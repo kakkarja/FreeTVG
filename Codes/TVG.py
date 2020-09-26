@@ -47,6 +47,7 @@ class TreeViewGui:
         self.root.bind('<Control-Down>', self.fcsent)
         self.root.bind('<Control-Left>', self.fcsent)
         self.root.bind('<Control-Right>', self.fcsent)
+        self.root.bind('<Control-n>', self.fcsent)
         llc = ['cp65001', 'UTF-8']
         if locale.getpreferredencoding() in llc:
             self.root.bind_all('<Control-y>', self.fcsent)
@@ -216,6 +217,8 @@ class TreeViewGui:
             elif event.keysym == 'Up':
                 self.pheight = self.pheight - 10
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+            elif event.keysym == 'n':
+                self.coppar()
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -941,7 +944,9 @@ def main(filename = None):
         begin = TreeViewGui(root, filename)
         root.mainloop()
     else:
-        messagebox.showwarning('File', 'No File Name!')
-        
+        messagebox.showwarning('File', 'No File Name!')    
+    
+
 if __name__ == '__main__':
-    main()
+    main()    
+    
