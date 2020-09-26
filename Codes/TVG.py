@@ -946,7 +946,5 @@ def main(filename = None):
     else:
         messagebox.showwarning('File', 'No File Name!')    
     
-
 if __name__ == '__main__':
-    main()    
-    
+    main()
