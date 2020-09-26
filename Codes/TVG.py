@@ -941,9 +941,7 @@ def main(filename = None):
         begin = TreeViewGui(root, filename)
         root.mainloop()
     else:
-        messagebox.showwarning('File', 'No File Name!')    
-    
-
+        messagebox.showwarning('File', 'No File Name!')
+        
 if __name__ == '__main__':
-    main()    
-    
+    main()
