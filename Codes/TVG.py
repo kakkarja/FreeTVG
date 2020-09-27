@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright © kakkarja (K A K)
 
 from tkinter import *
@@ -307,6 +308,10 @@ class TreeViewGui:
                     if 'label' not in i and 'scrollbar' not in i:
                         if i == 'entry3':
                             self.bt[i].config(state='readonly')
+                        elif i == 'button4':
+                            llc = ['cp65001', 'UTF-8']
+                            if locale.getpreferredencoding() in llc:
+                                self.bt[i].config(state='normal')
                         else:
                             self.bt[i].config(state='normal')
                 fi = spb.get()
@@ -643,6 +648,10 @@ class TreeViewGui:
                     if 'label' not in i and 'scrollbar' not in i:
                         if i == 'entry3':
                             self.bt[i].config(state='readonly')
+                        elif i == 'button4':
+                            llc = ['cp65001', 'UTF-8']
+                            if locale.getpreferredencoding() in llc:
+                                self.bt[i].config(state='normal')                        
                         else:
                             self.bt[i].config(state='normal')
                 gch = spb.get()
@@ -932,7 +941,6 @@ def main(filename = None):
         filename = simpledialog.askstring('Filename','Please create file: ')
     if filename:
         filename = filename.capitalize()
-        root.deiconify()
         if f'{filename}_tvg' not in os.listdir():
             try:
                 os.mkdir(f'{filename}_tvg')
@@ -942,6 +950,7 @@ def main(filename = None):
         else:
             os.chdir(f'{filename}_tvg')        
         begin = TreeViewGui(root, filename)
+        root.deiconify()
         root.mainloop()
     else:
         messagebox.showwarning('File', 'No File Name!')    
