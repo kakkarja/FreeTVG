@@ -166,7 +166,9 @@ class TreeViewGui:
                 st = self.listb.curselection()
                 if st:
                     self.listb.focus()
-                    self.listb.select_set(int(st[0]))
+                    self.listb.activate(int(st[0]))
+                    self.listb.see(int(st[0]))
+                    self.text.yview_moveto(self.listb.yview()[0])
                 else:
                     self.listb.focus()
             elif event.keysym == 'i':
@@ -374,6 +376,7 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             tvg = tv(self.filename)
+            rw = None
             if not tvg.insighttree():
                 if self.entry.get():
                     tvg.writetree(self.entry.get())
@@ -402,6 +405,9 @@ class TreeViewGui:
                             tvg.addparent(self.entry.get())
                             self.entry.delete(0,END)
             self.spaces()
+            if rw:
+                self.listb.see(int(rw[0]))
+                self.text.yview_moveto(self.listb.yview()[0])
 
     def deleterow(self):
         # Deletion on recorded row and updated.
@@ -421,25 +427,36 @@ class TreeViewGui:
                         if int(rw[0]) < len(ck):
                             if cp == 'parent' and int(rw[0]) != 0:
                                 self.listb.select_set(int(rw[0])-1)
+                                self.listb.see(int(rw[0])-1)
+                                self.text.yview_moveto(self.listb.yview()[0])                                
                             else:
                                 if cp == 'space':
                                     self.listb.select_set(int(rw[0])+1)
+                                    self.listb.see(int(rw[0])+1)
+                                    self.text.yview_moveto(self.listb.yview()[0])                                    
                                 else:
                                     self.listb.select_set(int(rw[0]))
+                                    self.listb.see(int(rw[0]))
+                                    self.text.yview_moveto(self.listb.yview()[0])                                    
                         else:
                             if len(ck) == 1:
                                 self.listb.select_set(0)
                             else:
                                 if cp == 'parent':
                                     self.listb.select_set(int(rw[0])-2)
+                                    self.listb.see(int(rw[0])-2)
+                                    self.text.yview_moveto(self.listb.yview()[0])                                    
                                 else:
                                     self.listb.select_set(int(rw[0])-1)
+                                    self.listb.see(int(rw[0])-1)
+                                    self.text.yview_moveto(self.listb.yview()[0])                                    
             except:
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
                 self.text.insert(END, sys.exc_info())
                 self.text.config(state = 'disable')
     
+    # fixing view on listb
     def move_lr(self, event = None):
         # Moving a child row to left or right, as to define spaces needed.
         
@@ -454,6 +471,8 @@ class TreeViewGui:
                         tvg.movechild(int(rw[0]), self.entry3.get())
                         self.view()
                         self.listb.select_set(int(rw[0]))
+                        self.listb.see(int(rw[0]))
+                        self.text.yview_moveto(self.listb.yview()[0])
                     except:
                         import sys
                         self.text.insert(END, 'Parent row is unable to be move to a child')
@@ -489,8 +508,12 @@ class TreeViewGui:
                             ck = tvg.insighttree()
                             if  ck[int(rw[0])-1][0] != 'space':
                                 self.listb.select_set(int(rw[0])-1)
+                                self.listb.see(int(rw[0])-1)
+                                self.text.yview_moveto(self.listb.yview()[0])                                
                             else:
                                 self.listb.select_set(int(rw[0])-2)
+                                self.listb.see(int(rw[0])-2)
+                                self.text.yview_moveto(self.listb.yview()[0])
 
     def movedown(self, event = None):
         # Step down a row to below row.
@@ -512,8 +535,12 @@ class TreeViewGui:
                             ck = tvg.insighttree()
                             if ck[int(rw[0])+1][0] != 'parent':
                                 self.listb.select_set(int(rw[0])+1)
+                                self.listb.see(int(rw[0])+1)
+                                self.text.yview_moveto(self.listb.yview()[0])                                
                             else:
                                 self.listb.select_set(int(rw[0])+2)
+                                self.listb.see(int(rw[0])+2)
+                                self.text.yview_moveto(self.listb.yview()[0])                                
                 
     def insertwords(self, event = None):
         # Insert a record to any row appear above the assign row.
@@ -534,6 +561,8 @@ class TreeViewGui:
                             tvg.insertrow(self.entry.get(), int(rw[0]))
                             self.entry.delete(0, END)  
                         self.spaces()
+                        self.listb.see(int(rw[0]))
+                        self.text.yview_moveto(self.listb.yview()[0])
                 
     def checked(self, event = None):
         # To add strikethrough unicode for finished task.
@@ -547,6 +576,8 @@ class TreeViewGui:
                 tvg.checked(int(rw[0]))
                 self.view()
                 self.listb.select_set(int(rw[0]))
+                self.listb.see(int(rw[0]))
+                self.text.yview_moveto(self.listb.yview()[0])                
             
     def backup(self, event = None):
         # Backup to max of 10 datas on csv file.
@@ -674,7 +705,7 @@ class TreeViewGui:
                                 pdf.add_font(f'{gch}', '', ppath, uni=True)
                                 pdf.alias_nb_pages()
                                 pdf.add_page() 
-                                pdf.set_font(f'{gch}', '', 12) 
+                                pdf.set_font(f'{gch}', '', 10) 
                                 pdf.multi_cell(0, 5, showt) 
                                 pdf.output(pdf.filename, 'F')
                                 messagebox.showinfo('Save as PDF', f'{self.filename}.pdf is created!')
@@ -688,7 +719,7 @@ class TreeViewGui:
                                     pdf.add_font(f'{gch}', '', ppath, uni=True)
                                     pdf.alias_nb_pages()
                                     pdf.add_page() 
-                                    pdf.set_font(f'{gch}', '', 12) 
+                                    pdf.set_font(f'{gch}', '', 10) 
                                     pdf.multi_cell(0, 5, frd) 
                                     pdf.output(pdf.filename, 'F')
                                 messagebox.showinfo('Save as PDF', f'{self.filename}.pdf is created!')
@@ -702,7 +733,7 @@ class TreeViewGui:
                                 pdf.add_font(f'{gch}', '', ppath, uni=True)
                                 pdf.alias_nb_pages()
                                 pdf.add_page() 
-                                pdf.set_font(f'{gch}', '', 12)
+                                pdf.set_font(f'{gch}', '', 10)
                                 pdf.multi_cell(0, 5, frd) 
                                 pdf.output(pdf.filename, 'F')
                             messagebox.showinfo('Save as PDF', f'{self.filename}.pdf is created!')
