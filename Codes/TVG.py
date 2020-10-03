@@ -315,7 +315,8 @@ class TreeViewGui:
                             if locale.getpreferredencoding() in llc:
                                 self.bt[i].config(state='normal')
                         else:
-                            self.bt[i].config(state='normal')
+                            if i != 'text':
+                                self.bt[i].config(state='normal')
                 fi = spb.get()
                 TreeViewGui.DB = None
                 TreeViewGui.FREEZE = False
@@ -640,10 +641,11 @@ class TreeViewGui:
         ins = tvg.insighttree()
         if ins:
             if self.text.get('1.0',END)[:-1]:
+                ckc = ['listb', 'button17', 'text']
                 if self.listb.cget('selectmode') == 'browse':
                     for i in self.bt:
                         if 'label' not in i and 'scrollbar' not in i:
-                            if i != 'listb' and i != 'button17':
+                            if i not in ckc:
                                 self.bt[i].config(state='disable')
                     self.listb.config(selectmode = EXTENDED)
                     TreeViewGui.FREEZE = True
@@ -700,7 +702,7 @@ class TreeViewGui:
                                 self.spaces()
                             for i in self.bt:
                                 if 'label' not in i and 'scrollbar' not in i:
-                                    if i != 'listb' and i != 'button17':
+                                    if i not in ckc:
                                         self.bt[i].config(state='normal')
                             self.listb.config(selectmode = BROWSE)
                             TreeViewGui.FREEZE = False
@@ -709,7 +711,7 @@ class TreeViewGui:
                         else:
                             for i in self.bt:
                                 if 'label' not in i and 'scrollbar' not in i:
-                                    if i != 'listb' and i != 'button17':
+                                    if i not in ckc:
                                         self.bt[i].config(state='normal')
                             self.listb.config(selectmode = BROWSE)
                             TreeViewGui.FREEZE = False
@@ -719,7 +721,7 @@ class TreeViewGui:
                         if ask:
                             for i in self.bt:
                                 if 'label' not in i and 'scrollbar' not in i:
-                                    if i != 'listb' and i != 'button17':
+                                    if i not in ckc:
                                         self.bt[i].config(state='normal')
                             self.listb.config(selectmode = BROWSE)
                             TreeViewGui.FREEZE = False
@@ -743,7 +745,8 @@ class TreeViewGui:
                             if locale.getpreferredencoding() in llc:
                                 self.bt[i].config(state='normal')                        
                         else:
-                            self.bt[i].config(state='normal')
+                            if i != 'text':
+                                self.bt[i].config(state='normal')
                 gch = spb.get()
                 TreeViewGui.DB = None
                 TreeViewGui.FREEZE = False

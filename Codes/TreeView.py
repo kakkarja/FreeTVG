@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright © kakkarja (K A K)
 
 import re
@@ -353,19 +354,36 @@ class TreeView:
                 if not callrows is None and row in callrows:
                     if all(callrows[row][0] != a for a in['parent', 'space']):
                         gety = ''
-                        stc = str(u"\u0336")
-                        if callrows[row][1][2] != stc:
-                            for callrow in callrows[row][1][1:-1]:
-                                gety += f'{stc}'.join(callrow) + f'{stc}'
+                        
+                        # Set prefered check on stc for better viewing in PDF
+                        stc = '«[DONE]»' #chr(10004)
+                        #####################################################
+                        
+                        stc = f' {stc}'
+                        if stc not in callrows[row][1]:
+                            gety = f'{callrows[row][1][:-1]}{stc}\n'
+                            
+                        # Other preference for checked function 
+                        #stc = str(u"\u0336")
+                        #if callrows[row][1][2] != stc:
+                            #for callrow in callrows[row][1][1:-1]:
+                                #gety += f'{stc}'.join(callrow) + f'{stc}'
+                        ##################################################
+                        
                             convert = list(callrows[row])
                             convert[1] = gety                         
                             callrows[row] = tuple(convert)
                             self.fileread(callrows)
                         else:
-                            cutt = callrows[row][1][1:-1]
-                            for cut in range(len(cutt)):
-                                if cut % 2 == 0:
-                                    gety += ''.join(cutt[cut])
+                            gety = callrows[row][1][:-(len(stc)+1)]+callrows[row][1][-1]
+                            
+                            # Other preference for checked function
+                            #cutt = callrows[row][1][1:-1]
+                            #for cut in range(len(cutt)):
+                                #if cut % 2 == 0:
+                                    #gety += ''.join(cutt[cut])
+                            #######################################
+                            
                             convert = list(callrows[row])
                             convert[1] = gety                         
                             callrows[row] = tuple(convert)
@@ -391,23 +409,7 @@ if __name__ == '__main__':
     """
     
     import os
-    from pprint import pprint
-    os.chdir(os.getcwd()[:34])
-    if 'testtv.txt' in os.listdir():
-        os.remove('testtv.txt')
-        print('Done')
-    else:
-        print('Nothing')
-    if 'testftv.txt' in os.listdir():
-        os.remove('testftv.txt')
-        print('Done')
-    else:
-        print('Nothing')
-    if 'testtv.csv' in os.listdir():
-        os.remove('testtv.csv')
-        print('Done')
-    else:
-        print('Nothing')    
+    from pprint import pprint 
     
     w = 'Amazing Grace'
     tv = TreeView('testtv')
@@ -452,4 +454,20 @@ if __name__ == '__main__':
             print()
             nf.readtree()
         else:
-            pprint(nf.loadbackup('testtv'))   
+            pprint(nf.loadbackup('testtv'))
+    
+    if 'testtv.txt' in os.listdir():
+        os.remove('testtv.txt')
+        print('Done')
+    else:
+        print('Nothing')
+    if 'testftv.txt' in os.listdir():
+        os.remove('testftv.txt')
+        print('Done')
+    else:
+        print('Nothing')
+    if 'testtv.csv' in os.listdir():
+        os.remove('testtv.csv')
+        print('Done')
+    else:
+        print('Nothing')    
