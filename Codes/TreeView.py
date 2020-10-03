@@ -359,7 +359,6 @@ class TreeView:
                         stc = '«[DONE]»' #chr(10004)
                         #####################################################
                         
-                        stc = f' {stc}'
                         if stc not in callrows[row][1]:
                             gety = f'{callrows[row][1][:-1]}{stc}\n'
                             
@@ -375,7 +374,7 @@ class TreeView:
                             callrows[row] = tuple(convert)
                             self.fileread(callrows)
                         else:
-                            gety = callrows[row][1][:-(len(stc)+1)]+callrows[row][1][-1]
+                            gety = callrows[row][1].replace(stc,'')
                             
                             # Other preference for checked function
                             #cutt = callrows[row][1][1:-1]
