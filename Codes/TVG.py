@@ -24,7 +24,7 @@ class TreeViewGui:
         self.wheight = self.root.winfo_reqheight()
         self.pwidth = int(self.root.winfo_screenwidth()/10 - self.wwidth/10)
         self.pheight = int(self.root.winfo_screenheight()/10 - self.wheight/10)
-        self.root.geometry(f"+{self.pwidth}+{self.pheight}")        
+        self.root.geometry(f"+{self.pwidth}+{self.pheight}")
         self.root.resizable(False, False)
         self.root.bind_all('<Control-f>', self.fcsent)
         self.root.bind_all('<Control-r>', self.fcsent)
@@ -49,9 +49,13 @@ class TreeViewGui:
         self.root.bind('<Control-Left>', self.fcsent)
         self.root.bind('<Control-Right>', self.fcsent)
         self.root.bind('<Control-n>', self.fcsent)
-        llc = ['cp65001', 'UTF-8']
-        if locale.getpreferredencoding() in llc:
-            self.root.bind_all('<Control-y>', self.fcsent)
+        
+        # Unblock this if use special unicode in TreeView engine
+        #llc = ['cp65001', 'UTF-8']
+        #if locale.getpreferredencoding() in llc:
+        #    self.root.bind_all('<Control-y>', self.fcsent)
+        
+        self.root.bind_all('<Control-y>', self.fcsent)
         self.root.bind_all('<Control-0>', self.fcsent)
         self.root.bind_all('<Control-minus>', self.fcsent)
         
@@ -116,10 +120,13 @@ class TreeViewGui:
         self.button4 = ttk.Button(self.bframe, text = 'Checked', command = self.checked)
         self.button4.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button4'] = self.button4
-        if locale.getpreferredencoding() not in llc:
-            self.button4.config(state = 'disable')
+        
+        # Unblock this if use special unicode in TreeView engine
+        #if locale.getpreferredencoding() not in llc:
+        #    self.button4.config(state = 'disable')
+        
         self.button10 = ttk.Button(self.bframe, text = 'Insight', command = self.insight)
-        self.button10.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')            
+        self.button10.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button10'] = self.button10
         self.button13 = ttk.Button(self.bframe, text = 'Space', command = self.spaces)
         self.button13.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
@@ -128,18 +135,18 @@ class TreeViewGui:
         self.button15.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button15'] = self.button15
         self.button16 = ttk.Button(self.bframe, text = 'Change File', command = self.chgfile)
-        self.button16.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')      
+        self.button16.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button16'] = self.button16
         self.button17 = ttk.Button(self.bframe, text = 'CPP', width = 4, command = self.cmrows)
         self.button17.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button17'] = self.button17
         self.tframe = Frame(root)
-        self.tframe.pack(anchor = 'w', side = TOP) 
+        self.tframe.pack(anchor = 'w', side = TOP)
         self.text = Text(self.tframe, width = 105, height = 33, font = ('verdana','10'), padx = 5, pady = 5)
         self.text.config(state = 'disable')
         self.text.pack(side = LEFT, pady = 3, padx = 2, fill = 'both')
         self.bt['text'] = self.text
-        self.scrollbar1 = ttk.Scrollbar(self.tframe, orient="vertical") 
+        self.scrollbar1 = ttk.Scrollbar(self.tframe, orient="vertical")
         self.scrollbar1.config(command = self.text.yview) 
         self.scrollbar1.pack(side="left", fill="y") 
         self.text.config(yscrollcommand = self.scrollbar1.set)
@@ -147,7 +154,7 @@ class TreeViewGui:
         self.listb = Listbox(self.tframe, width = 12, exportselection = False, font = 'verdana 10')
         self.listb.pack(side = LEFT, padx = 2, pady = 3, fill = 'both')
         self.bt['listb'] = self.listb
-        self.scrollbar2 = ttk.Scrollbar(self.tframe, orient="vertical") 
+        self.scrollbar2 = ttk.Scrollbar(self.tframe, orient="vertical")
         self.scrollbar2.config(command = self.listb.yview) 
         self.scrollbar2.pack(side="right", fill="y") 
         self.listb.config(yscrollcommand = self.scrollbar2.set)
@@ -300,7 +307,7 @@ class TreeViewGui:
         except:
             self.text.insert(END, sys.exc_info()[1])
             self.text.config(state = 'disable')
-    
+            
     def chgfile(self):
         # Changing file on active app environment.
         
@@ -310,10 +317,13 @@ class TreeViewGui:
                     if 'label' not in i and 'scrollbar' not in i:
                         if i == 'entry3':
                             self.bt[i].config(state='readonly')
-                        elif i == 'button4':
-                            llc = ['cp65001', 'UTF-8']
-                            if locale.getpreferredencoding() in llc:
-                                self.bt[i].config(state='normal')
+                            
+                        # Unblock this if use special unicode in TreeView engine
+                        #elif i == 'button4':
+                        #    llc = ['cp65001', 'UTF-8']
+                        #    if locale.getpreferredencoding() in llc:
+                        #        self.bt[i].config(state='normal')
+                                
                         else:
                             if i != 'text':
                                 self.bt[i].config(state='normal')
@@ -352,7 +362,7 @@ class TreeViewGui:
                     else:
                         messagebox.showerror('TreeViewGui', 'You are unable to delete present directory!!!')
                     os.chdir(ori)
-            
+                    
             for i in self.bt:
                 if 'label' not in i and 'scrollbar' not in i:
                     self.bt[i].config(state='disable')
@@ -388,7 +398,7 @@ class TreeViewGui:
                     if self.entry.get() and self.entry.get() not in cek:
                         if self.listb.curselection():
                             rw = self.listb.curselection()
-                            if tvg.insighttree()[int(rw[0])][0] != 'space':                        
+                            if tvg.insighttree()[int(rw[0])][0] != 'space':
                                 rw = self.listb.curselection()
                                 tvg.edittree(self.entry.get(),int(rw[0]),self.entry3.get())
                                 self.entry.delete(0,END)
@@ -409,7 +419,7 @@ class TreeViewGui:
             if rw:
                 self.listb.see(int(rw[0]))
                 self.text.yview_moveto(self.listb.yview()[0])
-
+                
     def deleterow(self):
         # Deletion on recorded row and updated.
         
@@ -429,16 +439,16 @@ class TreeViewGui:
                             if cp == 'parent' and int(rw[0]) != 0:
                                 self.listb.select_set(int(rw[0])-1)
                                 self.listb.see(int(rw[0])-1)
-                                self.text.yview_moveto(self.listb.yview()[0])                                
+                                self.text.yview_moveto(self.listb.yview()[0])
                             else:
                                 if cp == 'space':
                                     self.listb.select_set(int(rw[0])+1)
                                     self.listb.see(int(rw[0])+1)
-                                    self.text.yview_moveto(self.listb.yview()[0])                                    
+                                    self.text.yview_moveto(self.listb.yview()[0])
                                 else:
                                     self.listb.select_set(int(rw[0]))
                                     self.listb.see(int(rw[0]))
-                                    self.text.yview_moveto(self.listb.yview()[0])                                    
+                                    self.text.yview_moveto(self.listb.yview()[0])
                         else:
                             if len(ck) == 1:
                                 self.listb.select_set(0)
@@ -446,18 +456,17 @@ class TreeViewGui:
                                 if cp == 'parent':
                                     self.listb.select_set(int(rw[0])-2)
                                     self.listb.see(int(rw[0])-2)
-                                    self.text.yview_moveto(self.listb.yview()[0])                                    
+                                    self.text.yview_moveto(self.listb.yview()[0])
                                 else:
                                     self.listb.select_set(int(rw[0])-1)
                                     self.listb.see(int(rw[0])-1)
-                                    self.text.yview_moveto(self.listb.yview()[0])                                    
+                                    self.text.yview_moveto(self.listb.yview()[0])
             except:
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
                 self.text.insert(END, sys.exc_info())
                 self.text.config(state = 'disable')
-    
-    # fixing view on listb
+                
     def move_lr(self, event = None):
         # Moving a child row to left or right, as to define spaces needed.
         
@@ -478,7 +487,7 @@ class TreeViewGui:
                         import sys
                         self.text.insert(END, 'Parent row is unable to be move to a child')
                         self.text.config(state = 'disable')
-
+                        
     def insight(self, event = None):
         # To view the whole rows, each individually with the correspondent recorded values.
         
@@ -489,9 +498,9 @@ class TreeViewGui:
             self.text.config(state = 'normal')
             self.text.delete('1.0', END)
             for d in ins:
-                self.text.insert(END, f'{d}')                                            
+                self.text.insert(END, f'{d}')
             self.text.config(state = 'disable')
-
+            
     def moveup(self, event = None):
         # Step up a row to upper row.
         
@@ -510,12 +519,12 @@ class TreeViewGui:
                             if  ck[int(rw[0])-1][0] != 'space':
                                 self.listb.select_set(int(rw[0])-1)
                                 self.listb.see(int(rw[0])-1)
-                                self.text.yview_moveto(self.listb.yview()[0])                                
+                                self.text.yview_moveto(self.listb.yview()[0])
                             else:
                                 self.listb.select_set(int(rw[0])-2)
                                 self.listb.see(int(rw[0])-2)
                                 self.text.yview_moveto(self.listb.yview()[0])
-
+                                
     def movedown(self, event = None):
         # Step down a row to below row.
         
@@ -537,12 +546,12 @@ class TreeViewGui:
                             if ck[int(rw[0])+1][0] != 'parent':
                                 self.listb.select_set(int(rw[0])+1)
                                 self.listb.see(int(rw[0])+1)
-                                self.text.yview_moveto(self.listb.yview()[0])                                
+                                self.text.yview_moveto(self.listb.yview()[0])
                             else:
                                 self.listb.select_set(int(rw[0])+2)
                                 self.listb.see(int(rw[0])+2)
-                                self.text.yview_moveto(self.listb.yview()[0])                                
-                
+                                self.text.yview_moveto(self.listb.yview()[0])
+                                
     def insertwords(self, event = None):
         # Insert a record to any row appear above the assign row.
         
@@ -552,7 +561,7 @@ class TreeViewGui:
             if tvg.insighttree():
                 cek = ['parent', 'child']
                 cks = tvg.insighttree()
-                if self.entry.get() and self.entry.get() not in cek :            
+                if self.entry.get() and self.entry.get() not in cek :
                     if self.listb.curselection():
                         rw = self.listb.curselection()
                         if self.entry3.get():
@@ -578,7 +587,7 @@ class TreeViewGui:
                 self.view()
                 self.listb.select_set(int(rw[0]))
                 self.listb.see(int(rw[0]))
-                self.text.yview_moveto(self.listb.yview()[0])                
+                self.text.yview_moveto(self.listb.yview()[0])
             
     def backup(self, event = None):
         # Backup to max of 10 datas on csv file.
@@ -608,7 +617,7 @@ class TreeViewGui:
                             data = eval(reads[row][1])
                             tvg.fileread(data)
                             messagebox.showinfo('Load Backup',
-                            'Load backup is done, chek again!') 
+                            'Load backup is done, chek again!')
                 except:
                     import sys
                     self.text.config(state = 'normal')
@@ -626,7 +635,7 @@ class TreeViewGui:
                 rw = self.listb.curselection()
                 with open(f'{self.filename}.txt') as file:
                     rd = file.readlines()
-                    self.entry.delete(0, END)                
+                    self.entry.delete(0, END)
                     if rd[int(rw[0])][0] == ' ':
                         paste = rd[int(rw[0])][re.match(r'\s+', rd[int(rw[0])]).span()[1]:-1]
                         self.entry.insert(END, paste[1:])
@@ -725,7 +734,7 @@ class TreeViewGui:
                                         self.bt[i].config(state='normal')
                             self.listb.config(selectmode = BROWSE)
                             TreeViewGui.FREEZE = False
-                    
+                            
     def saveaspdf(self):
         # Saving records to a pdf.
         
@@ -740,10 +749,13 @@ class TreeViewGui:
                     if 'label' not in i and 'scrollbar' not in i:
                         if i == 'entry3':
                             self.bt[i].config(state='readonly')
-                        elif i == 'button4':
-                            llc = ['cp65001', 'UTF-8']
-                            if locale.getpreferredencoding() in llc:
-                                self.bt[i].config(state='normal')                        
+                            
+                        # Unblock this if use special unicode in TreeView engine
+                        #elif i == 'button4':
+                        #    llc = ['cp65001', 'UTF-8']
+                        #    if locale.getpreferredencoding() in llc:
+                        #        self.bt[i].config(state='normal')
+                        
                         else:
                             if i != 'text':
                                 self.bt[i].config(state='normal')
@@ -751,7 +763,7 @@ class TreeViewGui:
                 TreeViewGui.DB = None
                 TreeViewGui.FREEZE = False
                 tl.unbind_all('<Control-g>')
-                tl.destroy()                
+                tl.destroy()
                 try:
                     if fildir:
                         ori = os.getcwd()
@@ -796,7 +808,7 @@ class TreeViewGui:
                                 pdf.alias_nb_pages()
                                 pdf.add_page() 
                                 pdf.set_font(f'{gch}', '', 10)
-                                pdf.multi_cell(0, 5, frd) 
+                                pdf.multi_cell(0, 5, frd)
                                 pdf.output(pdf.filename, 'F')
                             messagebox.showinfo('Save as PDF', f'{self.filename}.pdf is created!')
                         os.chdir(ori)
@@ -829,7 +841,7 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             tvg = tv(self.filename)
-            cks =  tvg.insighttree()  
+            cks =  tvg.insighttree()
             num2 = 1
             if cks:
                 while num2 !=  len(cks):
@@ -862,7 +874,7 @@ class TreeViewGui:
                     tvg.delrow(0)
                     cks =  tvg.insighttree()
                 if cks[len(cks)-1][0] == 'space':
-                    tvg.delrow(len(cks)-1)             
+                    tvg.delrow(len(cks)-1)
                 self.view()
             else:
                 self.view()
@@ -883,7 +895,7 @@ class TreeViewGui:
         else:
             if self.unlock == False:
                 self.unlock = True
-
+                
     def hidform(self):
         # To display records and not hidden one from collection position in json file.
         
@@ -914,10 +926,10 @@ class TreeViewGui:
                 self.listb.delete(0,END)
                 for val in vals:
                     self.listb.insert(END, val)
-            return rd            
+            return rd
         
     def hiddenchl(self, event = None):
-        # Create Hidden position of parent and its childs in json file. 
+        # Create Hidden position of parent and its childs in json file.
         
         import json
         tvg = tv(self.filename)
@@ -995,18 +1007,18 @@ class TreeViewGui:
                                 c  in list(tvg.insighthidden(ih).items())]
                                 self.listb.delete(0,END)
                                 for val in vals:
-                                    self.listb.insert(END, val) 
+                                    self.listb.insert(END, val)
             else:
                 self.hidform()
-
+                
     def delhid(self, event = None):
-        # Deleting accordingly each position in json file, or can delete the file. 
+        # Deleting accordingly each position in json file, or can delete the file.
         
         import json
         if f'{self.filename}.json' in os.listdir():
             with open(f'{self.filename}.json') as jfile:
                 rd = list(dict(json.load(jfile)).values())
-            ans = messagebox.askyesno('TreeViewGui', 
+            ans = messagebox.askyesno('TreeViewGui',
             'Please choose "Yes" to delete ascending order, or "No" to delete all?')
             if ans:
                 if rd:
@@ -1022,7 +1034,7 @@ class TreeViewGui:
             else:
                 os.remove(f'{self.filename}.json')
                 self.view()         
-                messagebox.showinfo('TreeViewGui', f'{self.filename}.json has been deleted!')                
+                messagebox.showinfo('TreeViewGui', f'{self.filename}.json has been deleted!')
 
 def main(filename = None):
     # Starting point of running TVG and making directory for non-existing file.
@@ -1041,12 +1053,12 @@ def main(filename = None):
             except:
                 os.chdir(f'{filename}_tvg')
         else:
-            os.chdir(f'{filename}_tvg')        
+            os.chdir(f'{filename}_tvg')
         begin = TreeViewGui(root, filename)
         root.deiconify()
         root.mainloop()
     else:
-        messagebox.showwarning('File', 'No File Name!')    
+        messagebox.showwarning('File', 'No File Name!')
     
 if __name__ == '__main__':
     main()
