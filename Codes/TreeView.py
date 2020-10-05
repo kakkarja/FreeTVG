@@ -284,7 +284,7 @@ class TreeView:
             if data:
                 do = {'log': log, 'data': data}
                 if not f'{self.filename}.csv' in os.listdir():
-                    with open(f'{self.filename}.csv', 'w', newline='') as file:
+                    with open(f'{self.filename}.csv', 'w', newline = '') as file:
                         fieldnames = ['log', 'data']
                         writer = csv.DictWriter(file, fieldnames=fieldnames)
                         writer.writeheader()
@@ -292,18 +292,17 @@ class TreeView:
                 else:
                     with open(f'{self.filename}.csv') as file:
                         rd = list(csv.reader(file))
-                        if len(rd) >= 11:
-                            dat = rd[-9:]
-                            dat.insert(0,rd[0])
-                            with open(f'{self.filename}.csv', 'w') as wfile:
-                                fill = csv.writer(wfile, delimiter = ',')
-                                for d in dat:
-                                    fill.writerow(d)      
-                    
-                    with open(f'{self.filename}.csv', 'a', newline='') as file:
-                        fieldnames = ['log', 'data']
-                        writer = csv.DictWriter(file, fieldnames=fieldnames)
-                        writer.writerow(do)
+                    if len(rd) < 11:
+                        with open(f'{self.filename}.csv', 'a', newline = '') as file:
+                            fieldnames = ['log', 'data']
+                            writer = csv.DictWriter(file, fieldnames=fieldnames)
+                            writer.writerow(do)
+                    else:
+                        del rd[1]
+                        rd.append([log,data])
+                        with open(f'{self.filename}.csv', 'w', newline = '') as wfile:
+                            fill = csv.writer(wfile, delimiter = ',')
+                            fill.writerows(rd)
             else:
                 print('No data to be backup!!!')
         except:
