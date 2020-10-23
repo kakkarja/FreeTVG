@@ -18,7 +18,6 @@
 
 >### **TreeView is an outline note that save to text file in tree structure**
 
-^^^
 :white_check_mark: **This can be use in console mode**
 
 * **Example write a parent for first time:**
@@ -144,4 +143,3 @@
          8: ('child1', '-God bless you\n'),
          9: ('child1', '-Thank You\n')}
         ```
-^^^
