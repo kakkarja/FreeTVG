@@ -5,9 +5,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import simpledialog, messagebox, filedialog
 from TreeView import TreeView as tv
-import types
+import sys
 import os
-import locale
 
 class TreeViewGui:
     """
@@ -145,10 +144,12 @@ class TreeViewGui:
         self.text = Text(self.tframe, width = 105, height = 33, font = ('verdana','10'), padx = 5, pady = 5)
         self.text.config(state = 'disable')
         self.text.pack(side = LEFT, pady = 3, padx = 2, fill = 'both')
+        self.text.bind('<MouseWheel>', self.mscrt)
         self.bt['text'] = self.text
         self.scrollbar1 = ttk.Scrollbar(self.tframe, orient="vertical")
         self.scrollbar1.config(command = self.text.yview) 
         self.scrollbar1.pack(side="left", fill="y") 
+        self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
         self.listb = Listbox(self.tframe, width = 12, exportselection = False, font = 'verdana 10')
@@ -156,10 +157,24 @@ class TreeViewGui:
         self.bt['listb'] = self.listb
         self.scrollbar2 = ttk.Scrollbar(self.tframe, orient="vertical")
         self.scrollbar2.config(command = self.listb.yview) 
-        self.scrollbar2.pack(side="right", fill="y") 
+        self.scrollbar2.pack(side="right", fill="y")
+        self.scrollbar2.bind('<ButtonRelease>', self.mscrl)
         self.listb.config(yscrollcommand = self.scrollbar2.set)
+        self.listb.bind('<MouseWheel>', self.mscrl)
+        self.listb.bind('<Up>', self.mscrl)
+        self.listb.bind('<Down>', self.mscrl)
         self.bt['scrollbar2'] = self.scrollbar2
         self.unlock = True
+    
+    def mscrt(self, event = None):
+        # Mouse scroll on text window, will sync with list box on the right.
+        
+        self.listb.yview_moveto(self.text.yview()[0])
+    
+    def mscrl(self, event = None):
+        # Mouse scroll on list box window, will sync with text window on the right.
+    
+        self.text.yview_moveto(self.listb.yview()[0])
         
     def fcsent(self, event = None):
         # Key Bindings to keyboards.
@@ -290,20 +305,21 @@ class TreeViewGui:
         
         tvg = tv(self.filename)
         self.text.config(state = 'normal')
-        try:    
-            with open(f'{self.filename}.txt') as file:
-                rd = file.readlines()
-                self.text.delete('1.0', END)
-                for r in rd:
-                    self.text.insert(END, r)
-            self.text.config(state = 'disable')
-            vals = [f' {k}: {c[0]}' for k, c  in list(tvg.insighttree().items())]
-            self.listb.delete(0,END)
-            for val in vals:
-                self.listb.insert(END, val)
-            self.entry3.delete(0, END)
-            self.text.yview_moveto(1.0)
-            self.listb.yview_moveto(1.0)
+        try:
+            if f'{self.filename}.txt' in os.listdir():
+                with open(f'{self.filename}.txt') as file:
+                    rd = file.readlines()
+                    self.text.delete('1.0', END)
+                    for r in rd:
+                        self.text.insert(END, r)
+                self.text.config(state = 'disable')
+                vals = [f' {k}: {c[0]}' for k, c  in list(tvg.insighttree().items())]
+                self.listb.delete(0,END)
+                for val in vals:
+                    self.listb.insert(END, val)
+                self.entry3.delete(0, END)
+                self.text.yview_moveto(1.0)
+                self.listb.yview_moveto(1.0)
         except:
             self.text.insert(END, sys.exc_info()[1])
             self.text.config(state = 'disable')
@@ -317,13 +333,6 @@ class TreeViewGui:
                     if 'label' not in i and 'scrollbar' not in i:
                         if i == 'entry3':
                             self.bt[i].config(state='readonly')
-                            
-                        # Unblock this if use special unicode in TreeView engine
-                        #elif i == 'button4':
-                        #    llc = ['cp65001', 'UTF-8']
-                        #    if locale.getpreferredencoding() in llc:
-                        #        self.bt[i].config(state='normal')
-                                
                         else:
                             if i != 'text':
                                 self.bt[i].config(state='normal')
@@ -386,39 +395,37 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
-            rw = None
-            if not tvg.insighttree():
-                if self.entry.get():
-                    tvg.writetree(self.entry.get())
-                    self.entry.delete(0,END)
-            else:
-                cek = ['child', 'parent']
-                if self.entry3.get():
-                    if self.entry.get() and self.entry.get() not in cek:
-                        if self.listb.curselection():
-                            rw = self.listb.curselection()
-                            if tvg.insighttree()[int(rw[0])][0] != 'space':
-                                rw = self.listb.curselection()
-                                tvg.edittree(self.entry.get(),int(rw[0]),self.entry3.get())
-                                self.entry.delete(0,END)
-                        else:
-                            tvg.quickchild(self.entry.get(), self.entry3.get())
-                            self.entry.delete(0,END)
+            if f'{self.filename}.txt' in os.listdir():
+                tvg = tv(self.filename)
+                if not tvg.insighttree():
+                    if self.entry.get():
+                        tvg.writetree(self.entry.get())
+                        self.entry.delete(0,END)
                 else:
-                    if self.entry.get() and self.entry.get() not in cek:
-                        if self.listb.curselection():
-                            rw = self.listb.curselection()
-                            if tvg.insighttree()[int(rw[0])][0] != 'space':
-                                tvg.edittree(self.entry.get(),int(rw[0]))
+                    cek = ['child', 'parent']
+                    if self.entry3.get():
+                        if self.entry.get() and self.entry.get() not in cek:
+                            if self.listb.curselection():
+                                rw = self.listb.curselection()
+                                if tvg.insighttree()[int(rw[0])][0] != 'space':
+                                    tvg.edittree(self.entry.get(),int(rw[0]),self.entry3.get())
+                                    self.entry.delete(0,END)
+                            else:
+                                tvg.quickchild(self.entry.get(), self.entry3.get())
                                 self.entry.delete(0,END)
-                        else:
-                            tvg.addparent(self.entry.get())
-                            self.entry.delete(0,END)
-            self.spaces()
-            if rw:
-                self.listb.see(int(rw[0]))
-                self.text.yview_moveto(self.listb.yview()[0])
+                    else:
+                        if self.entry.get() and self.entry.get() not in cek:
+                            if self.listb.curselection():
+                                rw = self.listb.curselection()
+                                if tvg.insighttree()[int(rw[0])][0] != 'space':
+                                    tvg.edittree(self.entry.get(),int(rw[0]))
+                                    self.entry.delete(0,END)
+                            else:
+                                tvg.addparent(self.entry.get())
+                                self.entry.delete(0,END)
+                self.spaces()
+            else:
+                messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created!')
                 
     def deleterow(self):
         # Deletion on recorded row and updated.
@@ -484,7 +491,6 @@ class TreeViewGui:
                         self.listb.see(int(rw[0]))
                         self.text.yview_moveto(self.listb.yview()[0])
                     except:
-                        import sys
                         self.text.insert(END, 'Parent row is unable to be move to a child')
                         self.text.config(state = 'disable')
                         
@@ -560,7 +566,6 @@ class TreeViewGui:
             tvg = tv(self.filename)
             if tvg.insighttree():
                 cek = ['parent', 'child']
-                cks = tvg.insighttree()
                 if self.entry.get() and self.entry.get() not in cek :
                     if self.listb.curselection():
                         rw = self.listb.curselection()
@@ -575,7 +580,7 @@ class TreeViewGui:
                         self.text.yview_moveto(self.listb.yview()[0])
                 
     def checked(self, event = None):
-        # To add strikethrough unicode for finished task.
+        # To add checked unicode for finished task.
         # WARNING: is active according to your computer encoding system. (Active on encoding: "utf-8")
         
         self.hidcheck()
@@ -591,7 +596,7 @@ class TreeViewGui:
             
     def backup(self, event = None):
         # Backup to max of 10 datas on csv file.
-        # And any new one above will remove the oldest one.
+        # And any new one will remove the oldest one.
         
         self.hidcheck()
         if self.unlock:
@@ -750,12 +755,6 @@ class TreeViewGui:
                         if i == 'entry3':
                             self.bt[i].config(state='readonly')
                             
-                        # Unblock this if use special unicode in TreeView engine
-                        #elif i == 'button4':
-                        #    llc = ['cp65001', 'UTF-8']
-                        #    if locale.getpreferredencoding() in llc:
-                        #        self.bt[i].config(state='normal')
-                        
                         else:
                             if i != 'text':
                                 self.bt[i].config(state='normal')
@@ -1035,15 +1034,13 @@ class TreeViewGui:
                 os.remove(f'{self.filename}.json')
                 self.view()         
                 messagebox.showinfo('TreeViewGui', f'{self.filename}.json has been deleted!')
-
-def main(filename = None):
+                
+def main():
     # Starting point of running TVG and making directory for non-existing file.
-    
     root = Tk()
-    root.wm_iconbitmap(default='tvg.ico')
+    root.wm_iconbitmap(default = 'TVG.ico')
     root.withdraw()
-    if not filename:
-        filename = simpledialog.askstring('Filename','Please create file: ')
+    filename = simpledialog.askstring('Filename', 'Create filename:')    
     if filename:
         filename = filename.capitalize()
         if f'{filename}_tvg' not in os.listdir():
@@ -1054,11 +1051,12 @@ def main(filename = None):
                 os.chdir(f'{filename}_tvg')
         else:
             os.chdir(f'{filename}_tvg')
-        begin = TreeViewGui(root, filename)
-        root.deiconify()
-        root.mainloop()
+        begin = TreeViewGui(root = root, filename = filename)
+        begin.root.deiconify()
+        begin.view()
+        begin.root.mainloop()
     else:
         messagebox.showwarning('File', 'No File Name!')
-    
+        
 if __name__ == '__main__':
     main()
