@@ -395,37 +395,44 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            if f'{self.filename}.txt' in os.listdir():
-                tvg = tv(self.filename)
-                if not tvg.insighttree():
-                    if self.entry.get():
-                        tvg.writetree(self.entry.get())
-                        self.entry.delete(0,END)
-                else:
-                    cek = ['child', 'parent']
-                    if self.entry3.get():
-                        if self.entry.get() and self.entry.get() not in cek:
-                            if self.listb.curselection():
-                                rw = self.listb.curselection()
-                                if tvg.insighttree()[int(rw[0])][0] != 'space':
-                                    tvg.edittree(self.entry.get(),int(rw[0]),self.entry3.get())
-                                    self.entry.delete(0,END)
-                            else:
-                                tvg.quickchild(self.entry.get(), self.entry3.get())
-                                self.entry.delete(0,END)
+            if f'{self.filename}.txt' not in os.listdir():
+                if self.entry.get():
+                    if not self.entry3.get():
+                        tvg = tv(self.filename)
+                        cek = ['child', 'parent']
+                        if self.entry.get() not in cek:
+                            tvg.writetree(self.entry.get())
+                            self.entry.delete(0,END)
+                            self.spaces()
                     else:
-                        if self.entry.get() and self.entry.get() not in cek:
-                            if self.listb.curselection():
-                                rw = self.listb.curselection()
-                                if tvg.insighttree()[int(rw[0])][0] != 'space':
-                                    tvg.edittree(self.entry.get(),int(rw[0]))
-                                    self.entry.delete(0,END)
-                            else:
-                                tvg.addparent(self.entry.get())
-                                self.entry.delete(0,END)
-                self.spaces()
+                        messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created please choose parent first!')
+                else:
+                    messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created!')                
             else:
-                messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created!')
+                tvg = tv(self.filename)
+                cek = ['child', 'parent']
+                if self.entry3.get():
+                    if self.entry.get() and self.entry.get() not in cek:
+                        if self.listb.curselection():
+                            rw = self.listb.curselection()
+                            if tvg.insighttree()[int(rw[0])][0] != 'space':
+                                tvg.edittree(self.entry.get(),int(rw[0]),self.entry3.get())
+                                self.entry.delete(0,END)
+                        else:
+                            tvg.quickchild(self.entry.get(), self.entry3.get())
+                            self.entry.delete(0,END)
+                        self.spaces()
+                else:
+                    if self.entry.get() and self.entry.get() not in cek:
+                        if self.listb.curselection():
+                            rw = self.listb.curselection()
+                            if tvg.insighttree()[int(rw[0])][0] != 'space':
+                                tvg.edittree(self.entry.get(),int(rw[0]))
+                                self.entry.delete(0,END)
+                        else:
+                            tvg.addparent(self.entry.get())
+                            self.entry.delete(0,END)
+                        self.spaces()
                 
     def deleterow(self):
         # Deletion on recorded row and updated.
