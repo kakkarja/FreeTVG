@@ -206,7 +206,7 @@ class TreeView:
             if child in self.childs:
                 with open(f'{self.filename}.txt') as file:
                     read = file.readlines()
-                if read[row] != '\n' and row < len(read)-1:
+                if read[row] != '\n' and row <= len(read)-1:
                     bond = read[row][re.match(r"\s+", read[row]).span()[1]:]
                     read[row] = f'{" " * self.childs[child]}{bond}' 
                     with open(f'{self.filename}.txt', 'w') as file:
