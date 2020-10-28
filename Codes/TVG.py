@@ -14,6 +14,7 @@ class TreeViewGui:
     """
     DB = None
     FREEZE = False
+    MARK = False
     def __init__(self, root, filename):
         super().__init__()
         self.filename = filename
@@ -47,13 +48,7 @@ class TreeViewGui:
         self.root.bind('<Control-Down>', self.fcsent)
         self.root.bind('<Control-Left>', self.fcsent)
         self.root.bind('<Control-Right>', self.fcsent)
-        self.root.bind('<Control-n>', self.fcsent)
-        
-        # Unblock this if use special unicode in TreeView engine
-        #llc = ['cp65001', 'UTF-8']
-        #if locale.getpreferredencoding() in llc:
-        #    self.root.bind_all('<Control-y>', self.fcsent)
-        
+        self.root.bind_all('<Control-n>', self.fcsent)
         self.root.bind_all('<Control-y>', self.fcsent)
         self.root.bind_all('<Control-0>', self.fcsent)
         self.root.bind_all('<Control-minus>', self.fcsent)
@@ -119,15 +114,10 @@ class TreeViewGui:
         self.button4 = ttk.Button(self.bframe, text = 'Checked', command = self.checked)
         self.button4.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button4'] = self.button4
-        
-        # Unblock this if use special unicode in TreeView engine
-        #if locale.getpreferredencoding() not in llc:
-        #    self.button4.config(state = 'disable')
-        
         self.button10 = ttk.Button(self.bframe, text = 'Insight', command = self.insight)
         self.button10.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button10'] = self.button10
-        self.button13 = ttk.Button(self.bframe, text = 'Space', command = self.spaces)
+        self.button13 = ttk.Button(self.bframe, text = 'Arrange', command = self.spaces)
         self.button13.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
         self.bt['button13'] = self.button13
         self.button15 = ttk.Button(self.bframe, text = 'Clear hide', command = self.delhid)
@@ -163,19 +153,32 @@ class TreeViewGui:
         self.listb.bind('<MouseWheel>', self.mscrl)
         self.listb.bind('<Up>', self.mscrl)
         self.listb.bind('<Down>', self.mscrl)
+        self.listb.bind('<FocusIn>', self.flb)
         self.bt['scrollbar2'] = self.scrollbar2
         self.unlock = True
     
+    def checkfile(self):
+        if f'{self.filename}.txt' in os.listdir():
+            return True
+        else:
+            return False
+        
     def mscrt(self, event = None):
         # Mouse scroll on text window, will sync with list box on the right.
         
-        self.listb.yview_moveto(self.text.yview()[0])
-    
+        if self.text.yview()[1] < 1.0:
+            self.listb.yview_moveto(self.text.yview()[0])
+        else:
+            self.listb.yview_moveto(self.text.yview()[1])
+            
     def mscrl(self, event = None):
         # Mouse scroll on list box window, will sync with text window on the right.
     
-        self.text.yview_moveto(self.listb.yview()[0])
-        
+        if self.listb.yview()[1] < 1.0:
+            self.text.yview_moveto(self.listb.yview()[0])
+        else:
+            self.text.yview_moveto(self.listb.yview()[1])
+            
     def fcsent(self, event = None):
         # Key Bindings to keyboards.
         
@@ -262,7 +265,11 @@ class TreeViewGui:
                 self.entry3.delete(0,END)
                 self.entry3.config(state = 'readonly')
             self.entry.delete(0,END)
-            self.entry.insert(0, case[''])
+            if len(str(self.entry.focus_get()))> 5:
+                if str(self.entry.focus_get())[-5:] != 'entry':
+                    self.entry.insert(0, case[''])
+            else:
+                self.entry.insert(0, case[''])
         else:
             if case[self.rb.get()] == 'child':
                 self.entry3.config(values = tuple([f'child{c}' for c in range(1, 51)]))
@@ -272,6 +279,7 @@ class TreeViewGui:
                 self.entry3.config(state = 'normal')
                 self.entry3.delete(0,END)
                 self.entry3.config(state = 'readonly')
+            self.entry.selection_clear()
 
     def focus(self, event = None):
         # Validation for Entry
@@ -303,10 +311,10 @@ class TreeViewGui:
     def view(self, event = None):
         # Viewing engine for most module fuction.
         
-        tvg = tv(self.filename)
-        self.text.config(state = 'normal')
         try:
-            if f'{self.filename}.txt' in os.listdir():
+            if self.checkfile():
+                tvg = tv(self.filename)
+                self.text.config(state = 'normal')                
                 with open(f'{self.filename}.txt') as file:
                     rd = file.readlines()
                     self.text.delete('1.0', END)
@@ -327,7 +335,7 @@ class TreeViewGui:
     def chgfile(self):
         # Changing file on active app environment.
         
-        if TreeViewGui.DB is None:
+        if TreeViewGui.DB is None and self.checkfile():
             def chosen(event = None):
                 for i in self.bt:
                     if 'label' not in i and 'scrollbar' not in i:
@@ -349,7 +357,7 @@ class TreeViewGui:
                     self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
                     if f'{self.filename}.txt' in os.listdir():
                         if f'{self.filename}.json' not in os.listdir():
-                            self.writefile()
+                            self.spaces()
                         else:
                             self.hidform()
                     else:
@@ -395,7 +403,7 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            if f'{self.filename}.txt' not in os.listdir():
+            if not self.checkfile():
                 if self.entry.get():
                     if not self.entry3.get():
                         tvg = tv(self.filename)
@@ -413,36 +421,44 @@ class TreeViewGui:
                 cek = ['child', 'parent']
                 if self.entry3.get():
                     if self.entry.get() and self.entry.get() not in cek:
-                        if self.listb.curselection():
-                            rw = self.listb.curselection()
-                            if tvg.insighttree()[int(rw[0])][0] != 'space':
-                                tvg.edittree(self.entry.get(),int(rw[0]),self.entry3.get())
-                                self.entry.delete(0,END)
+                        if TreeViewGui.MARK:
+                            appr = messagebox.askyesno('Edit', f'Edit cell {self.listb.curselection()[0]}?')
+                            if appr:
+                                if self.listb.curselection():
+                                    rw = self.listb.curselection()
+                                    if tvg.insighttree()[int(rw[0])][0] != 'space':
+                                        tvg.edittree(self.entry.get(),int(rw[0]),self.entry3.get())
+                                        self.entry.delete(0,END)
                         else:
                             tvg.quickchild(self.entry.get(), self.entry3.get())
                             self.entry.delete(0,END)
                         self.spaces()
                 else:
                     if self.entry.get() and self.entry.get() not in cek:
-                        if self.listb.curselection():
-                            rw = self.listb.curselection()
-                            if tvg.insighttree()[int(rw[0])][0] != 'space':
-                                tvg.edittree(self.entry.get(),int(rw[0]))
-                                self.entry.delete(0,END)
+                        if TreeViewGui.MARK:
+                            appr = messagebox.askyesno('Edit', f'Edit cell {self.listb.curselection()[0]}?')
+                            if appr:
+                                if self.listb.curselection():
+                                    rw = self.listb.curselection()
+                                    if tvg.insighttree()[int(rw[0])][0] != 'space':
+                                        tvg.edittree(self.entry.get(),int(rw[0]))
+                                        self.entry.delete(0,END)
                         else:
                             tvg.addparent(self.entry.get())
                             self.entry.delete(0,END)
                         self.spaces()
-                
+                        
+    def flb(self, event = None):
+        TreeViewGui.MARK = True
+        
     def deleterow(self):
         # Deletion on recorded row and updated.
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
-            ck = tvg.insighttree()
             try:
-                if ck:     
+                if self.checkfile():
+                    tvg = tv(self.filename)
                     if self.listb.curselection():
                         rw = self.listb.curselection()
                         cp = ck[int(rw[0])][0]
@@ -504,8 +520,8 @@ class TreeViewGui:
     def insight(self, event = None):
         # To view the whole rows, each individually with the correspondent recorded values.
         
-        tvg = tv(self.filename)
-        if tvg.insighttree():
+        if self.checkfile():
+            tvg = tv(self.filename)
             ins = tvg.insighttree()
             ins = [f'row {k}: {v[0]}, {v[1]}' for k, v in ins.items()]
             self.text.config(state = 'normal')
@@ -519,9 +535,9 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
-            ck = tvg.insighttree()
-            if ck:
+            if self.checkfile():
+                tvg = tv(self.filename)
+                ck = tvg.insighttree()                
                 if self.listb.curselection():
                     rw = self.listb.curselection()
                     if ck[int(rw[0])][0] != 'space' and 'child' in ck[int(rw[0])][0]:
@@ -543,9 +559,9 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
-            ck = tvg.insighttree()
-            if ck:
+            if self.checkfile():
+                tvg = tv(self.filename)
+                ck = tvg.insighttree()                
                 if self.listb.curselection():
                     rw = self.listb.curselection()
                     if ck[int(rw[0])][0] != 'space' and 'child' in ck[int(rw[0])][0]:
@@ -570,22 +586,25 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
-            if tvg.insighttree():
+            if self.checkfile():
+                tvg = tv(self.filename)
                 cek = ['parent', 'child']
                 if self.entry.get() and self.entry.get() not in cek :
-                    if self.listb.curselection():
-                        rw = self.listb.curselection()
-                        if self.entry3.get():
-                            tvg.insertrow(self.entry.get(), int(rw[0]), self.entry3.get())
-                            self.entry.delete(0, END)
-                        else:
-                            tvg.insertrow(self.entry.get(), int(rw[0]))
-                            self.entry.delete(0, END)  
-                        self.spaces()
-                        self.listb.see(int(rw[0]))
-                        self.text.yview_moveto(self.listb.yview()[0])
-                
+                    if TreeViewGui.MARK:
+                        appr = messagebox.askyesno('Edit', f'Edit cell {self.listb.curselection()[0]}?')
+                        if appr:                    
+                            if self.listb.curselection():
+                                rw = self.listb.curselection()
+                                if self.entry3.get():
+                                    tvg.insertrow(self.entry.get(), int(rw[0]), self.entry3.get())
+                                    self.entry.delete(0, END)
+                                else:
+                                    tvg.insertrow(self.entry.get(), int(rw[0]))
+                                    self.entry.delete(0, END)  
+                                self.spaces()
+                                self.listb.see(int(rw[0]))
+                                self.text.yview_moveto(self.listb.yview()[0])
+                                
     def checked(self, event = None):
         # To add checked unicode for finished task.
         # WARNING: is active according to your computer encoding system. (Active on encoding: "utf-8")
@@ -607,8 +626,8 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
-            if tvg.insighttree():
+            if self.checkfile():
+                tvg = tv(self.filename)
                 tvg.backuptv()
                 messagebox.showinfo('Backup', 'Backup done!')
             
@@ -658,9 +677,9 @@ class TreeViewGui:
     def cmrows(self):
         # Copy or move any rows to any point of a row within existing rows
         
-        tvg = tv(self.filename)
-        ins = tvg.insighttree()
-        if ins:
+        if self.checkfile():
+            tvg = tv(self.filename)
+            ins = tvg.insighttree()            
             if self.text.get('1.0',END)[:-1]:
                 ckc = ['listb', 'button17', 'text']
                 if self.listb.cget('selectmode') == 'browse':
@@ -752,7 +771,7 @@ class TreeViewGui:
         
         from CreatePDF import Pydf
         
-        if TreeViewGui.DB is None:
+        if TreeViewGui.DB is None and self.checkfile():
             gch = ''
             def chosen(event = None):
                 global gch
@@ -846,44 +865,47 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
-            cks =  tvg.insighttree()
-            num2 = 1
-            if cks:
-                while num2 !=  len(cks):
-                    try:
-                        if cks[num2][0] == 'parent':
-                            if cks[num2 - 1][0] != 'space':
-                                tvg.insertspace(num2)
-                                cks =  tvg.insighttree()
+            if self.checkfile():
+                if TreeViewGui.MARK:
+                    TreeViewGui.MARK = False
+                tvg = tv(self.filename)
+                cks =  tvg.insighttree()
+                num2 = 1
+                if cks:
+                    while num2 !=  len(cks):
+                        try:
+                            if cks[num2][0] == 'parent':
+                                if cks[num2 - 1][0] != 'space':
+                                    tvg.insertspace(num2)
+                                    cks =  tvg.insighttree()
+                                else:
+                                    num2 += 1
+                            elif cks[num2][0] == 'space':
+                                if cks[num2 - 1][0] == 'space':
+                                    tvg.delrow(num2)
+                                    cks =  tvg.insighttree()
+                                else:
+                                    num2 += 1
+                            elif 'child' in cks[num2][0]:
+                                if cks[num2 - 1][0] == 'space':
+                                    tvg.delrow(num2-1)
+                                    num2 -= 1
+                                    cks =  tvg.insighttree()
+                                else:
+                                    num2 += 1
                             else:
                                 num2 += 1
-                        elif cks[num2][0] == 'space':
-                            if cks[num2 - 1][0] == 'space':
-                                tvg.delrow(num2)
-                                cks =  tvg.insighttree()
-                            else:
-                                num2 += 1
-                        elif 'child' in cks[num2][0]:
-                            if cks[num2 - 1][0] == 'space':
-                                tvg.delrow(num2-1)
-                                num2 -= 1
-                                cks =  tvg.insighttree()
-                            else:
-                                num2 += 1
-                        else:
-                            num2 += 1
-                    except:
-                        print(sys.exc_info())
-                        break
-                if cks[0][0] == 'space':
-                    tvg.delrow(0)
-                    cks =  tvg.insighttree()
-                if cks[len(cks)-1][0] == 'space':
-                    tvg.delrow(len(cks)-1)
-                self.view()
-            else:
-                self.view()
+                        except:
+                            print(sys.exc_info())
+                            break
+                    if cks[0][0] == 'space':
+                        tvg.delrow(0)
+                        cks =  tvg.insighttree()
+                    if cks[len(cks)-1][0] == 'space':
+                        tvg.delrow(len(cks)-1)
+                    self.view()
+                else:
+                    self.view()
                     
     def hidcheck(self):
         # Core checking for hidden parent on display, base on existing json file.
@@ -906,6 +928,7 @@ class TreeViewGui:
         # To display records and not hidden one from collection position in json file.
         
         import json
+        
         tvg = tv(self.filename)
         if f'{self.filename}.json' in os.listdir():
             self.view()
@@ -938,8 +961,9 @@ class TreeViewGui:
         # Create Hidden position of parent and its childs in json file.
         
         import json
-        tvg = tv(self.filename)
-        if tvg.insighttree():
+    
+        if self.checkfile():
+            tvg = tv(self.filename)
             if self.listb.curselection():
                 row = int(self.listb.curselection()[0])
                 if self.text.get('1.0', END):
@@ -1021,6 +1045,7 @@ class TreeViewGui:
         # Deleting accordingly each position in json file, or can delete the file.
         
         import json
+        
         if f'{self.filename}.json' in os.listdir():
             with open(f'{self.filename}.json') as jfile:
                 rd = list(dict(json.load(jfile)).values())
@@ -1044,6 +1069,7 @@ class TreeViewGui:
                 
 def main():
     # Starting point of running TVG and making directory for non-existing file.
+    
     root = Tk()
     root.wm_iconbitmap(default = 'TVG.ico')
     root.withdraw()
