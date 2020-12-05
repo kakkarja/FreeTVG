@@ -5,9 +5,14 @@
 * **To use the PDF function user must download PyFPDF. [https://github.com/reingart/pyfpdf]**
 * **Please give feedback if there is known error by creating issues.**
 
-    **Note: Block using '#' in the code on icon, because not provided in the repository**
+**Note: Block using '#' in the code on icon, because not provided in the repository**
+
+### **New addition function :joy:**
+* **Add send note with Telethon [Telegram api wrapper].**
+    * **Please install first Telethon https://github.com/LonamiWebs/Telethon**
 
 ![TVG](/TVG.png)
+![TeleTVG](/TeleTVG.png)
 ![SavedPDF](/SavedPDF.png)
 ---
 # **TreeView**

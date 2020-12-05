@@ -7,6 +7,7 @@ from tkinter import simpledialog, messagebox, filedialog
 from TreeView import TreeView as tv
 import sys
 import os
+import TeleTVG
 
 class TreeViewGui:
     """
@@ -20,10 +21,10 @@ class TreeViewGui:
         self.filename = filename
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
-        self.wwidth = self.root.winfo_reqwidth()
-        self.wheight = self.root.winfo_reqheight()
-        self.pwidth = int(self.root.winfo_screenwidth()/10 - self.wwidth/10)
-        self.pheight = int(self.root.winfo_screenheight()/10 - self.wheight/10)
+        self.wwidth = int(self.root.winfo_screenwidth()/1.4)
+        self.wheight = int(self.root.winfo_screenheight()/2)
+        self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
+        self.pheight = int(self.root.winfo_screenheight()/12 - self.wheight/12)
         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
         self.root.resizable(False, False)
         self.root.bind_all('<Control-f>', self.fcsent)
@@ -52,88 +53,109 @@ class TreeViewGui:
         self.root.bind_all('<Control-y>', self.fcsent)
         self.root.bind_all('<Control-0>', self.fcsent)
         self.root.bind_all('<Control-minus>', self.fcsent)
-        
         self.bt = {}
         self.rb = StringVar()
+        
+        # 1st frame. 
+        # Frame for label and Entry.
         self.fframe = Frame(root)
         self.fframe.pack(side = TOP, fill = 'x')
         self.label = ttk.Label(self.fframe, text = 'Words')
         self.label.pack(side = LEFT, pady = 3, fill = 'x')
         self.bt['label'] = self.label
-        self.entry = ttk.Entry(self.fframe, width = 56, validate = 'focusin', validatecommand = self.focus, font = 'verdana 10')
-        self.entry.pack(side = LEFT, ipady = 7, pady = 3, padx = 1, fill = 'x')
+        self.entry = ttk.Entry(self.fframe, validate = 'focusin', validatecommand = self.focus, font = 'consolas 12')
+        self.entry.pack(side = LEFT, ipady = 5, pady = (3, 0), padx = 1, fill = 'x', expand = 1)
         self.entry.config(state = 'disable')
         self.bt['entry'] = self.entry
-        self.radio1 = ttk.Radiobutton(self.fframe, text = 'parent', value = 'parent', var = self.rb, command = self.radiobut)
-        self.radio1.pack(anchor = 'w', side = LEFT, padx = 1, fill = 'x')
+       
+        # 2nd frame in first frame.
+        # Frame for radios button.
+        self.frbt = ttk.Frame(self.fframe)
+        self.frbt.pack()
+        self.radio1 = ttk.Radiobutton(self.frbt, text = 'parent', value = 'parent', var = self.rb, command = self.radiobut)
+        self.radio1.pack(anchor = 'w', padx = 1)
         self.bt['radio1'] = self.radio1
-        self.radio2 = ttk.Radiobutton(self.fframe, text = 'child', value = 'child', var = self.rb, command = self.radiobut)
-        self.radio2.pack(anchor = 'w', side = LEFT, padx = 1, fill ='x')
+        self.radio2 = ttk.Radiobutton(self.frbt, text = 'child', value = 'child', var = self.rb, command = self.radiobut)
+        self.radio2.pack(anchor = 'w', padx = 1)
         self.bt['radio2'] = self.radio2
-        self.button = ttk.Button(self.fframe, text = 'Up', command = self.moveup)
-        self.button.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button'] = self.button
-        self.button2 = ttk.Button(self.fframe, text = 'Down', command = self.movedown)
-        self.button2.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button2'] = self.button2
-        self.button11 = ttk.Button(self.fframe, text = 'Paste', command = self.copas)
-        self.button11.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button11'] = self.button11
-        self.button12 = ttk.Button(self.fframe, text = 'Save as PDF', command = self.saveaspdf)
-        self.button12.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button12'] = self.button12
-        self.button14 = ttk.Button(self.fframe, text = 'Hide Parent', command = self.hiddenchl)
-        self.button14.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button14'] = self.button14
+        
+        # 3rd frame for top buttons.
+        # Frame for first row Buttons.
         self.bframe = Frame(root)
         self.bframe.pack(side = TOP, fill = 'x')
         self.button5 = ttk.Button(self.bframe, text = 'Insert', command = self.insertwords)
-        self.button5.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
+        self.button5.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button5'] = self.button5
         self.button6 = ttk.Button(self.bframe, text = 'Write', command =  self.writefile)
-        self.button6.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
+        self.button6.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button6'] = self.button6
+        self.button9 = ttk.Button(self.bframe, text = 'Delete', command = self.deleterow)
+        self.button9.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button9'] = self.button9        
         self.button7 = ttk.Button(self.bframe, text = 'BackUp', command = self.backup)
-        self.button7.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
+        self.button7.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button7'] = self.button7
         self.button8 = ttk.Button(self.bframe, text = 'Load', command = self.loadbkp)
-        self.button8.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
+        self.button8.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button8'] = self.button8
-        self.button9 = ttk.Button(self.bframe, text = 'Delete', command = self.deleterow)
-        self.button9.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button9'] = self.button9
-        self.button3 = ttk.Button(self.bframe, text = 'Move Child', command = self.move_lr)
-        self.button3.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button3'] = self.button3
         self.label3 = ttk.Label(self.bframe, text = 'Child')
-        self.label3.pack(side = LEFT, padx = 1, pady = 8, fill = 'x')
+        self.label3.pack(side = LEFT, padx = 1, pady = (0, 3), fill = 'x')
         self.bt['label3'] = self.label3
         self.entry3 = ttk.Combobox(self.bframe, width = 7, state = 'readonly')
-        self.entry3.pack(side = LEFT, padx = 1, pady = 8, fill = 'x')
+        self.entry3.pack(side = LEFT, padx = 1, pady = (0, 3), fill = 'x')
         self.bt['entry3'] = self.entry3
-        self.button4 = ttk.Button(self.bframe, text = 'Checked', command = self.checked)
-        self.button4.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button4'] = self.button4
-        self.button10 = ttk.Button(self.bframe, text = 'Insight', command = self.insight)
-        self.button10.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button10'] = self.button10
-        self.button13 = ttk.Button(self.bframe, text = 'Arrange', command = self.spaces)
-        self.button13.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button13'] = self.button13
-        self.button15 = ttk.Button(self.bframe, text = 'Clear hide', command = self.delhid)
-        self.button15.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
-        self.bt['button15'] = self.button15
+        self.button3 = ttk.Button(self.bframe, text = 'Move Child', command = self.move_lr)
+        self.button3.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button3'] = self.button3        
         self.button16 = ttk.Button(self.bframe, text = 'Change File', command = self.chgfile)
-        self.button16.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
+        self.button16.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button16'] = self.button16
-        self.button17 = ttk.Button(self.bframe, text = 'CPP', width = 4, command = self.cmrows)
-        self.button17.pack(side = LEFT, pady = 3, padx = 1, fill = 'x')
+        self.button17 = ttk.Button(self.bframe, text = 'CPP', command = self.cmrows)
+        self.button17.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button17'] = self.button17
+        self.button18 = ttk.Button(self.bframe, text = 'Send Note', command = self.sendtel)
+        self.button18.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button18'] = self.button18
+        
+        # 4th frame for below buttons.
+        # Frame for second row buttons.
+        self.frb1 = ttk.Frame(self.root)
+        self.frb1.pack(fill = X)
+        self.button10 = ttk.Button(self.frb1, text = 'Insight', command = self.insight)
+        self.button10.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button10'] = self.button10
+        self.button13 = ttk.Button(self.frb1, text = 'Arrange', command = self.spaces)
+        self.button13.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button13'] = self.button13
+        self.button11 = ttk.Button(self.frb1, text = 'Paste', command = self.copas)
+        self.button11.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button11'] = self.button11
+        self.button4 = ttk.Button(self.frb1, text = 'Checked', command = self.checked)
+        self.button4.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button4'] = self.button4        
+        self.button = ttk.Button(self.frb1, text = 'Up', command = self.moveup)
+        self.button.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button'] = self.button
+        self.button2 = ttk.Button(self.frb1, text = 'Down', command = self.movedown)
+        self.button2.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button2'] = self.button2
+        self.button12 = ttk.Button(self.frb1, text = 'Save as PDF', command = self.saveaspdf)
+        self.button12.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button12'] = self.button12
+        self.button14 = ttk.Button(self.frb1, text = 'Hide Parent', command = self.hiddenchl)
+        self.button14.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button14'] = self.button14
+        self.button15 = ttk.Button(self.frb1, text = 'Clear hide', command = self.delhid)
+        self.button15.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button15'] = self.button15
+        
+        # 5th frame.
+        # Frame for text, listbox and scrollbars.
         self.tframe = Frame(root)
         self.tframe.pack(anchor = 'w', side = TOP)
         self.text = Text(self.tframe, width = 105, height = 33, font = ('verdana','10'), padx = 5, pady = 5)
         self.text.config(state = 'disable')
-        self.text.pack(side = LEFT, pady = 3, padx = 2, fill = 'both')
+        self.text.pack(side = LEFT, pady = (0, 3), padx = 2, fill = 'both')
         self.text.bind('<MouseWheel>', self.mscrt)
         self.bt['text'] = self.text
         self.scrollbar1 = ttk.Scrollbar(self.tframe, orient="vertical")
@@ -143,7 +165,7 @@ class TreeViewGui:
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
         self.listb = Listbox(self.tframe, width = 12, exportselection = False, font = 'verdana 10')
-        self.listb.pack(side = LEFT, padx = 2, pady = 3, fill = 'both')
+        self.listb.pack(side = LEFT, padx = 2, pady = (0, 3), fill = 'both')
         self.bt['listb'] = self.listb
         self.scrollbar2 = ttk.Scrollbar(self.tframe, orient="vertical")
         self.scrollbar2.config(command = self.listb.yview) 
@@ -158,6 +180,8 @@ class TreeViewGui:
         self.unlock = True
     
     def checkfile(self):
+        # Checking file if it is exist
+        
         if f'{self.filename}.txt' in os.listdir():
             return True
         else:
@@ -449,6 +473,8 @@ class TreeViewGui:
                         self.spaces()
                         
     def flb(self, event = None):
+        # Set Mark for cheking row for edit.
+        
         TreeViewGui.MARK = True
         
     def deleterow(self):
@@ -461,19 +487,19 @@ class TreeViewGui:
                     tvg = tv(self.filename)
                     if self.listb.curselection():
                         rw = self.listb.curselection()
-                        cp = ck[int(rw[0])][0]
                         tvg.delrow(int(rw[0]))
                         self.spaces()
                         ck = tvg.insighttree()
                         if int(rw[0]) < len(ck):
+                            cp = ck[int(rw[0])][0]
                             if cp == 'parent' and int(rw[0]) != 0:
-                                self.listb.select_set(int(rw[0])-1)
-                                self.listb.see(int(rw[0])-1)
+                                self.listb.select_set(int(rw[0])-2)
+                                self.listb.see(int(rw[0])-2)
                                 self.text.yview_moveto(self.listb.yview()[0])
                             else:
                                 if cp == 'space':
-                                    self.listb.select_set(int(rw[0])+1)
-                                    self.listb.see(int(rw[0])+1)
+                                    self.listb.select_set(int(rw[0])-1)
+                                    self.listb.see(int(rw[0])-1)
                                     self.text.yview_moveto(self.listb.yview()[0])
                                 else:
                                     self.listb.select_set(int(rw[0]))
@@ -483,14 +509,9 @@ class TreeViewGui:
                             if len(ck) == 1:
                                 self.listb.select_set(0)
                             else:
-                                if cp == 'parent':
-                                    self.listb.select_set(int(rw[0])-2)
-                                    self.listb.see(int(rw[0])-2)
-                                    self.text.yview_moveto(self.listb.yview()[0])
-                                else:
-                                    self.listb.select_set(int(rw[0])-1)
-                                    self.listb.see(int(rw[0])-1)
-                                    self.text.yview_moveto(self.listb.yview()[0])
+                                self.listb.select_set(len(ck)-1)
+                                self.listb.see(len(ck)-1)
+                                self.text.yview_moveto(self.listb.yview()[0])
             except:
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
@@ -520,15 +541,17 @@ class TreeViewGui:
     def insight(self, event = None):
         # To view the whole rows, each individually with the correspondent recorded values.
         
-        if self.checkfile():
-            tvg = tv(self.filename)
-            ins = tvg.insighttree()
-            ins = [f'row {k}: {v[0]}, {v[1]}' for k, v in ins.items()]
-            self.text.config(state = 'normal')
-            self.text.delete('1.0', END)
-            for d in ins:
-                self.text.insert(END, f'{d}')
-            self.text.config(state = 'disable')
+        self.hidcheck()
+        if self.unlock:
+            if self.checkfile():
+                tvg = tv(self.filename)
+                ins = tvg.insighttree()
+                ins = [f'row {k}: {v[0]}, {v[1]}' for k, v in ins.items()]
+                self.text.config(state = 'normal')
+                self.text.delete('1.0', END)
+                for d in ins:
+                    self.text.insert(END, f'{d}')
+                self.text.config(state = 'disable')
             
     def moveup(self, event = None):
         # Step up a row to upper row.
@@ -634,27 +657,25 @@ class TreeViewGui:
     def loadbkp(self, event = None):
         # Load any backup data.
         
-        import csv
+        from DataB import Datab as db
+        
         self.hidcheck()
         if self.unlock:
             tvg = tv(self.filename)
-            if f'{self.filename}.csv' in os.listdir():
-                try:
-                    with open(f'{self.filename}.csv') as csvfile:
-                        reads = list(csv.reader(csvfile))
-                        row  = simpledialog.askinteger('Load Backup',
-                        f'There are {len(reads)-1} rows, please choose a row:')
-                        if row:
-                            data = eval(reads[row][1])
-                            tvg.fileread(data)
-                            messagebox.showinfo('Load Backup',
-                            'Load backup is done, chek again!')
-                except:
-                    import sys
-                    self.text.config(state = 'normal')
-                    self.text.delete('1.0', END)
-                    self.text.insert(END, sys.exc_info())
-                    self.text.config(state = 'disable')
+            dbs = db(self.filename)
+            try:
+                row  = simpledialog.askinteger('Load Backup',
+                f'There are {dbs.totalrecs()} rows, please choose a row:')
+                if row and row <= dbs.totalrecs():
+                    tvg.loadbackup(self.filename, row = row-1, stat = True)
+                    messagebox.showinfo('Load Backup',
+                    'Load backup is done, chek again!')
+                    self.spaces()
+            except:
+                self.text.config(state = 'normal')
+                self.text.delete('1.0', END)
+                self.text.insert(END, sys.exc_info())
+                self.text.config(state = 'disable')
                 
     def copas(self, event = None):
         # Paste a row value to Entry for fixing value.
@@ -677,95 +698,97 @@ class TreeViewGui:
     def cmrows(self):
         # Copy or move any rows to any point of a row within existing rows
         
-        if self.checkfile():
-            tvg = tv(self.filename)
-            ins = tvg.insighttree()            
-            if self.text.get('1.0',END)[:-1]:
-                ckc = ['listb', 'button17', 'text']
-                if self.listb.cget('selectmode') == 'browse':
-                    for i in self.bt:
-                        if 'label' not in i and 'scrollbar' not in i:
-                            if i not in ckc:
-                                self.bt[i].config(state='disable')
-                    self.listb.config(selectmode = EXTENDED)
-                    TreeViewGui.FREEZE = True
-                else:
-                    if len(self.listb.curselection()) > 1:
-                        gcs = [int(i) for i in self.listb.curselection()]
-                        ask = simpledialog.askinteger('TreeViewGui', 
-                                                      f'Move to which row? choose between 0 to {len(ins)-1} rows')
-                        if ask < len(ins):
-                            deci = messagebox.askyesno('TreeViewGui', '"Yes" to MOVE to, "No" to COPY to')
-                            if deci:
-                                with open(f'{self.filename}.txt') as file:
-                                    rd = file.readlines()
-                                    cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
-                                    for i in range(gcs[0], gcs[-1]+1):
-                                        rd[i] = '\n'
-                                    if ask < len(ins)-1:
-                                        if ask == 0:
-                                            if ins[gcs[0]][0] == 'parent':
-                                                for i in cop[::-1]:
-                                                    rd.insert(ask, i)
-                                            else:
-                                                for i in cop[::-1]:
-                                                    rd.insert(ask+1, i)
-                                        else:
-                                            for i in cop[::-1]:
-                                                rd.insert(ask, i)
-                                    else:
-                                        for i in cop:
-                                            rd.append(i)
-                                with open(f'{self.filename}.txt', 'w') as file:
-                                    file.writelines(rd)
-                                self.spaces()
-                            else:
-                                with open(f'{self.filename}.txt') as file:
-                                    rd = file.readlines()
-                                    cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
-                                    if ask < len(ins)-1:
-                                        if ask == 0:
-                                            if ins[gcs[0]][0] == 'parent':
-                                                for i in cop[::-1]:
-                                                    rd.insert(ask, i)
-                                            else:
-                                                for i in cop[::-1]:
-                                                    rd.insert(ask+1, i)
-                                        else:
-                                            for i in cop[::-1]:
-                                                rd.insert(ask, i)
-                                    else:
-                                        for i in cop:
-                                            rd.append(i)
-                                with open(f'{self.filename}.txt', 'w') as file:
-                                    file.writelines(rd)
-                                self.spaces()
-                            for i in self.bt:
-                                if 'label' not in i and 'scrollbar' not in i:
-                                    if i not in ckc:
-                                        self.bt[i].config(state='normal')
-                            self.listb.config(selectmode = BROWSE)
-                            TreeViewGui.FREEZE = False
-                            self.listb.see(ask)
-                            self.text.yview_moveto(self.listb.yview()[0])
-                        else:
-                            for i in self.bt:
-                                if 'label' not in i and 'scrollbar' not in i:
-                                    if i not in ckc:
-                                        self.bt[i].config(state='normal')
-                            self.listb.config(selectmode = BROWSE)
-                            TreeViewGui.FREEZE = False
-                            messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
+        self.hidcheck()
+        if self.unlock:
+            if self.checkfile():
+                tvg = tv(self.filename)
+                ins = tvg.insighttree()            
+                if self.text.get('1.0',END)[:-1]:
+                    ckc = ['listb', 'button17', 'text']
+                    if self.listb.cget('selectmode') == 'browse':
+                        for i in self.bt:
+                            if 'label' not in i and 'scrollbar' not in i:
+                                if i not in ckc:
+                                    self.bt[i].config(state='disable')
+                        self.listb.config(selectmode = EXTENDED)
+                        TreeViewGui.FREEZE = True
                     else:
-                        ask = messagebox.askyesno('TreeViewGui', 'Cancel this operation?')
-                        if ask:
-                            for i in self.bt:
-                                if 'label' not in i and 'scrollbar' not in i:
-                                    if i not in ckc:
-                                        self.bt[i].config(state='normal')
-                            self.listb.config(selectmode = BROWSE)
-                            TreeViewGui.FREEZE = False
-                            
+                        if len(self.listb.curselection()) > 1:
+                            gcs = [int(i) for i in self.listb.curselection()]
+                            ask = simpledialog.askinteger('TreeViewGui', 
+                                                          f'Move to which row? choose between 0 to {len(ins)-1} rows')
+                            if ask < len(ins):
+                                deci = messagebox.askyesno('TreeViewGui', '"Yes" to MOVE to, "No" to COPY to')
+                                if deci:
+                                    with open(f'{self.filename}.txt') as file:
+                                        rd = file.readlines()
+                                        cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
+                                        for i in range(gcs[0], gcs[-1]+1):
+                                            rd[i] = '\n'
+                                        if ask < len(ins)-1:
+                                            if ask == 0:
+                                                if ins[gcs[0]][0] == 'parent':
+                                                    for i in cop[::-1]:
+                                                        rd.insert(ask, i)
+                                                else:
+                                                    for i in cop[::-1]:
+                                                        rd.insert(ask+1, i)
+                                            else:
+                                                for i in cop[::-1]:
+                                                    rd.insert(ask, i)
+                                        else:
+                                            for i in cop:
+                                                rd.append(i)
+                                    with open(f'{self.filename}.txt', 'w') as file:
+                                        file.writelines(rd)
+                                    self.spaces()
+                                else:
+                                    with open(f'{self.filename}.txt') as file:
+                                        rd = file.readlines()
+                                        cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
+                                        if ask < len(ins)-1:
+                                            if ask == 0:
+                                                if ins[gcs[0]][0] == 'parent':
+                                                    for i in cop[::-1]:
+                                                        rd.insert(ask, i)
+                                                else:
+                                                    for i in cop[::-1]:
+                                                        rd.insert(ask+1, i)
+                                            else:
+                                                for i in cop[::-1]:
+                                                    rd.insert(ask, i)
+                                        else:
+                                            for i in cop:
+                                                rd.append(i)
+                                    with open(f'{self.filename}.txt', 'w') as file:
+                                        file.writelines(rd)
+                                    self.spaces()
+                                for i in self.bt:
+                                    if 'label' not in i and 'scrollbar' not in i:
+                                        if i not in ckc:
+                                            self.bt[i].config(state='normal')
+                                self.listb.config(selectmode = BROWSE)
+                                TreeViewGui.FREEZE = False
+                                self.listb.see(ask)
+                                self.text.yview_moveto(self.listb.yview()[0])
+                            else:
+                                for i in self.bt:
+                                    if 'label' not in i and 'scrollbar' not in i:
+                                        if i not in ckc:
+                                            self.bt[i].config(state='normal')
+                                self.listb.config(selectmode = BROWSE)
+                                TreeViewGui.FREEZE = False
+                                messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
+                        else:
+                            ask = messagebox.askyesno('TreeViewGui', 'Cancel this operation?')
+                            if ask:
+                                for i in self.bt:
+                                    if 'label' not in i and 'scrollbar' not in i:
+                                        if i not in ckc:
+                                            self.bt[i].config(state='normal')
+                                self.listb.config(selectmode = BROWSE)
+                                TreeViewGui.FREEZE = False
+                                
     def saveaspdf(self):
         # Saving records to a pdf.
         
@@ -910,13 +933,13 @@ class TreeViewGui:
     def hidcheck(self):
         # Core checking for hidden parent on display, base on existing json file.
         
-        if f'{self.filename}.json' in os.listdir():
-            ans = messagebox.askyesno('TreeViewGui', f'Delete {self.filename}.json?')
+        if f'{self.filename}_hid.json' in os.listdir():
+            ans = messagebox.askyesno('TreeViewGui', f'Delete {self.filename}_hid.json?')
             if ans:
-                os.remove(f'{self.filename}.json')
+                os.remove(f'{self.filename}_hid.json')
                 self.view()
                 self.unlock = True
-                messagebox.showinfo('TreeViewGui', f'{self.filename}.json has been deleted!')
+                messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
             else:
                 self.unlock = False
                 messagebox.showinfo('TreeViewGui', 'This function has been terminated!!!')
@@ -930,9 +953,9 @@ class TreeViewGui:
         import json
         
         tvg = tv(self.filename)
-        if f'{self.filename}.json' in os.listdir():
+        if f'{self.filename}_hid.json' in os.listdir():
             self.view()
-            with open(f'{self.filename}.json') as jfile:
+            with open(f'{self.filename}_hid.json') as jfile:
                 rd = dict(json.load(jfile))
                 rolrd = list(rd.values())  
             for wow, wrow in rolrd:
@@ -967,7 +990,7 @@ class TreeViewGui:
             if self.listb.curselection():
                 row = int(self.listb.curselection()[0])
                 if self.text.get('1.0', END):
-                    if f'{self.filename}.json' not in os.listdir():
+                    if f'{self.filename}_hid.json' not in os.listdir():
                         rows = tvg.insighthidden(self.text.get('1.0', END).split('\n')[:-2])
                         if row in rows:
                             if rows[row][0] == 'parent' and 'child' in rows[row+1][0]:
@@ -981,7 +1004,7 @@ class TreeViewGui:
                                         srow +=1
                                     else:
                                         break
-                                with open(f'{self.filename}.json', 'w') as jfile:
+                                with open(f'{self.filename}_hid.json', 'w') as jfile:
                                     hd = {0:(row, srow)}
                                     json.dump(hd, jfile, indent = 4)
                                 firstpart = showt[:row]
@@ -1017,7 +1040,7 @@ class TreeViewGui:
                                         srow +=1
                                     else:
                                         break
-                                with open(f'{self.filename}.json', 'w') as jfile:
+                                with open(f'{self.filename}_hid.json', 'w') as jfile:
                                     rd[len(rd)+1] = (row, srow)
                                     json.dump(rd, jfile, indent = 4)
                                 firstpart = showt[:row]
@@ -1046,27 +1069,39 @@ class TreeViewGui:
         
         import json
         
-        if f'{self.filename}.json' in os.listdir():
-            with open(f'{self.filename}.json') as jfile:
+        if f'{self.filename}_hid.json' in os.listdir():
+            with open(f'{self.filename}_hid.json') as jfile:
                 rd = list(dict(json.load(jfile)).values())
             ans = messagebox.askyesno('TreeViewGui',
             'Please choose "Yes" to delete ascending order, or "No" to delete all?')
             if ans:
                 if rd:
                     rd.pop()
-                    rd = {k:v for k, v in list(enumerate(rd))}
-                    with open(f'{self.filename}.json', 'w') as jfile:
-                        json.dump(rd, jfile, indent = 4)
-                    self.hidform()
-                else:
-                    os.remove(f'{self.filename}.json')
-                    self.view()
-                    messagebox.showinfo('TreeViewGui', f'{self.filename}.json has been deleted!')
+                    if rd:
+                        rd = {k:v for k, v in list(enumerate(rd))}
+                        with open(f'{self.filename}_hid.json', 'w') as jfile:
+                            json.dump(rd, jfile, indent = 4)
+                        self.hidform()
+                    else:
+                        os.remove(f'{self.filename}_hid.json')
+                        self.view()
+                        messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
             else:
-                os.remove(f'{self.filename}.json')
+                os.remove(f'{self.filename}_hid.json')
                 self.view()         
-                messagebox.showinfo('TreeViewGui', f'{self.filename}.json has been deleted!')
-                
+                messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+    
+    def sendtel(self):
+        # This is the sending note with Telethon [Telegram api wrapper].
+        
+        ori = os.getcwd()
+        os.chdir(os.getcwd()[:os.getcwd().rfind('\\')])
+        if self.text.get('1.0', END)[:-1]:
+            TeleTVG.main(self.root, ori, self.text.get('1.0', END)[:-1])
+        else:
+            os.chdir(ori)
+            messagebox.showinfo('TreeViewGui', 'Nothing to be sent!')
+               
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
@@ -1075,7 +1110,7 @@ def main():
     root.withdraw()
     filename = simpledialog.askstring('Filename', 'Create filename:')    
     if filename:
-        filename = filename.capitalize()
+        filename = filename.title()
         if f'{filename}_tvg' not in os.listdir():
             try:
                 os.mkdir(f'{filename}_tvg')
@@ -1086,10 +1121,14 @@ def main():
             os.chdir(f'{filename}_tvg')
         begin = TreeViewGui(root = root, filename = filename)
         begin.root.deiconify()
-        begin.view()
+        if f'{filename}_hid.json' in os.listdir():
+            begin.hidform()
+        else:
+            begin.view()
         begin.root.mainloop()
     else:
         messagebox.showwarning('File', 'No File Name!')
+        root.destroy()
         
 if __name__ == '__main__':
     main()
