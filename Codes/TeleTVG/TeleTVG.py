@@ -41,6 +41,7 @@ class Reminder:
         self.seconds = None
         self.langs = None
         self.chacc = None
+        self.lock = False
         self.api_id = cp.readcpd("api_id")
         self.api_hash = cp.readcpd("api_hash")
         self.users = {}
@@ -414,31 +415,34 @@ class Reminder:
     def chacct(self, event = None):
         # Choosing an account in existing accounts.
         
-        accounts = os.listdir('Telacc')
-        accounts.append('New')
-        class MyDialog(simpledialog.Dialog):
-        
-            def body(self, master):
-                self.title('Choose Account')
-                Label(master, text="Acc: ").grid(row=0, column = 0, sticky = E)
-                self.e1 = ttk.Combobox(master, state = 'readonly')
-                self.e1['values'] = accounts
-                self.e1.current(0)
-                self.e1.grid(row=0, column=1)
-                return self.e1
-        
-            def apply(self):
-                self.result = self.e1.get()
-                            
-        d = MyDialog(self.root)
-        ckt = self.root.title()
-        if d.result and d.result != ckt[ckt.find('-')+1:]:
-            if d.result == 'New':
-                self.newacc()
-            else:
-                self.chacc = d.result    
-                asyncio.get_event_loop().run_until_complete(self.accs())
-                asyncio.get_event_loop().run_until_complete(self.filcomb())
+        if self.lock is False:
+            self.lock = True
+            accounts = os.listdir('Telacc')
+            accounts.append('New')
+            class MyDialog(simpledialog.Dialog):
+            
+                def body(self, master):
+                    self.title('Choose Account')
+                    Label(master, text="Acc: ").grid(row=0, column = 0, sticky = E)
+                    self.e1 = ttk.Combobox(master, state = 'readonly')
+                    self.e1['values'] = accounts
+                    self.e1.current(0)
+                    self.e1.grid(row=0, column=1)
+                    return self.e1
+            
+                def apply(self):
+                    self.result = self.e1.get()
+                                
+            d = MyDialog(self.root)
+            self.lock = False
+            ckt = self.root.title()
+            if d.result and d.result != ckt[ckt.find('-')+1:]:
+                if d.result == 'New':
+                    self.newacc()
+                else:
+                    self.chacc = d.result    
+                    asyncio.get_event_loop().run_until_complete(self.accs())
+                    asyncio.get_event_loop().run_until_complete(self.filcomb())
 
 def main(stat, path, message):
     # Start app.
@@ -471,9 +475,13 @@ def main(stat, path, message):
             api_hash = cp.readcpd("api_hash")            
             if 'ReminderTel.session' not in os.listdir():
                 ask = simpledialog.askstring('ReminderTel', 'Phone number:', show = '●', parent = begin.root)
+                psd = simpledialog.askstring('ReminderTel', 'Password:', show = '●', parent = begin.root)
                 if ask:
                     try:
-                        client = TelegramClient('ReminderTel', api_id, api_hash).start(ask, code_callback = lambda: simpledialog.askstring('ReminderTel', 'code:', show = '⋆', parent = begin.root))
+                        if psd:
+                            client = TelegramClient('ReminderTel', api_id, api_hash).start(ask, psd, code_callback = lambda: simpledialog.askstring('ReminderTel', 'code:', show = '⋆', parent = begin.root))
+                        else:
+                            client = TelegramClient('ReminderTel', api_id, api_hash).start(ask, code_callback = lambda: simpledialog.askstring('ReminderTel', 'code:', show = '⋆', parent = begin.root))
                         client.disconnect()
                         messagebox.showinfo('ReminderTel', 'Please Restart the app!')
                         begin.winexit()
