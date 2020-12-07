@@ -1110,15 +1110,15 @@ class TreeViewGui:
                             self.hidform()
                         else:
                             os.remove(f'{self.filename}_hid.json')
-                            self.view()
+                            self.spaces()
                             messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
                 else:
                     os.remove(f'{self.filename}_hid.json')
-                    self.view()         
+                    self.spaces()         
                     messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
             else:
                 os.remove(f'{self.filename}_hid.json')
-                self.view()
+                self.spaces()
                 messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
             
     def sendtel(self):
