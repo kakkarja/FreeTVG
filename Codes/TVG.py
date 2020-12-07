@@ -701,8 +701,6 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.checkfile():
-                tvg = tv(self.filename)
-                ins = tvg.insighttree()            
                 if self.text.get('1.0',END)[:-1]:
                     ckc = ['listb', 'button17', 'text']
                     if self.listb.cget('selectmode') == 'browse':
@@ -713,6 +711,8 @@ class TreeViewGui:
                         self.listb.config(selectmode = EXTENDED)
                         TreeViewGui.FREEZE = True
                     else:
+                        tvg = tv(self.filename)
+                        ins = tvg.insighttree()                        
                         if len(self.listb.curselection()) > 1:
                             gcs = [int(i) for i in self.listb.curselection()]
                             ask = simpledialog.askinteger('TreeViewGui', 
@@ -766,7 +766,15 @@ class TreeViewGui:
                                 for i in self.bt:
                                     if 'label' not in i and 'scrollbar' not in i:
                                         if i not in ckc:
-                                            self.bt[i].config(state='normal')
+                                            if i == 'entry3':
+                                                self.bt[i].config(state='readonly')
+                                            elif i == 'entry':
+                                                if not self.rb.get():
+                                                    self.bt[i].config(state='disable')
+                                                else:
+                                                    self.bt[i].config(state='normal')
+                                            else:
+                                                self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
                                 self.listb.see(ask)
@@ -775,7 +783,15 @@ class TreeViewGui:
                                 for i in self.bt:
                                     if 'label' not in i and 'scrollbar' not in i:
                                         if i not in ckc:
-                                            self.bt[i].config(state='normal')
+                                            if i == 'entry3':
+                                                self.bt[i].config(state='readonly')
+                                            elif i == 'entry':
+                                                if not self.rb.get():
+                                                    self.bt[i].config(state='disable')
+                                                else:
+                                                    self.bt[i].config(state='normal')
+                                            else:
+                                                self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
                                 messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
@@ -785,7 +801,15 @@ class TreeViewGui:
                                 for i in self.bt:
                                     if 'label' not in i and 'scrollbar' not in i:
                                         if i not in ckc:
-                                            self.bt[i].config(state='normal')
+                                            if i == 'entry3':
+                                                self.bt[i].config(state='readonly')
+                                            elif i == 'entry':
+                                                if not self.rb.get():
+                                                    self.bt[i].config(state='disable')
+                                                else:
+                                                    self.bt[i].config(state='normal')
+                                            else:
+                                                self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
                                 
@@ -954,116 +978,115 @@ class TreeViewGui:
         
         tvg = tv(self.filename)
         if f'{self.filename}_hid.json' in os.listdir():
-            self.view()
             with open(f'{self.filename}_hid.json') as jfile:
                 rd = dict(json.load(jfile))
-                rolrd = list(rd.values())  
-            for wow, wrow in rolrd:
+                            
+            if rd['reverse'] is False:
+                self.view()
+                rolrd = [i for i in list(rd.values()) if isinstance(i, list)]
                 showt = self.text.get('1.0', END).split('\n')[:-2]
-                firstpart = showt[:wow]
-                if wrow < len(showt):
-                    scdpart = showt[wrow:]
-                    allpart = firstpart + scdpart
-                else:
-                    allpart = firstpart
+                for wow, wrow in rolrd:
+                    for i in range(wow, wrow+1):
+                        showt[i] = 0
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
-                ih =[]
-                for put in allpart:
-                    self.text.insert(END, f'{put}\n')
-                    ih.append(f'{put}\n')
+                showt = [f'{i}\n' for i in showt if i != 0]
+                for i in showt:
+                    self.text.insert(END, f'{i}')
+                self.text.config(state = 'disable')
+                vals = [f' {k}: {c[0]}' for k, 
+                c  in list(tvg.insighthidden(showt).items())]
+                self.listb.delete(0,END)
+                for val in vals:
+                    self.listb.insert(END, val)
+            else:
+                self.view()
+                rolrd = [i for i in list(rd.values()) if isinstance(i, list)]
+                showt = self.text.get('1.0', END).split('\n')[:-2]
+                ih = []
+                for wow, wrow in rolrd:
+                    for i in range(wow, wrow+1):
+                        ih.append(f'{showt[i]}\n')
+                
+                self.text.config(state = 'normal')
+                self.text.delete('1.0', END)
+                for i in ih:
+                    self.text.insert(END, f'{i}')
                 self.text.config(state = 'disable')
                 vals = [f' {k}: {c[0]}' for k, 
                 c  in list(tvg.insighthidden(ih).items())]
                 self.listb.delete(0,END)
                 for val in vals:
-                    self.listb.insert(END, val)
-            return rd
-        
+                    self.listb.insert(END, val)                
+                    
     def hiddenchl(self, event = None):
         # Create Hidden position of parent and its childs in json file.
         
         import json
     
         if self.checkfile():
-            tvg = tv(self.filename)
-            if self.listb.curselection():
-                row = int(self.listb.curselection()[0])
-                if self.text.get('1.0', END):
-                    if f'{self.filename}_hid.json' not in os.listdir():
-                        rows = tvg.insighthidden(self.text.get('1.0', END).split('\n')[:-2])
-                        if row in rows:
-                            if rows[row][0] == 'parent' and 'child' in rows[row+1][0]:
-                                showt = self.text.get('1.0', END).split('\n')[:-2]
-                                srow = row+1
-                                while True:
-                                    if srow < len(showt):
-                                        if rows[srow][0] == 'parent':
-                                            srow += 1
+            if f'{self.filename}_hid.json' not in os.listdir():
+                ckc = ['listb', 'button14', 'text']
+                if self.listb.cget('selectmode') == 'browse':
+                    for i in self.bt:
+                        if 'label' not in i and 'scrollbar' not in i:
+                            if i not in ckc:
+                                self.bt[i].config(state='disable')
+                    self.listb.config(selectmode = MULTIPLE)
+                    TreeViewGui.FREEZE = True
+                else:
+                    ask = messagebox.askyesno('TreeViewGui', '"Yes" to hide selected, "No" reverse hide instead!')                    
+                    tvg = tv(self.filename)
+                    if self.listb.curselection():
+                        allrows = [int(i) for i in self.listb.curselection()]
+                        rows = tvg.insighttree()
+                        hd = {}
+                        num = 0
+                        for row in allrows:
+                            num += 1
+                            if row in rows:
+                                if rows[row][0] == 'parent' and 'child' in rows[row+1][0]:
+                                    srow = row+1
+                                    while True:
+                                        if srow < len(rows):
+                                            if rows[srow][0] == 'space':
+                                                break
+                                            srow +=1
+                                        else:
+                                            srow -=1
                                             break
-                                        srow +=1
-                                    else:
-                                        break
+                                    hd[num] = (row, srow)
+                        if hd:
+                            if ask:
+                                rev = {'reverse': False}
                                 with open(f'{self.filename}_hid.json', 'w') as jfile:
-                                    hd = {0:(row, srow)}
-                                    json.dump(hd, jfile, indent = 4)
-                                firstpart = showt[:row]
-                                if srow < len(showt):
-                                    scdpart = showt[srow:]
-                                    allpart = firstpart + scdpart
-                                else:
-                                    allpart = firstpart
-                                self.text.config(state = 'normal')
-                                self.text.delete('1.0', END)
-                                ih =[]
-                                for put in allpart:
-                                    self.text.insert(END, f'{put}\n')
-                                    ih.append(f'{put}\n')
-                                self.text.config(state = 'disable')
-                                vals = [f' {k}: {c[0]}' for k, 
-                                c  in list(tvg.insighthidden(ih).items())]
-                                self.listb.delete(0,END)
-                                for val in vals:
-                                    self.listb.insert(END, val)
-                    else:
-                        rd = self.hidform()
-                        rows = tvg.insighthidden(self.text.get('1.0', END).split('\n')[:-2])
-                        if row in rows:
-                            if rows[row][0] == 'parent' and 'child' in rows[row+1][0]:
-                                showt = self.text.get('1.0', END).split('\n')[:-2]
-                                srow = row+1
-                                while True:
-                                    if srow < len(showt):
-                                        if rows[srow][0] == 'parent':
-                                            srow += 1
-                                            break
-                                        srow +=1
-                                    else:
-                                        break
+                                    json.dump(hd | rev, jfile)
+                                self.hidform()                                
+                            else:
+                                rev = {'reverse': True}
                                 with open(f'{self.filename}_hid.json', 'w') as jfile:
-                                    rd[len(rd)+1] = (row, srow)
-                                    json.dump(rd, jfile, indent = 4)
-                                firstpart = showt[:row]
-                                if srow < len(showt):
-                                    scdpart = showt[srow:]
-                                    allpart = firstpart + scdpart
+                                    json.dump(hd | rev, jfile)
+                                self.hidform()
+                        else:
+                            self.listb.selection_clear(0, END)
+                            messagebox.showinfo('TreeViewGui', 'Please choose Parent only!')
+                    for i in self.bt:
+                        if 'label' not in i and 'scrollbar' not in i:
+                            if i not in ckc:
+                                if i == 'entry3':
+                                    self.bt[i].config(state='readonly')
+                                elif i == 'entry':
+                                    if not self.rb.get():
+                                        self.bt[i].config(state='disable')
+                                    else:
+                                        self.bt[i].config(state='normal')
                                 else:
-                                    allpart = firstpart
-                                self.text.config(state = 'normal')
-                                self.text.delete('1.0', END)
-                                ih =[]
-                                for put in allpart:
-                                    self.text.insert(END, f'{put}\n')
-                                    ih.append(f'{put}\n')
-                                self.text.config(state = 'disable')
-                                vals = [f' {k}: {c[0]}' for k, 
-                                c  in list(tvg.insighthidden(ih).items())]
-                                self.listb.delete(0,END)
-                                for val in vals:
-                                    self.listb.insert(END, val)
+                                    self.bt[i].config(state='normal')
+                    self.listb.config(selectmode = BROWSE)
+                    TreeViewGui.FREEZE = False
             else:
-                self.hidform()
-                
+                messagebox.showinfo('TreeViewGui', 'Hidden parent is recorded, please clear all first!')
+            
     def delhid(self, event = None):
         # Deleting accordingly each position in json file, or can delete the file.
         
@@ -1071,26 +1094,33 @@ class TreeViewGui:
         
         if f'{self.filename}_hid.json' in os.listdir():
             with open(f'{self.filename}_hid.json') as jfile:
-                rd = list(dict(json.load(jfile)).values())
-            ans = messagebox.askyesno('TreeViewGui',
-            'Please choose "Yes" to delete ascending order, or "No" to delete all?')
-            if ans:
-                if rd:
-                    rd.pop()
+                rd = dict(json.load(jfile))
+            if rd['reverse'] is False:
+                rd = [i for i in list(rd.values()) if isinstance(i, list)]
+                ans = messagebox.askyesno('TreeViewGui',
+                'Please choose "Yes" to delete ascending order, or "No" to delete all?')
+                if ans:
                     if rd:
-                        rd = {k:v for k, v in list(enumerate(rd))}
-                        with open(f'{self.filename}_hid.json', 'w') as jfile:
-                            json.dump(rd, jfile, indent = 4)
-                        self.hidform()
-                    else:
-                        os.remove(f'{self.filename}_hid.json')
-                        self.view()
-                        messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+                        rd.pop()
+                        if rd:
+                            rd = {k:v for k, v in list(enumerate(rd))}
+                            rev = {'reverse': False}
+                            with open(f'{self.filename}_hid.json', 'w') as jfile:
+                                json.dump(rd | rev, jfile)
+                            self.hidform()
+                        else:
+                            os.remove(f'{self.filename}_hid.json')
+                            self.view()
+                            messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+                else:
+                    os.remove(f'{self.filename}_hid.json')
+                    self.view()         
+                    messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
             else:
                 os.remove(f'{self.filename}_hid.json')
-                self.view()         
+                self.view()
                 messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
-    
+            
     def sendtel(self):
         # This is the sending note with Telethon [Telegram api wrapper].
         
