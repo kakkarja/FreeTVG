@@ -6,7 +6,7 @@ from CreatePassword import CreatePassword as cp
 from telethon import TelegramClient
 from telethon import functions
 from tkinter import *
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox, simpledialog, filedialog
 from datetime import datetime as dt
 from Scheduler import Settimer as stm
 import string
@@ -27,15 +27,15 @@ class Reminder:
     def __init__(self, root):
         self.root = root
         self.root.resizable(False, False)
-        self.root.title('ReminderTel')
+        self.root.title('TeleTVG')
         self.wid = int(self.root.winfo_screenwidth()/2)
-        self.hei = int(self.root.winfo_screenheight()/1.205)
+        self.hei = int(self.root.winfo_screenheight()/1.207)
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wid/2)
         self.pheight = int(self.root.winfo_screenheight()/3 - self.hei/3)
         self.root.geometry(f'{self.wid}x{self.hei}+{self.pwidth}+{self.pheight}')
         self.root.protocol('WM_DELETE_WINDOW', self.winexit)
         self.root.bind_all('<Control-s>', self.chacct)
-        self.root.bind_all('<Control-v>', self.paste)
+        self.root.bind_all('<Control-p>', self.paste)
         self.root.bind_all('<Control-c>', self.copc)
         self.root.bind_all('<Control-x>', self.clear)
         self.seconds = None
@@ -100,10 +100,14 @@ class Reminder:
         self.scroll.pack(side = RIGHT, fill = 'y', padx = (0,5), pady = (0, 5))
         self.scroll.config(command = self.text.yview)
         self.text.config(yscrollcommand = self.scroll.set)
-        self.sbut = Button(root, text = 'S E N D  T E L E G R A M  N O W', command = self.sentem, 
+        self.frbs = Frame(self.root)
+        self.frbs.pack(fill = 'x')
+        self.sbut = Button(self.frbs, text = 'S E N D  T E L E G R A M  N O W', command = self.sentem, 
                            font = 'consolas 12 bold', relief = GROOVE)
-        self.sbut.pack(padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.entto.focus()        
+        self.sbut.pack(side =  LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
+        self.busf = Button(self.frbs, text = 'S E N D  F I L E', command = self.sf, 
+                           font = 'consolas 12 bold', relief = GROOVE)
+        self.busf.pack(side =  RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
         self.frm4 = Frame(self.root)
         self.frm4.pack(fill = 'x')
         self.text2 = Text(self.frm4, font = '-*-Segoe-UI-Emoji-*--*-153-*', pady = 3, padx = 5, 
@@ -114,9 +118,14 @@ class Reminder:
         self.scroll2.config(command = self.text2.yview)
         self.text2.config(yscrollcommand = self.scroll2.set)
         self.text2.config(state = 'disable')
-        self.sbut = Button(root, text = 'G E T  R E P L Y', command = self.getrep, 
+        self.frgr = Frame(self.root)
+        self.frgr.pack(fill = 'x')
+        self.bugr = Button(self.frgr, text = 'G E T  R E P L Y', command = self.getrep, 
                            font = 'consolas 12 bold', relief = GROOVE)
-        self.sbut.pack(padx = 2, pady = (0, 5), fill = 'x', expand = 1)
+        self.bugr.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
+        self.bugf = Button(self.frgr, text = 'G E T  T V G  F I L E', command = self.gf, 
+                           font = 'consolas 12 bold', relief = GROOVE)
+        self.bugf.pack(side = RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
         self.entto.focus()
     
     def tynam(self, event = None):
@@ -312,6 +321,32 @@ class Reminder:
         else:
             messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)            
             
+    async def sentfile(self):
+        # Sending file to user.
+        
+        try:
+            ask = filedialog.askopenfilename(filetypes = [("Encryption file","*_protected.txt")], parent = self.root)
+            if ask:
+                async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+                    await client.connect()
+                    await client.send_file(self.users[self.entto.get()], ask, caption = 'TreeViewGui')
+                    await client.disconnect()
+                tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
+                messagebox.showinfo('ReminderTel', tms, parent = self.root)
+            else:
+                messagebox.showinfo('ReminderTel', 'Send file is aborted!', parent = self.root)
+        except:
+            messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}', parent = self.root)
+            await client.disconnect()
+    
+    def sf(self):
+        # Sending file using asyncio call
+        
+        if self.entto.get():
+            asyncio.get_event_loop().run_until_complete(self.sentfile())
+        else:
+            messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)        
+    
     async def rep(self):
         # Getting reply from a user [get the last 5 messages]
         
@@ -339,6 +374,44 @@ class Reminder:
         else:
             messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)
             
+    async def getfile(self):
+        # Getting file from a user [get the last 5 messages]
+        
+        ori = os.getcwd()
+        try:
+            async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+                await client.connect()
+                async for message in client.iter_messages(self.users[self.entto.get()],  5):
+                    mmd = None
+                    if message.media:
+                        mmd = message.media.document.attributes[0].file_name
+                        await client.download_media(message, mmd)
+                await client.disconnect()
+            fname = os.path.join(ori, mmd)
+            os.chdir(ori[:ori.rfind('\\')])
+            if not 'TeleFile' in os.listdir():
+                os.mkdir('TeleFile')
+                os.chdir('TeleFile')
+            else:
+                os.chdir('TeleFile')
+            if mmd not in os.listdir():
+                shutil.move(fname, os.getcwd())
+        except:
+            await client.disconnect()
+            messagebox.showerror('TreeViewGui', f'{sys.exc_info()}')
+        finally:
+            os.chdir(ori)
+            if mmd in os.listdir():
+                os.remove(mmd)
+    
+    def gf(self):
+        # Starting running asyncio get file.
+        
+        if self.entto.get():
+            asyncio.get_event_loop().run_until_complete(self.getfile())
+        else:
+            messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)        
+            
     async def filcomb(self):
         # Intitiate filling contacts and languages.
         
@@ -348,9 +421,9 @@ class Reminder:
             mypro = await client.get_me()
             await client.disconnect()
             if mypro.last_name:
-                self.root.title(f'ReminderTel-{mypro.first_name} {mypro.last_name}')
+                self.root.title(f'TeleTVG-{mypro.first_name} {mypro.last_name}')
             else:
-                self.root.title(f'ReminderTel-{mypro.first_name}')
+                self.root.title(f'TeleTVG-{mypro.first_name}')
             self.users = {}
             self.langs = None
             for user in result.users:
@@ -492,9 +565,13 @@ def main(stat, path, message):
                     messagebox.showinfo('ReminderTel', 'Please log in first!')
                     begin.winexit()
             else:
-                asyncio.get_event_loop().run_until_complete(begin.acc())
-                asyncio.get_event_loop().run_until_complete(begin.filcomb())
-                begin.schedulerun()
-                begin.entto.focus_force()
-                begin.text.insert(END, message)
-                begin.root.mainloop()
+                try:
+                    asyncio.get_event_loop().run_until_complete(begin.acc())
+                    asyncio.get_event_loop().run_until_complete(begin.filcomb())
+                    begin.schedulerun()
+                    begin.entto.focus_force()
+                    begin.text.insert(END, message)
+                    begin.root.mainloop()
+                except:
+                    messagebox.showerror('TreeViewGui', f'{sys.exc_info()}')
+                    begin.winexit()

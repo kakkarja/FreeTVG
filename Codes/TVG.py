@@ -53,6 +53,13 @@ class TreeViewGui:
         self.root.bind_all('<Control-y>', self.fcsent)
         self.root.bind_all('<Control-0>', self.fcsent)
         self.root.bind_all('<Control-minus>', self.fcsent)
+        self.root.bind_all('<Control-Key-1>', self.fcsent)
+        self.root.bind_all('<Control-Key-2>', self.fcsent)
+        self.root.bind_all('<Control-Key-3>', self.fcsent)
+        self.root.bind_all('<Control-Key-4>', self.fcsent)
+        self.root.bind_all('<Control-Key-5>', self.fcsent)
+        self.root.bind_all('<Control-Key-6>', self.fcsent)
+        self.root.bind_all('<Control-Key-7>', self.fcsent)
         self.bt = {}
         self.rb = StringVar()
         
@@ -72,12 +79,25 @@ class TreeViewGui:
         # Frame for radios button.
         self.frbt = ttk.Frame(self.fframe)
         self.frbt.pack()
+        self.frrb = ttk.Frame(self.frbt)
+        self.frrb.pack(side = BOTTOM)
         self.radio1 = ttk.Radiobutton(self.frbt, text = 'parent', value = 'parent', var = self.rb, command = self.radiobut)
-        self.radio1.pack(anchor = 'w', padx = 1)
+        self.radio1.pack(side = LEFT,anchor = 'w', padx = 1)
         self.bt['radio1'] = self.radio1
         self.radio2 = ttk.Radiobutton(self.frbt, text = 'child', value = 'child', var = self.rb, command = self.radiobut)
-        self.radio2.pack(anchor = 'w', padx = 1)
+        self.radio2.pack(side = RIGHT, anchor = 'w', padx = 1)
         self.bt['radio2'] = self.radio2
+        
+        # 3rd frame in 2nd frame.
+        # Frame for Child ComboBox
+        self.frcc = ttk.Frame(self.frrb)
+        self.frcc.pack(side = TOP)
+        self.label3 = ttk.Label(self.frcc, text = 'Child')
+        self.label3.pack(side = LEFT, padx = 1, pady = (0, 2), fill = 'x')
+        self.bt['label3'] = self.label3
+        self.entry3 = ttk.Combobox(self.frcc, width = 8, state = 'readonly', justify = 'center')
+        self.entry3.pack(side = LEFT, padx = 1, pady = (0, 2), fill = 'x')
+        self.bt['entry3'] = self.entry3        
         
         # 3rd frame for top buttons.
         # Frame for first row Buttons.
@@ -98,12 +118,6 @@ class TreeViewGui:
         self.button8 = ttk.Button(self.bframe, text = 'Load', command = self.loadbkp)
         self.button8.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button8'] = self.button8
-        self.label3 = ttk.Label(self.bframe, text = 'Child')
-        self.label3.pack(side = LEFT, padx = 1, pady = (0, 3), fill = 'x')
-        self.bt['label3'] = self.label3
-        self.entry3 = ttk.Combobox(self.bframe, width = 7, state = 'readonly')
-        self.entry3.pack(side = LEFT, padx = 1, pady = (0, 3), fill = 'x')
-        self.bt['entry3'] = self.entry3
         self.button3 = ttk.Button(self.bframe, text = 'Move Child', command = self.move_lr)
         self.button3.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button3'] = self.button3        
@@ -116,6 +130,15 @@ class TreeViewGui:
         self.button18 = ttk.Button(self.bframe, text = 'Send Note', command = self.sendtel)
         self.button18.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button18'] = self.button18
+        self.button19 = ttk.Button(self.bframe, text = 'Look Up', command = self.lookup)
+        self.button19.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button19'] = self.button19        
+        self.button21 = ttk.Button(self.bframe, text = 'Save', command = self.endec)
+        self.button21.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button21'] = self.button21        
+        self.button23 = ttk.Button(self.bframe, text = 'Create file', command = self.createf)
+        self.button23.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button23'] = self.button23        
         
         # 4th frame for below buttons.
         # Frame for second row buttons.
@@ -148,6 +171,15 @@ class TreeViewGui:
         self.button15 = ttk.Button(self.frb1, text = 'Clear hide', command = self.delhid)
         self.button15.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button15'] = self.button15
+        self.button20 = ttk.Button(self.frb1, text = 'Date-Time', command = self.dattim)
+        self.button20.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button20'] = self.button20        
+        self.button22 = ttk.Button(self.frb1, text = 'Open', command = self.openf)
+        self.button22.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button22'] = self.button22        
+        self.button24 = ttk.Button(self.frb1, text = 'Lock File', command = self.lockf)
+        self.button24.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button24'] = self.button24        
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
@@ -205,7 +237,7 @@ class TreeViewGui:
             
     def fcsent(self, event = None):
         # Key Bindings to keyboards.
-        
+
         if TreeViewGui.FREEZE is False:
             if event.keysym == 'f':
                 self.entry.focus()
@@ -271,6 +303,20 @@ class TreeViewGui:
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
             elif event.keysym == 'n':
                 self.cmrows()
+            elif event.keysym == '1':
+                self.sendtel()
+            elif event.keysym == '2':
+                self.lookup()
+            elif event.keysym == '3':
+                self.dattim()
+            elif event.keysym == '4':
+                self.endec()
+            elif event.keysym == '5':
+                self.openf()
+            elif event.keysym == '6':
+                self.createf()
+            elif event.keysym == '7':
+                self.lockf()
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -365,6 +411,11 @@ class TreeViewGui:
                     if 'label' not in i and 'scrollbar' not in i:
                         if i == 'entry3':
                             self.bt[i].config(state='readonly')
+                        elif i == 'entry':
+                            if not self.rb.get():
+                                self.bt[i].config(state='disable')
+                            else:
+                                self.bt[i].config(state='normal')
                         else:
                             if i != 'text':
                                 self.bt[i].config(state='normal')
@@ -1045,17 +1096,21 @@ class TreeViewGui:
                         for row in allrows:
                             num += 1
                             if row in rows:
-                                if rows[row][0] == 'parent' and 'child' in rows[row+1][0]:
-                                    srow = row+1
-                                    while True:
-                                        if srow < len(rows):
-                                            if rows[srow][0] == 'space':
+                                if row < len(rows)-1:
+                                    if rows[row][0] == 'parent' and 'child' in rows[row+1][0]:
+                                        srow = row+1
+                                        while True:
+                                            if srow < len(rows):
+                                                if rows[srow][0] == 'space':
+                                                    break
+                                                srow +=1
+                                            else:
+                                                srow -=1
                                                 break
-                                            srow +=1
-                                        else:
-                                            srow -=1
-                                            break
-                                    hd[num] = (row, srow)
+                                        hd[num] = (row, srow)
+                                else:
+                                    if rows[row][0] == 'parent':
+                                        hd[num] = (row, row)
                         if hd:
                             if ask:
                                 rev = {'reverse': False}
@@ -1131,7 +1186,176 @@ class TreeViewGui:
         else:
             os.chdir(ori)
             messagebox.showinfo('TreeViewGui', 'Nothing to be sent!')
-               
+            
+    def lookup(self):
+        # To lookup word on row.
+        
+        self.hidcheck()
+        if self.unlock:
+            if self.checkfile():
+                tvg = tv(self.filename)
+                dat = tvg.insighttree()
+                num = len(dat)
+                sn = 0
+                if self.entry.get():
+                    sw = self.entry.get()
+                    while sn < num:
+                        if sw in dat[sn][1]:
+                            self.text.see(f'{sn+1}.0')
+                            self.listb.see(sn)
+                            self.listb.selection_clear(0, END)
+                            self.listb.selection_set(sn)
+                            ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
+                            self.listb.focus()
+                            self.listb.activate(sn)
+                            if ask:
+                                sn += 1
+                                continue
+                            else:
+                                break
+                        else:
+                            sn += 1
+    
+    def dattim(self):
+        # To insert date and time.
+        
+        from datetime import datetime as dt
+        import re
+        
+        if str(self.entry.cget('state')) == 'normal':
+            dtt = f'[{dt.isoformat(dt.today().replace(microsecond = 0)).replace("T"," ")}]'
+            hold = self.entry.get()
+            if hold:
+                gt = re.match(r'\[.*?\]', hold)
+                if not gt:
+                    self.entry.delete(0, END)
+                    self.entry.insert(0, f'{dtt} {hold}')
+                else:
+                    try:
+                        if isinstance(dt.fromisoformat(gt.group()[1:20]), dt):
+                            self.entry.delete(0, END)
+                            self.entry.insert(0, f'{dtt} {hold[22:]}')
+                    except:
+                        self.entry.delete(0, END)
+                        self.entry.insert(0, f'{dtt} {hold}')                        
+            else:
+                self.entry.insert(0, f'{dtt} ')
+    
+    def endec(self):
+        # Data encrypt and saved for sharing.
+        
+        from ProtectData import ProtectData as ptd
+        
+        self.hidcheck()
+        if self.unlock:
+            if self.checkfile():
+                try:
+                    enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 5, t2 = 7)
+                    ins = f'{enc[0]}'
+                    key = f'{[[j for j in i] for i in enc[1]]}'
+                    with open(f'{self.filename}_protected.txt', 'wb') as encrypt:
+                        encrypt.write(str({key:ins}).encode())
+                    messagebox.showinfo('TreeViewGui', 'Encryption created!')
+                except Exception as e:
+                    messagebox.showerror('TreeViewGui', f'{e}')
+
+    def openf(self):
+        # Data decrypt and can be saved as _tvg file.
+        
+        from ProtectData import ProtectData as ptd
+        
+        self.hidcheck()
+        if self.unlock:
+            ask = filedialog.askopenfilename(filetypes = [("Encryption file","*_protected.txt")])
+            if ask:
+                try:
+                    with open(f'{ask}', 'rb') as encrypt:
+                        rd  = eval(encrypt.read().decode('utf-8'))
+                    key = list(rd)[0]
+                    ins = rd[key]
+                    dec = ptd.complek(ins, key =((j for j in i) for i in eval(key)), 
+                                      stat = False, t1 = 5, t2 = 7)
+                    self.text.config(state = 'normal')
+                    self.text.delete('1.0', END)
+                    self.text.insert(END, dec)
+                    self.text.config(state = 'disabled')
+                    que = messagebox.askyesno('TreeViewGui', 'Want to save as this file?')
+                    if que:
+                        tvg = tv(f'{self.filename}')
+                        tak = [f'{i}\n' for i in dec.split('\n') if i]
+                        wtvg = tvg.insighthidden(tak)
+                        tvg.fileread(wtvg)
+                        self.spaces()
+                    os.remove(ask)
+                except Exception as e:
+                    messagebox.showerror('TreeViewGui', f'{e}')
+                    
+    def createf(self):
+        ask = messagebox.askyesno('TreeViewGui', 'Create new file?')
+        if ask:
+            fl = simpledialog.askstring('TreeViewGui', 'What is the name?')
+            if fl:
+                mkd = f'{fl.title()}_tvg' 
+                dr = os.getcwd()[:os.getcwd().rfind('\\')]
+                files = [file for file in os.listdir(dr) if '.' not in file]
+                if mkd not in files:
+                    os.chdir(dr)
+                    os.mkdir(mkd)
+                    os.chdir(mkd)
+                    self.filename = fl.title()
+                    self.root.title(f'{os.getcwd()}\{self.filename}.txt')
+                    self.text.config(state = NORMAL)
+                    self.text.delete('1.0', END)
+                    self.text.config(state = DISABLED)
+                    self.entry.delete(0, END)
+                    self.rb.set('')
+                    self.entry.config(state = DISABLED)
+                else:
+                    messagebox.showinfo('TreeViewGui', f'The file {mkd}/{fl.title()}.txt is already exist!')
+            else:
+                messagebox.showinfo('TreeViewGui', 'Nothing created yet!')
+        else:
+            messagebox.showinfo('TreeViewGui', 'Create new file is aborted!')
+                
+    def lockf(self):
+        # Lock file as encrypted file.
+        # Also unclock it directly when open with TVG.
+        
+        from ProtectData import ProtectData as ptd
+        
+        self.hidcheck()
+        if self.unlock:
+            if os.path.isfile(f'{self.filename}.txt'):
+                try:
+                    enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 5, t2 = 7)
+                    ins = f'{enc[0]}'
+                    key = f'{[[j for j in i] for i in enc[1]]}'
+                    with open(f'{self.filename}.protected', 'wb') as encrypt:
+                        encrypt.write(str({key:ins}).encode())
+                    os.remove(f'{self.filename}.txt')
+                    messagebox.showinfo('TreeViewGui', f'{self.filename}.txt is locked!')
+                    self.root.destroy()
+                except Exception as e:
+                    messagebox.showerror('TreeViewGui', f'{e}')
+            elif os.path.isfile(f'{self.filename}.protected'):
+                try:
+                    with open(f'{self.filename}.protected', 'rb') as encrypt:
+                        rd  = eval(encrypt.read().decode('utf-8'))
+                    key = list(rd)[0]
+                    ins = rd[key]
+                    dec = ptd.complek(ins, key =((j for j in i) for i in eval(key)), 
+                                      stat = False, t1 = 5, t2 = 7)
+                    tvg = tv(f'{self.filename}')
+                    tak = [f'{i}\n' for i in dec.split('\n') if i]
+                    wtvg = tvg.insighthidden(tak)
+                    tvg.fileread(wtvg)
+                    self.spaces()
+                    os.remove(f'{self.filename}.protected')
+                except Exception as e:
+                    messagebox.showerror('TreeViewGui', f'{e}')
+            else:
+                print(os.path.isfile(f'{self.filename}.protected'))
+                
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
@@ -1151,10 +1375,13 @@ def main():
             os.chdir(f'{filename}_tvg')
         begin = TreeViewGui(root = root, filename = filename)
         begin.root.deiconify()
-        if f'{filename}_hid.json' in os.listdir():
-            begin.hidform()
+        if f'{filename}.protected' in os.listdir():
+            begin.lockf()
         else:
-            begin.view()
+            if f'{filename}_hid.json' in os.listdir():
+                begin.hidform()
+            else:
+                begin.view()
         begin.root.mainloop()
     else:
         messagebox.showwarning('File', 'No File Name!')
