@@ -10,6 +10,8 @@
 ### **New addition function :joy:**
 * **Add send note with Telethon [Telegram api wrapper].**
     * **Please install first Telethon https://github.com/LonamiWebs/Telethon**
+>* **Please get ProtectData for Lock File function https://github.com/kakkarja/PTD**
+>* **Please get CreatePassword for encrypting telegram apis https://github.com/kakkarja/CP**
 
 ![TVG](/TVG.png)
 ![TeleTVG](/TeleTVG.png)
