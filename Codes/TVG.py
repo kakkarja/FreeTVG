@@ -237,7 +237,8 @@ class TreeViewGui:
             
     def fcsent(self, event = None):
         # Key Bindings to keyboards.
-
+        
+        fcom = str(self.root.focus_get())
         if TreeViewGui.FREEZE is False:
             if event.keysym == 'f':
                 self.entry.focus()
@@ -289,16 +290,16 @@ class TreeViewGui:
                 self.spaces()
             elif event.keysym == 'minus':
                 self.delhid()
-            elif event.keysym == 'Left':
+            elif event.keysym == 'Left' and 'entry' not in fcom:
                 self.pwidth = self.pwidth - 10
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-            elif event.keysym == 'Right':
+            elif event.keysym == 'Right' and 'entry' not in fcom:
                 self.pwidth = self.pwidth + 10
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-            elif event.keysym == 'Down':
+            elif event.keysym == 'Down' and 'entry' not in fcom:
                 self.pheight = self.pheight + 10
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-            elif event.keysym == 'Up':
+            elif event.keysym == 'Up' and 'entry' not in fcom:
                 self.pheight = self.pheight - 10
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
             elif event.keysym == 'n':
