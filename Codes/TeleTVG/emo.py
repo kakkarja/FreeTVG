@@ -19,26 +19,94 @@ class Emo:
         self.root.attributes('-toolwindow', 1)
         self.root.attributes('-topmost', 1)
         self.root.resizable(False, False)
+        self.root.bind('<Up>', self.scrud)
+        self.root.bind('<Down>', self.scrud)
+        self.root.bind('<Control-Up>', self.jumpsc)
+        self.root.bind('<Control-Down>', self.jumpsc)
+        self.root.bind('<Control-s>', self.slec)
+        self.root.bind('<Control-c>', self.slec)
+        self.root.bind('<Control-m>', self.slec)
+        self.root.bind('<Control-l>', self.slec)
         self.sel = []
         self.upt = tuple()
-        self.lbe = Listbox(self.root, font = '-*-Segoe-UI-Emoji-*--*-300-*', 
+        self.fr = ttk.Frame(self.root)
+        self.fr.pack(fill = 'both')
+        self.lbe = Listbox(self.fr, font = '-*-Segoe-UI-Emoji-*--*-300-*', 
                            width = 5, height = 10 , 
                            justify ='center', bg = 'light gray', 
                            exportselection = False, selectmode = 'multiple')
-        self.lbe.pack()
+        self.lbe.pack(fill = 'x', expand = 1)
         with open('emoj.txt') as emr:
             a  = [chr(i) for i in eval(emr.read())]
         for i in a:
             self.lbe.insert(END,i)
         self.lbe.bind('<ButtonRelease>', self.updatesel)
+        self.sp =  IntVar()
+        self.scl = ttk.Scale(self.fr, from_ = 0, to = len(a)-1, variable = self.sp, command = self.sclupt)
+        self.scl.pack()
+        self.setscl = (0, len(a)-1)
         self.btc = Button(self.root, text = 'C O P Y', font = 'consolas 10 bold', relief = GROOVE, command = self.copem)
         self.btc.pack(fill = 'x', expand = 1)
         self.btm = Button(self.root, text = 'M A R K', font = 'consolas 10 bold', relief = GROOVE, command = self.mark)
         self.btm.pack(fill = 'x', expand = 1)        
         self.btm = Button(self.root, text = 'L O A D', font = 'consolas 10 bold', relief = GROOVE, command = self.choind)
-        self.btm.pack(fill = 'x', expand = 1)        
+        self.btm.pack(fill = 'x', expand = 1)
         
+    def slec(self, event = None):
+        # Short-cut to keyboard.
+        
+        if event.keysym == 's':
+            self.lbe.selection_set(ACTIVE)
+            self.updatesel()
+        elif event.keysym == 'c':
+            self.copem()
+        elif event.keysym == 'm':
+            self.mark()
+        elif event.keysym == 'l':
+            self.choind()
+    
+    def jumpsc(self, event = None):
+        # Scroll up and down jump by 10.
+        
+        if event.keysym == 'Up':
+            if self.sp.get() > self.setscl[0]:
+                self.sp.set(self.sp.get()-10)
+                self.sclupt()
+            else:
+                self.sp.set(self.setscl[0])
+                self.sclupt()
+        elif event.keysym == 'Down':
+            if self.sp.get() < self.setscl[1]:
+                self.sp.set(self.sp.get()+10)        
+                self.sclupt()
+            else:
+                self.sp.set(self.setscl[1])
+                self.sclupt()            
+    
+    def sclupt(self, event = None):
+        # Using scale to scroll the listbox of emojies.
+        
+        fc = str(self.root.focus_get())
+        if 'listbox' not in fc:
+            self.lbe.focus()
+        self.lbe.activate(self.sp.get())
+        self.lbe.see(self.sp.get())
+            
+    def scrud(self, event = None):
+        # Using Up and Down button to scroll emojies.
+        
+        if event.keysym == 'Up':
+            if self.sp.get() > self.setscl[0]:
+                self.sp.set(self.sp.get()-1)
+                self.sclupt()
+        elif event.keysym == 'Down':
+            if self.sp.get() < self.setscl[1]:
+                self.sp.set(self.sp.get()+1)        
+                self.sclupt()
+            
     def updatesel(self, event = None):
+        # Precedent selection.
+        
         if self.upt:
             if set(self.lbe.curselection()) - set(self.upt):
                 x = list(set(self.lbe.curselection()) - set(self.upt)).pop()
