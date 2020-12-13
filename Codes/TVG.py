@@ -229,6 +229,8 @@ class TreeViewGui:
         self.unlock = True
         
     def infobar(self, event = None):
+        # Info Bar telling the selected rows in listbox.
+        # If nothing, it will display today's date.
         
         if f'{self.filename}_hid.json' in os.listdir():
             self.info.set('Hidden Mode')
@@ -1225,28 +1227,38 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.checkfile():
-                tvg = tv(self.filename)
-                dat = tvg.insighttree()
-                num = len(dat)
-                sn = 0
                 if self.entry.get():
+                    tvg = tv(self.filename)
+                    dat = tvg.insighttree()
+                    num = len(dat)
+                    sn = 0                    
                     sw = self.entry.get()
-                    while sn < num:
-                        if sw in dat[sn][1]:
-                            self.text.see(f'{sn+1}.0')
-                            self.listb.see(sn)
-                            self.listb.selection_clear(0, END)
-                            self.listb.selection_set(sn)
-                            ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
+                    if sw.isdigit():
+                        sw = int(sw)
+                        if sw <= num-1:
+                            self.listb.see(sw)
+                            self.text.see(f'{sw+1}.0')                            
                             self.listb.focus()
-                            self.listb.activate(sn)
-                            if ask:
-                                sn += 1
-                                continue
+                            self.listb.selection_clear(0, END)
+                            self.listb.activate(sw)
+                            self.listb.selection_set(sw)
+                    else:
+                        while sn < num:
+                            if sw in dat[sn][1]:
+                                self.text.see(f'{sn+1}.0')
+                                self.listb.see(sn)
+                                self.listb.selection_clear(0, END)
+                                self.listb.selection_set(sn)
+                                ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
+                                self.listb.focus()
+                                self.listb.activate(sn)
+                                if ask:
+                                    sn += 1
+                                    continue
+                                else:
+                                    break
                             else:
-                                break
-                        else:
-                            sn += 1
+                                sn += 1
     
     def dattim(self):
         # To insert date and time.
