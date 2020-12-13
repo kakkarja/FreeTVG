@@ -8,6 +8,7 @@ from TreeView import TreeView as tv
 import sys
 import os
 import TeleTVG
+from datetime import datetime as dt
 
 class TreeViewGui:
     """
@@ -45,6 +46,8 @@ class TreeViewGui:
         self.root.bind_all('<Control-e>', self.fcsent)
         self.root.bind_all('<Shift-Up>', self.scru)
         self.root.bind_all('<Shift-Down>', self.scrd)
+        self.root.bind('<KeyRelease>', self.infobar)
+        self.root.bind('<ButtonRelease>', self.infobar)        
         self.root.bind('<Control-Up>', self.fcsent)
         self.root.bind('<Control-Down>', self.fcsent)
         self.root.bind('<Control-Left>', self.fcsent)
@@ -185,9 +188,10 @@ class TreeViewGui:
         # Frame for text, listbox and scrollbars.
         self.tframe = Frame(root)
         self.tframe.pack(anchor = 'w', side = TOP)
-        self.text = Text(self.tframe, width = 105, height = 33, font = ('verdana','10'), padx = 5, pady = 5)
+        self.text = Text(self.tframe, width = 105, height = 33, 
+                         font = ('verdana','10'), padx = 5, pady = 5, wrap = NONE)
         self.text.config(state = 'disable')
-        self.text.pack(side = LEFT, pady = (0, 3), padx = 2, fill = 'both')
+        self.text.pack(side = LEFT, padx = 2, fill = 'both')
         self.text.bind('<MouseWheel>', self.mscrt)
         self.bt['text'] = self.text
         self.scrollbar1 = ttk.Scrollbar(self.tframe, orient="vertical")
@@ -197,11 +201,11 @@ class TreeViewGui:
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
         self.listb = Listbox(self.tframe, width = 12, exportselection = False, font = 'verdana 10')
-        self.listb.pack(side = LEFT, padx = 2, pady = (0, 3), fill = 'both')
+        self.listb.pack(side = LEFT, fill = 'both')
         self.bt['listb'] = self.listb
-        self.scrollbar2 = ttk.Scrollbar(self.tframe, orient="vertical")
+        self.scrollbar2 = ttk.Scrollbar(self.tframe, orient = "vertical")
         self.scrollbar2.config(command = self.listb.yview) 
-        self.scrollbar2.pack(side="right", fill="y")
+        self.scrollbar2.pack(side = "right", fill = "y")
         self.scrollbar2.bind('<ButtonRelease>', self.mscrl)
         self.listb.config(yscrollcommand = self.scrollbar2.set)
         self.listb.bind('<MouseWheel>', self.mscrl)
@@ -209,8 +213,35 @@ class TreeViewGui:
         self.listb.bind('<Down>', self.mscrl)
         self.listb.bind('<FocusIn>', self.flb)
         self.bt['scrollbar2'] = self.scrollbar2
+        
+        # 6th frame.
+        # Frame for horizontal scrollbar and info label.
+        self.fscr = Frame(root)
+        self.fscr.pack(fill = 'x')
+        self.scrolh = ttk.Scrollbar(self.fscr, orient = "horizontal")
+        self.scrolh.pack(side = LEFT, fill = 'x', expand = 1)
+        self.scrolh.config(command = self.text.xview)
+        self.text.config(xscrollcommand = self.scrolh.set)
+        self.info = StringVar()
+        self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
+        self.labcor = Label(self.fscr, textvariable = self.info, width = 18, justify = CENTER)
+        self.labcor.pack(side = RIGHT, fill = 'x')
         self.unlock = True
-    
+        
+    def infobar(self, event = None):
+        
+        if f'{self.filename}_hid.json' in os.listdir():
+            self.info.set('Hidden Mode')
+        elif str(self.listb.cget('selectmode')) == EXTENDED:
+            self.info.set('CPP Mode')
+        elif self.listb.curselection():
+            tvg = tv(f'{self.filename}')
+            ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:10]
+            self.info.set(f'{self.listb.curselection()[0]}: {ck[:-1]}...')
+            del ck
+        elif ':' in self.info.get() or 'Mode' in self.info.get():
+            self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
+                    
     def checkfile(self):
         # Checking file if it is exist
         
@@ -1220,7 +1251,6 @@ class TreeViewGui:
     def dattim(self):
         # To insert date and time.
         
-        from datetime import datetime as dt
         import re
         
         if str(self.entry.cget('state')) == 'normal':
