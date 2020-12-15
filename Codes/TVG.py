@@ -46,8 +46,6 @@ class TreeViewGui:
         self.root.bind_all('<Control-e>', self.fcsent)
         self.root.bind_all('<Shift-Up>', self.scru)
         self.root.bind_all('<Shift-Down>', self.scrd)
-        self.root.bind('<KeyRelease>', self.infobar)
-        self.root.bind('<ButtonRelease>', self.infobar)        
         self.root.bind('<Control-Up>', self.fcsent)
         self.root.bind('<Control-Down>', self.fcsent)
         self.root.bind('<Control-Left>', self.fcsent)
@@ -208,6 +206,7 @@ class TreeViewGui:
         self.scrollbar2.pack(side = "right", fill = "y")
         self.scrollbar2.bind('<ButtonRelease>', self.mscrl)
         self.listb.config(yscrollcommand = self.scrollbar2.set)
+        self.listb.bind('<<ListboxSelect>>', self.infobar)
         self.listb.bind('<MouseWheel>', self.mscrl)
         self.listb.bind('<Up>', self.mscrl)
         self.listb.bind('<Down>', self.mscrl)
@@ -270,7 +269,7 @@ class TreeViewGui:
             
     def fcsent(self, event = None):
         # Key Bindings to keyboards.
-        
+
         fcom = str(self.root.focus_get())
         if TreeViewGui.FREEZE is False:
             if event.keysym == 'f':
@@ -798,7 +797,7 @@ class TreeViewGui:
                     else:
                         tvg = tv(self.filename)
                         ins = tvg.insighttree()                        
-                        if len(self.listb.curselection()) > 1:
+                        if self.listb.curselection():
                             gcs = [int(i) for i in self.listb.curselection()]
                             ask = simpledialog.askinteger('TreeViewGui', 
                                                           f'Move to which row? choose between 0 to {len(ins)-1} rows')
@@ -897,7 +896,7 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
-                                
+                    self.infobar()                
     def saveaspdf(self):
         # Saving records to a pdf.
         
@@ -1038,7 +1037,9 @@ class TreeViewGui:
                     self.view()
                 else:
                     self.view()
-                    
+            if str(self.root.focus_get()) != '.':
+                self.root.focus()
+            self.infobar()
     def hidcheck(self):
         # Core checking for hidden parent on display, base on existing json file.
         
@@ -1120,9 +1121,9 @@ class TreeViewGui:
                     self.listb.config(selectmode = MULTIPLE)
                     TreeViewGui.FREEZE = True
                 else:
-                    ask = messagebox.askyesno('TreeViewGui', '"Yes" to hide selected, "No" reverse hide instead!')                    
-                    tvg = tv(self.filename)
                     if self.listb.curselection():
+                        ask = messagebox.askyesno('TreeViewGui', '"Yes" to hide selected, "No" reverse hide instead!')
+                        tvg = tv(self.filename)
                         allrows = [int(i) for i in self.listb.curselection()]
                         rows = tvg.insighttree()
                         hd = {}
@@ -1142,6 +1143,9 @@ class TreeViewGui:
                                                 srow -=1
                                                 break
                                         hd[num] = (row, srow)
+                                    else:
+                                        if rows[row][0] == 'parent':
+                                            hd[num] = (row, row+1)                                        
                                 else:
                                     if rows[row][0] == 'parent':
                                         hd[num] = (row, row)
@@ -1173,6 +1177,7 @@ class TreeViewGui:
                                     self.bt[i].config(state='normal')
                     self.listb.config(selectmode = BROWSE)
                     TreeViewGui.FREEZE = False
+                    self.infobar()
             else:
                 messagebox.showinfo('TreeViewGui', 'Hidden parent is recorded, please clear all first!')
             
@@ -1267,8 +1272,11 @@ class TreeViewGui:
         
         if str(self.entry.cget('state')) == 'normal':
             dtt = f'[{dt.isoformat(dt.today().replace(microsecond = 0)).replace("T"," ")}]'
-            hold = self.entry.get()
-            if hold:
+            ck = ['parent', 'child']
+            if self.entry.get() in ck:
+                self.entry.delete(0, END)
+            if self.entry.get():
+                hold = self.entry.get()
                 gt = re.match(r'\[.*?\]', hold)
                 if not gt:
                     self.entry.delete(0, END)
@@ -1423,6 +1431,7 @@ def main():
         else:
             if f'{filename}_hid.json' in os.listdir():
                 begin.hidform()
+                begin.infobar()
             else:
                 begin.view()
         begin.root.mainloop()
