@@ -12,7 +12,26 @@
     * **Please install first Telethon https://github.com/LonamiWebs/Telethon**
 >* **Please get ProtectData for Lock File function https://github.com/kakkarja/PTD**
 >* **Please get CreatePassword for encrypting telegram apis https://github.com/kakkarja/CP**
-
+### Changes:
+* **TVG has evolved to more than just taking simple outline note.**
+    * **Now can convert a simple note to outline note.**
+        * **FORMAT:**
+            * **Sample => as "parent" [first-line]**  
+              **This is the format of child. Will be split to two. => as child1 [split by ". "]**
+    * **You can use CPP function to move or even clone rows to other row within existing rows.**
+    * **No folding child like other outline, but..**
+        * **Can hide parents and its childs.**
+            * **This function better than folding, as the outline that you want to save as pdf or even send note will only be the unhide one.**
+    * **Now combine with Telethon wrapper for Telegram.** 
+        * **Send note:**
+            * **With emojies.**
+            * **Scheduler**
+            * **Send file [only the TVG outline note]**
+            * **Get file [any file except pictures and stickers]**
+            * **Multi accounts**
+        * **You have to create Telegram api "https://core.telegram.org/api" in order to use this incredible function.**
+    * **And many more.. :joy:**
+                
 ![TVG](/TVG.png)
 ![TeleTVG](/TeleTVG.png)
 ![SavedPDF](/SavedPDF.png)
