@@ -139,7 +139,10 @@ class TreeViewGui:
         self.bt['button21'] = self.button21        
         self.button23 = ttk.Button(self.bframe, text = 'Create file', command = self.createf)
         self.button23.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button23'] = self.button23        
+        self.bt['button23'] = self.button23
+        self.button26 = ttk.Button(self.bframe, text = 'Convert', command = self.converting)
+        self.button26.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button26'] = self.button26        
         
         # 4th frame for below buttons.
         # Frame for second row buttons.
@@ -181,15 +184,18 @@ class TreeViewGui:
         self.button24 = ttk.Button(self.frb1, text = 'Lock File', command = self.lockf)
         self.button24.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button24'] = self.button24        
+        self.button25 = ttk.Button(self.frb1, text = 'Un/Wrap', command = self.wrapped)
+        self.button25.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button25'] = self.button25        
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
         self.tframe = Frame(root)
-        self.tframe.pack(anchor = 'w', side = TOP)
+        self.tframe.pack(anchor = 'w', side = TOP, fill = 'x')
         self.text = Text(self.tframe, width = 105, height = 33, 
                          font = ('verdana','10'), padx = 5, pady = 5, wrap = NONE)
         self.text.config(state = 'disable')
-        self.text.pack(side = LEFT, padx = 2, fill = 'both')
+        self.text.pack(side = LEFT, padx = 2, fill = 'both', expand = 1)
         self.text.bind('<MouseWheel>', self.mscrt)
         self.bt['text'] = self.text
         self.scrollbar1 = ttk.Scrollbar(self.tframe, orient="vertical")
@@ -227,6 +233,76 @@ class TreeViewGui:
         self.labcor.pack(side = RIGHT, fill = 'x')
         self.unlock = True
         
+    def wrapped(self, event = None):
+        # Wrap the records so that it is filling the windows.
+        # The scrolling horizontal become inactive.
+        
+        if str(self.text.cget('wrap')) == 'none':
+            self.text.config(wrap = WORD)
+        else:
+            self.text.config(wrap = NONE)
+    
+    def converting(self, event =  None):
+        # Convert any text that is paste or written in text window.
+        # Example format:
+        #      """
+        #      Testing => to parent
+        #      This is the format that will be converted appropriately. With
+        #      no spaces after '\n'. And the period is needed for child. => to child1 [2 child]
+        #      """
+        
+        import string
+        
+        if str(self.text.cget('state')) == 'disabled':
+            self.text.config(state = 'normal')
+            for i in self.bt:
+                if 'label' not in i and 'scrollbar' not in i:
+                    if i != 'button26' and i != 'text':
+                        self.bt[i].config(state='disable')
+            TreeViewGui.FREEZE = True
+        else:
+            if self.text.get('1.0', END)[:-1]:
+                fn = str(self.root.title())
+                fn = fn[fn.rfind('\\')+1:]
+                ask = messagebox.askyesno('TreeViewGui', 
+                                          f'Do yout want to convert to this file {fn}?')
+                if ask:
+                    gt = self.text.get('1.0', END)[:-1]
+                    keys = [k for k in gt.split('\n') if k and '.' not in k]
+                    values = [v.split('. ') for v in gt.split('\n') if '. ' in v]
+                    conv = dict(zip(keys, values))
+                    tvg = tv(self.filename)
+                    ck = string.ascii_letters
+                    for i in conv:
+                        if self.checkfile():
+                            tvg.addparent(i)
+                        else:
+                            tvg.writetree(i)
+                        
+                        for j in conv[i]:
+                            if j:
+                                if j[-1] in ck:
+                                    tvg.quickchild(f'{j}.', 'child1')
+                                else:
+                                    tvg.quickchild(j, 'child1')
+                else:
+                    messagebox.showinfo('TreeViewGui', 'Converting is aborted!')
+            self.text.config(state = DISABLED)
+            for i in self.bt:
+                if 'label' not in i and 'scrollbar' not in i:
+                    if i == 'entry3':
+                        self.bt[i].config(state='readonly')
+                    elif i == 'entry':
+                        if not self.rb.get():
+                            self.bt[i].config(state='disable')
+                        else:
+                            self.bt[i].config(state='normal')
+                    else:
+                        if i != 'text':
+                            self.bt[i].config(state='normal')
+            TreeViewGui.FREEZE = False
+            self.spaces()
+            
     def infobar(self, event = None):
         # Info Bar telling the selected rows in listbox.
         # If nothing, it will display today's date.
@@ -464,7 +540,7 @@ class TreeViewGui:
                     self.filename = fi[:fi.rfind('_')]
                     self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
                     if f'{self.filename}.txt' in os.listdir():
-                        if f'{self.filename}.json' not in os.listdir():
+                        if f'{self.filename}_hid.json' not in os.listdir():
                             self.spaces()
                         else:
                             self.hidform()
@@ -1027,7 +1103,7 @@ class TreeViewGui:
                             else:
                                 num2 += 1
                         except:
-                            print(sys.exc_info())
+                            messagebox.showerror('TreeViewGui', sys.exc_info())
                             break
                     if cks[0][0] == 'space':
                         tvg.delrow(0)
@@ -1404,8 +1480,6 @@ class TreeViewGui:
                     os.remove(f'{self.filename}.protected')
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
-            else:
-                print(os.path.isfile(f'{self.filename}.protected'))
                 
 def main():
     # Starting point of running TVG and making directory for non-existing file.

@@ -15,7 +15,7 @@ import shutil
 import emo
 import os
 import sys
-
+import string
 
 class Reminder:
     """
@@ -54,13 +54,17 @@ class Reminder:
         self.entto.bind('<KeyRelease>', self.tynam)
         self.frm2 = ttk.Frame(self.root)
         self.frm2.pack(fill = 'x')
-        self.bem = Button(self.frm2, text = 'E M O J I', font = 'consolas 10 bold', relief = GROOVE, command = self.emj)
+        self.bem = Button(self.frm2, text = 'E M O J I', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.emj)
         self.bem.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
-        self.bup = Button(self.frm2, text = 'P A S T E', font = 'consolas 10 bold', relief = GROOVE, command = self.paste)
+        self.bup = Button(self.frm2, text = 'P A S T E', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.paste)
         self.bup.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.buo = Button(self.frm2, text = 'C O P I E D', font = 'consolas 10 bold', relief = GROOVE, command = self.copc)
+        self.buo = Button(self.frm2, text = 'C O P I E D', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.copc)
         self.buo.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
-        self.buc = Button(self.frm2, text = 'C L E A R', font = 'consolas 10 bold', relief = GROOVE, command = self.clear)
+        self.buc = Button(self.frm2, text = 'C L E A R', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.clear)
         self.buc.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)      
         self.frll = Frame(self.root)
         self.frll.pack(fill = 'x', padx = 2)
@@ -449,13 +453,9 @@ class Reminder:
             await client.disconnect()
             ori = os.getcwd()
             os.chdir('Telacc')
-            if mypro.first_name:
-                if mypro.last_name:
-                    if f'{mypro.first_name} {mypro.last_name}' not in os.listdir():
-                        os.mkdir(f'{mypro.first_name} {mypro.last_name}')
-                else:
-                    if f'{mypro.first_name}' not in os.listdir():
-                        os.mkdir(f'{mypro.first_name}')
+            self.chacc = f'{mypro.id}'
+            if f'{mypro.id}' not in os.listdir():
+                os.mkdir(f'{mypro.id}')
             os.chdir(ori)
             
     
@@ -467,22 +467,15 @@ class Reminder:
             mypro = await client.get_me()
             await client.disconnect()
             ori = os.getcwd()
-            if mypro.first_name not in self.chacc:
-                if mypro.last_name:
-                    keep = f'{mypro.first_name} {mypro.last_name}'
-                    shutil.move('ReminderTel.session', os.path.join(ori, 'Telacc', keep))
-                    shutil.move(os.path.join(ori, 'Telacc', self.chacc, 'ReminderTel.session'), ori)
-                else:
-                    keep = f'{mypro.first_name}'
-                    shutil.move('ReminderTel.session', os.path.join(ori, 'Telacc', keep))
-                    shutil.move(os.path.join(ori, 'Telacc', self.chacc, 'ReminderTel.session'), ori)
+            if f'{mypro.id}' != self.chacc:
+                shutil.move('ReminderTel.session', os.path.join(ori, 'Telacc', f'{mypro.id}'))
+                shutil.move(os.path.join(ori, 'Telacc', self.chacc, 'ReminderTel.session'), ori)
     
     def newacc(self):
         # To get existing client stored.
         
         ori = os.getcwd()
-        keep = self.root.title()
-        shutil.move('ReminderTel.session', os.path.join(ori, 'Telacc', keep[keep.find('-')+1:]))
+        shutil.move('ReminderTel.session', os.path.join(ori, 'Telacc', self.chacc))
         self.winexit()
                     
     def chacct(self, event = None):
@@ -491,6 +484,7 @@ class Reminder:
         if self.lock is False:
             self.lock = True
             accounts = os.listdir('Telacc')
+            gid = accounts.index(self.chacc)
             accounts.append('New')
             class MyDialog(simpledialog.Dialog):
             
@@ -499,7 +493,7 @@ class Reminder:
                     Label(master, text="Acc: ").grid(row=0, column = 0, sticky = E)
                     self.e1 = ttk.Combobox(master, state = 'readonly')
                     self.e1['values'] = accounts
-                    self.e1.current(0)
+                    self.e1.current(gid)
                     self.e1.grid(row=0, column=1)
                     return self.e1
             
@@ -508,12 +502,11 @@ class Reminder:
                                 
             d = MyDialog(self.root)
             self.lock = False
-            ckt = self.root.title()
-            if d.result and d.result != ckt[ckt.find('-')+1:]:
+            if d.result:
                 if d.result == 'New':
                     self.newacc()
                 else:
-                    self.chacc = d.result    
+                    self.chacc = d.result
                     asyncio.get_event_loop().run_until_complete(self.accs())
                     asyncio.get_event_loop().run_until_complete(self.filcomb())
 
