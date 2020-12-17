@@ -61,6 +61,8 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-5>', self.fcsent)
         self.root.bind_all('<Control-Key-6>', self.fcsent)
         self.root.bind_all('<Control-Key-7>', self.fcsent)
+        self.root.bind_all('<Control-Key-8>', self.fcsent)
+        self.root.bind_all('<Control-Key-9>', self.fcsent)
         self.bt = {}
         self.rb = StringVar()
         
@@ -428,6 +430,10 @@ class TreeViewGui:
                 self.createf()
             elif event.keysym == '7':
                 self.lockf()
+            elif event.keysym == '8':
+                self.converting()
+            elif event.keysym == '9':
+                self.wrapped()
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -1129,6 +1135,7 @@ class TreeViewGui:
             if str(self.root.focus_get()) != '.':
                 self.root.focus()
             self.infobar()
+            
     def hidcheck(self):
         # Core checking for hidden parent on display, base on existing json file.
         
@@ -1432,6 +1439,8 @@ class TreeViewGui:
                     messagebox.showerror('TreeViewGui', f'{e}')
                     
     def createf(self):
+        # Creating new file not able to open existing one.
+        
         ask = messagebox.askyesno('TreeViewGui', 'Create new file?')
         if ask:
             fl = simpledialog.askstring('TreeViewGui', 'What is the name?')
@@ -1501,7 +1510,17 @@ def main():
     root = Tk()
     root.wm_iconbitmap(default = 'TVG.ico')
     root.withdraw()
-    filename = simpledialog.askstring('Filename', 'Create filename:')    
+    if 'lastopen.tvg' in os.listdir():
+        ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
+        if ask:
+            with open('lastopen.tvg', 'rb') as lop:
+                rd = eval(lop.read().decode('utf-8'))
+            filename = rd['lop']
+        else:
+            os.remove('lastopen.tvg')
+            filename = simpledialog.askstring('Filename', 'Create filename:')
+    else:
+        filename = simpledialog.askstring('Filename', 'Create filename:')    
     if filename:
         filename = filename.title()
         if f'{filename}_tvg' not in os.listdir():
@@ -1511,6 +1530,8 @@ def main():
             except:
                 os.chdir(f'{filename}_tvg')
         else:
+            with open('lastopen.tvg', 'wb') as lop:
+                lop.write(str({'lop': filename}).encode())
             os.chdir(f'{filename}_tvg')
         begin = TreeViewGui(root = root, filename = filename)
         begin.root.deiconify()
