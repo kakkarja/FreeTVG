@@ -5,6 +5,7 @@
 from CreatePassword import CreatePassword as cp
 from telethon import TelegramClient
 from telethon import functions
+from telethon.tl import types
 from tkinter import *
 from tkinter import ttk, messagebox, simpledialog, filedialog
 from datetime import datetime as dt
@@ -393,14 +394,16 @@ class Reminder:
         try:
             async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
                 await client.connect()
-                async for message in client.iter_messages(self.users[self.entto.get()],  5):
+                async for message in client.iter_messages(self.users[self.entto.get()], 5):
                     if message.media:
-                        takm = message.media.document.attributes[0].file_name
-                        await client.download_media(message, takm)
-                        mmd.append(takm)
+                        if isinstance(message.media.document.attributes[0], types.DocumentAttributeFilename):
+                            takm = message.media.document.attributes[0].file_name
+                            await client.download_media(message, takm)
+                            mmd.append(takm)
                 await client.disconnect()
         except:
             await client.disconnect()
+            messagebox.showerror('TeleTVG', f'{sys.exc_info()}')
         finally:
             if mmd:
                 os.chdir(ori[:ori.rfind('\\')])
@@ -412,11 +415,13 @@ class Reminder:
                 for med in mmd:
                     fname = os.path.join(ori, med)
                     if med not in os.listdir():
-                        shutil.move(fname, os.getcwd())            
+                        shutil.move(fname, os.getcwd())
+                os.startfile(os.getcwd())
+            
             os.chdir(ori)
             if mmd in os.listdir():
                 os.remove(mmd)
-    
+                    
     def gf(self):
         # Starting running asyncio get file.
         
@@ -520,6 +525,8 @@ class Reminder:
                     asyncio.get_event_loop().run_until_complete(self.filcomb())
     
     def multiselect(self, event = None):
+        # Select multiple recepients and save them under a group.
+        
         if self.lock is False:
             self.lock = True
             users = sorted(list(self.users))
@@ -567,6 +574,8 @@ class Reminder:
                     messagebox.showinfo('TeleTVG', 'Please create folder first!')
                     
     async def mulsend(self, sen):
+        # Asyncio module of sending multiple.
+        
         try:
             gms = int(len(self.text.get('1.0', END)[:-1])/4096)
             async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
@@ -592,6 +601,8 @@ class Reminder:
         
     
     def multisend(self, event = None):
+        # Multiple send message to group, like broadcast.
+        
         groups = [ i  for i in os.listdir(os.path.join('Telacc', self.chacc)) if '_group' in i ]
         if groups:
             if self.text.get('1.0', END)[:-1]:
