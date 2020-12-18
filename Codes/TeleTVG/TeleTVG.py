@@ -16,6 +16,7 @@ import emo
 import os
 import sys
 import string
+import json
 
 class Reminder:
     """
@@ -66,6 +67,9 @@ class Reminder:
         self.buc = Button(self.frm2, text = 'C L E A R', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.clear)
         self.buc.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)      
+        self.bsel = Button(self.frm2, text = 'M U L T I', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.multiselect)
+        self.bsel.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
         self.frll = Frame(self.root)
         self.frll.pack(fill = 'x', padx = 2)
         self.frsp = ttk.Frame(self.root)
@@ -106,10 +110,13 @@ class Reminder:
         self.text.config(yscrollcommand = self.scroll.set)
         self.frbs = Frame(self.root)
         self.frbs.pack(fill = 'x')
-        self.sbut = Button(self.frbs, text = 'S E N D  T E L E G R A M  N O W', command = self.sentem, 
+        self.sbut = Button(self.frbs, text = 'S E N D  N O W', command = self.sentem, 
                            font = 'consolas 12 bold', relief = GROOVE)
         self.sbut.pack(side =  LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.busf = Button(self.frbs, text = 'S E N D  F I L E', command = self.sf, 
+                           font = 'consolas 12 bold', relief = GROOVE)
+        self.busf.pack(side =  RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)
+        self.busf = Button(self.frbs, text = 'S E N D  M U L T I', command = self.multisend, 
                            font = 'consolas 12 bold', relief = GROOVE)
         self.busf.pack(side =  RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
         self.frm4 = Frame(self.root)
@@ -127,7 +134,7 @@ class Reminder:
         self.bugr = Button(self.frgr, text = 'G E T  R E P L Y', command = self.getrep, 
                            font = 'consolas 12 bold', relief = GROOVE)
         self.bugr.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.bugf = Button(self.frgr, text = 'G E T  T V G  F I L E', command = self.gf, 
+        self.bugf = Button(self.frgr, text = 'G E T  F I L E', command = self.gf, 
                            font = 'consolas 12 bold', relief = GROOVE)
         self.bugf.pack(side = RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
         self.entto.focus()
@@ -382,28 +389,30 @@ class Reminder:
         # Getting file from a user [get the last 5 messages]
         
         ori = os.getcwd()
+        mmd = []
         try:
             async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
                 await client.connect()
                 async for message in client.iter_messages(self.users[self.entto.get()],  5):
-                    mmd = None
                     if message.media:
-                        mmd = message.media.document.attributes[0].file_name
-                        await client.download_media(message, mmd)
+                        takm = message.media.document.attributes[0].file_name
+                        await client.download_media(message, takm)
+                        mmd.append(takm)
                 await client.disconnect()
-            fname = os.path.join(ori, mmd)
-            os.chdir(ori[:ori.rfind('\\')])
-            if not 'TeleFile' in os.listdir():
-                os.mkdir('TeleFile')
-                os.chdir('TeleFile')
-            else:
-                os.chdir('TeleFile')
-            if mmd not in os.listdir():
-                shutil.move(fname, os.getcwd())
         except:
             await client.disconnect()
-            messagebox.showerror('TreeViewGui', f'{sys.exc_info()}')
         finally:
+            if mmd:
+                os.chdir(ori[:ori.rfind('\\')])
+                if not 'TeleFile' in os.listdir():
+                    os.mkdir('TeleFile')
+                    os.chdir('TeleFile')
+                else:
+                    os.chdir('TeleFile')                
+                for med in mmd:
+                    fname = os.path.join(ori, med)
+                    if med not in os.listdir():
+                        shutil.move(fname, os.getcwd())            
             os.chdir(ori)
             if mmd in os.listdir():
                 os.remove(mmd)
@@ -509,7 +518,109 @@ class Reminder:
                     self.chacc = d.result
                     asyncio.get_event_loop().run_until_complete(self.accs())
                     asyncio.get_event_loop().run_until_complete(self.filcomb())
-
+    
+    def multiselect(self, event = None):
+        if self.lock is False:
+            self.lock = True
+            users = sorted(list(self.users))
+            class MyDialog(simpledialog.Dialog):
+                
+                def body(self, master):
+                    self.title('Select users')
+                    Label(master, text="Users: ").grid(row = 0, column = 0, sticky = E)
+                    self.e1 = Listbox(master, selectmode = MULTIPLE)
+                    for i in users:
+                        self.e1.insert(END, i)
+                    self.e1.grid(row=0, column=1)
+                    Label(master, text = 'Folder name:').grid(row = 1, column = 0, sticky = E)
+                    self.e2 = Entry(master)
+                    self.e2.grid(row = 1, column = 1)
+            
+                def apply(self):
+                    self.result = self.e1.curselection()
+                    self.folder = self.e2.get()
+                                
+            d = MyDialog(self.root)
+            self.lock = False
+            if d.result is not None:
+                dest = os.path.join('Telacc', self.chacc)
+                mfold = os.path.join(dest, f'{d.folder}_group')            
+                if d.result and d.folder:
+                    with open(f'{d.folder}.json', 'w') as fs:
+                        mkc = {d.folder: d.result}
+                        json.dump(mkc, fs)                
+                    if f'{d.folder}_group' not in os.listdir(dest):
+                        os.mkdir(mfold)
+                    else:
+                        os.remove(os.path.join(mfold, f'{d.folder}.json'))
+                    shutil.move(f'{d.folder}.json', mfold)
+                elif d.folder:
+                    if f'{d.folder}_group' in os.listdir(dest):
+                        ask = messagebox.askyesno('TeleTVG', 'Do you want to delete this group?')
+                        if ask:
+                            shutil.rmtree(mfold)
+                        else:
+                            messagebox.showinfo('TeleTVG', 'Deletion aborted!')
+                    else:
+                        messagebox.showinfo('TeleTVG', 'Not created yet!')
+                else:
+                    messagebox.showinfo('TeleTVG', 'Please create folder first!')
+                    
+    async def mulsend(self, sen):
+        try:
+            gms = int(len(self.text.get('1.0', END)[:-1])/4096)
+            async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+                await client.connect()
+                for user in sen:
+                    if gms == 0:
+                        await client.send_message(self.users[user], self.text.get('1.0', END)[:-1])
+                    else:
+                        orm = self.text.get('1.0', END)[:-1]
+                        while orm:
+                            if len(orm) > 4090:
+                                await client.send_message(self.users[user], orm[:4091])
+                                orm = orm[4091:]
+                            else:
+                                await client.send_message(self.users[user], orm)
+                                orm = None
+                await client.disconnect()
+            tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
+            messagebox.showinfo('ReminderTel', tms, parent = self.root)
+        except:
+            messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}', parent = self.root)
+            await client.disconnect()        
+        
+    
+    def multisend(self, event = None):
+        groups = [ i  for i in os.listdir(os.path.join('Telacc', self.chacc)) if '_group' in i ]
+        if groups:
+            if self.text.get('1.0', END)[:-1]:
+                sel = sorted(list(self.users))
+                class MyDialog(simpledialog.Dialog):
+                
+                    def body(self, master):
+                        self.title('Choose Group')
+                        Label(master, text="Group: ").grid(row=0, column = 0, sticky = E)
+                        self.e1 = ttk.Combobox(master, state = 'readonly')
+                        self.e1['values'] = groups
+                        self.e1.current(0)
+                        self.e1.grid(row=0, column=1)
+                        return self.e1
+                
+                    def apply(self):
+                        self.result = self.e1.get()
+                                    
+                d = MyDialog(self.root)
+                self.lock = False
+                if d.result:
+                    tkd = os.path.join('Telacc', self.chacc, d.result, f'{d.result.rpartition("_")[0]}.json')
+                    with open(tkd, 'r') as us:
+                        rd = dict(json.load(us))
+                    sen = [sel[int(i)] for i in rd[d.result.rpartition("_")[0]]]
+                    asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
+            else:
+                messagebox.showinfo('TeleTVG', 'No message to send?')
+                
 def main(stat, path, message):
     # Start app.
     # Please create encryption for app_id and app_hash for security.
