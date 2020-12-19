@@ -22,6 +22,7 @@ class TreeViewGui:
         self.filename = filename
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
+        self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
         self.wwidth = int(self.root.winfo_screenwidth()/1.4)
         self.wheight = int(self.root.winfo_screenheight()/2)
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
@@ -65,6 +66,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-9>', self.fcsent)
         self.bt = {}
         self.rb = StringVar()
+        self.lock = False
         
         # 1st frame. 
         # Frame for label and Entry.
@@ -522,72 +524,65 @@ class TreeViewGui:
     def chgfile(self):
         # Changing file on active app environment.
         
-        if TreeViewGui.DB is None and self.checkfile():
-            def chosen(event = None):
-                for i in self.bt:
-                    if 'label' not in i and 'scrollbar' not in i:
-                        if i == 'entry3':
-                            self.bt[i].config(state='readonly')
-                        elif i == 'entry':
-                            if not self.rb.get():
-                                self.bt[i].config(state='disable')
-                            else:
-                                self.bt[i].config(state='normal')
-                        else:
-                            if i != 'text':
-                                self.bt[i].config(state='normal')
-                fi = spb.get()
-                TreeViewGui.DB = None
-                TreeViewGui.FREEZE = False
-                tl.unbind_all('<Control-g>')
-                tl.destroy()
-                ask = messagebox.askyesno('TreeViewGui', '"Yes" to change file, "No" to delete directory')
-                if ask:
-                    os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], fi))
-                    self.filename = fi.rpartition('_')[0]
-                    self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
-                    if f'{self.filename}.txt' in os.listdir():
-                        if f'{self.filename}_hid.json' not in os.listdir():
-                            self.spaces()
-                        else:
-                            self.hidform()
+        def chosen(file):
+            fi = file
+            TreeViewGui.FREEZE = False
+            ask = messagebox.askyesno('TreeViewGui', '"Yes" to change file, "No" to delete directory')
+            if ask:
+                os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], fi))
+                self.filename = fi.rpartition('_')[0]
+                self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
+                if f'{self.filename}.txt' in os.listdir():
+                    if f'{self.filename}_hid.json' not in os.listdir():
+                        self.spaces()
                     else:
-                        self.text.config(state = 'normal')
-                        self.text.delete('1.0', END)
-                        self.text.config(state = 'disable')
-                        self.listb.delete(0,END)
+                        self.hidform()
+                        self.infobar()
                 else:
-                    import shutil
-                    ori = os.getcwd()
-                    os.chdir(os.getcwd().rpartition('\\')[0])
-                    if ori.rpartition('\\')[2] != fi:
-                        lf = os.listdir(fi)
-                        lsc = messagebox.askyesno('TreeViewGui', f'Do you really want to delete {fi} directory with all\n{lf}\nfiles?')
-                        if lsc:
-                            shutil.rmtree(fi)
-                        else:
-                            messagebox.showinfo('TreeViewGui', 'Deleting directory is aborted!')
+                    self.text.config(state = 'normal')
+                    self.text.delete('1.0', END)
+                    self.text.config(state = 'disable')
+                    self.listb.delete(0,END)
+            else:
+                import shutil
+                ori = os.getcwd()
+                os.chdir(os.getcwd().rpartition('\\')[0])
+                if ori.rpartition('\\')[2] != fi:
+                    lf = os.listdir(fi)
+                    lsc = messagebox.askyesno('TreeViewGui', f'Do you really want to delete {fi} directory with all\n{lf}\nfiles?')
+                    if lsc:
+                        shutil.rmtree(fi)
                     else:
-                        messagebox.showerror('TreeViewGui', 'You are unable to delete present directory!!!')
-                    os.chdir(ori)
+                        messagebox.showinfo('TreeViewGui', 'Deleting directory is aborted!')
+                else:
+                    messagebox.showerror('TreeViewGui', 'You are unable to delete present directory!!!')
+                os.chdir(ori)
                     
-            for i in self.bt:
-                if 'label' not in i and 'scrollbar' not in i:
-                    self.bt[i].config(state='disable')
-            TreeViewGui.FREEZE = True
-            tl = Toplevel()
-            tl.resizable(False, False)
-            tl.overrideredirect(True)
-            tl.wm_attributes("-topmost", 1)
-            tl.bind_all('<Control-g>', chosen)
+        if self.lock is False:
+            TreeViewGui.FREEZE = True        
+            self.lock = True
             files = [file for file in os.listdir(os.getcwd()[:os.getcwd().rfind('\\')]) if '_tvg' in file]
-            spb = Spinbox(tl, values = files, font= 'Helvetica 20 bold')
-            spb.pack(side = LEFT, padx = 5, pady = 5)
-            bt = Button(tl, text = 'Choose', command = chosen)
-            bt.pack(pady = 5, padx = 2)
-            spb.focus()
-            TreeViewGui.DB = tl
+            class MyDialog(simpledialog.Dialog):
             
+                def body(self, master):
+                    self.title('Choose File')
+                    Label(master, text="File: ").grid(row=0, column = 0, sticky = E)
+                    self.e1 = ttk.Combobox(master, state = 'readonly')
+                    self.e1['values'] = files
+                    self.e1.current(0)
+                    self.e1.grid(row=0, column=1)
+                    return self.e1
+            
+                def apply(self):
+                    self.result = self.e1.get()
+                                
+            d = MyDialog(self.root)
+            self.lock = False
+            if d.result:            
+                chosen(d.result)
+            else:
+                TreeViewGui.FREEZE = False
+                
     def writefile(self, event = None):
         # Write first entry and on next updated line.
         # Write also on chosen row for update.
@@ -970,22 +965,20 @@ class TreeViewGui:
                                 TreeViewGui.FREEZE = False
                                 messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
                         else:
-                            ask = messagebox.askyesno('TreeViewGui', 'Cancel this operation?')
-                            if ask:
-                                for i in self.bt:
-                                    if 'label' not in i and 'scrollbar' not in i:
-                                        if i not in ckc:
-                                            if i == 'entry3':
-                                                self.bt[i].config(state='readonly')
-                                            elif i == 'entry':
-                                                if not self.rb.get():
-                                                    self.bt[i].config(state='disable')
-                                                else:
-                                                    self.bt[i].config(state='normal')
+                            for i in self.bt:
+                                if 'label' not in i and 'scrollbar' not in i:
+                                    if i not in ckc:
+                                        if i == 'entry3':
+                                            self.bt[i].config(state='readonly')
+                                        elif i == 'entry':
+                                            if not self.rb.get():
+                                                self.bt[i].config(state='disable')
                                             else:
                                                 self.bt[i].config(state='normal')
-                                self.listb.config(selectmode = BROWSE)
-                                TreeViewGui.FREEZE = False
+                                        else:
+                                            self.bt[i].config(state='normal')
+                            self.listb.config(selectmode = BROWSE)
+                            TreeViewGui.FREEZE = False
                     self.infobar()
                     
     def saveaspdf(self):
@@ -993,28 +986,12 @@ class TreeViewGui:
         
         from CreatePDF import Pydf
         
-        if TreeViewGui.DB is None and self.checkfile():
-            gch = ''
-            def chosen(event = None):
-                global gch
+        if self.checkfile():
+            
+            def chosen(file):
+                gch = file
                 fildir = filedialog.askdirectory()
-                for i in self.bt:
-                    if 'label' not in i and 'scrollbar' not in i:
-                        if i == 'entry3':
-                            self.bt[i].config(state='readonly')
-                        elif i == 'entry':
-                            if not self.rb.get():
-                                self.bt[i].config(state='disable')
-                            else:
-                                self.bt[i].config(state='normal')
-                        else:
-                            if i != 'text':
-                                self.bt[i].config(state='normal')
-                gch = spb.get()
-                TreeViewGui.DB = None
                 TreeViewGui.FREEZE = False
-                tl.unbind_all('<Control-g>')
-                tl.destroy()
                 try:
                     if fildir:
                         ori = os.getcwd()
@@ -1068,23 +1045,31 @@ class TreeViewGui:
                 except:
                     messagebox.showinfo('Save as PDF', f'{sys.exc_info()}')
                         
-            for i in self.bt:
-                if 'label' not in i and 'scrollbar' not in i:
-                    self.bt[i].config(state='disable')
-            TreeViewGui.FREEZE = True
-            tl = Toplevel()
-            tl.resizable(False, False)
-            tl.overrideredirect(True)
-            tl.wm_attributes("-topmost", 1)
-            tl.bind_all('<Control-g>', chosen)
-            a = [i.rpartition('.')[0] for i in os.listdir(r'c:\WINDOWS\Fonts') if '.ttf' in i]
-            spb = Spinbox(tl, values = a, font= 'Helvetica 20 bold')
-            spb.pack(side = LEFT, padx = 5, pady = 5)
-            bt = Button(tl, text = 'Choose', command = chosen)
-            bt.pack(pady = 5, padx = 2)
-            spb.focus()
-            TreeViewGui.DB = tl
-            
+            if self.lock is False:
+                TreeViewGui.FREEZE = True        
+                self.lock = True
+                files = [i.rpartition('.')[0] for i in os.listdir(r'c:\WINDOWS\Fonts') if '.ttf' in i]
+                class MyDialog(simpledialog.Dialog):
+                
+                    def body(self, master):
+                        self.title('Choose Font')
+                        Label(master, text="Font: ").grid(row=0, column = 0, sticky = E)
+                        self.e1 = ttk.Combobox(master, state = 'readonly')
+                        self.e1['values'] = files
+                        self.e1.current(0)
+                        self.e1.grid(row=0, column=1)
+                        return self.e1
+                
+                    def apply(self):
+                        self.result = self.e1.get()
+                                    
+                d = MyDialog(self.root)
+                self.lock = False
+                if d.result:            
+                    chosen(d.result)
+                else:
+                    TreeViewGui.FREEZE = False
+                    
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.
         # To appropriate the display better.
@@ -1406,7 +1391,7 @@ class TreeViewGui:
                     messagebox.showinfo('TreeViewGui', 'Encryption created!')
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
-
+                    
     def openf(self):
         # Data decrypt and can be saved as _tvg file.
         
@@ -1503,7 +1488,14 @@ class TreeViewGui:
                     os.remove(f'{self.filename}.protected')
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
-                
+                    
+    def tvgexit(self, event = None):
+        if self.checkfile():
+            os.chdir(os.getcwd().rpartition('\\')[0])
+            with open('lastopen.tvg', 'wb') as lop:
+                lop.write(str({'lop': self.filename}).encode())
+        self.root.destroy()
+        
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
@@ -1530,8 +1522,6 @@ def main():
             except:
                 os.chdir(f'{filename}_tvg')
         else:
-            with open('lastopen.tvg', 'wb') as lop:
-                lop.write(str({'lop': filename}).encode())
             os.chdir(f'{filename}_tvg')
         begin = TreeViewGui(root = root, filename = filename)
         begin.root.deiconify()

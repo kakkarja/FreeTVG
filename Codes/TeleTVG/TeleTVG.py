@@ -391,36 +391,59 @@ class Reminder:
         
         ori = os.getcwd()
         mmd = []
-        try:
-            async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+        async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+            try:
                 await client.connect()
                 async for message in client.iter_messages(self.users[self.entto.get()], 5):
                     if message.media:
-                        if isinstance(message.media.document.attributes[0], types.DocumentAttributeFilename):
-                            takm = message.media.document.attributes[0].file_name
-                            await client.download_media(message, takm)
-                            mmd.append(takm)
+                        if isinstance(message.media, types.MessageMediaPhoto):
+                            await client.download_media(message)
+                            for pht in os.listdir():
+                                if 'photo_' in pht and '.jpg' in pht:
+                                    mmd.append(pht)
+                        elif isinstance(message.media, types.MessageMediaDocument):
+                            takm = message.media.document.attributes
+                            for i in range(len((takm))):
+                                if isinstance(takm[i], types.DocumentAttributeFilename):
+                                    takm = takm[i].file_name
+                                    if '.tgs' in takm:
+                                        await client.download_media(message)
+                                        adn = os.stat(takm).st_size
+                                        os.rename(takm, f'{adn}.tgs')
+                                        mmd.append(f'{adn}.tgs')
+                                    elif '.webp' in takm:
+                                        await client.download_media(message)
+                                        adn = os.stat(takm).st_size
+                                        os.rename(takm, f'{adn}.webp')
+                                        mmd.append(f'{adn}.webp')                                        
+                                    else:
+                                        await client.download_media(message)
+                                        mmd.append(takm)
                 await client.disconnect()
-        except:
-            await client.disconnect()
-            messagebox.showerror('TeleTVG', f'{sys.exc_info()}')
-        finally:
-            if mmd:
-                os.chdir(ori[:ori.rfind('\\')])
-                if not 'TeleFile' in os.listdir():
-                    os.mkdir('TeleFile')
-                    os.chdir('TeleFile')
-                else:
-                    os.chdir('TeleFile')                
-                for med in mmd:
-                    fname = os.path.join(ori, med)
-                    if med not in os.listdir():
-                        shutil.move(fname, os.getcwd())
-                os.startfile(os.getcwd())
-            
-            os.chdir(ori)
-            if mmd in os.listdir():
-                os.remove(mmd)
+            except:
+                await client.disconnect()
+                messagebox.showerror('TeleTVG', f'{sys.exc_info()}')
+            finally:
+                if client.loop.is_running():
+                    await client.loop.shutdown_asyncgens()
+                if mmd:
+                    os.chdir(ori[:ori.rfind('\\')])
+                    if not 'TeleFile' in os.listdir():
+                        os.mkdir('TeleFile')
+                        os.chdir('TeleFile')
+                    else:
+                        os.chdir('TeleFile')
+                    nf = len(os.listdir())
+                    for med in mmd:
+                        fname = os.path.join(ori, str(med))
+                        if med not in os.listdir():
+                            shutil.move(fname, os.getcwd())
+                    if len(os.listdir()) > nf:
+                        os.startfile(os.getcwd())
+                os.chdir(ori)
+                for file in mmd: 
+                    if file in os.listdir():
+                        os.remove(file)
                     
     def gf(self):
         # Starting running asyncio get file.
@@ -603,34 +626,36 @@ class Reminder:
     def multisend(self, event = None):
         # Multiple send message to group, like broadcast.
         
-        groups = [ i  for i in os.listdir(os.path.join('Telacc', self.chacc)) if '_group' in i ]
-        if groups:
-            if self.text.get('1.0', END)[:-1]:
-                sel = sorted(list(self.users))
-                class MyDialog(simpledialog.Dialog):
-                
-                    def body(self, master):
-                        self.title('Choose Group')
-                        Label(master, text="Group: ").grid(row=0, column = 0, sticky = E)
-                        self.e1 = ttk.Combobox(master, state = 'readonly')
-                        self.e1['values'] = groups
-                        self.e1.current(0)
-                        self.e1.grid(row=0, column=1)
-                        return self.e1
-                
-                    def apply(self):
-                        self.result = self.e1.get()
-                                    
-                d = MyDialog(self.root)
-                self.lock = False
-                if d.result:
-                    tkd = os.path.join('Telacc', self.chacc, d.result, f'{d.result.rpartition("_")[0]}.json')
-                    with open(tkd, 'r') as us:
-                        rd = dict(json.load(us))
-                    sen = [sel[int(i)] for i in rd[d.result.rpartition("_")[0]]]
-                    asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
-            else:
-                messagebox.showinfo('TeleTVG', 'No message to send?')
+        if self.lock is False:        
+            groups = [ i  for i in os.listdir(os.path.join('Telacc', self.chacc)) if '_group' in i ]
+            if groups:
+                if self.text.get('1.0', END)[:-1]:
+                    sel = sorted(list(self.users))
+                    self.lock = True
+                    class MyDialog(simpledialog.Dialog):
+                    
+                        def body(self, master):
+                            self.title('Choose Group')
+                            Label(master, text="Group: ").grid(row=0, column = 0, sticky = E)
+                            self.e1 = ttk.Combobox(master, state = 'readonly')
+                            self.e1['values'] = groups
+                            self.e1.current(0)
+                            self.e1.grid(row=0, column=1)
+                            return self.e1
+                    
+                        def apply(self):
+                            self.result = self.e1.get()
+                                        
+                    d = MyDialog(self.root)
+                    self.lock = False
+                    if d.result:
+                        tkd = os.path.join('Telacc', self.chacc, d.result, f'{d.result.rpartition("_")[0]}.json')
+                        with open(tkd, 'r') as us:
+                            rd = dict(json.load(us))
+                        sen = [sel[int(i)] for i in rd[d.result.rpartition("_")[0]]]
+                        asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
+                else:
+                    messagebox.showinfo('TeleTVG', 'No message to send?')
                 
 def main(stat, path, message):
     # Start app.
