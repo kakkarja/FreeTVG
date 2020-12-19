@@ -165,7 +165,7 @@ class Reminder:
         
     def winexit(self):
         # Will close ReminderTel and Emoji window as well.
-        
+
         if emo.Emo.status is False:
             emo.Emo.status = True
             emo.Emo.mainon.destroy()
@@ -406,17 +406,7 @@ class Reminder:
                             for i in range(len((takm))):
                                 if isinstance(takm[i], types.DocumentAttributeFilename):
                                     takm = takm[i].file_name
-                                    if '.tgs' in takm:
-                                        await client.download_media(message)
-                                        adn = os.stat(takm).st_size
-                                        os.rename(takm, f'{adn}.tgs')
-                                        mmd.append(f'{adn}.tgs')
-                                    elif '.webp' in takm:
-                                        await client.download_media(message)
-                                        adn = os.stat(takm).st_size
-                                        os.rename(takm, f'{adn}.webp')
-                                        mmd.append(f'{adn}.webp')                                        
-                                    else:
+                                    if '.tgs' not in takm and '.webp' not in takm:
                                         await client.download_media(message)
                                         mmd.append(takm)
                 await client.disconnect()
@@ -424,8 +414,6 @@ class Reminder:
                 await client.disconnect()
                 messagebox.showerror('TeleTVG', f'{sys.exc_info()}')
             finally:
-                if client.loop.is_running():
-                    await client.loop.shutdown_asyncgens()
                 if mmd:
                     os.chdir(ori[:ori.rfind('\\')])
                     if not 'TeleFile' in os.listdir():
@@ -715,3 +703,22 @@ def main(stat, path, message):
                 except:
                     messagebox.showerror('TreeViewGui', f'{sys.exc_info()}')
                     begin.winexit()
+    else:
+        # Please create api in telegram!
+        
+        root = Tk()
+        root.withdraw()
+        api = simpledialog.askstring('Key in api_id', 'api_id:', show = '*')
+        if api:
+            cp.createcpd(api, 'api_id', cp.createtoken(37,1))
+            api = simpledialog.askstring('Key in api_hash', 'api_hash:', show = '*')
+            if api:
+                cp.createcpd(api, 'api_hash', cp.createtoken(37,1))
+                messagebox.showinfo('TeleTVG', 'Please Restart Send Note!')
+                root.destroy()
+            else:
+                messagebox.showinfo('TeleTVG', 'You need to start over again later!')
+                root.destroy()
+        else:
+            root.destroy()
+            
