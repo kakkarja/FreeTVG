@@ -27,7 +27,7 @@
             * **With emojies.**
             * **Scheduler**
             * **Send file [only the TVG outline note]**
-            * **Get docs file [any file except ~~pictures and~~ stickers]**
+            * **Get files ~~[except pictures and stickers]~~**
             * **Multi accounts**
             * **Send multiple chat in group**
         * **You have to create Telegram api "https://core.telegram.org/api" to use this incredible function.**
