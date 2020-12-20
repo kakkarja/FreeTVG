@@ -389,52 +389,27 @@ class Reminder:
     async def getfile(self):
         # Getting file from a user [get the last 5 messages]
         
-        ori = os.getcwd()
-        mmd = []
+        path = os.path.join(os.getcwd().rpartition('\\')[0],'TeleFile')
         async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
             try:
                 await client.connect()
                 async for message in client.iter_messages(self.users[self.entto.get()], 5):
                     if message.media:
-                        if isinstance(message.media, types.MessageMediaPhoto):
-                            await client.download_media(message)
-                            for pht in os.listdir():
-                                if 'photo_' in pht and '.jpg' in pht:
-                                    mmd.append(pht)
-                        elif isinstance(message.media, types.MessageMediaDocument):
-                            takm = message.media.document.attributes
-                            for i in range(len((takm))):
-                                if isinstance(takm[i], types.DocumentAttributeFilename):
-                                    takm = takm[i].file_name
-                                    if '.tgs' not in takm and '.webp' not in takm:
-                                        await client.download_media(message)
-                                        mmd.append(takm)
+                        if isinstance(message.media, 
+                                      (types.MessageMediaDocument,
+                                       types.MessageMediaPhoto)
+                                     ):
+                            await client.download_media(message, path)
                 await client.disconnect()
             except:
                 await client.disconnect()
-                messagebox.showerror('TeleTVG', f'{sys.exc_info()}')
-            finally:
-                if mmd:
-                    os.chdir(ori[:ori.rfind('\\')])
-                    if not 'TeleFile' in os.listdir():
-                        os.mkdir('TeleFile')
-                        os.chdir('TeleFile')
-                    else:
-                        os.chdir('TeleFile')
-                    nf = len(os.listdir())
-                    for med in mmd:
-                        fname = os.path.join(ori, str(med))
-                        if med not in os.listdir():
-                            shutil.move(fname, os.getcwd())
-                    if len(os.listdir()) > nf:
-                        os.startfile(os.getcwd())
-                os.chdir(ori)
-                for file in mmd: 
-                    if file in os.listdir():
-                        os.remove(file)
+                messagebox.showerror('TeleTVG', f'{sys.exc_info()[1]}')
                     
     def gf(self):
         # Starting running asyncio get file.
+        
+        if 'TeleFile' not in os.listdir(os.getcwd().rpartition('\\')[0]):
+            os.mkdir(os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile'))
         
         if self.entto.get():
             asyncio.get_event_loop().run_until_complete(self.getfile())
