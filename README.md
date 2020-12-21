@@ -31,6 +31,10 @@
             * **Multi accounts**
             * **Send multiple chat in group**
         * **You have to create Telegram api "https://core.telegram.org/api" to use this incredible function.**
+    * **Can choose color for setting the text and listbox background color. [No button, only event binding. Control+.]**
+    * **Can change font setting for text and listbox. [No button, only event binding. Control+,]**
+    * **Can delete setting back to original. [No button, only event binding. Control+/]**
+        * **The size is locked on size 10, to preserve viewing.** 
     * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
