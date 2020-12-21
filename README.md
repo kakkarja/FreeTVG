@@ -37,9 +37,13 @@
         * **The size is locked on size 10, to preserve viewing.** 
     * **And many more.. :joy:**
                 
+
 ![TVG](/TVG.png)
 ![TeleTVG](/TeleTVG.png)
+![ColorTVG](/ColorTVG.png)
+![FontTVG](/FontTVG.png)
 ![SavedPDF](/SavedPDF.png)
+
 ---
 # **TreeView**
 
