@@ -3,7 +3,7 @@
 
 from tkinter import *
 from tkinter import ttk
-from tkinter import simpledialog, messagebox, filedialog
+from tkinter import simpledialog, messagebox, filedialog, colorchooser
 from TreeView import TreeView as tv
 import sys
 import os
@@ -18,15 +18,14 @@ class TreeViewGui:
     FREEZE = False
     MARK = False
     def __init__(self, root, filename):
-        super().__init__()
         self.filename = filename
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
         self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
-        self.wwidth = int(self.root.winfo_screenwidth()/1.4)
-        self.wheight = int(self.root.winfo_screenheight()/2)
+        self.wwidth = 1100
+        self.wheight = 660
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
-        self.pheight = int(self.root.winfo_screenheight()/12 - self.wheight/12)
+        self.pheight = int(self.root.winfo_screenheight()/4 - self.wheight/4)
         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
         self.root.resizable(False, False)
         self.root.bind_all('<Control-f>', self.fcsent)
@@ -64,6 +63,9 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-7>', self.fcsent)
         self.root.bind_all('<Control-Key-8>', self.fcsent)
         self.root.bind_all('<Control-Key-9>', self.fcsent)
+        self.root.bind_all('<Control-Key-period>', self.txtcol)
+        self.root.bind_all('<Control-Key-comma>', self.ft)
+        self.root.bind_all('<Control-Key-slash>', self.oriset)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -194,13 +196,15 @@ class TreeViewGui:
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
-        self.tframe = Frame(root)
-        self.tframe.pack(anchor = 'w', side = TOP, fill = 'x')
-        self.text = Text(self.tframe, width = 105, height = 33, 
-                         font = ('verdana','10'), padx = 5, pady = 5, wrap = NONE)
+        ftt = 'verdana 10'
+        self.tframe = Frame(root, width = 1100, height = 550)
+        self.tframe.pack(anchor = 'w', side = TOP)
+        self.tframe.pack_propagate(0)
+        self.text = Text(self.tframe, font = ftt, padx = 5, pady = 5, wrap = NONE)
         self.text.config(state = 'disable')
         self.text.pack(side = LEFT, padx = 2, fill = 'both', expand = 1)
         self.text.bind('<MouseWheel>', self.mscrt)
+        self.text.pack_propagate(0)
         self.bt['text'] = self.text
         self.scrollbar1 = ttk.Scrollbar(self.tframe, orient="vertical")
         self.scrollbar1.config(command = self.text.yview) 
@@ -208,8 +212,9 @@ class TreeViewGui:
         self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
-        self.listb = Listbox(self.tframe, width = 12, exportselection = False, font = 'verdana 10')
-        self.listb.pack(side = LEFT, fill = 'both')
+        self.listb = Listbox(self.tframe, width = 13, exportselection = False, font = ftt)
+        self.listb.pack(side = LEFT, fill = 'y')
+        self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
         self.scrollbar2 = ttk.Scrollbar(self.tframe, orient = "vertical")
         self.scrollbar2.config(command = self.listb.yview) 
@@ -222,7 +227,7 @@ class TreeViewGui:
         self.listb.bind('<Down>', self.mscrl)
         self.listb.bind('<FocusIn>', self.flb)
         self.bt['scrollbar2'] = self.scrollbar2
-        
+            
         # 6th frame.
         # Frame for horizontal scrollbar and info label.
         self.fscr = Frame(root)
@@ -234,8 +239,12 @@ class TreeViewGui:
         self.info = StringVar()
         self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
         self.labcor = Label(self.fscr, textvariable = self.info, width = 18, justify = CENTER)
-        self.labcor.pack(side = RIGHT, fill = 'x')
+        self.labcor.pack(side = LEFT, fill = 'x')
         self.unlock = True
+        if 'ft.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
+            self.ft(path = os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'))        
+        if 'theme.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
+            self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
         
     def wrapped(self, event = None):
         # Wrap the records so that it is filling the windows.
@@ -1495,7 +1504,79 @@ class TreeViewGui:
             with open('lastopen.tvg', 'wb') as lop:
                 lop.write(str({'lop': self.filename}).encode())
         self.root.destroy()
+    
+    def txtcol(self, event = None, path = None, wr = True):
+        # Setting colors for text and listbox.
         
+        color = None
+        if path:
+            with open(path) as rd:
+                color = rd.read()
+        else:
+            color = colorchooser.askcolor()[1]
+        hn = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, 
+              '6': 6, '7': 7, '8': 8, '9': 9, 'a': 10, 'b': 11,
+              'c': 12, 'd': 13, 'e': 14, 'f': 15}
+        if color:
+            sn = 0
+            for i in color[1:]:
+                sn += hn[i]
+            if sn < 36:
+                self.text.config(foreground = 'white')
+                self.listb.config(foreground = 'white')
+            else:
+                self.text.config(foreground = 'black')
+                self.listb.config(foreground = 'black')
+            self.text.config(bg = color)
+            self.listb.config(bg = color)
+            if wr:
+                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
+                    thm.write(color)
+                    
+    def clb(self, event, wr = True):
+        # Setting font for text and listbox.
+        
+        import re
+        
+        f = None
+        if '}' in event:
+            n = len(event[:event.find('}')])
+            f = re.search(r'\d+', event[event.find('}'):])
+            f = event[:(n + f.span()[0])] + '10' + event[(n+f.span()[1]):]
+        else:
+            f = re.search(r'\d+', event)
+            f = event[:f.span()[0]] + '10' + event[f.span()[1]:]
+        
+        if f:
+            self.listb['font'] = f
+            self.text['font'] = f
+            if wr:
+                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
+                    ftvg.write(event)
+    
+    def ft(self, event = None, path = None):
+        # Initial starting fonts chooser.
+        
+        if path:
+            with open(path) as rd:
+                self.clb(rd.read(), wr = False)
+        else:
+            self.root.tk.call('tk', 'fontchooser', 'configure', 
+                              '-font', 'arial 10', '-command', 
+                              self.root.register(self.clb))
+            self.root.tk.call('tk', 'fontchooser', 'show')
+    
+    def oriset(self, event = None):
+        pth = os.getcwd().rpartition('\\')[0]
+        lf = [i for i in os.listdir(pth) if '.tvg' in i and i != 'lastopen.tvg']
+        if lf:
+            ask = messagebox.askyesno('TreeViewGui', 'Set back to original?')
+            if ask:
+                for i in lf:
+                    os.remove(os.path.join(pth, i))
+                messagebox.showinfo('TreeViewGui', 'All set back to original setting!')
+            else:
+                messagebox.showinfo('TreeViewGui', 'None change yet!')
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
