@@ -10,14 +10,21 @@
 ### **New addition function :joy:**
 * **Add send note with Telethon [Telegram api wrapper].**
     * **Please install first Telethon https://github.com/LonamiWebs/Telethon**
->* **Please get ProtectData for Lock File function https://github.com/kakkarja/PTD**
->* **Please get CreatePassword for encrypting telegram apis https://github.com/kakkarja/CP**
+>**Please get ProtectData for Lock File function https://github.com/kakkarja/PTD**  
+>  
+>**Please get CreatePassword for encrypting telegram apis https://github.com/kakkarja/CP**
 ### Changes:
 * **TVG has evolved to more than just taking simple outline note.**
     * **Now can convert a simple note to outline note.**
-        * **FORMAT:**
-            * **Sample => as "parent" [first-line]**  
-              **This is the format of child. Will be split to two. => as child1 [split by ". "]**
+        * **FORMAT:**  
+          >Sample  =>  "parent" [first-line]  
+          >This is the format of child. Will be split to two.  =>  "child1" [split by "."/"?"/"!"]
+        * **RESULT:**
+          ```TEXT
+          Sample:
+            -This is the format of child.
+            -Will be split to two.
+          ```
     * **You can use CPP function to move or even clone rows to other row within existing rows.**
     * **No folding child like other outline, but..**
         * **Can hide parents and its childs.**
