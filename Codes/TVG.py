@@ -8,6 +8,7 @@ from TreeView import TreeView as tv
 import sys
 import os
 import TeleTVG
+from FileFind import filen
 from datetime import datetime as dt
 
 class TreeViewGui:
@@ -265,58 +266,57 @@ class TreeViewGui:
         #      """
         
         import string
+        import re
         
-        if str(self.text.cget('state')) == 'disabled':
-            self.text.config(state = 'normal')
-            self.text.delete('1.0', END)
-            for i in self.bt:
-                if 'label' not in i and 'scrollbar' not in i:
-                    if i != 'button26' and i != 'text':
-                        self.bt[i].config(state='disable')
-            TreeViewGui.FREEZE = True
-        else:
-            if self.text.get('1.0', END)[:-1]:
-                fn = str(self.root.title())
-                fn = fn[fn.rfind('\\')+1:]
-                ask = messagebox.askyesno('TreeViewGui', 
-                                          f'Do yout want to convert to this file {fn}?')
-                if ask:
-                    gt = self.text.get('1.0', END)[:-1]
-                    keys = [k for k in gt.split('\n') if k and '.' not in k]
-                    values = [v.split('. ') for v in gt.split('\n') if '. ' in v]
-                    conv = dict(zip(keys, values))
-                    tvg = tv(self.filename)
-                    ck = string.ascii_letters
-                    if conv:
-                        for i in conv:
-                            if self.checkfile():
-                                tvg.addparent(i)
-                            else:
-                                tvg.writetree(i)
-                            
-                            for j in conv[i]:
-                                if j:
-                                    if j[-1] in ck:
-                                        tvg.quickchild(f'{j}.', 'child1')
-                                    else:
-                                        tvg.quickchild(j, 'child1')
-                else:
-                    messagebox.showinfo('TreeViewGui', 'Converting is aborted!')
-            self.text.config(state = DISABLED)
-            for i in self.bt:
-                if 'label' not in i and 'scrollbar' not in i:
-                    if i == 'entry3':
-                        self.bt[i].config(state='readonly')
-                    elif i == 'entry':
-                        if not self.rb.get():
+        self.hidcheck()
+        if self.unlock:
+            if str(self.text.cget('state')) == 'disabled':
+                self.text.config(state = 'normal')
+                self.text.delete('1.0', END)
+                for i in self.bt:
+                    if 'label' not in i and 'scrollbar' not in i:
+                        if i != 'button26' and i != 'text':
                             self.bt[i].config(state='disable')
-                        else:
-                            self.bt[i].config(state='normal')
+                TreeViewGui.FREEZE = True
+            else:
+                if self.text.get('1.0', END)[:-1]:
+                    fn = str(self.root.title())
+                    fn = fn[fn.rfind('\\')+1:]
+                    ask = messagebox.askyesno('TreeViewGui', 
+                                              f'Do yout want to convert to this file {fn}?')
+                    if ask:
+                        gt = self.text.get('1.0', END)[:-1]
+                        keys = [k for k in gt.split('\n') if k and '.' not in k]
+                        x = re.compile(r'.*?[\.|\!|\?]')
+                        values = [[w.removeprefix(' ') for w in x.findall(v)] for v in gt.split('\n') if '.' in v]
+                        conv = dict(zip(keys, values))
+                        tvg = tv(self.filename)
+                        if conv:
+                            for i in conv:
+                                if self.checkfile():
+                                    tvg.addparent(i)
+                                else:
+                                    tvg.writetree(i)
+                                for j in conv[i]:
+                                    if j:
+                                        tvg.quickchild(j, 'child1')
                     else:
-                        if i != 'text':
-                            self.bt[i].config(state='normal')
-            TreeViewGui.FREEZE = False
-            self.spaces()
+                        messagebox.showinfo('TreeViewGui', 'Converting is aborted!')
+                self.text.config(state = DISABLED)
+                for i in self.bt:
+                    if 'label' not in i and 'scrollbar' not in i:
+                        if i == 'entry3':
+                            self.bt[i].config(state='readonly')
+                        elif i == 'entry':
+                            if not self.rb.get():
+                                self.bt[i].config(state='disable')
+                            else:
+                                self.bt[i].config(state='normal')
+                        else:
+                            if i != 'text':
+                                self.bt[i].config(state='normal')
+                TreeViewGui.FREEZE = False
+                self.spaces()
             
     def infobar(self, event = None):
         # Info Bar telling the selected rows in listbox.
@@ -1580,8 +1580,8 @@ class TreeViewGui:
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
-    root = Tk()
-    root.wm_iconbitmap(default = 'TVG.ico')
+    root = Tk()  
+    root.wm_iconbitmap(default = filen('TVG.ico'))
     root.withdraw()
     if 'lastopen.tvg' in os.listdir():
         ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
