@@ -42,7 +42,18 @@
     * **Can change font setting for text and listbox. [No button, only event binding. Control+,]**
     * **Can delete setting back to original. [No button, only event binding. Control+/]**
         * **The size is locked on size 10, to preserve viewing.** 
-    * **And many more.. :joy:**
+    * **~~File Lock~~ has been replace with Editor.** 
+        * **FORMAT:**
+          >**s: => 'space'**  
+          >**p:Format => 'parent'**  
+          >**c1:Editor that write directly. => 'child1' ['c1' to 'c50' represent 'child1' to 'child50']**
+        * **RESULT:**
+          ```TEXT
+          \n
+          Format:
+             Editor that write directly.
+          ```
+* **And many more.. :joy:**
                 
 
 ![TVG](/TVG.png)

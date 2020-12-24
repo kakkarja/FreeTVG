@@ -3,11 +3,13 @@
 
 from tkinter import *
 from tkinter import ttk
+from tkinter import font
 from tkinter import simpledialog, messagebox, filedialog, colorchooser
 from TreeView import TreeView as tv
 import sys
 import os
 import TeleTVG
+import re
 from FileFind import filen
 from datetime import datetime as dt
 
@@ -188,7 +190,7 @@ class TreeViewGui:
         self.button22 = ttk.Button(self.frb1, text = 'Open', command = self.openf)
         self.button22.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button22'] = self.button22        
-        self.button24 = ttk.Button(self.frb1, text = 'Lock File', command = self.lockf)
+        self.button24 = ttk.Button(self.frb1, text = 'Editor', command = self.editor)
         self.button24.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button24'] = self.button24        
         self.button25 = ttk.Button(self.frb1, text = 'Un/Wrap', command = self.wrapped)
@@ -246,7 +248,7 @@ class TreeViewGui:
             self.ft(path = os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'))        
         if 'theme.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
             self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
-        
+            
     def wrapped(self, event = None):
         # Wrap the records so that it is filling the windows.
         # The scrolling horizontal become inactive.
@@ -254,7 +256,7 @@ class TreeViewGui:
         if str(self.text.cget('wrap')) == 'none':
             self.text.config(wrap = WORD)
         else:
-            self.text.config(wrap = NONE)
+            self.text.config(wrap = NONE)            
     
     def converting(self, event =  None):
         # Convert any text that is paste or written in text window.
@@ -264,9 +266,6 @@ class TreeViewGui:
         #      This is the format that will be converted appropriately. With
         #      no spaces after '\n'. And the period is needed for child. => to child1 [2 child]
         #      """
-        
-        import string
-        import re
         
         self.hidcheck()
         if self.unlock:
@@ -440,7 +439,7 @@ class TreeViewGui:
             elif event.keysym == '6':
                 self.createf()
             elif event.keysym == '7':
-                self.lockf()
+                self.editor()
             elif event.keysym == '8':
                 self.converting()
             elif event.keysym == '9':
@@ -512,12 +511,26 @@ class TreeViewGui:
         try:
             if self.checkfile():
                 tvg = tv(self.filename)
-                self.text.config(state = 'normal')                
+                self.text.config(state = 'normal')
                 with open(f'{self.filename}.txt') as file:
                     rd = file.readlines()
                     self.text.delete('1.0', END)
+                    nf = str(self.text.cget('font'))
+                    try:
+                        text_font = font.Font(self.root, font = nf, name = nf, exists=True)
+                    except:
+                        text_font = font.Font(self.root, font = nf, name = nf, exists=False)
+                    g = re.compile(r'\s+')
+                    em = text_font.measure(" ")
                     for r in rd:
-                        self.text.insert(END, r)
+                        gr = g.match(r)
+                        if gr and gr.span()[1] > 1:
+                            if str(gr.span()[1]) not in self.text.tag_names():
+                                bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
+                                self.text.tag_configure(f"{gr.span()[1]}", lmargin1=em, lmargin2=em+bullet_width)
+                            self.text.insert(END, r, f'{gr.span()[1]}')
+                        else:
+                            self.text.insert(END, r)
                 self.text.config(state = 'disable')
                 vals = [f' {k}: {c[0]}' for k, c  in list(tvg.insighttree().items())]
                 self.listb.delete(0,END)
@@ -858,7 +871,6 @@ class TreeViewGui:
     def copas(self, event = None):
         # Paste a row value to Entry for fixing value.
         
-        import re
         self.hidcheck()
         if self.unlock:
             if self.listb.curselection():
@@ -1156,7 +1168,8 @@ class TreeViewGui:
         if f'{self.filename}_hid.json' in os.listdir():
             with open(f'{self.filename}_hid.json') as jfile:
                 rd = dict(json.load(jfile))
-                            
+            g = re.compile(r'\s+')
+            nf = str(self.text.cget('font'))
             if rd['reverse'] is False:
                 self.view()
                 rolrd = [i for i in list(rd.values()) if isinstance(i, list)]
@@ -1167,8 +1180,20 @@ class TreeViewGui:
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
                 showt = [f'{i}\n' for i in showt if i != 0]
+                try:
+                    text_font = font.Font(self.root, font = nf, name = nf, exists=True)
+                except:
+                    text_font = font.Font(self.root, font = nf, name = nf, exists=False)
+                em = text_font.measure(" ")
                 for i in showt:
-                    self.text.insert(END, f'{i}')
+                    gr = g.match(i)
+                    if gr and gr.span()[1] > 1:
+                        if str(gr.span()[1]) not in self.text.tag_names():
+                            bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
+                            self.text.tag_configure(f"{gr.span()[1]}", lmargin1=em, lmargin2=em+bullet_width)
+                        self.text.insert(END, i, f'{gr.span()[1]}')
+                    else:
+                        self.text.insert(END, i)
                 self.text.config(state = 'disable')
                 vals = [f' {k}: {c[0]}' for k, 
                 c  in list(tvg.insighthidden(showt).items())]
@@ -1183,11 +1208,22 @@ class TreeViewGui:
                 for wow, wrow in rolrd:
                     for i in range(wow, wrow+1):
                         ih.append(f'{showt[i]}\n')
-                
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
+                try:
+                    text_font = font.Font(self.root, font = nf, name = nf, exists=True)
+                except:
+                    text_font = font.Font(self.root, font = nf, name = nf, exists=False)
+                em = text_font.measure(" ")
                 for i in ih:
-                    self.text.insert(END, f'{i}')
+                    gr = g.match(i)
+                    if gr and gr.span()[1] > 1:
+                        if str(gr.span()[1]) not in self.text.tag_names():
+                            bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
+                            self.text.tag_configure(f"{gr.span()[1]}", lmargin1=em, lmargin2=em+bullet_width)
+                        self.text.insert(END, i, f'{gr.span()[1]}')
+                    else:
+                        self.text.insert(END, i)
                 self.text.config(state = 'disable')
                 vals = [f' {k}: {c[0]}' for k, 
                 c  in list(tvg.insighthidden(ih).items())]
@@ -1359,8 +1395,6 @@ class TreeViewGui:
     def dattim(self):
         # To insert date and time.
         
-        import re
-        
         if str(self.entry.cget('state')) == 'normal':
             dtt = f'[{dt.isoformat(dt.today().replace(microsecond = 0)).replace("T"," ")}]'
             ck = ['parent', 'child']
@@ -1461,42 +1495,78 @@ class TreeViewGui:
         else:
             messagebox.showinfo('TreeViewGui', 'Create new file is aborted!')
                 
-    def lockf(self):
-        # Lock file as encrypted file.
-        # Also unclock it directly when open with TVG.
-        
-        from ProtectData import ProtectData as ptd
+    def editor(self):
+        # This is direct editor on text window.
+        # FORMAT:
+        # "s:" for 'space'
+        # "p:" for 'parent'
+        # "c1:" - "c50:" for 'child1' to 'child50'
         
         self.hidcheck()
         if self.unlock:
-            if os.path.isfile(f'{self.filename}.txt'):
+            if str(self.text.cget('state')) == 'disabled':
+                self.text.config(state = 'normal')
+                self.text.delete('1.0', END)
+                for i in self.bt:
+                    if 'label' not in i and 'scrollbar' not in i:
+                        if i != 'button24' and i != 'text':
+                            self.bt[i].config(state='disable')
+                TreeViewGui.FREEZE = True
+            else:
                 try:
-                    enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 5, t2 = 7)
-                    ins = f'{enc[0]}'
-                    key = f'{[[j for j in i] for i in enc[1]]}'
-                    with open(f'{self.filename}.protected', 'wb') as encrypt:
-                        encrypt.write(str({key:ins}).encode())
-                    os.remove(f'{self.filename}.txt')
-                    messagebox.showinfo('TreeViewGui', f'{self.filename}.txt is locked!')
-                    self.root.destroy()
-                except Exception as e:
-                    messagebox.showerror('TreeViewGui', f'{e}')
-            elif os.path.isfile(f'{self.filename}.protected'):
-                try:
-                    with open(f'{self.filename}.protected', 'rb') as encrypt:
-                        rd  = eval(encrypt.read().decode('utf-8'))
-                    key = list(rd)[0]
-                    ins = rd[key]
-                    dec = ptd.complek(ins, key =((j for j in i) for i in eval(key)), 
-                                      stat = False, t1 = 5, t2 = 7)
-                    tvg = tv(f'{self.filename}')
-                    tak = [f'{i}\n' for i in dec.split('\n') if i]
-                    wtvg = tvg.insighthidden(tak)
-                    tvg.fileread(wtvg)
+                    if self.text.get('1.0', END)[:-1]:
+                        if self.checkfile():
+                            tvg = tv(self.filename)
+                            p1 = tvg.insighttree()
+                            et = len(p1)-1
+                            ed = self.text.get('1.0', END)[:-1].split('\n')
+                            ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                            p2 = {}
+                            for i in ed:
+                                et += 1
+                                if 's:' in i.lower():
+                                    p2[et] = ('space', '\n')
+                                elif 'p:' in i.lower():
+                                    p2[et] = ('parent', i.partition(':')[2].removeprefix(' '))
+                                elif i.lower().partition(':')[0] in list(ckc):
+                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                            if len(ed) != len(p2):
+                                raise Exception('Not Editable')
+                            tvg.fileread(p1 | p2)
+                        else:
+                            tvg = tv(self.filename)
+                            ed = self.text.get('1.0', END)[:-1].split('\n')
+                            et = -1
+                            ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                            p2 = {}
+                            for i in ed:
+                                et += 1
+                                if 's:' in i.lower():
+                                    p2[et] = ('space', '\n')
+                                elif 'p:' in i.lower():
+                                    p2[et] = ('parent', i.partition(':')[2].removeprefix(' '))
+                                elif i.lower().partition(':')[0] in list(ckc):
+                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                            if len(ed) != len(p2):
+                                raise Exception('Not Editable')
+                            tvg.fileread(p2)
+                    self.text.config(state = DISABLED)
+                    for i in self.bt:
+                        if 'label' not in i and 'scrollbar' not in i:
+                            if i == 'entry3':
+                                self.bt[i].config(state='readonly')
+                            elif i == 'entry':
+                                if not self.rb.get():
+                                    self.bt[i].config(state='disable')
+                                else:
+                                    self.bt[i].config(state='normal')
+                            else:
+                                if i != 'text':
+                                    self.bt[i].config(state='normal')
+                    TreeViewGui.FREEZE = False
                     self.spaces()
-                    os.remove(f'{self.filename}.protected')
-                except Exception as e:
-                    messagebox.showerror('TreeViewGui', f'{e}')
+                except Exception as a:
+                    messagebox.showerror('TreeViewGui', f'{a}')
                     
     def tvgexit(self, event = None):
         if self.checkfile():
@@ -1536,23 +1606,31 @@ class TreeViewGui:
     def clb(self, event, wr = True):
         # Setting font for text and listbox.
         
-        import re
-        
+        ckf = ['10', '11', '12']
         f = None
         if '}' in event:
             n = len(event[:event.find('}')])
             f = re.search(r'\d+', event[event.find('}'):])
-            f = event[:(n + f.span()[0])] + '10' + event[(n+f.span()[1]):]
+            if f.group() in ckf:
+                f = event
+            else:
+                f = event[:(n + f.span()[0])] + '10' + event[(n+f.span()[1]):]
         else:
             f = re.search(r'\d+', event)
-            f = event[:f.span()[0]] + '10' + event[f.span()[1]:]
+            if f.group() in ckf:
+                f = event
+            else:
+                f = event[:f.span()[0]] + '10' + event[f.span()[1]:]
         
         if f:
             self.listb['font'] = f
             self.text['font'] = f
+            for i in self.text.tag_names():
+                self.text.tag_remove(i, '1.0', END)
             if wr:
                 with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
                     ftvg.write(event)
+            self.spaces()
     
     def ft(self, event = None, path = None):
         # Initial starting fonts chooser.
@@ -1606,14 +1684,11 @@ def main():
             os.chdir(f'{filename}_tvg')
         begin = TreeViewGui(root = root, filename = filename)
         begin.root.deiconify()
-        if f'{filename}.protected' in os.listdir():
-            begin.lockf()
+        if f'{filename}_hid.json' in os.listdir():
+            begin.hidform()
+            begin.infobar()
         else:
-            if f'{filename}_hid.json' in os.listdir():
-                begin.hidform()
-                begin.infobar()
-            else:
-                begin.view()
+            begin.view()
         begin.root.mainloop()
     else:
         messagebox.showwarning('File', 'No File Name!')
