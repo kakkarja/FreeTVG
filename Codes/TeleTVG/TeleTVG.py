@@ -8,8 +8,7 @@ from telethon import functions
 from telethon.tl import types
 from tkinter import *
 from tkinter import ttk, messagebox, simpledialog, filedialog
-from datetime import datetime as dt
-from Scheduler import Settimer as stm
+from datetime import datetime as dt, timedelta
 import string
 import asyncio
 import shutil
@@ -98,7 +97,7 @@ class Reminder:
         self.frms = ttk.Frame(self.root)
         self.frms.pack(fill = 'x')
         self.schb = Button(self.frms, text = 'S C H E D U L E R  S E N D  T E L E G R A M', 
-                           command = self.scheduler, font = 'consolas 12 bold', relief = GROOVE)
+                           command = self.runsend, font = 'consolas 12 bold', relief = GROOVE)
         self.schb.pack(padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.frm3 = Frame(self.root)
         self.frm3.pack(fill = 'x')
@@ -206,96 +205,62 @@ class Reminder:
             ask = messagebox.askyesno('ReminderTel', 'Do you want to clear the text?', parent = self.root)
             if ask:
                 self.text.delete('1.0', END)
+                
+    async def runs(self, sch: dict):
+        # Run Scheduler to send Telegram
         
-    def scheduler(self, event = None):
-        # Scheduling Telegram to be sent, using seconds.
-        # - 60 = 1 minute
-        # - 3600 = 1 hour
-        # - 86400 = 1 day
+        smsg = self.text.get('1.0', END)[:-1]
+        gms = int(len(smsg)/4096)
+        async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+            try:
+                await client.connect()
+                if gms == 0:
+                    await client.send_message(self.users[self.entto.get()], smsg, 
+                                              schedule = timedelta(days = sch['days'], 
+                                                                   hours = sch['hours'],
+                                                                   minutes = sch['minutes'],
+                                                                   seconds = sch['seconds']))
+                else:
+                    orm = smsg
+                    while orm:
+                        if len(orm) > 4090:
+                            await client.send_message(self.users[self.entto.get()], orm[:4091],
+                                                      schedule = timedelta(days = sch['days'], 
+                                                                           hours = sch['hours'],
+                                                                           minutes = sch['minutes'],
+                                                                           seconds = sch['seconds']))
+                            orm = orm[4091:]
+                        else:
+                            await client.send_message(self.users[self.entto.get()], orm, 
+                                                      schedule = timedelta(days = sch['days'], 
+                                                                           hours = sch['hours'],
+                                                                           minutes = sch['minutes'],
+                                                                           seconds = sch['seconds']))
+                            orm = None
+                await client.disconnect()
+                ct = timedelta(days = sch['days'], hours = sch['hours'], minutes = sch['minutes'], seconds = sch['seconds'])
+                ct = str(dt.today().replace(microsecond = 0) + ct)
+                tms = f'Message schedule sent at {ct}'
+                messagebox.showinfo('ReminderTel', tms, parent = self.root)
+            except:
+                await client.disconnect()
+                messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}\n\n{msg}', parent = self.root) 
+            
+    def runsend(self):
+        # Asyncio method of calling for running schedulers.
         
         if self.entto.get():
             if self.text.get('1.0', END)[:-1]:
-                try:
-                    schd = {}
-                    ask = stm(days = eval(self.sp1.get()), 
-                              hours = eval(self.sp2.get()), 
-                              minutes = eval(self.sp3.get()), 
-                              seconds = eval(self.sp4.get()),
-                              )
-                    if ask:
-                        tm = int(dt.timestamp(dt.today().replace(microsecond = 0)))
-                        schd['schedule'] = tm + ask.settimer()
-                        schd['to'] = self.entto.get()
-                        schd['text'] = self.text.get('1.0', END)
-                        with open(f'schedule_{tm}', 'wb') as scf:
-                            scf.write(f'{schd}'.encode())
-                        self.seconds = ask.scheduletk()
-                        self.runsend(f'schedule_{tm}')
-                    else:
-                        messagebox.showinfo('ReminderTel', 'Schedule send message aborted!', parent = self.root)
-                except:
-                    messagebox.showinfo('ReminderTel', 'Please give number only!', parent = self.root)
+                stm = dict(days = eval(self.sp1.get()), 
+                           hours = eval(self.sp2.get()), 
+                           minutes = eval(self.sp3.get()), 
+                           seconds = eval(self.sp4.get()),
+                           )        
+                asyncio.get_event_loop().run_until_complete(self.runs(stm))
             else:
                 messagebox.showinfo('ReminderTel', 'Please write message!', parent = self.root)
         else:
-            messagebox.showinfo('ReminderTel', 'Please fill "To"!', parent = self.root)
-                    
-    def schedulerun(self):
-        # Rerun scheduler on the opening app.
-        
-        schedules = [i for i in os.listdir() if 'schedule_' in  i]
-        if schedules:
-            for i in schedules:
-                with open(i, 'rb') as scr:
-                    gtm = eval(scr.read().decode('utf-8'))
-                    gtm = gtm['schedule']
-                    nt = int(dt.timestamp(dt.today().replace(microsecond = 0)))
-                if gtm <= nt:
-                    self.runsend(i)
-                else:
-                    self.seconds = (gtm - nt) * 1000
-                    self.runsend(i)
-            messagebox.showinfo('ReminderTel', 'Schedule has been set previously, now running!', parent = self.root)
-    
-    async def runs(self, filename):
-        # Run Scheduler to send Telegram
-        
-        with open(filename, 'rb') as rsc:
-            sem = eval(rsc.read().decode('utf-8'))
-        if dt.isoformat(dt.fromtimestamp(sem['schedule'])) <= dt.isoformat(dt.today().replace(microsecond=0)):
-            gms = int(len(sem['text'])/4096)
-            async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
-                try:
-                    await client.connect()
-                    if gms == 0:
-                        await client.send_message(self.users[sem['to']], sem['text'])
-                    else:
-                        orm = sem['text']
-                        while orm:
-                            if len(orm) > 4090:
-                                await client.send_message(self.users[sem['to']], orm[:4091])
-                                orm = orm[4091:]
-                            else:
-                                await client.send_message(self.users[sem['to']], orm)
-                                orm = None
-                    await client.disconnect()
-                    os.remove(filename)
-                    self.seconds = None
-                    tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
-                    messagebox.showinfo('ReminderTel', tms, parent = self.root)
-                except:
-                    await client.disconnect()
-                    os.remove(filename)
-                    self.seconds = None
-                    msg = f'This file {filename} is deleted as well!'
-                    messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}\n\n{msg}', parent = self.root)
-        else:
-            self.root.after(self.seconds, self.runsend, filename)        
-            
-    def runsend(self, filename):
-        # Asyncio method of calling for running schedulers.
-        
-        asyncio.get_event_loop().run_until_complete(self.runs(filename))
+            messagebox.showinfo('ReminderTel', 'Please fill "To"!', parent = self.root)            
                 
     async def sent(self, event =  None):
         # Sending Telegram as Reminder to anyone.
@@ -403,7 +368,7 @@ class Reminder:
                 await client.disconnect()
             except:
                 await client.disconnect()
-                messagebox.showerror('TeleTVG', f'{sys.exc_info()[1]}')
+                messagebox.showerror('TeleTVG', f'{sys.exc_info()[1]}', parent = self.root)
                     
     def gf(self):
         # Starting running asyncio get file.
@@ -549,15 +514,15 @@ class Reminder:
                     shutil.move(f'{d.folder}.json', mfold)
                 elif d.folder:
                     if f'{d.folder}_group' in os.listdir(dest):
-                        ask = messagebox.askyesno('TeleTVG', 'Do you want to delete this group?')
+                        ask = messagebox.askyesno('TeleTVG', 'Do you want to delete this group?', parent = self.root)
                         if ask:
                             shutil.rmtree(mfold)
                         else:
-                            messagebox.showinfo('TeleTVG', 'Deletion aborted!')
+                            messagebox.showinfo('TeleTVG', 'Deletion aborted!', parent = self.root)
                     else:
-                        messagebox.showinfo('TeleTVG', 'Not created yet!')
+                        messagebox.showinfo('TeleTVG', 'Not created yet!', parent = self.root)
                 else:
-                    messagebox.showinfo('TeleTVG', 'Please create folder first!')
+                    messagebox.showinfo('TeleTVG', 'Please create folder first!', parent = self.root)
                     
     async def mulsend(self, sen):
         # Asyncio module of sending multiple.
@@ -618,8 +583,8 @@ class Reminder:
                         sen = [sel[int(i)] for i in rd[d.result.rpartition("_")[0]]]
                         asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
                 else:
-                    messagebox.showinfo('TeleTVG', 'No message to send?')
-                
+                    messagebox.showinfo('TeleTVG', 'No message to send?', parent = self.root)
+                    
 def main(stat, path, message):
     # Start app.
     # Please create encryption for app_id and app_hash for security.
@@ -671,7 +636,6 @@ def main(stat, path, message):
                 try:
                     asyncio.get_event_loop().run_until_complete(begin.acc())
                     asyncio.get_event_loop().run_until_complete(begin.filcomb())
-                    begin.schedulerun()
                     begin.entto.focus_force()
                     begin.text.insert(END, message)
                     begin.root.mainloop()
