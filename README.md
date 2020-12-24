@@ -56,7 +56,8 @@
 * **And many more.. :joy:**
                 
 
-![TVG](/TVG.png)
+![TVG2](/TVG2.png)
+![TVG1](/TVG1.png)
 ![TeleTVG](/TeleTVG.png)
 ![ColorTVG](/ColorTVG.png)
 ![FontTVG](/FontTVG.png)
