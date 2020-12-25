@@ -557,6 +557,7 @@ class TreeViewGui:
                 if f'{self.filename}.txt' in os.listdir():
                     if f'{self.filename}_hid.json' not in os.listdir():
                         self.spaces()
+                        self.infobar()
                     else:
                         self.hidform()
                         self.infobar()
@@ -1535,7 +1536,7 @@ class TreeViewGui:
                             tvg.fileread(p1 | p2)
                         else:
                             tvg = tv(self.filename)
-                            ed = self.text.get('1.0', END)[:-1].split('\n')
+                            ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
                             et = -1
                             ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
                             p2 = {}
@@ -1630,7 +1631,8 @@ class TreeViewGui:
             if wr:
                 with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
                     ftvg.write(event)
-            self.spaces()
+            if f'{self.filename}_hid.json' not in os.listdir():
+                self.spaces()
     
     def ft(self, event = None, path = None):
         # Initial starting fonts chooser.
@@ -1655,6 +1657,7 @@ class TreeViewGui:
                 messagebox.showinfo('TreeViewGui', 'All set back to original setting!')
             else:
                 messagebox.showinfo('TreeViewGui', 'None change yet!')
+                
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
@@ -1662,6 +1665,7 @@ def main():
     root.wm_iconbitmap(default = filen('TVG.ico'))
     root.withdraw()
     if 'lastopen.tvg' in os.listdir():
+        root.update()
         ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
         if ask:
             with open('lastopen.tvg', 'rb') as lop:

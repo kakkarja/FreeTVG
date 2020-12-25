@@ -155,7 +155,7 @@ class Reminder:
                                 self.entto.current(sorted(list(self.users)).index(name))
                     self.entto.icursor(index = idx)
         except Exception as e:
-            messagebox.showwarning('ReminderTel', f'{e}', parent = self.root)
+            messagebox.showwarning('TeleTVG', f'{e}', parent = self.root)
         
     def emj(self):
         # Emoji window.
@@ -181,7 +181,7 @@ class Reminder:
         try:
             p = self.root.clipboard_get()
             if p:
-                ask = messagebox.askyesno('ReminderTel', 'Do you want to paste text?', parent = self.root)
+                ask = messagebox.askyesno('TeleTVG', 'Do you want to paste text?', parent = self.root)
                 if ask:
                     self.text.delete('1.0', END)
                     self.text.insert(END, p)
@@ -196,13 +196,13 @@ class Reminder:
             self.root.clipboard_clear()
             self.root.clipboard_append(self.text.get('1.0', END)[:-1])
             self.text.delete('1.0', END)
-            messagebox.showinfo('ReminderTel', 'The text has been copied!', parent = self.root)
+            messagebox.showinfo('TeleTVG', 'The text has been copied!', parent = self.root)
     
     def clear(self, event = None):
         # Clear screen.
         
         if self.text.get('1.0', END)[:-1]:
-            ask = messagebox.askyesno('ReminderTel', 'Do you want to clear the text?', parent = self.root)
+            ask = messagebox.askyesno('TeleTVG', 'Do you want to clear the text?', parent = self.root)
             if ask:
                 self.text.delete('1.0', END)
                 
@@ -241,10 +241,10 @@ class Reminder:
                 ct = timedelta(days = sch['days'], hours = sch['hours'], minutes = sch['minutes'], seconds = sch['seconds'])
                 ct = str(dt.today().replace(microsecond = 0) + ct)
                 tms = f'Message schedule sent at {ct}'
-                messagebox.showinfo('ReminderTel', tms, parent = self.root)
+                messagebox.showinfo('TeleTVG', tms, parent = self.root)
             except:
                 await client.disconnect()
-                messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}\n\n{msg}', parent = self.root) 
+                messagebox.showinfo('TeleTVG', f'\n{sys.exc_info()}\n\n{msg}', parent = self.root) 
             
     def runsend(self):
         # Asyncio method of calling for running schedulers.
@@ -258,9 +258,9 @@ class Reminder:
                            )        
                 asyncio.get_event_loop().run_until_complete(self.runs(stm))
             else:
-                messagebox.showinfo('ReminderTel', 'Please write message!', parent = self.root)
+                messagebox.showinfo('TeleTVG', 'Please write message!', parent = self.root)
         else:
-            messagebox.showinfo('ReminderTel', 'Please fill "To"!', parent = self.root)            
+            messagebox.showinfo('TeleTVG', 'Please fill "To"!', parent = self.root)            
                 
     async def sent(self, event =  None):
         # Sending Telegram as Reminder to anyone.
@@ -282,9 +282,9 @@ class Reminder:
                             orm = None
                 await client.disconnect()
             tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
-            messagebox.showinfo('ReminderTel', tms, parent = self.root)
+            messagebox.showinfo('TeleTVG', tms, parent = self.root)
         except:
-            messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}', parent = self.root)
+            messagebox.showinfo('TeleTVG', f'\n{sys.exc_info()}', parent = self.root)
             await client.disconnect()
             
     def sentem(self):
@@ -294,35 +294,35 @@ class Reminder:
             if self.text.get('1.0', END)[:-1]:
                 asyncio.get_event_loop().run_until_complete(self.sent())
             else:
-                messagebox.showinfo('ReminderTel', 'Please write message!', parent = self.root)
+                messagebox.showinfo('TeleTVG', 'Please write message!', parent = self.root)
         else:
-            messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)            
+            messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)            
             
-    async def sentfile(self):
+    async def sentfile(self, filename: str):
         # Sending file to user.
         
         try:
-            ask = filedialog.askopenfilename(filetypes = [("Encryption file","*_protected.txt")], parent = self.root)
-            if ask:
-                async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
-                    await client.connect()
-                    await client.send_file(self.users[self.entto.get()], ask, caption = 'TreeViewGui')
-                    await client.disconnect()
-                tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
-                messagebox.showinfo('ReminderTel', tms, parent = self.root)
-            else:
-                messagebox.showinfo('ReminderTel', 'Send file is aborted!', parent = self.root)
+            async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+                await client.connect()
+                await client.send_file(self.users[self.entto.get()], filename, caption = 'TreeViewGui')
+                await client.disconnect()
+            tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
+            messagebox.showinfo('TeleTVG', tms, parent = self.root)
         except:
-            messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}', parent = self.root)
+            messagebox.showinfo('TeleTVG', f'\n{sys.exc_info()}', parent = self.root)
             await client.disconnect()
     
     def sf(self):
         # Sending file using asyncio call
         
         if self.entto.get():
-            asyncio.get_event_loop().run_until_complete(self.sentfile())
+            ask = filedialog.askopenfilename(filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
+            if ask:
+                asyncio.get_event_loop().run_until_complete(self.sentfile(ask))
+            else:
+                messagebox.showinfo('TeleTVG', 'Send file is aborted!', parent = self.root)            
         else:
-            messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)        
+            messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)        
     
     async def rep(self):
         # Getting reply from a user [get the last 5 messages]
@@ -349,7 +349,7 @@ class Reminder:
         if self.entto.get():
             asyncio.get_event_loop().run_until_complete(self.rep())
         else:
-            messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)
+            messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)
             
     async def getfile(self):
         # Getting file from a user [get the last 5 messages]
@@ -379,7 +379,7 @@ class Reminder:
         if self.entto.get():
             asyncio.get_event_loop().run_until_complete(self.getfile())
         else:
-            messagebox.showinfo('ReminderTel', 'Please fill "To" first!', parent = self.root)        
+            messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)        
             
     async def filcomb(self):
         # Intitiate filling contacts and languages.
@@ -485,14 +485,22 @@ class Reminder:
                 
                 def body(self, master):
                     self.title('Select users')
-                    Label(master, text="Users: ").grid(row = 0, column = 0, sticky = E)
-                    self.e1 = Listbox(master, selectmode = MULTIPLE)
+                    fr1 = ttk.Frame(master)
+                    fr1.pack()
+                    Label(fr1, text="Users: ").pack(side = LEFT)
+                    self.e1 = Listbox(fr1, selectmode = MULTIPLE)
                     for i in users:
                         self.e1.insert(END, i)
-                    self.e1.grid(row=0, column=1)
-                    Label(master, text = 'Folder name:').grid(row = 1, column = 0, sticky = E)
-                    self.e2 = Entry(master)
-                    self.e2.grid(row = 1, column = 1)
+                    self.e1.pack(side = LEFT)
+                    self.sce1 = ttk.Scrollbar(fr1, orient = 'vertical')
+                    self.sce1.pack(side = RIGHT, fill = 'y')
+                    self.sce1.config(command = self.e1.yview)
+                    self.e1.config(yscrollcommand = self.sce1.set)
+                    fr2 = ttk.Frame(master)
+                    fr2.pack(anchor = W)
+                    Label(fr2, text = 'Folder:').grid(row = 0, column = 0, sticky = W)
+                    self.e2 = Entry(fr2)
+                    self.e2.grid(row = 0, column = 1)
             
                 def apply(self):
                     self.result = self.e1.curselection()
@@ -545,9 +553,9 @@ class Reminder:
                                 orm = None
                 await client.disconnect()
             tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
-            messagebox.showinfo('ReminderTel', tms, parent = self.root)
+            messagebox.showinfo('TeleTVG', tms, parent = self.root)
         except:
-            messagebox.showinfo('ReminderTel', f'\n{sys.exc_info()}', parent = self.root)
+            messagebox.showinfo('TeleTVG', f'\n{sys.exc_info()}', parent = self.root)
             await client.disconnect()        
         
     
@@ -615,22 +623,22 @@ def main(stat, path, message):
             api_id = cp.readcpd("api_id")
             api_hash = cp.readcpd("api_hash")            
             if 'ReminderTel.session' not in os.listdir():
-                ask = simpledialog.askstring('ReminderTel', 'Phone number:', show = '●', parent = begin.root)
-                psd = simpledialog.askstring('ReminderTel', 'Password:', show = '●', parent = begin.root)
+                ask = simpledialog.askstring('TeleTVG', 'Phone number:', show = '●', parent = begin.root)
+                psd = simpledialog.askstring('TeleTVG', 'Password:', show = '●', parent = begin.root)
                 if ask:
                     try:
                         if psd:
-                            client = TelegramClient('ReminderTel', api_id, api_hash).start(ask, psd, code_callback = lambda: simpledialog.askstring('ReminderTel', 'code:', show = '⋆', parent = begin.root))
+                            client = TelegramClient('ReminderTel', api_id, api_hash).start(ask, psd, code_callback = lambda: simpledialog.askstring('TeleTVG', 'code:', show = '⋆', parent = begin.root))
                         else:
-                            client = TelegramClient('ReminderTel', api_id, api_hash).start(ask, code_callback = lambda: simpledialog.askstring('ReminderTel', 'code:', show = '⋆', parent = begin.root))
+                            client = TelegramClient('ReminderTel', api_id, api_hash).start(ask, code_callback = lambda: simpledialog.askstring('TeleTVG', 'code:', show = '⋆', parent = begin.root))
                         client.disconnect()
-                        messagebox.showinfo('ReminderTel', 'Please Restart the app!')
+                        messagebox.showinfo('TeleTVG', 'Please Restart the app!')
                         begin.winexit()
                     except:
-                        messagebox.showinfo('ReminderTel', sys.exc_info())
+                        messagebox.showinfo('TeleTVG', sys.exc_info())
                         begin.winexit()
                 else:
-                    messagebox.showinfo('ReminderTel', 'Please log in first!')
+                    messagebox.showinfo('TeleTVG', 'Please log in first!')
                     begin.winexit()
             else:
                 try:
