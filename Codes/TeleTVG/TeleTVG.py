@@ -69,7 +69,10 @@ class Reminder:
         self.buc.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)      
         self.bsel = Button(self.frm2, text = 'M U L T I', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.multiselect)
-        self.bsel.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
+        self.bsel.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
+        self.bedm = Button(self.frm2, text = 'E D  M U L T I', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.editmu)
+        self.bedm.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
         self.frll = Frame(self.root)
         self.frll.pack(fill = 'x', padx = 2)
         self.frsp = ttk.Frame(self.root)
@@ -474,7 +477,7 @@ class Reminder:
                     self.chacc = d.result
                     asyncio.get_event_loop().run_until_complete(self.accs())
                     asyncio.get_event_loop().run_until_complete(self.filcomb())
-    
+                    
     def multiselect(self, event = None):
         # Select multiple recepients and save them under a group.
         
@@ -503,7 +506,7 @@ class Reminder:
                     self.e2.grid(row = 0, column = 1)
             
                 def apply(self):
-                    self.result = self.e1.curselection()
+                    self.result = [users[int(i)] for i in self.e1.curselection()]
                     self.folder = self.e2.get()
                                 
             d = MyDialog(self.root)
@@ -512,14 +515,19 @@ class Reminder:
                 dest = os.path.join('Telacc', self.chacc)
                 mfold = os.path.join(dest, f'{d.folder}_group')            
                 if d.result and d.folder:
-                    with open(f'{d.folder}.json', 'w') as fs:
-                        mkc = {d.folder: d.result}
-                        json.dump(mkc, fs)                
                     if f'{d.folder}_group' not in os.listdir(dest):
                         os.mkdir(mfold)
+                        with open(os.path.join(mfold,f'{d.folder}.json'), 'w') as fs:
+                            mkc = {d.folder: d.result}
+                            json.dump(mkc, fs)
                     else:
-                        os.remove(os.path.join(mfold, f'{d.folder}.json'))
-                    shutil.move(f'{d.folder}.json', mfold)
+                        with open(os.path.join(mfold,f'{d.folder}.json')) as fs:
+                            rd = dict(json.load(fs))
+                            ou = rd[d.folder]
+                            ou.extend(d.result)
+                            rd[d.folder] = ou
+                        with open(os.path.join(mfold,f'{d.folder}.json'), 'w') as wj:
+                            json.dump(rd, wj)   
                 elif d.folder:
                     if f'{d.folder}_group' in os.listdir(dest):
                         ask = messagebox.askyesno('TeleTVG', 'Do you want to delete this group?', parent = self.root)
@@ -531,6 +539,66 @@ class Reminder:
                         messagebox.showinfo('TeleTVG', 'Not created yet!', parent = self.root)
                 else:
                     messagebox.showinfo('TeleTVG', 'Please create folder first!', parent = self.root)
+                    
+    def editmu(self):
+        # To get Users in group for edit. [deleting users in group]
+        
+        if self.lock is False:        
+            groups = [ i  for i in os.listdir(os.path.join('Telacc', self.chacc)) if '_group' in i ]
+            if groups:
+                self.lock = True
+                class MyDialog(simpledialog.Dialog):
+                
+                    def body(self, master):
+                        self.title('Choose Group')
+                        Label(master, text="Group: ").grid(row=0, column = 0, sticky = E)
+                        self.e1 = ttk.Combobox(master, state = 'readonly')
+                        self.e1['values'] = groups
+                        self.e1.current(0)
+                        self.e1.grid(row=0, column=1)
+                        return self.e1
+                
+                    def apply(self):
+                        self.result = self.e1.get()
+                                    
+                d = MyDialog(self.root)
+                if d.result:
+                    path = os.path.join('Telacc', self.chacc, d.result,
+                                        f'{d.result.partition("_")[0]}.json')
+                    with open(path) as rd:
+                        edt = dict(json.load(rd))
+                        users = sorted(edt[d.result.partition("_")[0]])
+                    class UserDialog(simpledialog.Dialog):
+                        
+                        def body(self, master):
+                            self.title('Delete users')
+                            fr1 = ttk.Frame(master)
+                            fr1.pack()
+                            Label(fr1, text="Users: ").pack(side = LEFT)
+                            self.e1 = Listbox(fr1, selectmode = MULTIPLE)
+                            for i in users:
+                                self.e1.insert(END, i)
+                            self.e1.pack(side = LEFT)
+                            self.sce1 = ttk.Scrollbar(fr1, orient = 'vertical')
+                            self.sce1.pack(side = RIGHT, fill = 'y')
+                            self.sce1.config(command = self.e1.yview)
+                            self.e1.config(yscrollcommand = self.sce1.set)
+                    
+                        def apply(self):
+                            self.result = [users[int(i)] for i in self.e1.curselection()]
+                                        
+                    u = UserDialog(self.root)
+                    self.lock = False
+                    if u.result:
+                        dus = [i for i in users if i not in u.result]
+                        if dus:
+                            edt[d.result.partition("_")[0]] = dus
+                            with open(path, 'w') as wu:
+                                json.dump(edt, wu)
+                        else:
+                            shutil.rmtree(os.path.join('Telacc', self.chacc, d.result))
+                else:
+                    self.lock = False
                     
     async def mulsend(self, sen):
         # Asyncio module of sending multiple.
@@ -566,7 +634,7 @@ class Reminder:
             groups = [ i  for i in os.listdir(os.path.join('Telacc', self.chacc)) if '_group' in i ]
             if groups:
                 if self.text.get('1.0', END)[:-1]:
-                    sel = sorted(list(self.users))
+                    sel = list(self.users)
                     self.lock = True
                     class MyDialog(simpledialog.Dialog):
                     
@@ -588,8 +656,11 @@ class Reminder:
                         tkd = os.path.join('Telacc', self.chacc, d.result, f'{d.result.rpartition("_")[0]}.json')
                         with open(tkd, 'r') as us:
                             rd = dict(json.load(us))
-                        sen = [sel[int(i)] for i in rd[d.result.rpartition("_")[0]]]
-                        asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
+                        sen = [i for i in rd[d.result.rpartition("_")[0]] if i in sel]
+                        if sen:
+                            asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
+                        else:
+                            messagebox.showinfo('TeleTVG', 'This group is no longer exist, please delete it!', parent = self.root)
                 else:
                     messagebox.showinfo('TeleTVG', 'No message to send?', parent = self.root)
                     
