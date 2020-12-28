@@ -40,8 +40,10 @@
         * **You have to create Telegram api "https://core.telegram.org/api" to use this incredible function.**
     * **Can choose color for setting the text and listbox background color. [No button, only event binding. Control+.]**
     * **Can change font setting for text and listbox. [No button, only event binding. Control+,]**
+        * **The size is ~~locked~~ on size 10 to 12, to preserve viewing.**
+        * **TAKE NOTICE:**
+            * **Not all fonts will appear nicely if change the size.**
     * **Can delete setting back to original. [No button, only event binding. Control+/]**
-        * **The size is locked on size 10, to preserve viewing.** 
     * **~~File Lock~~ has been replace with Editor.** 
         * **FORMAT:**
           >**s: => 'space'**  
@@ -53,12 +55,27 @@
           Format:
              Editor that write directly.
           ```
+    * **~~Convert~~ has been deleted and replace with <u>TeleCalc</u>.**
+        * **Convert now become part of Editor.[2 functions in one]**
+    * **Can do calculation and get latest exchange rate.**
+        * **Built with https://fixer.io api.**
+        * **Fixer wrapper for python is used in this project.**
+        * **Get free api in https://fixer.io**
+        * **Exchange Rate from a currency to all currency in library [157 currencies].**
+        * **For free api only can convert the base currency ["EUR"].**
+        * **Convert amount of currency to another currency.**
+            * **Only available for paid api.**
+    * **Can transfer calculation or rates/convert, back to TVG for outline note record.**
+        * **This convinient for Send Note.**
+    * **Wrap mode:**
+        * **Make long sentences appear nice in childs.**
 * **And many more.. :joy:**
                 
-
+![TVG](/TVG.png)
 ![TVG2](/TVG2.png)
 ![TVG1](/TVG1.png)
 ![TeleTVG](/TeleTVG.png)
+![TeleCalc](/TeleCalc.png)
 ![ColorTVG](/ColorTVG.png)
 ![FontTVG](/FontTVG.png)
 ![SavedPDF](/SavedPDF.png)
@@ -75,7 +92,7 @@
 :white_check_mark: **This can be use in console mode**
 
 * **Example write a parent for first time:**
-    ```python
+    ```PYTHON
     from TreeView import TreeView
     w = 'Amazing Grace'
     tv = TreeView('testtv')
@@ -84,18 +101,18 @@
     ```
     * **Result:**
     
-        ```python
+        ```TEXT
         Amazing Grace:
         ```
         
 * **Example write childs:**
-    ```python
+    ```PYTHON
     for i in range(5):
         tv.quickchild(w, child = f'child{i}')
     tv.readtree()
     ```
     * **Result:**
-        ```python
+        ```TEXT
         Amazing Grace:
         
             -Amazing Grace
@@ -107,13 +124,13 @@
                         -Amazing Grace
         ```
 * **Example edit:**
-    ```python
+    ```PYTHON
     tv.edittree('Amazing Grace, how sweet the sound')
     tv.edittree('Mantaaaaaaap!', row = 4, child = 'child2')
     tv.readtree()
     ```
     * **Result:**
-        ```python
+        ```TEXT
         Amazing Grace, how sweet the sound:
         
             -Amazing Grace
@@ -125,7 +142,7 @@
                 -Mantaaaaaaap!
         ```
 * **Example add parent childs and deleting:**
-    ```python
+    ```PYTHON
     tv.addparent('Wow good job')
     tv.edittree('Wow good job buddy', row = 6)
     tv.quickchild('Totally awesome', child = 'child1')
@@ -135,7 +152,7 @@
     tv.readtree()
     ```
     * **Result:**
-        ```python
+        ```TEXT
         Amazing Grace, how sweet the sound:
         
             -Amazing Grace
@@ -153,14 +170,14 @@
             -Thank You
         ```
 * **Example insert, move tree position and move child position:**
-    ```python
+    ```PYTHON
     tv.insertrow('God bless you', row = 8, child = 'child1' )
     tv.movetree(4, 6)
     tv.movechild(6, child = 'child1')
     tv.readtree()
     ```
     * **Result:**
-        ```python
+        ```TEXT
         Amazing Grace, how sweet the sound:
         
             -Amazing Grace
@@ -180,12 +197,12 @@
             -Thank You
         ```
 * **Example insighttree:**
-    ```python
+    ```PYTHON
     from pprint import pprint
     pprint(tv.insighttree())
     ```
     * **Result:**
-        ```python
+        ```TEXT
         {0: ('parent', 'Amazing Grace, how sweet the sound:\n'),
          1: ('child1', '-Amazing Grace\n'),
          2: ('child2', '-Amazing Grace\n'),

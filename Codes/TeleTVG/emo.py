@@ -33,15 +33,16 @@ class Emo:
         self.fr.pack(fill = 'both')
         self.lbe = Listbox(self.fr, font = '-*-Segoe-UI-Emoji-*--*-300-*', 
                            width = 5, height = 10 , 
-                           justify ='center', bg = 'light gray', 
+                           justify ='center', bg = 'khaki', 
+                           selectbackground = 'teal', selectforeground = 'gold',
                            exportselection = False, selectmode = 'multiple')
-        self.lbe.pack(fill = 'x', expand = 1)
+        self.lbe.pack(fill = 'x', expand = 1, padx = 3, pady = (2, 0))
         with open('emoj.txt') as emr:
             a  = [chr(i) for i in eval(emr.read())]
         for i in a:
             self.lbe.insert(END,i)
         self.lbe.bind('<ButtonRelease>', self.updatesel)
-        self.sp =  IntVar()
+        self.sp =  IntVar(self.root)
         self.scl = ttk.Scale(self.fr, from_ = 0, to = len(a)-1, variable = self.sp, command = self.sclupt)
         self.scl.pack()
         self.setscl = (0, len(a)-1)
@@ -137,13 +138,13 @@ class Emo:
             del lj
             del gc
         else:
-            messagebox.showinfo('Emo', 'Nothing selected yet!')
+            messagebox.showinfo('Emo', 'Nothing selected yet!', parent = self.root)
     
     def mark(self):
         # Saving emoji indexes using json database.
         
         if self.sel:
-            nm = simpledialog.askstring('Emo', 'Name your marking: [if name is exist, will overwrite!]')
+            nm = simpledialog.askstring('Emo', 'Name your marking: [if name is exist, will overwrite!]', parent = self.root)
             if nm:            
                 if 'marking.json' in os.listdir():
                     mrk = db('marking')
@@ -160,9 +161,9 @@ class Emo:
                     self.sel = []
                     self.upt = tuple()
             else:
-                messagebox.showinfo('Emo', 'Adding mark is aborted!')
+                messagebox.showinfo('Emo', 'Adding mark is aborted!', parent = self.root)
         else:
-            messagebox.showinfo('Emo', 'Nothing selected yet!')
+            messagebox.showinfo('Emo', 'Nothing selected yet!', parent = self.root)
                 
     def choind(self):
         # Choose saved marking and directly copied.
@@ -192,9 +193,9 @@ class Emo:
                 self.root.clipboard_append(cope)
                 del cope
                 del d.result
-                messagebox.showinfo('Emo', 'Copied!')
+                messagebox.showinfo('Emo', 'Copied!', parent = self.root)
         else:
-            messagebox.showinfo('Emo', 'No database, please save some first!')
+            messagebox.showinfo('Emo', 'No database, please save some first!', parent = self.root)
             
     def delwin(self, event = None):
         # Exit emoji window.

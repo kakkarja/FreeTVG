@@ -8,6 +8,7 @@ from tkinter import simpledialog, messagebox, filedialog, colorchooser
 from TreeView import TreeView as tv
 import sys
 import os
+import TeleCalc
 import TeleTVG
 import re
 from FileFind import filen
@@ -72,6 +73,7 @@ class TreeViewGui:
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
+        self.store = None
         
         # 1st frame. 
         # Frame for label and Entry.
@@ -149,7 +151,7 @@ class TreeViewGui:
         self.button23 = ttk.Button(self.bframe, text = 'Create file', command = self.createf)
         self.button23.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button23'] = self.button23
-        self.button26 = ttk.Button(self.bframe, text = 'Convert', command = self.converting)
+        self.button26 = ttk.Button(self.bframe, text = 'Calculator', command = self.calc)
         self.button26.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button26'] = self.button26        
         
@@ -267,40 +269,22 @@ class TreeViewGui:
         #      no spaces after '\n'. And the period is needed for child. => to child1 [2 child]
         #      """
         
-        self.hidcheck()
-        if self.unlock:
-            if str(self.text.cget('state')) == 'disabled':
-                self.text.config(state = 'normal')
-                self.text.delete('1.0', END)
-                for i in self.bt:
-                    if 'label' not in i and 'scrollbar' not in i:
-                        if i != 'button26' and i != 'text':
-                            self.bt[i].config(state='disable')
-                TreeViewGui.FREEZE = True
-            else:
-                if self.text.get('1.0', END)[:-1]:
-                    fn = str(self.root.title())
-                    fn = fn[fn.rfind('\\')+1:]
-                    ask = messagebox.askyesno('TreeViewGui', 
-                                              f'Do yout want to convert to this file {fn}?')
-                    if ask:
-                        gt = self.text.get('1.0', END)[:-1]
-                        keys = [k for k in gt.split('\n') if k and '.' not in k]
-                        x = re.compile(r'.*?[\.|\!|\?]')
-                        values = [[w.removeprefix(' ') for w in x.findall(v)] for v in gt.split('\n') if '.' in v]
-                        conv = dict(zip(keys, values))
-                        tvg = tv(self.filename)
-                        if conv:
-                            for i in conv:
-                                if self.checkfile():
-                                    tvg.addparent(i)
-                                else:
-                                    tvg.writetree(i)
-                                for j in conv[i]:
-                                    if j:
-                                        tvg.quickchild(j, 'child1')
+        if self.text.get('1.0', END)[:-1]:
+            gt = self.text.get('1.0', END)[:-1]
+            keys = [k for k in gt.split('\n') if k and '.' not in k]
+            x = re.compile(r'.*?[\.|\!|\?]')
+            values = [[w.removeprefix(' ') for w in x.findall(v)] for v in gt.split('\n') if '.' in v]
+            conv = dict(zip(keys, values))
+            tvg = tv(self.filename)
+            if conv and len(keys) == len (values):
+                for i in conv:
+                    if self.checkfile():
+                        tvg.addparent(i)
                     else:
-                        messagebox.showinfo('TreeViewGui', 'Converting is aborted!')
+                        tvg.writetree(i)
+                    for j in conv[i]:
+                        if j:
+                            tvg.quickchild(j, 'child1')
                 self.text.config(state = DISABLED)
                 for i in self.bt:
                     if 'label' not in i and 'scrollbar' not in i:
@@ -316,6 +300,8 @@ class TreeViewGui:
                                 self.bt[i].config(state='normal')
                 TreeViewGui.FREEZE = False
                 self.spaces()
+            else:
+                messagebox.showinfo('TreeViewGui', 'Unable to convert!')
             
     def infobar(self, event = None):
         # Info Bar telling the selected rows in listbox.
@@ -441,7 +427,7 @@ class TreeViewGui:
             elif event.keysym == '7':
                 self.editor()
             elif event.keysym == '8':
-                self.converting()
+                self.calc()
             elif event.keysym == '9':
                 self.wrapped()
                 
@@ -908,7 +894,7 @@ class TreeViewGui:
                             gcs = [int(i) for i in self.listb.curselection()]
                             ask = simpledialog.askinteger('TreeViewGui', 
                                                           f'Move to which row? choose between 0 to {len(ins)-1} rows')
-                            if ask < len(ins):
+                            if ask is not None and ask < len(ins):
                                 deci = messagebox.askyesno('TreeViewGui', '"Yes" to MOVE to, "No" to COPY to')
                                 if deci:
                                     with open(f'{self.filename}.txt') as file:
@@ -985,7 +971,8 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
-                                messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
+                                if ask:
+                                    messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
                         else:
                             for i in self.bt:
                                 if 'label' not in i and 'scrollbar' not in i:
@@ -1342,16 +1329,31 @@ class TreeViewGui:
                 self.spaces()
                 messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
             
+    def free(self):
+        if TreeViewGui.FREEZE is False:
+            TreeViewGui.FREEZE = True
+        else:
+            TreeViewGui.FREEZE = False
+    
     def sendtel(self):
         # This is the sending note with Telethon [Telegram api wrapper].
         
         ori = os.getcwd()
-        os.chdir(os.getcwd()[:os.getcwd().rfind('\\')])
+        os.chdir(os.getcwd().rpartition('\\')[0])
         if self.text.get('1.0', END)[:-1]:
-            TeleTVG.main(self.root, ori, self.text.get('1.0', END)[:-1])
+            self.free()
+            TeleTVG.main(self, ori, self.text.get('1.0', END)[:-1]) 
         else:
             os.chdir(ori)
             messagebox.showinfo('TreeViewGui', 'Nothing to be sent!')
+            
+    def calc(self):
+        # Calling TeleCalc
+        
+        ori = os.getcwd()
+        os.chdir(os.getcwd().rpartition('\\')[0])
+        self.free()
+        TeleCalc.main(self, ori)        
             
     def lookup(self):
         # To lookup word on row.
@@ -1513,59 +1515,82 @@ class TreeViewGui:
                         if i != 'button24' and i != 'text':
                             self.bt[i].config(state='disable')
                 TreeViewGui.FREEZE = True
+                if self.store:
+                    self.text.insert(END, self.store)
+                    self.store = None
             else:
                 try:
                     if self.text.get('1.0', END)[:-1]:
-                        if self.checkfile():
-                            tvg = tv(self.filename)
-                            p1 = tvg.insighttree()
-                            et = len(p1)-1
-                            ed = self.text.get('1.0', END)[:-1].split('\n')
-                            ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                            p2 = {}
-                            for i in ed:
-                                et += 1
-                                if 's:' in i.lower():
-                                    p2[et] = ('space', '\n')
-                                elif 'p:' in i.lower():
-                                    p2[et] = ('parent', i.partition(':')[2].removeprefix(' '))
-                                elif i.lower().partition(':')[0] in list(ckc):
-                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
-                            if len(ed) != len(p2):
-                                raise Exception('Not Editable')
-                            tvg.fileread(p1 | p2)
-                        else:
-                            tvg = tv(self.filename)
-                            ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                            et = -1
-                            ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                            p2 = {}
-                            for i in ed:
-                                et += 1
-                                if 's:' in i.lower():
-                                    p2[et] = ('space', '\n')
-                                elif 'p:' in i.lower():
-                                    p2[et] = ('parent', i.partition(':')[2].removeprefix(' '))
-                                elif i.lower().partition(':')[0] in list(ckc):
-                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
-                            if len(ed) != len(p2):
-                                raise Exception('Not Editable')
-                            tvg.fileread(p2)
-                    self.text.config(state = DISABLED)
-                    for i in self.bt:
-                        if 'label' not in i and 'scrollbar' not in i:
-                            if i == 'entry3':
-                                self.bt[i].config(state='readonly')
-                            elif i == 'entry':
-                                if not self.rb.get():
-                                    self.bt[i].config(state='disable')
-                                else:
-                                    self.bt[i].config(state='normal')
+                        ask = messagebox.askyesno('TreeViewGui', 'Do you want to convert[y] or Edit[n]?')
+                        if ask:
+                            self.converting()
+                        else:                        
+                            if self.checkfile():
+                                tvg = tv(self.filename)
+                                p1 = tvg.insighttree()
+                                et = len(p1)-1
+                                ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                p2 = {}
+                                for i in ed:
+                                    et += 1
+                                    if 's:' == i.lower()[:2]:
+                                        p2[et] = ('space', '\n')
+                                    elif 'p:' == i.lower()[:2]:
+                                        p2[et] = ('parent', i[2:].removeprefix(' '))
+                                    elif i.lower().partition(':')[0] in list(ckc):
+                                        p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                if len(ed) != len(p2):
+                                    raise Exception('Not Editable')
+                                tvg.fileread(p1 | p2)
                             else:
-                                if i != 'text':
-                                    self.bt[i].config(state='normal')
-                    TreeViewGui.FREEZE = False
-                    self.spaces()
+                                tvg = tv(self.filename)
+                                ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                et = -1
+                                ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                p2 = {}
+                                for i in ed:
+                                    et += 1
+                                    if 's:' == i.lower()[:2]:
+                                        p2[et] = ('space', '\n')
+                                    elif 'p:' == i.lower()[:2]:
+                                        p2[et] = ('parent', i[2:].removeprefix(' '))
+                                    elif i.lower().partition(':')[0] in list(ckc):
+                                        p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                if len(ed) != len(p2):
+                                    raise Exception('Not Editable')
+                                tvg.fileread(p2)
+                            self.text.config(state = DISABLED)
+                            for i in self.bt:
+                                if 'label' not in i and 'scrollbar' not in i:
+                                    if i == 'entry3':
+                                        self.bt[i].config(state='readonly')
+                                    elif i == 'entry':
+                                        if not self.rb.get():
+                                            self.bt[i].config(state='disable')
+                                        else:
+                                            self.bt[i].config(state='normal')
+                                    else:
+                                        if i != 'text':
+                                            self.bt[i].config(state='normal')
+                            TreeViewGui.FREEZE = False
+                            self.spaces()
+                    else:
+                        self.text.config(state = DISABLED)
+                        for i in self.bt:
+                            if 'label' not in i and 'scrollbar' not in i:
+                                if i == 'entry3':
+                                    self.bt[i].config(state='readonly')
+                                elif i == 'entry':
+                                    if not self.rb.get():
+                                        self.bt[i].config(state='disable')
+                                    else:
+                                        self.bt[i].config(state='normal')
+                                else:
+                                    if i != 'text':
+                                        self.bt[i].config(state='normal')
+                        TreeViewGui.FREEZE = False
+                        self.spaces()
                 except Exception as a:
                     messagebox.showerror('TreeViewGui', f'{a}')
                     

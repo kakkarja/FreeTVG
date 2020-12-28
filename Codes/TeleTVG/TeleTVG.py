@@ -174,7 +174,8 @@ class Reminder:
         os.chdir(Reminder.DEST)
         Reminder.STATUS = False
         Reminder.DEST = None
-        Reminder.MAINST.deiconify()
+        Reminder.MAINST.free()
+        Reminder.MAINST.root.deiconify()
         Reminder.MAINST = None
         self.root.destroy()
         
@@ -669,7 +670,7 @@ def main(stat, path, message):
     # Please create encryption for app_id and app_hash for security.
     
     ori = os.getcwd()
-    files = [i for i in os.listdir() if '_cpd' in i]
+    files = [i for i in os.listdir() if '_cpd' in i and i != 'fixio_cpd.json']
     if "emoj.txt" in os.listdir():
         files.extend(["emoj.txt"])
     if 'Schedule' in os.listdir():
@@ -688,9 +689,9 @@ def main(stat, path, message):
             root = Tk()
             Reminder.STATUS = True
             Reminder.MAINST = stat
+            Reminder.MAINST.root.withdraw()
             Reminder.DEST = path
             begin = Reminder(root)
-            begin.MAINST.withdraw()
             api_id = cp.readcpd("api_id")
             api_hash = cp.readcpd("api_hash")            
             if 'ReminderTel.session' not in os.listdir():
