@@ -56,7 +56,7 @@
              Editor that write directly.
           ```
     * **~~Convert~~ has been deleted and replace with <u>TeleCalc</u>.**
-        * **Convert now become part of Editor.[2 functions in one]**
+        * **Convert now become part of Editor.~~[2 functions in one]~~**
     * **Can do calculation and get latest exchange rate.**
         * **Built with https://fixer.io api.**
         * **Fixer wrapper for python is used in this project.**
@@ -69,6 +69,23 @@
         * **This convinient for Send Note.**
     * **Wrap mode:**
         * **Make long sentences appear nice in childs.**
+    * **Can copy calculation or exchange rate to TVG Editor.**
+        * **For calculation have 2 choices.**
+            * **As TVG note format** 
+            * **TeleCalc format [for re-editing].**
+    * **Can edit calculation in TVG and translated to TeleCalc.**
+        * **FORMAT:**
+          >**cal: 2500500/7 => "Calculation"**  
+          >**ans: => "Answer" [just empty or not empty in re-editing]**  
+          >**note: Awesome => "Note" [optional]**
+        * **TAKE NOTICE:**
+            * **"ans:" is ignored, because it will be recalculate by the changes in "cal:".**
+        * **RESULT: [in TeleCalc]**
+          ```TEXT
+          CAL: 2,500,500/7
+          ANS: 357,214.28571428574
+          Note: Awesome
+          ```
 * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
