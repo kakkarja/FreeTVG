@@ -84,7 +84,7 @@ class Calculator():
         self.root.bind_all('<Control-s>', self.movc)
         self.root.bind_all('<Control-m>', self.maxim)
         self.root.bind('<Control-q>', self.bye)
-        self.lt = StringVar()
+        self.lt = StringVar(self.root)
         self.label = ttk.Label(self.root, textvariable = self.lt, font = 'verdana 9 bold', 
                                background = 'black', foreground = 'white')
         self.label.pack(pady = 2)
@@ -823,7 +823,23 @@ class Calculator():
             self.tpl = None
             os.chdir(std)
         else:
-            messagebox.showwarning('Calculator', 'Unable to load, because Calendar or Rate is active!!!', parent = self.root)     
+            messagebox.showwarning('Calculator', 'Unable to load, because Calendar or Rate is active!!!', parent = self.root)
+            
+    def reader(self):
+        ex = Calculator.MAINST.store
+        self.text.config(state = 'normal')
+        for _, t in ex.items():
+            for c in t[0].partition(':')[2].strip():
+                self.calculation(self.bt[c])
+            frt = self.entry.get()
+            self.calculation(self.bt['C'])
+            t = (f'CAL: {frt}',) + t[1:]
+            if len(t) == 2:
+                self.text.insert(END, f'{t[0]}\n{t[1]}\n', 'thg')
+            else:
+                self.text.insert(END, f'{t[0]}\n{t[1]}\n{t[2]}\n\n', 'thg')
+        self.text.config(state = 'disable')
+        Calculator.MAINST.store = None
             
     def edt(self, event = None):
         #Edit calculation for changing value in a file and add note as well.
@@ -1099,18 +1115,22 @@ class Calculator():
                         messagebox.showinfo('Calculator', f'Pasted and\n{cp}copied!', parent = self.root)
                         self.ctc = {i.span()[1]: i.group() for i in reg.finditer(gpt[pas-1][5:]) if i.group()!=','}
                     else:
-                        txt = 'p:Calculations\n'
-                        frt = [i for i in self.text.get('1.0', END)[:-2].split('\n')]
-                        wrd = ''
-                        for w in range(len(frt)):
-                            if frt[w]:
-                                wrd += ''.join(f'c1:{frt[w]}\n')
-                            else:
-                                if w != len(frt)-1:
-                                    wrd += ''.join(f'c1: \n')
-                        
-                        Calculator.MAINST.store = txt + wrd
-                        messagebox.showinfo('Calculator', 'Pasting skipped and screen copied for editor!', parent = self.root)
+                        ask = messagebox.askyesno('Calculator', '"Y" as TVG format, or "N" as Calc format?', parent = self.root)
+                        if ask:
+                            txt = 'p:Calculations\n'
+                            frt = [i for i in self.text.get('1.0', END)[:-2].split('\n')]
+                            wrd = ''
+                            for w in range(len(frt)):
+                                if frt[w]:
+                                    wrd += ''.join(f'c1:{frt[w]}\n')
+                                else:
+                                    if w != len(frt)-1:
+                                        wrd += ''.join(f'c1:  \n')
+                            Calculator.MAINST.store = txt + wrd
+                            messagebox.showinfo('Calculator', 'Pasting skipped and screen copied for editor!', parent = self.root)
+                        else:
+                            Calculator.MAINST.store = self.text.get('1.0', END)[:-2].replace(',', '')
+                            messagebox.showinfo('Calculator', 'Pasting skipped and screen copied for editor!', parent = self.root)
                 else:
                     messagebox.showinfo('Calculator', 'Copy aborted!', parent = self.root)
             else:
@@ -1184,5 +1204,7 @@ def main(stat, ori):
     Calculator.MAINST.root.withdraw()
     begin = Calculator(root)
     begin.MAINST.root.withdraw()
+    if begin.MAINST.store:
+        begin.reader()
     begin.root.focus_force()
     begin.root.mainloop()

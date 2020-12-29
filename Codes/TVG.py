@@ -1521,45 +1521,48 @@ class TreeViewGui:
             else:
                 try:
                     if self.text.get('1.0', END)[:-1]:
-                        ask = messagebox.askyesno('TreeViewGui', 'Do you want to convert[y] or Edit[n]?')
-                        if ask:
-                            self.converting()
-                        else:                        
-                            if self.checkfile():
-                                tvg = tv(self.filename)
-                                p1 = tvg.insighttree()
-                                et = len(p1)-1
-                                ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                                ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                                p2 = {}
-                                for i in ed:
-                                    et += 1
-                                    if 's:' == i.lower()[:2]:
-                                        p2[et] = ('space', '\n')
-                                    elif 'p:' == i.lower()[:2]:
-                                        p2[et] = ('parent', i[2:].removeprefix(' '))
-                                    elif i.lower().partition(':')[0] in list(ckc):
-                                        p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
-                                if len(ed) != len(p2):
-                                    raise Exception('Not Editable')
-                                tvg.fileread(p1 | p2)
-                            else:
-                                tvg = tv(self.filename)
-                                ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                                et = -1
-                                ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                                p2 = {}
-                                for i in ed:
-                                    et += 1
-                                    if 's:' == i.lower()[:2]:
-                                        p2[et] = ('space', '\n')
-                                    elif 'p:' == i.lower()[:2]:
-                                        p2[et] = ('parent', i[2:].removeprefix(' '))
-                                    elif i.lower().partition(':')[0] in list(ckc):
-                                        p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
-                                if len(ed) != len(p2):
-                                    raise Exception('Not Editable')
-                                tvg.fileread(p2)
+                        if 'CAL:' and 'ANS:' in self.text.get('1.0', END)[:-1].upper() and self.text.get('1.0', END)[:-1][:4].upper() == 'CAL:':
+                            ckcal = [i for i in self.text.get('1.0', END).split('\n')[:-1] if 'CAL:' in i.upper()]
+                            nck = ['0','1','2','3','4','5','6','7','8','9','-','+','*','/','(',')','.']
+                            for cal in ckcal:
+                                for ck in cal.partition(':')[2].strip():
+                                    if ck not in nck:
+                                        raise Exception('Not Editable!')
+                            del nck
+                            
+                            dt =[i for i in self.text.get('1.0', END).split('\n')[:-1] if i]
+                            dd = []
+                            while dt:
+                                if len(dt)>2:
+                                    if 'Note:' in dt[2].capitalize():
+                                        dd.append([dt[0], dt[1], dt[2]])
+                                        del dt[0]
+                                        del dt[0]
+                                        del dt[0]
+                                    else:
+                                        dd.append([dt[0], dt[1]])
+                                        del dt[0]
+                                        del dt[0]
+                                elif dt:
+                                    dd.append([dt[0], dt[1]])
+                                    del dt[0]
+                                    del dt[0]
+                            if len(ckcal) != len(dd):
+                                raise Exception('Not editble!')
+                            del ckcal
+                            dc = {}
+                            n = 1
+                            for i in dd:
+                                ga = eval(i[0].partition(':')[2].strip())
+                                i[0]= f'CAL: {i[0].partition(":")[2].strip()}'
+                                i[1] = f'ANS: {ga:,}'
+                                if len(i) == 3:
+                                    i[2] = f'Note: {i[2].partition(":")[2].strip()}'
+                                dc[n] = tuple(i)
+                                n += 1
+                            del dd
+                            self.store = dc
+                            self.text.delete('1.0', END)
                             self.text.config(state = DISABLED)
                             for i in self.bt:
                                 if 'label' not in i and 'scrollbar' not in i:
@@ -1575,6 +1578,62 @@ class TreeViewGui:
                                             self.bt[i].config(state='normal')
                             TreeViewGui.FREEZE = False
                             self.spaces()
+                            self.calc()
+                        else:
+                            ask = messagebox.askyesno('TreeViewGui', 'Do you want to convert[y] or Edit[n]?')
+                            if ask:
+                                self.converting()
+                            else:                        
+                                if self.checkfile():
+                                    tvg = tv(self.filename)
+                                    p1 = tvg.insighttree()
+                                    et = len(p1)-1
+                                    ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                    ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                    p2 = {}
+                                    for i in ed:
+                                        et += 1
+                                        if 's:' == i.lower()[:2]:
+                                            p2[et] = ('space', '\n')
+                                        elif 'p:' == i.lower()[:2]:
+                                            p2[et] = ('parent', i[2:].removeprefix(' '))
+                                        elif i.lower().partition(':')[0] in list(ckc):
+                                            p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                    if len(ed) != len(p2):
+                                        raise Exception('Not Editable')
+                                    tvg.fileread(p1 | p2)
+                                else:
+                                    tvg = tv(self.filename)
+                                    ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                    et = -1
+                                    ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                    p2 = {}
+                                    for i in ed:
+                                        et += 1
+                                        if 's:' == i.lower()[:2]:
+                                            p2[et] = ('space', '\n')
+                                        elif 'p:' == i.lower()[:2]:
+                                            p2[et] = ('parent', i[2:].removeprefix(' '))
+                                        elif i.lower().partition(':')[0] in list(ckc):
+                                            p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                    if len(ed) != len(p2):
+                                        raise Exception('Not Editable')
+                                    tvg.fileread(p2)
+                                self.text.config(state = DISABLED)
+                                for i in self.bt:
+                                    if 'label' not in i and 'scrollbar' not in i:
+                                        if i == 'entry3':
+                                            self.bt[i].config(state='readonly')
+                                        elif i == 'entry':
+                                            if not self.rb.get():
+                                                self.bt[i].config(state='disable')
+                                            else:
+                                                self.bt[i].config(state='normal')
+                                        else:
+                                            if i != 'text':
+                                                self.bt[i].config(state='normal')
+                                TreeViewGui.FREEZE = False
+                                self.spaces()
                     else:
                         self.text.config(state = DISABLED)
                         for i in self.bt:
