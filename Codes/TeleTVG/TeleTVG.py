@@ -605,21 +605,20 @@ class Reminder:
         # Asyncio module of sending multiple.
         
         try:
-            gms = int(len(self.text.get('1.0', END)[:-1])/4096)
+            gms = int(len(self.text.get('1.0', END)[:-1])/4090)
             async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
                 await client.connect()
-                for user in sen:
-                    if gms == 0:
-                        await client.send_message(self.users[user], self.text.get('1.0', END)[:-1])
-                    else:
-                        orm = self.text.get('1.0', END)[:-1]
-                        while orm:
-                            if len(orm) > 4090:
-                                await client.send_message(self.users[user], orm[:4091])
-                                orm = orm[4091:]
-                            else:
-                                await client.send_message(self.users[user], orm)
-                                orm = None
+                if gms == 0:
+                    await asyncio.gather(*[client.send_message(self.users[user], self.text.get('1.0', END)[:-1]) for user in sen])
+                else:
+                    orm = self.text.get('1.0', END)[:-1]
+                    while orm:
+                        if len(orm) > 4090:
+                            await asyncio.gather(*[client.send_message(self.users[user], orm[:4091]) for user in sen])
+                            orm = orm[4091:]
+                        else:
+                            await asyncio.gather(*[client.send_message(self.users[user], orm) for user in sen])
+                            orm = None
                 await client.disconnect()
             tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
             messagebox.showinfo('TeleTVG', tms, parent = self.root)
