@@ -2,6 +2,9 @@
 # Copyright © kakkarja (K A K)
 
 import re
+import datetime
+import os
+from DataB import Datab as db
 
 class TreeView:
     """
@@ -54,9 +57,8 @@ class TreeView:
                     di[d] = (childs[re.match(r'\s+', reads[d]).span()[1]], 
                              reads[d][re.match(r'\s+', reads[d]).span()[1]:])
             return di
-        except:
-            import traceback
-            traceback.print_exc()
+        except Exception as e:
+            raise e
             
     def insighthidden(self, data):
         """
@@ -76,9 +78,8 @@ class TreeView:
                         di[d] = (childs[re.match(r'\s+', data[d]).span()[1]], 
                                  data[d][re.match(r'\s+', data[d]).span()[1]:])
                 return di
-        except:
-            import traceback
-            traceback.print_exc()
+        except Exception as e:
+            raise e
             
     def quickchild(self, words, child ):
         """
@@ -124,9 +125,8 @@ class TreeView:
                         print(f'"row" must be int number and less or equal to {len(d)-1}!')                    
             else:
                 print('Need to be string!!!')                                
-        except:
-            import traceback
-            traceback.print_exc()
+        except Exception as e:
+            raise e
             
     def addparent(self, words):
         """
@@ -264,82 +264,47 @@ class TreeView:
                                 wfile.write('\n')
                 else:
                     print('Unidentified file!!!')
-            except:
-                import traceback
-                traceback.print_exc()
+            except Exception as e:
+                raise e
                 
     def backuptv(self):
         """
-        Backup TreeView structure in csv file. The backup max is 10 records only.
+        Backup TreeView structure in json database file. The backup max is 10 records only.
         The max can be change in line with '< 11'
         """
-        import datetime
-        import csv
-        import os
         try:
-            log = str(datetime.datetime.now())[:-7]
+            log = int(datetime.datetime.timestamp(datetime.datetime.now()))
             data = list(self.insighttree().values())
-            if data:
-                do = {'log': log, 'data': data}
-                if not f'{self.filename}.csv' in os.listdir():
-                    with open(f'{self.filename}.csv', 'w', newline = '') as file:
-                        fieldnames = ['log', 'data']
-                        writer = csv.DictWriter(file, fieldnames=fieldnames)
-                        writer.writeheader()
-                        writer.writerow(do)
-                else:
-                    with open(f'{self.filename}.csv') as file:
-                        rd = list(csv.reader(file))
-                    if len(rd) < 11:
-                        with open(f'{self.filename}.csv', 'a', newline = '') as file:
-                            fieldnames = ['log', 'data']
-                            writer = csv.DictWriter(file, fieldnames=fieldnames)
-                            writer.writerow(do)
-                    else:
-                        del rd[1]
-                        rd.append([log,data])
-                        with open(f'{self.filename}.csv', 'w', newline = '') as wfile:
-                            fill = csv.writer(wfile, delimiter = ',')
-                            fill.writerows(rd)
+            do = {log: data}
+            dbs = db(self.filename)
+            if str(dbs) not in os.listdir():
+                dbs.createdb(do)
             else:
-                print('No data to be backup!!!')
-        except:
-            import traceback
-            traceback.print_exc()
+                if dbs.totalrecs() < 10:
+                    dbs.indata(do)
+                else:
+                    dbs.indata(do)
+                    key = sorted(list(dbs.loadkeys()))[0]
+                    dbs.deldata(key)
+        except Exception as e:
+            raise e
             
-    def loadbackup(self, filename, row = 1, stat = False):
+    def loadbackup(self, filename, row = 0, stat = False):
         """
         This function can call back your previous data saved by backuptv() and 
         overwrite your existing one.
         """
-        import csv
-        import os
-        try:
-            if f'{filename}.csv' in os.listdir():
-                with open(f'{filename}.csv') as csvfile:
-                    reads = list(csv.reader(csvfile))
-                    if stat:
-                        if row:
-                            if len(reads)-1 >= row:
-                                data = eval(reads[row][1])
-                                self.fileread(data)
-                            else:
-                                print('No data is available!')
-                        else:
-                            print('No data available!')
-                    else:
-                        if row:
-                            data = list(eval(reads[row][1]))
-                            data  = {n:w  for n,w in enumerate(data)}
-                            return data
-                        else:
-                            print('No data available!')
+        dbs = db(filename)
+        if str(dbs) in os.listdir():
+            if stat:
+                if row <= dbs.totalrecs()-1:
+                    key = sorted(list(dbs.loadkeys()))[row]
+                    self.fileread(dbs.takedat(key))
             else:
-                print('No such file!')
-        except:
-            import traceback
-            traceback.print_exc()
-
+                if row <= dbs.totalrecs()-1:
+                    key = sorted(list(dbs.loadkeys()))[row]
+                    return {n: tuple(w)  for n,w in enumerate(dbs.takedat(key))}
+                
     def checked(self, row):
         """ 
         Appearing nice only in 'utf-8' encoding.
@@ -369,9 +334,8 @@ class TreeView:
                                 convert[1] = gety                         
                                 callrows[row] = tuple(convert)
                                 self.fileread(callrows)
-                except:
-                    import traceback
-                    traceback.print_exc()
+                except Exception as e:
+                    raise e
                     
     def insertspace(self, row):
         """
@@ -446,8 +410,8 @@ if __name__ == '__main__':
         print('Done')
     else:
         print('Nothing')
-    if 'testtv.csv' in os.listdir():
-        os.remove('testtv.csv')
+    if 'testtv.json' in os.listdir():
+        os.remove('testtv.json')
         print('Done')
     else:
         print('Nothing')    
