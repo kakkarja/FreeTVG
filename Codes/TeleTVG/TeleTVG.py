@@ -9,6 +9,7 @@ from telethon.tl import types
 from tkinter import *
 from tkinter import ttk, messagebox, simpledialog, filedialog
 from datetime import datetime as dt, timedelta
+from FileFind import filen
 import string
 import asyncio
 import shutil
@@ -25,6 +26,8 @@ class Reminder:
     STATUS = False
     MAINST = None
     DEST = None
+    API = None
+    HASH_ = None
     def __init__(self, root):
         self.root = root
         self.root.resizable(False, False)
@@ -43,8 +46,8 @@ class Reminder:
         self.langs = None
         self.chacc = None
         self.lock = False
-        self.api_id = cp.readcpd("api_id")
-        self.api_hash = cp.readcpd("api_hash")
+        self.api_id = cp.readcpd(Reminder.API)
+        self.api_hash = cp.readcpd(Reminder.HASH_)
         self.users = {}
         self.frm1 = ttk.Frame(self.root)
         self.frm1.pack(fill = 'x')
@@ -668,32 +671,31 @@ def main(stat, path, message):
     # Start app.
     # Please create encryption for app_id and app_hash for security.
     
-    ori = os.getcwd()
-    files = [i for i in os.listdir() if '_cpd' in i and i != 'fixio_cpd.json']
-    if "emoj.txt" in os.listdir():
-        files.extend(["emoj.txt"])
-    if 'Schedule' in os.listdir():
-        os.chdir('Schedule')
+    api = filen("api_id_cpd.json").rpartition('_')[0]
+    hash_ = filen("api_hash_cpd.json").rpartition('_')[0]    
+    emj = filen("emoj.txt")
+    if 'Tele_TVG' in os.listdir():
+        os.chdir('Tele_TVG')
     else:
-        os.mkdir('Schedule')
-        os.chdir('Schedule')
-    if files:
-        for file in files:
-            shutil.move(os.path.join(ori, file), os.getcwd())
-    files = [i for i in os.listdir() if '_cpd' in i]
-    if len(files) == 2:
+        os.mkdir('Tele_TVG')
+        os.chdir('Tele_TVG')
+    if emj and emj.rpartition('\\')[2] not in os.listdir():
+        shutil.copy(emj, os.getcwd())
+    if api and hash_:      
         if 'Telacc' not in os.listdir():
             os.mkdir('Telacc')
-        if Reminder.STATUS is False:
+        if Reminder.STATUS is False:              
             root = Tk()
             Reminder.STATUS = True
             Reminder.MAINST = stat
             Reminder.MAINST.root.withdraw()
             Reminder.DEST = path
+            Reminder.API = api
+            Reminder.HASH_ = hash_
             begin = Reminder(root)
-            api_id = cp.readcpd("api_id")
-            api_hash = cp.readcpd("api_hash")            
             if 'ReminderTel.session' not in os.listdir():
+                api_id = cp.readcpd(api)
+                api_hash = cp.readcpd(hash_)                
                 ask = simpledialog.askstring('TeleTVG', 'Phone number:', show = '●', parent = begin.root)
                 psd = simpledialog.askstring('TeleTVG', 'Password:', show = '●', parent = begin.root)
                 if ask:

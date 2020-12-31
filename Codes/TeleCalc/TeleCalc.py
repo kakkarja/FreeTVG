@@ -397,7 +397,7 @@ class Calculator():
                 try:
                     if self.cbc1.get()[:3] and self.cbc2.get()[:3]:
                         self.ic = 1
-                        key = cp.readcpd('fixio')
+                        key = cp.readcpd(filen('fixio_cpd.json').rpartition('_')[0])
                         rtb = Fixio(base = self.cbc1.get()[:3], apik = key)
                         self.rate = rtb.converlatest()
                         self.base = self.cbc1.get()[:3]
@@ -423,7 +423,7 @@ class Calculator():
                 try:
                     if self.cbc1.get()[:3] and self.cbc2.get()[:3]:
                         self.ic = 1
-                        key = cp.readcpd('fixio')
+                        key = cp.readcpd(filen('fixio_cpd.json').rpartition('_')[0])
                         enn = eval(self.entry.get().replace(',',''))
                         rtb = Fixio(base = self.cbc1.get()[:3], symbols = self.cbc2.get()[:3], amount = enn, apik = key)
                         self.rate = rtb.converconv()

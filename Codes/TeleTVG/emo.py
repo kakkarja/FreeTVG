@@ -4,6 +4,7 @@
 from tkinter import *
 from tkinter import messagebox, simpledialog, ttk
 import os
+from FileFind import filen
 from DataB import Datab as db
 
 class Emo:
@@ -37,7 +38,7 @@ class Emo:
                            selectbackground = 'teal', selectforeground = 'gold',
                            exportselection = False, selectmode = 'multiple')
         self.lbe.pack(fill = 'x', expand = 1, padx = 3, pady = (2, 0))
-        with open('emoj.txt') as emr:
+        with open(filen('emoj.txt')) as emr:
             a  = [chr(i) for i in eval(emr.read())]
         for i in a:
             self.lbe.insert(END,i)
