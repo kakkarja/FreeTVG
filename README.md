@@ -86,6 +86,16 @@
           ANS: 357,214.28571428574
           Note: Awesome
           ```
+    * **Add few functions for complementing the Editor:**
+        * **Ex [Edit existing] for editing existing file in Editor instead using the entry box.**
+            * **Very useful for editing long records of outline document.**
+            * **Very quick aditting as well with Editor's format.**
+            * **TAKE NOTICE:**
+                * **Is advisable to backup file before edit with Ex function.**
+                * **In case you want to revert back, you can load back anytime with your backup file.**
+        * **Template for saving frequently used format of outlines.**
+            * **You can load them for applying the template on the editor mode.**
+            * **Template can help you to forget about retyping same format again-and-again.**
 * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
