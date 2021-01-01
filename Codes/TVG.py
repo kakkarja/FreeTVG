@@ -153,7 +153,10 @@ class TreeViewGui:
         self.bt['button23'] = self.button23
         self.button26 = ttk.Button(self.bframe, text = 'Calculator', command = self.calc)
         self.button26.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button26'] = self.button26        
+        self.bt['button26'] = self.button26
+        self.button27 = ttk.Button(self.bframe, text = 'Ex', command = self.editex)
+        self.button27.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button27'] = self.button27
         
         # 4th frame for below buttons.
         # Frame for second row buttons.
@@ -197,7 +200,10 @@ class TreeViewGui:
         self.bt['button24'] = self.button24        
         self.button25 = ttk.Button(self.frb1, text = 'Un/Wrap', command = self.wrapped)
         self.button25.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button25'] = self.button25        
+        self.bt['button25'] = self.button25
+        self.button28 = ttk.Button(self.frb1, text = 'Template', command = self.temp)
+        self.button28.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button28'] = self.button28
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
@@ -1497,7 +1503,99 @@ class TreeViewGui:
                 messagebox.showinfo('TreeViewGui', 'Nothing created yet!')
         else:
             messagebox.showinfo('TreeViewGui', 'Create new file is aborted!')
-                
+            
+    def editex(self):
+        # Edit existing file in the editor mode which can be very convinient and powerful.
+        # However, before edit in editor mode, it is advice to make backup first!
+        # Just in case you want to get back the previous file. 
+        
+        self.hidcheck()
+        if self.unlock:
+            if self.checkfile:
+                tvg = tv(self.filename)
+                edit = list(tvg.insighttree().values())
+                c = {f'child{i}': f'c{i}'  for i in range(1, 51)}
+                self.editor()
+                for ed in edit:
+                    if ed[0] == 'parent':
+                        self.text.insert(END, f'p:{ed[1][:-2]}\n')
+                    elif ed[0] == 'space':
+                        self.text.insert(END, f's:\n')
+                    else:
+                        self.text.insert(END, f'{c[ed[0]]}:{ed[1][1:]}')
+                os.remove(f'{self.filename}.txt')
+    
+    def temp(self):
+        # This is to compliment the editor mode.
+        # If you have to type several outline that has same format,
+        # You can save them as template and re-use again in the editor mode.
+        
+        if str(self.text.cget('state')) == 'normal' and str(self.bt['button24'].cget('state')) == 'normal': 
+            ori = os.getcwd()
+            if 'Templates' not in os.listdir(ori.rpartition('\\')[0]):
+                os.mkdir(os.path.join(ori.rpartition('\\')[0], 'Templates'))
+            ask = messagebox.askyesno('TreeViewGui', 'Want to save template? ["No" to load template]')
+            if ask:            
+                if self.text.get('1.0', END)[:-1]:
+                    fname = simpledialog.askstring('TreeViewGui', 'Name?')
+                    if fname:
+                        dest = os.path.join(ori.rpartition('\\')[0], 'Templates', f'{fname}.tvg')
+                        with open(dest, 'w') as wt:
+                            wt.write(str([i for i in self.text.get('1.0', END)[:-1].split('\n') if i]))
+                        messagebox.showinfo('TreeViewGui', f'Template {fname}.tvg saved!')
+                    else:
+                        messagebox.showinfo('TreeViewGui', 'Save template is aborted!')
+                else:
+                    messagebox.showinfo('TreeViewGui', 'Nothing to be save!')
+            else:
+                if self.lock is False:        
+                    self.lock = True
+                    files = [i for i in os.listdir(os.path.join(ori.rpartition('\\')[0], 'Templates'))]
+                    if files:
+                        class MyDialog(simpledialog.Dialog):
+                        
+                            def body(self, master):
+                                self.title('Choose Template')
+                                Label(master, text="File: ").grid(row=0, column = 0, sticky = E)
+                                self.e1 = ttk.Combobox(master, state = 'readonly')
+                                self.e1['values'] = files
+                                self.e1.current(0)
+                                self.e1.grid(row=0, column=1)
+                                return self.e1
+                        
+                            def apply(self):
+                                self.result = self.e1.get()
+                                            
+                        d = MyDialog(self.root)
+                        self.lock = False
+                        if d.result:
+                            path = os.path.join(ori.rpartition('\\')[0], 'Templates', d.result)
+                            with open(path) as rdf:
+                                gf = rdf.read()
+                            if gf[0] == '[' and gf[-1] == ']':
+                                gf = eval(gf)
+                                tot = 0
+                                for pr in gf:
+                                    if not tot:
+                                        gw = self.text.get(INSERT, f'{INSERT} lineend')
+                                    if gw == '':
+                                        if int(self.text.index(INSERT).rpartition('.')[2]):
+                                            self.text.insert(INSERT, f'\n{pr}')
+                                        else:
+                                            self.text.insert(INSERT, f'{pr}\n')
+                                        tot += 1
+                                    else:
+                                        ind = float(self.text.index(INSERT))+float(tot)
+                                        self.text.insert(f'{ind} lineend ', f'\n{pr}')
+                                        tot += 1
+                                del gf
+                            else:
+                                messagebox.showerror('TreeViewGui', 'Template has been corrupted!')
+                        else:
+                            messagebox.showinfo('TreeViewGui', 'Loading template aborted!')
+                    else:
+                        messagebox.showinfo('TreeViewGui', 'No templates yet!')
+                        
     def editor(self):
         # This is direct editor on text window.
         # FORMAT:
@@ -1510,10 +1608,10 @@ class TreeViewGui:
             if str(self.text.cget('state')) == 'disabled':
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
+                ckb = ['button24', 'button28', 'text']
                 for i in self.bt:
-                    if 'label' not in i and 'scrollbar' not in i:
-                        if i != 'button24' and i != 'text':
-                            self.bt[i].config(state='disable')
+                    if 'label' and 'scrollbar' not in i and i not in ckb:
+                        self.bt[i].config(state='disable')
                 TreeViewGui.FREEZE = True
                 if self.store:
                     self.text.insert(END, self.store)
