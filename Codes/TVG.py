@@ -70,6 +70,8 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-period>', self.txtcol)
         self.root.bind_all('<Control-Key-comma>', self.ft)
         self.root.bind_all('<Control-Key-slash>', self.oriset)
+        self.root.bind_all('<Control-Key-bracketleft>', self.editex)
+        self.root.bind_all('<Control-Key-bracketright>', self.temp)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -436,6 +438,8 @@ class TreeViewGui:
                 self.calc()
             elif event.keysym == '9':
                 self.wrapped()
+            elif event.keysym == 'bracketleft':
+                self.editex()
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -1504,7 +1508,7 @@ class TreeViewGui:
         else:
             messagebox.showinfo('TreeViewGui', 'Create new file is aborted!')
             
-    def editex(self):
+    def editex(self, event = None):
         # Edit existing file in the editor mode which can be very convinient and powerful.
         # However, before edit in editor mode, it is advice to make backup first!
         # Just in case you want to get back the previous file. 
@@ -1525,7 +1529,7 @@ class TreeViewGui:
                         self.text.insert(END, f'{c[ed[0]]}:{ed[1][1:]}')
                 os.remove(f'{self.filename}.txt')
     
-    def temp(self):
+    def temp(self, event = None):
         # This is to compliment the editor mode.
         # If you have to type several outline that has same format,
         # You can save them as template and re-use again in the editor mode.
@@ -1694,11 +1698,17 @@ class TreeViewGui:
                                         if 's:' == i.lower()[:2]:
                                             p2[et] = ('space', '\n')
                                         elif 'p:' == i.lower()[:2]:
-                                            p2[et] = ('parent', i[2:].removeprefix(' '))
+                                            if i.partition(':')[2].isspace():
+                                                raise Exception('Parent cannot be empty!')
+                                            else:
+                                                p2[et] = ('parent', i[2:].removeprefix(' '))
                                         elif i.lower().partition(':')[0] in list(ckc):
-                                            p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                            if i.partition(':')[2].isspace():
+                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
+                                            else:
+                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                     if len(ed) != len(p2):
-                                        raise Exception('Not Editable')
+                                        raise Exception('Not Editable!')
                                     tvg.fileread(p1 | p2)
                                 else:
                                     tvg = tv(self.filename)
@@ -1711,11 +1721,17 @@ class TreeViewGui:
                                         if 's:' == i.lower()[:2]:
                                             p2[et] = ('space', '\n')
                                         elif 'p:' == i.lower()[:2]:
-                                            p2[et] = ('parent', i[2:].removeprefix(' '))
+                                            if i.partition(':')[2].isspace():
+                                                raise Exception('Parent cannot be empty!')
+                                            else:
+                                                p2[et] = ('parent', i[2:].removeprefix(' '))
                                         elif i.lower().partition(':')[0] in list(ckc):
-                                            p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                            if i.partition(':')[2].isspace():
+                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
+                                            else:
+                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                     if len(ed) != len(p2):
-                                        raise Exception('Not Editable')
+                                        raise Exception('Not Editable!')
                                     tvg.fileread(p2)
                                 self.text.config(state = DISABLED)
                                 for i in self.bt:

@@ -1125,7 +1125,7 @@ class Calculator():
                                     wrd += ''.join(f'c1:{frt[w]}\n')
                                 else:
                                     if w != len(frt)-1:
-                                        wrd += ''.join(f'c1:  \n')
+                                        wrd += ''.join(f'c1: \n')
                             Calculator.MAINST.store = txt + wrd
                             messagebox.showinfo('Calculator', 'Pasting skipped and screen copied for editor!', parent = self.root)
                         else:
