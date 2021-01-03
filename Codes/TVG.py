@@ -12,6 +12,7 @@ import TeleCalc
 import TeleTVG
 import re
 from FileFind import filen
+from mdh import convhtml
 from datetime import datetime as dt
 
 class TreeViewGui:
@@ -182,7 +183,7 @@ class TreeViewGui:
         self.button2 = ttk.Button(self.frb1, text = 'Down', command = self.movedown)
         self.button2.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button2'] = self.button2
-        self.button12 = ttk.Button(self.frb1, text = 'Save as PDF', command = self.saveaspdf)
+        self.button12 = ttk.Button(self.frb1, text = 'Printing', command = self.saveaspdf)
         self.button12.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button12'] = self.button12
         self.button14 = ttk.Button(self.frb1, text = 'Hide Parent', command = self.hiddenchl)
@@ -1001,94 +1002,14 @@ class TreeViewGui:
                     self.infobar()
                     
     def saveaspdf(self):
-        # Saving records to a pdf.
-        
-        from CreatePDF import Pydf
+        # Show to browser and directly print as pdf or direct printing.
         
         if self.checkfile():
-            
-            def chosen(file):
-                gch = file
-                fildir = filedialog.askdirectory()
-                TreeViewGui.FREEZE = False
-                try:
-                    if fildir:
-                        ori = os.getcwd()
-                        if f'{self.filename}_hid.json' in os.listdir():
-                            ans = messagebox.askyesno('TreeViewGui', 'Do you want print the hidden parents?')
-                            if ans:
-                                self.hidform()
-                                os.chdir(fildir)
-                                showt = self.text.get('1.0', END)[:-2]
-                                self.root.clipboard_append(showt)
-                                pdf = Pydf(f'{self.filename}')
-                                ppath = f"c:\\WINDOWS\\Fonts\\{gch}.ttf"
-                                pdf.add_font(f'{gch}', '', ppath, uni=True)
-                                pdf.alias_nb_pages()
-                                pdf.add_page() 
-                                pdf.set_font(f'{gch}', '', 10) 
-                                pdf.multi_cell(0, 5, showt) 
-                                pdf.output(pdf.filename, 'F')
-                                messagebox.showinfo('Save as PDF', f'{self.filename}.pdf is created!')
-                            else:
-                                with open(f'{self.filename}.txt') as file:
-                                    frd = file.read()
-                                    self.root.clipboard_append(frd)
-                                    os.chdir(fildir)
-                                    pdf = Pydf(f'{self.filename}')
-                                    ppath = f"c:\\WINDOWS\\Fonts\\{gch}.ttf"
-                                    pdf.add_font(f'{gch}', '', ppath, uni=True)
-                                    pdf.alias_nb_pages()
-                                    pdf.add_page() 
-                                    pdf.set_font(f'{gch}', '', 10) 
-                                    pdf.multi_cell(0, 5, frd) 
-                                    pdf.output(pdf.filename, 'F')
-                                messagebox.showinfo('Save as PDF', f'{self.filename}.pdf is created!')
-                        else:
-                            with open(f'{self.filename}.txt') as file:
-                                frd = file.read()
-                                self.root.clipboard_append(frd)
-                                os.chdir(fildir)
-                                pdf = Pydf(f'{self.filename}')
-                                ppath = f"c:\\WINDOWS\\Fonts\\{gch}.ttf"
-                                pdf.add_font(f'{gch}', '', ppath, uni=True)
-                                pdf.alias_nb_pages()
-                                pdf.add_page() 
-                                pdf.set_font(f'{gch}', '', 10)
-                                pdf.multi_cell(0, 5, frd)
-                                pdf.output(pdf.filename, 'F')
-                            messagebox.showinfo('Save as PDF', f'{self.filename}.pdf is created!')
-                        os.chdir(ori)
-                    else:
-                        messagebox.showinfo('Save as PDF', 'Please choose a directory first!')
-                except:
-                    messagebox.showinfo('Save as PDF', f'{sys.exc_info()}')
-                        
-            if self.lock is False:
-                TreeViewGui.FREEZE = True        
-                self.lock = True
-                files = [i.rpartition('.')[0] for i in os.listdir(r'c:\WINDOWS\Fonts') if '.ttf' in i]
-                class MyDialog(simpledialog.Dialog):
+            if f'{self.filename}_hid.json' in os.listdir():
+                convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}')
+            else:
+                convhtml(f'{self.filename}.txt', f'{self.filename}')
                 
-                    def body(self, master):
-                        self.title('Choose Font')
-                        Label(master, text="Font: ").grid(row=0, column = 0, sticky = E)
-                        self.e1 = ttk.Combobox(master, state = 'readonly')
-                        self.e1['values'] = files
-                        self.e1.current(0)
-                        self.e1.grid(row=0, column=1)
-                        return self.e1
-                
-                    def apply(self):
-                        self.result = self.e1.get()
-                                    
-                d = MyDialog(self.root)
-                self.lock = False
-                if d.result:            
-                    chosen(d.result)
-                else:
-                    TreeViewGui.FREEZE = False
-                    
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.
         # To appropriate the display better.

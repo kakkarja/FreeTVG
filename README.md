@@ -1,8 +1,6 @@
 # TVG
 >## TreeViewGui
 * **TVG is an outline note for viewing in tree structure.**
-* **Can be save as PDF to a user preferred directory.**
-* **To use the PDF function user must download PyFPDF. [https://github.com/reingart/pyfpdf]**
 * **Please give feedback if there is known error by creating issues.**
 
 **Note: Block using '#' in the code on icon, because not provided in the repository**
@@ -96,9 +94,15 @@
         * **Template for saving frequently used format of outlines.**
             * **You can load them for applying the template on the editor mode.**
             * **Template can help you to forget about retyping same format again-and-again.**
+        * **~~Save as pdf~~ is replace with <u>Printing</u>.**
+            * **Convert TVG file to HTML and open in browser.**
+              >**Please get markdown first for Printing to work https://github.com/Python-Markdown/markdown.**
+            * **Just click the print button and save to pdf or print direct to a printer.**
 * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
+![TVG2](/TVG3.png)
+![TVG2](/TVG4.png)
 ![TVG2](/TVG2.png)
 ![TVG1](/TVG1.png)
 ![TeleTVG](/TeleTVG.png)

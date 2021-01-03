@@ -528,7 +528,9 @@ class Reminder:
                         with open(os.path.join(mfold,f'{d.folder}.json')) as fs:
                             rd = dict(json.load(fs))
                             ou = rd[d.folder]
-                            ou.extend(d.result)
+                            for u in d.result:
+                                if u not in ou:
+                                    ou.append(u)
                             rd[d.folder] = ou
                         with open(os.path.join(mfold,f'{d.folder}.json'), 'w') as wj:
                             json.dump(rd, wj)   
