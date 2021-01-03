@@ -94,10 +94,10 @@
         * **Template for saving frequently used format of outlines.**
             * **You can load them for applying the template on the editor mode.**
             * **Template can help you to forget about retyping same format again-and-again.**
-        * **~~Save as pdf~~ is replace with <u>Printing</u>.**
-            * **Convert TVG file to HTML and open in browser.**
-              >**Please get markdown first for Printing to work https://github.com/Python-Markdown/markdown.**
-            * **Just click the print button and save to pdf or print direct to a printer.**
+    * **~~Save as pdf~~ is replace with <u>Printing</u>.**
+        * **Convert TVG file to HTML and open in browser.**
+          >**Please get markdown first for Printing to work https://github.com/Python-Markdown/markdown.**
+        * **Just click the print button and save to pdf or print direct to a printer.**
 * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
