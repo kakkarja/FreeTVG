@@ -566,17 +566,15 @@ class TreeViewGui:
             else:
                 import shutil
                 ori = os.getcwd()
-                os.chdir(os.getcwd().rpartition('\\')[0])
                 if ori.rpartition('\\')[2] != fi:
-                    lf = os.listdir(fi)
+                    lf = os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], fi))
                     lsc = messagebox.askyesno('TreeViewGui', f'Do you really want to delete {fi} directory with all\n{lf}\nfiles?')
                     if lsc:
-                        shutil.rmtree(fi)
+                        shutil.rmtree(os.path.join(os.getcwd().rpartition('\\')[0], fi))
                     else:
                         messagebox.showinfo('TreeViewGui', 'Deleting directory is aborted!')
                 else:
                     messagebox.showerror('TreeViewGui', 'You are unable to delete present directory!!!')
-                os.chdir(ori)
                     
         if self.lock is False:
             TreeViewGui.FREEZE = True        
@@ -1270,19 +1268,18 @@ class TreeViewGui:
         # This is the sending note with Telethon [Telegram api wrapper].
         
         ori = os.getcwd()
-        os.chdir(os.getcwd().rpartition('\\')[0])
         if self.text.get('1.0', END)[:-1]:
+            os.chdir(ori.rpartition('\\')[0])
             self.free()
             TeleTVG.main(self, ori, self.text.get('1.0', END)[:-1]) 
         else:
-            os.chdir(ori)
             messagebox.showinfo('TreeViewGui', 'Nothing to be sent!')
             
     def calc(self):
         # Calling TeleCalc
         
         ori = os.getcwd()
-        os.chdir(os.getcwd().rpartition('\\')[0])
+        os.chdir(ori.rpartition('\\')[0])
         self.free()
         TeleCalc.main(self, ori)        
             
@@ -1411,9 +1408,8 @@ class TreeViewGui:
                 dr = os.getcwd().rpartition('\\')[0]
                 files = [file for file in os.listdir(dr) if '_tvg' in file]
                 if mkd not in files:
-                    os.chdir(dr)
-                    os.mkdir(mkd)
-                    os.chdir(mkd)
+                    os.mkdir(os.path.join(dr, mkd))
+                    os.chdir(os.path.join(dr, mkd))
                     self.filename = fl.title()
                     self.root.title(f'{os.getcwd()}\{self.filename}.txt')
                     self.text.config(state = NORMAL)
@@ -1422,6 +1418,7 @@ class TreeViewGui:
                     self.entry.delete(0, END)
                     self.rb.set('')
                     self.entry.config(state = DISABLED)
+                    self.listb.delete(0, END)
                 else:
                     messagebox.showinfo('TreeViewGui', f'The file {mkd}/{fl.title()}.txt is already exist!')
             else:
