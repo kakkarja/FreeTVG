@@ -61,18 +61,18 @@ class TreeViewGui:
         self.root.bind_all('<Control-minus>', self.fcsent)
         self.root.bind_all('<Control-Key-1>', self.fcsent)
         self.root.bind_all('<Control-Key-2>', self.fcsent)
-        self.root.bind_all('<Control-Key-3>', self.fcsent)
+        self.root.bind_all('<Control-Key-3>', self.dattim)
         self.root.bind_all('<Control-Key-4>', self.fcsent)
         self.root.bind_all('<Control-Key-5>', self.fcsent)
         self.root.bind_all('<Control-Key-6>', self.fcsent)
         self.root.bind_all('<Control-Key-7>', self.fcsent)
         self.root.bind_all('<Control-Key-8>', self.fcsent)
         self.root.bind_all('<Control-Key-9>', self.fcsent)
-        self.root.bind_all('<Control-Key-period>', self.txtcol)
-        self.root.bind_all('<Control-Key-comma>', self.ft)
-        self.root.bind_all('<Control-Key-slash>', self.oriset)
-        self.root.bind_all('<Control-Key-bracketleft>', self.editex)
-        self.root.bind_all('<Control-Key-bracketright>', self.temp)
+        self.root.bind_all('<Control-Key-period>', self.fcsent)
+        self.root.bind_all('<Control-Key-comma>', self.fcsent)
+        self.root.bind_all('<Control-Key-slash>', self.fcsent)
+        self.root.bind_all('<Control-Key-bracketleft>', self.fcsent)
+        self.root.bind_all('<Control-Key-bracketright>', self.temp) 
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -425,8 +425,6 @@ class TreeViewGui:
                 self.sendtel()
             elif event.keysym == '2':
                 self.lookup()
-            elif event.keysym == '3':
-                self.dattim()
             elif event.keysym == '4':
                 self.endec()
             elif event.keysym == '5':
@@ -441,6 +439,12 @@ class TreeViewGui:
                 self.wrapped()
             elif event.keysym == 'bracketleft':
                 self.editex()
+            elif event.keysym == 'period':
+                self.txtcol()
+            elif event.keysym == 'comma':
+                self.ft()
+            elif event.keysym == 'slash':
+                self.oriset()
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -1323,7 +1327,7 @@ class TreeViewGui:
                                 sn += 1
                     self.infobar()
     
-    def dattim(self):
+    def dattim(self, event = None):
         # To insert date and time.
         
         if str(self.entry.cget('state')) == 'normal':
@@ -1347,16 +1351,26 @@ class TreeViewGui:
                         self.entry.insert(0, f'{dtt} {hold}')                        
             else:
                 self.entry.insert(0, f'{dtt} ')
+        elif str(self.text.cget('state')) == 'normal' and str(self.bt['button20'].cget('state')) == 'normal':
+            dtt = f'[{dt.isoformat(dt.today().replace(microsecond = 0)).replace("T"," ")}]'
+            self.text.insert(INSERT, f'{dtt} ')
     
     def endec(self):
         # Data encrypt and saved for sharing.
         
         from ProtectData import ProtectData as ptd
+        import string
         
         self.hidcheck()
         if self.unlock:
             if self.checkfile():
                 try:
+                    checking = list(string.printable)
+                    seekchar = ''
+                    for char in self.text.get('1.0', END)[:-1]:
+                        if char not in checking:
+                            seekchar = char
+                            raise Exception(f'This "{char}" is not able to be encrypted!')
                     enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 5, t2 = 7)
                     ins = f'{enc[0]}'
                     key = f'{[[j for j in i] for i in enc[1]]}'
@@ -1365,7 +1379,14 @@ class TreeViewGui:
                     messagebox.showinfo('TreeViewGui', 'Encryption created!')
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
-                    
+                finally:
+                    if seekchar:
+                        self.rb.set('child')
+                        self.radiobut()
+                        self.entry.delete(0, END)
+                        self.entry.insert(END, seekchar)
+                        self.lookup()
+                        
     def openf(self):
         # Data decrypt and can be saved as _tvg file.
         
@@ -1373,11 +1394,15 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            ask = filedialog.askopenfilename(filetypes = [("Encryption file","*_protected.txt")])
+            ask = filedialog.askopenfilename(initialdir = os.getcwd().rpartition('\\')[0], filetypes = [("Encryption file","*_protected.txt")])
             if ask:
                 try:
                     with open(f'{ask}', 'rb') as encrypt:
-                        rd  = eval(encrypt.read().decode('utf-8'))
+                        rd  = encrypt.read().decode('utf-8')
+                        if rd[0] == '{' and rd[-1] == '}':
+                            rd = eval(rd)
+                        else:
+                            raise Exception('This protected file is corrupted!')
                     key = list(rd)[0]
                     ins = rd[key]
                     dec = ptd.complek(ins, key =((j for j in i) for i in eval(key)), 
@@ -1530,7 +1555,7 @@ class TreeViewGui:
             if str(self.text.cget('state')) == 'disabled':
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
-                ckb = ['button24', 'button28', 'text']
+                ckb = ['button24', 'button28', 'button20', 'text']
                 for i in self.bt:
                     if 'label' and 'scrollbar' not in i and i not in ckb:
                         self.bt[i].config(state='disable')

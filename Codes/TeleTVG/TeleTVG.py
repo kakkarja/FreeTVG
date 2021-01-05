@@ -323,7 +323,7 @@ class Reminder:
         # Sending file using asyncio call
         
         if self.entto.get():
-            ask = filedialog.askopenfilename(filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
+            ask = filedialog.askopenfilename(initialdir = os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile'), filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
             if ask:
                 asyncio.get_event_loop().run_until_complete(self.sentfile(ask))
             else:
@@ -365,8 +365,10 @@ class Reminder:
         async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
             try:
                 await client.connect()
+                num = 0
                 async for message in client.iter_messages(self.users[self.entto.get()], 5):
                     if message.media:
+                        num += 1
                         if isinstance(message.media, 
                                       (types.MessageMediaDocument,
                                        types.MessageMediaPhoto)
@@ -376,7 +378,12 @@ class Reminder:
             except:
                 await client.disconnect()
                 messagebox.showerror('TeleTVG', f'{sys.exc_info()[1]}', parent = self.root)
-                    
+            finally:
+                if num:
+                    ask = messagebox.askquestion('TeleTVG', f'You have dwnload {num} files, want to open file folder?')
+                    if ask:
+                        os.startfile(path)
+                        
     def gf(self):
         # Starting running asyncio get file.
         

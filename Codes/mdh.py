@@ -20,7 +20,7 @@ def convhtml(text: str, filename: str):
                     sp = sp.span()[1]-4
                     txt = re.search(r'-', i)
                     if txt:
-                        txt = f'* **{i[txt.span()[1]:]}**'
+                        txt = f'* #### {i[txt.span()[1]:]}'
                     else:
                         txt = '*  '
                     tohtml.append(f'{" " * sp}{txt}\n\n')
@@ -44,7 +44,7 @@ body {
 }
 </style>
 <body>
-<button class="button"  onclick="javascript:window.print();">Print this page</button>
+<button class="button"  onclick="javascript:window.print();">Print</button>
 
 """
         nxt = f"""{a}
