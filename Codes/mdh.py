@@ -2,7 +2,7 @@ import markdown
 import os
 import re
 
-def convhtml(text: str, filename: str):
+def convhtml(text: str, filename: str, font: str):
     # Converting your TVG to html and printable directly from browser.
     
     try:
@@ -32,14 +32,14 @@ def convhtml(text: str, filename: str):
         chg = f"""{''.join(tohtml)}"""
         
         a = markdown.markdown(chg)
-        cssstyle = """<!DOCTYPE html>
+        setfont = 'body { ' + f"""background-color: gold;
+  font-family: '{font}', san-serif;""" + ' }'
+        cssstyle = f"""<!DOCTYPE html>
 <html>
 <style>
-body {
-  background-color: gold;
-  font-family: 'Trebuchet MS', sans-serif;
-}
-@media print {
+{setfont}
+"""
+        printed = """@media print {
 .button { display: none }
 }
 </style>
@@ -52,7 +52,7 @@ body {
 </body>
 </html>
 """
-        cssstyle = cssstyle + nxt
+        cssstyle = cssstyle + printed + nxt
         with open(f'{filename}.html', 'w') as whtm:
             whtm.write(cssstyle)
         os.startfile(f'{filename}.html')

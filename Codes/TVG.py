@@ -1007,10 +1007,14 @@ class TreeViewGui:
         # Show to browser and directly print as pdf or direct printing.
         
         if self.checkfile():
-            if f'{self.filename}_hid.json' in os.listdir():
-                convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}')
+            if '}' in self.text['font']:
+                fon = self.text['font'].partition('}')[0].replace('{','')
             else:
-                convhtml(f'{self.filename}.txt', f'{self.filename}')
+                fon = self.text['font'].partition(' ')[0]
+            if f'{self.filename}_hid.json' in os.listdir():
+                convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon)
+            else:
+                convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
                 
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.
