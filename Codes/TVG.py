@@ -72,7 +72,8 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-comma>', self.fcsent)
         self.root.bind_all('<Control-Key-slash>', self.fcsent)
         self.root.bind_all('<Control-Key-bracketleft>', self.fcsent)
-        self.root.bind_all('<Control-Key-bracketright>', self.temp) 
+        self.root.bind_all('<Control-Key-bracketright>', self.temp)
+        self.root.bind_all('<Control-Key-g>', self.fcsent)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -421,6 +422,8 @@ class TreeViewGui:
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
             elif event.keysym == 'n':
                 self.cmrows()
+            elif event.keysym == 'g':
+                self.chgfile()            
             elif event.keysym == '1':
                 self.sendtel()
             elif event.keysym == '2':
@@ -1276,12 +1279,12 @@ class TreeViewGui:
         # This is the sending note with Telethon [Telegram api wrapper].
         
         ori = os.getcwd()
+        os.chdir(ori.rpartition('\\')[0])
+        self.free()        
         if self.text.get('1.0', END)[:-1]:
-            os.chdir(ori.rpartition('\\')[0])
-            self.free()
             TeleTVG.main(self, ori, self.text.get('1.0', END)[:-1]) 
         else:
-            messagebox.showinfo('TreeViewGui', 'Nothing to be sent!')
+            TeleTVG.main(self, ori)
             
     def calc(self):
         # Calling TeleCalc

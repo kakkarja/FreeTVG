@@ -676,7 +676,7 @@ class Reminder:
                 else:
                     messagebox.showinfo('TeleTVG', 'No message to send?', parent = self.root)
                     
-def main(stat, path, message):
+def main(stat, path, message = None):
     # Start app.
     # Please create encryption for app_id and app_hash for security.
     
@@ -727,7 +727,8 @@ def main(stat, path, message):
                     asyncio.get_event_loop().run_until_complete(begin.acc())
                     asyncio.get_event_loop().run_until_complete(begin.filcomb())
                     begin.entto.focus_force()
-                    begin.text.insert(END, message)
+                    if message:
+                        begin.text.insert(END, message)
                     begin.root.mainloop()
                 except:
                     messagebox.showerror('TreeViewGui', f'{sys.exc_info()}')
