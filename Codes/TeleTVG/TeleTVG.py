@@ -102,7 +102,7 @@ class Reminder:
         self.sp4.pack(side = LEFT, pady = (0, 5), padx = (0, 3), fill = 'x', expand = 1)        
         self.frms = ttk.Frame(self.root)
         self.frms.pack(fill = 'x')
-        self.schb = Button(self.frms, text = 'S C H E D U L E R  S E N D  T E L E G R A M', 
+        self.schb = Button(self.frms, text = 'S C H E D U L E R  S E N D', 
                            command = self.runsend, font = 'consolas 12 bold', relief = GROOVE)
         self.schb.pack(padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.frm3 = Frame(self.root)
@@ -166,13 +166,14 @@ class Reminder:
     def emj(self):
         # Emoji window.
         
-        emo.main()
+        emo.main(self)
         
     def winexit(self):
         # Will close ReminderTel and Emoji window as well.
 
         if emo.Emo.status is False:
             emo.Emo.status = True
+            emo.Emo.paste = None
             emo.Emo.mainon.destroy()
         os.chdir(Reminder.DEST)
         Reminder.STATUS = False

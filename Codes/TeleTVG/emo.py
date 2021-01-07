@@ -10,6 +10,7 @@ from DataB import Datab as db
 class Emo:
     status = True
     mainon = None
+    paste = None
     def __init__(self, root):
         """
         Creating Emoji for ReminderTel.
@@ -30,6 +31,7 @@ class Emo:
         self.root.bind('<Control-l>', self.slec)
         self.sel = []
         self.upt = tuple()
+        self.lock = False
         self.fr = ttk.Frame(self.root)
         self.fr.pack(fill = 'both')
         self.lbe = Listbox(self.fr, font = '-*-Segoe-UI-Emoji-*--*-300-*', 
@@ -125,14 +127,18 @@ class Emo:
         
     def copem(self):
         # Copy all selected emojies.
-        
+
         lj = ''
         if self.sel:
             gc = self.sel
             for i in gc:
                 lj += ''.join(self.lbe.get(i))
-            self.root.clipboard_clear()
-            self.root.clipboard_append(lj)
+            if Emo.paste:
+                Emo.paste.text.insert(INSERT, lj)
+                Emo.paste.text.see(INSERT)
+            else:
+                self.root.clipboard_clear()
+                self.root.clipboard_append(lj)
             self.lbe.selection_clear(0, END)
             self.sel = []
             self.upt = tuple()
@@ -162,55 +168,94 @@ class Emo:
                     self.sel = []
                     self.upt = tuple()
             else:
-                messagebox.showinfo('Emo', 'Adding mark is aborted!', parent = self.root)
+                messagebox.showinfo('Emo', 'Saving Mark aborted!', parent = self.root)
         else:
             messagebox.showinfo('Emo', 'Nothing selected yet!', parent = self.root)
                 
     def choind(self):
         # Choose saved marking and directly copied.
         
-        if 'marking.json' in os.listdir():
-            mrk = db('marking')
-            class MyDialog(simpledialog.Dialog):
-            
-                def body(self, master):
-                    self.title('Choose Mark')
-                    Label(master, text="Marking: ").pack(side = LEFT)
-                    self.e1 = ttk.Combobox(master, state = 'readonly')
-                    self.e1.pack(side = LEFT)
-                    self.e1['values'] = list(mrk.loadkeys())
-                    self.e1.current(0)
-                    return self.e1
-            
-                def apply(self):
-                    self.result = mrk.takedat(self.e1.get())
-            
-            d = MyDialog(self.root)
-            if d.result:
-                cope = ''
-                for i in d.result:
-                    cope += ''.join(self.lbe.get(i))
-                self.root.clipboard_clear()
-                self.root.clipboard_append(cope)
-                del cope
-                del d.result
-                messagebox.showinfo('Emo', 'Copied!', parent = self.root)
-        else:
-            messagebox.showinfo('Emo', 'No database, please save some first!', parent = self.root)
-            
+        if self.lock is False:
+            if 'marking.json' in os.listdir():
+                mrk = db('marking')
+                self.lock = True
+                class MyDialog(simpledialog.Dialog):
+                
+                    def body(self, master):
+                        self.title('Choose Mark')
+                        Label(master, text="Marking: ").pack(side = LEFT)
+                        self.e1 = ttk.Combobox(master, state = 'readonly')
+                        self.e1.pack(side = LEFT)
+                        self.e1['values'] = list(mrk.loadkeys())
+                        self.e1.current(0)
+                        return self.e1
+                
+                    def apply(self):
+                        self.result = mrk.takedat(self.e1.get())
+                
+                d = MyDialog(self.root)
+                self.lock = False
+                if d.result:
+                    cope = ''
+                    for i in d.result:
+                        cope += ''.join(self.lbe.get(i))
+                    if Emo.paste:
+                        Emo.paste.text.insert(INSERT, cope)
+                        Emo.paste.text.see(INSERT)
+                    else:
+                        self.root.clipboard_clear()
+                        self.root.clipboard_append(cope)
+                        messagebox.showinfo('Emo', 'Copied!', parent = self.root)
+                    del cope
+                    del d.result
+                else:
+                    ask = messagebox.askyesno('Emo', 'Do you want delete Mark?')
+                    if ask:
+                        if self.lock is False:
+                            if 'marking.json' in os.listdir():
+                                mrk = db('marking')
+                                self.lock = True
+                                class MyDialog(simpledialog.Dialog):
+                                
+                                    def body(self, master):
+                                        self.title('Choose Mark')
+                                        Label(master, text="Marking: ").pack(side = LEFT)
+                                        self.e1 = ttk.Combobox(master, state = 'readonly')
+                                        self.e1.pack(side = LEFT)
+                                        self.e1['values'] = list(mrk.loadkeys())
+                                        self.e1.current(0)
+                                        return self.e1
+                                
+                                    def apply(self):
+                                        self.result = self.e1.get()
+                                
+                                d = MyDialog(self.root)
+                                self.lock = False
+                                if d.result:
+                                    mrk.deldata(d.result)
+                            else:
+                                messagebox.showinfo('Emo', 'No database, please save some first!', parent = self.root)
+            else:
+                messagebox.showinfo('Emo', 'No database, please save some first!', parent = self.root)
+                
     def delwin(self, event = None):
         # Exit emoji window.
 
         Emo.status = True
         Emo.mainon = None
+        Emo.paste = None
         self.root.destroy()
            
-def main():
+def main(paste = None):
     # Create Emoji window for one time until it close.
     
     if Emo.status:
+        if paste:
+            Emo.paste = paste
         root = Tk()
         Emo.status = False
+        
+            
         Emo(root)
         Emo.mainon = root
         Emo.mainon.mainloop()
