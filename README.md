@@ -98,6 +98,8 @@
         * **Convert TVG file to HTML and open in browser.**
           >**Please get markdown first for Printing to work https://github.com/Python-Markdown/markdown.**
         * **Just click the print button and save to pdf or print direct to a printer.**
+    * **Emoji now can paste direct to TeleTVG screen.**
+        * **Now can delete Mark that no longer use.**
 * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
