@@ -36,6 +36,14 @@ def convhtml(text: str, filename: str, font: str):
   font-family: '{font}', san-serif;""" + ' }'
         cssstyle = f"""<!DOCTYPE html>
 <html>
+<button class="button"  onclick="javascript:window.print();">Print</button>
+<header>
+<h1>
+<strong>
+{filename}
+</strong>
+</h1>
+</header>
 <style>
 {setfont}
 """
@@ -44,7 +52,6 @@ def convhtml(text: str, filename: str, font: str):
 }
 </style>
 <body>
-<button class="button"  onclick="javascript:window.print();">Print</button>
 
 """
         nxt = f"""{a}
