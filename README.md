@@ -100,6 +100,14 @@
         * **Just click the print button and save to pdf or print direct to a printer.**
     * **Emoji now can paste direct to TeleTVG screen.**
         * **Now can delete Mark that no longer use.**
+    * **Can write markdown style.**
+        * **TAKE NOTE:**
+            * **This is not markdown editor, so not all markdown style will give desired result.**
+            * **Simple markdowns style will applied [eg. _emphasize_].**
+    * **Can print with checkboxes.**
+        * **Need to get extention for markdown https://github.com/facelessuser/pymdown-extensions.**
+    * **Now can paste emoji to editor.**
+        * **No button yet for emoji, only key binding [Control+';']**
 * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
