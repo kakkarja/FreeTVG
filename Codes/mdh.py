@@ -40,10 +40,12 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
         checkbut = """.markdown-body .task-list-item {
   list-style-type: none !important;
 }
-
 .markdown-body .task-list-item input[type="checkbox"] {
   margin: 0 4px 0.25em -20px;
   vertical-align: middle;
+}
+.strikethrough:checked + span {
+  text-decoration: line-through;
 }
 """
         cssstyle = f"""<!DOCTYPE html>
@@ -64,10 +66,8 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
 }
 </style>
 <body class="markdown-body">
-
 """
         nxt = f"""{a}
-
 </body>
 </html>
 """
@@ -77,7 +77,10 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
             fcs = []
             for i in cs:
                 if '<li>' in i and len(i) > 5:
-                    fx = i[:4]+'\n<p>'+i[4:-5]+'</p>\n'+i[-5:]+'\n'
+                    fx = i[:4]+'\n<p>\n<span>'+i[4:-5]+'</span>\n</p>\n'+i[-5:]+'\n'
+                    fcs.append(fx)
+                elif '<p>' in i:
+                    fx = i[:3]+'\n<span>'+i[3:-4]+'</span>\n'+i[-4:]+'\n'
                     fcs.append(fx)
                 else:
                     fcs.append(f'{i}\n')
@@ -85,7 +88,8 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
             cssstyle = ''.join(fcs)
             cssstyle = cssstyle.replace('<ul>', '<ul class="task-list">')
             cssstyle = cssstyle.replace('<li>', '<li class="task-list-item">')
-            cssstyle = cssstyle.replace('<p>','<p><input type="checkbox" enabled/>')
+            cssstyle = cssstyle.replace('<p>','<p><input type="checkbox" class="strikethrough" name="ck">')
+            cssstyle = cssstyle.replace('<span>','<span for="ck">')
             del fcs
         else:
             cssstyle = cssstyle + printed + nxt
