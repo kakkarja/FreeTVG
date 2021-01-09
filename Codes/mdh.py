@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+#Copyright (c) 2020, KarjaKAK
+#All rights reserved.
+
 import markdown
-import pymdownx
 import os
 import re
 
@@ -21,10 +24,7 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
                     sp = sp.span()[1]-4
                     txt = re.search(r'-', i)
                     if txt and not i[txt.span()[1]:].isspace():
-                        if ckb:
-                            txt = f'* [ ] {i[txt.span()[1]:]}'
-                        else:
-                            txt = f'* {i[txt.span()[1]:]}'
+                        txt = f'* {i[txt.span()[1]:]}'
                     else:
                         txt = '*  '
                     tohtml.append(f'{" " * sp}{txt}\n\n')
@@ -34,9 +34,7 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
                     else:
                         tohtml.append(f'#### {i}\n\n')
         chg = f"""{''.join(tohtml)}"""
-        
-        a = markdown.Markdown(extensions=['pymdownx.smartsymbols', 'pymdownx.tasklist'])
-        a  = a.convert(chg)
+        a  = markdown.markdown(chg)
         setfont = 'body { ' + f"""background-color: gold;
   font-family: '{font}', san-serif;""" + ' }'
         checkbut = """.markdown-body .task-list-item {
@@ -75,7 +73,9 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
 """
         if ckb:
             cssstyle = cssstyle + checkbut + printed + nxt
-            cssstyle = cssstyle.replace('disabled', 'enabled')
+            cssstyle = cssstyle.replace('<ul>', '<ul class="task-list">')
+            cssstyle = cssstyle.replace('<li>', '<li class="task-list-item">')
+            cssstyle = cssstyle.replace('<p>', '<p><input type="checkbox" enabled/>')
         else:
             cssstyle = cssstyle + printed + nxt
         with open(f'{filename}.html', 'w') as whtm:
