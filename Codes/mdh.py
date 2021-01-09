@@ -73,9 +73,20 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
 """
         if ckb:
             cssstyle = cssstyle + checkbut + printed + nxt
+            cs = cssstyle.split('\n')
+            fcs = []
+            for i in cs:
+                if '<li>' in i and len(i) > 5:
+                    fx = i[:4]+'\n<p>'+i[4:-5]+'</p>\n'+i[-5:]+'\n'
+                    fcs.append(fx)
+                else:
+                    fcs.append(f'{i}\n')
+            del cs
+            cssstyle = ''.join(fcs)
             cssstyle = cssstyle.replace('<ul>', '<ul class="task-list">')
             cssstyle = cssstyle.replace('<li>', '<li class="task-list-item">')
-            cssstyle = cssstyle.replace('<p>', '<p><input type="checkbox" enabled/>')
+            cssstyle = cssstyle.replace('<p>','<p><input type="checkbox" enabled/>')
+            del fcs
         else:
             cssstyle = cssstyle + printed + nxt
         with open(f'{filename}.html', 'w') as whtm:
