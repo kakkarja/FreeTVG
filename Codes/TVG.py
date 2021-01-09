@@ -13,6 +13,7 @@ import TeleTVG
 import re
 from FileFind import filen
 from mdh import convhtml
+import emo
 from datetime import datetime as dt
 
 class TreeViewGui:
@@ -74,6 +75,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-bracketleft>', self.fcsent)
         self.root.bind_all('<Control-Key-bracketright>', self.temp)
         self.root.bind_all('<Control-Key-g>', self.fcsent)
+        self.root.bind_all('<Control-Key-semicolon>', self.emoj)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -208,6 +210,10 @@ class TreeViewGui:
         self.button28 = ttk.Button(self.frb1, text = 'Template', command = self.temp)
         self.button28.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button28'] = self.button28
+        #Wait till new func found again!!!
+        #self.button29 = ttk.Button(self.frb1, text = 'Emoji', command = self.emoj)
+        #self.button29.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        #self.bt['button29'] = self.button29        
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
@@ -1014,10 +1020,17 @@ class TreeViewGui:
                 fon = self.text['font'].partition('}')[0].replace('{','')
             else:
                 fon = self.text['font'].partition(' ')[0]
+            ask = messagebox.askyesno('TreeViewGui', 'Add checkboxes?')
             if f'{self.filename}_hid.json' in os.listdir():
-                convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon)
+                if ask:
+                    convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon, ckb = True)
+                else:
+                    convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon)
             else:
-                convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
+                if ask:
+                    convhtml(f'{self.filename}.txt', f'{self.filename}', fon, ckb = True)
+                else:
+                    convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
                 
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.
@@ -1269,6 +1282,10 @@ class TreeViewGui:
                 self.spaces()
                 messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
             
+    def emoj(self, event = None):
+        if str(self.text.cget('state')) == 'normal' and str(self.bt['button24'].cget('state')) == 'normal':
+            emo.main(self)
+    
     def free(self):
         if TreeViewGui.FREEZE is False:
             TreeViewGui.FREEZE = True
@@ -1280,6 +1297,10 @@ class TreeViewGui:
         
         ori = os.getcwd()
         os.chdir(ori.rpartition('\\')[0])
+        if emo.Emo.status is False:
+            emo.Emo.status = True
+            emo.Emo.paste = None
+            emo.Emo.mainon.destroy()        
         self.free()        
         if self.text.get('1.0', END)[:-1]:
             TeleTVG.main(self, ori, self.text.get('1.0', END)[:-1]) 
@@ -1291,6 +1312,10 @@ class TreeViewGui:
         
         ori = os.getcwd()
         os.chdir(ori.rpartition('\\')[0])
+        if emo.Emo.status is False:
+            emo.Emo.status = True
+            emo.Emo.paste = None
+            emo.Emo.mainon.destroy()        
         self.free()
         TeleCalc.main(self, ori)        
             
@@ -1562,7 +1587,7 @@ class TreeViewGui:
             if str(self.text.cget('state')) == 'disabled':
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
-                ckb = ['button24', 'button28', 'button20', 'text']
+                ckb = ['button24', 'button28', 'button20', 'button29', 'text']
                 for i in self.bt:
                     if 'label' and 'scrollbar' not in i and i not in ckb:
                         self.bt[i].config(state='disable')
@@ -1722,6 +1747,10 @@ class TreeViewGui:
             os.chdir(os.getcwd().rpartition('\\')[0])
             with open('lastopen.tvg', 'wb') as lop:
                 lop.write(str({'lop': self.filename}).encode())
+        if emo.Emo.status is False:
+            emo.Emo.status = True
+            emo.Emo.paste = None
+            emo.Emo.mainon.destroy()
         self.root.destroy()
     
     def txtcol(self, event = None, path = None, wr = True):

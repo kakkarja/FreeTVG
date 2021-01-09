@@ -11,6 +11,7 @@ class Emo:
     status = True
     mainon = None
     paste = None
+    pathn = None
     def __init__(self, root):
         """
         Creating Emoji for ReminderTel.
@@ -153,15 +154,15 @@ class Emo:
         if self.sel:
             nm = simpledialog.askstring('Emo', 'Name your marking: [if name is exist, will overwrite!]', parent = self.root)
             if nm:            
-                if 'marking.json' in os.listdir():
-                    mrk = db('marking')
+                if 'marking.json' in os.listdir(Emo.pathn):
+                    mrk = db(os.path.join(Emo.pathn,'marking'))
                     m = {f'{nm}': self.sel}
                     mrk.indata(m)
                     self.lbe.selection_clear(0, END)
                     self.sel = []
                     self.upt = tuple()
                 else:
-                    mrk = db('marking')
+                    mrk = db(os.path.join(Emo.pathn,'marking'))
                     m = {f'{nm}': self.sel}
                     mrk.createdb(m)
                     self.lbe.selection_clear(0, END)
@@ -176,8 +177,8 @@ class Emo:
         # Choose saved marking and directly copied.
         
         if self.lock is False:
-            if 'marking.json' in os.listdir():
-                mrk = db('marking')
+            if 'marking.json' in os.listdir(Emo.pathn):
+                mrk = db(os.path.join(Emo.pathn,'marking'))
                 self.lock = True
                 class MyDialog(simpledialog.Dialog):
                 
@@ -212,8 +213,8 @@ class Emo:
                     ask = messagebox.askyesno('Emo', 'Do you want delete Mark?')
                     if ask:
                         if self.lock is False:
-                            if 'marking.json' in os.listdir():
-                                mrk = db('marking')
+                            if 'marking.json' in os.listdir(Emo.pathn):
+                                mrk = db(os.path.join(Emo.pathn,'marking'))
                                 self.lock = True
                                 class MyDialog(simpledialog.Dialog):
                                 
@@ -248,14 +249,16 @@ class Emo:
            
 def main(paste = None):
     # Create Emoji window for one time until it close.
-    
+
+    path = os.getcwd().rpartition('\\')[0]
+    if 'emodb' not in os.listdir(path):
+        os.mkdir(os.path.join(path, 'emodb'))
     if Emo.status:
+        Emo.pathn = os.path.join(path, 'emodb')
+        Emo.status = False
         if paste:
             Emo.paste = paste
         root = Tk()
-        Emo.status = False
-        
-            
         Emo(root)
         Emo.mainon = root
         Emo.mainon.mainloop()

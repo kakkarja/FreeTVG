@@ -9,8 +9,15 @@ class Datab:
     """
     Database created in json file.
     """
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
+        self.path = None
+        self.ckname = None
+        if '\\' in self.name:
+            self.path = self.name.rpartition('\\')[0]
+            self.ckname = self.name.rpartition('\\')[2]
+        else:
+            self.ckname = self.name
     
     def __str__(self):
         return f'{self.name}.json'
@@ -26,7 +33,7 @@ class Datab:
         # Insert data to existing database.
         
         adb = None
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             with open(f'{self.name}.json') as rdb:
                 adb = dict(json.load(rdb)) 
             with open(f'{self.name}.json', 'w') as dbj:
@@ -41,7 +48,7 @@ class Datab:
         # Delete a data in existing database.
         
         adb = None
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             with open(f'{self.name}.json') as rdb:
                 adb = dict(json.load(rdb))
             if named in adb:
@@ -59,7 +66,7 @@ class Datab:
         # Taking a data from database.
         
         adb = None
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             with open(f'{self.name}.json') as rdb:
                 adb = dict(json.load(rdb))
             if named in adb:
@@ -77,7 +84,7 @@ class Datab:
         # Return the total of records in database.
         
         adb = None
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             with open(f'{self.name}.json') as rdb:
                 adb = dict(json.load(rdb))
             return len(adb)
@@ -87,14 +94,14 @@ class Datab:
     def deldb(self):
         # Delete database.
         
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             os.remove(f'{self.name}.json')
     
     def loadall(self):
         # Load all database to dictionary's items.
         
         adb = None
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             with open(f'{self.name}.json') as rdb:
                 adb = dict(json.load(rdb))
             return adb.items()
@@ -105,7 +112,7 @@ class Datab:
         # Load all database keys only.
         
         adb = None
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             with open(f'{self.name}.json') as rdb:
                 adb = dict(json.load(rdb))
             return adb.keys()
@@ -116,7 +123,7 @@ class Datab:
         # Load all database values only
         
         adb = None
-        if f'{self.name}.json' in os.listdir():
+        if f'{self.ckname}.json' in os.listdir(self.path):
             with open(f'{self.name}.json') as rdb:
                 adb = dict(json.load(rdb))
             return adb.values()
@@ -125,7 +132,8 @@ class Datab:
             
                 
 if __name__ == '__main__':
-    a = Datab('coba')
+    a = Datab(os.path.join(os.getcwd(),'coba'))
+    
     print(a)
     a.createdb({'mantaaap': 'keren'})
     a.indata({'keren': 'mantaaap'})
