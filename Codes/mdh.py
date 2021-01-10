@@ -29,9 +29,9 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
                         txt = '*  '
                     tohtml.append(f'{" " * sp}{txt}\n\n')
                 else:
-                    if '\n' in i:
+                    if '\n' in i and re.search(r'\w+', i):
                         tohtml.append(f'#### {i}\n')
-                    else:
+                    elif re.search(r'\w+', i):
                         tohtml.append(f'#### {i}\n\n')
         chg = f"""{''.join(tohtml)}"""
         a  = markdown.markdown(chg)
