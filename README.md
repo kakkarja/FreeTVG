@@ -106,7 +106,8 @@
             * **Simple markdowns style will applied [eg. _emphasize_].**
     * **Can print with checkboxes.**
     * **Now can paste emoji to editor.**
-        * **No button yet for emoji, only key binding [Control+';']**
+        * **~~No~~ Button for emoji, ~~only~~ key binding [Control+';']**
+    * **Can view created html from Printing, with HTML View.**
 * **And many more.. :joy:**
                 
 ![TVG](/TVG.png)
