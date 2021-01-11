@@ -112,7 +112,6 @@
                 
 ![TVG](/TVG.png)
 ![TVG5](/TVG5.png)
-![TVG3](/TVG3.png)
 ![TVG4](/TVG4.png)
 ![TVG2](/TVG2.png)
 ![TVG1](/TVG1.png)
