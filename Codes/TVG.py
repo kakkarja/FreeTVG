@@ -28,7 +28,7 @@ class TreeViewGui:
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
         self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
-        self.wwidth = 1100
+        self.wwidth = 1180
         self.wheight = 660
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
         self.pheight = int(self.root.winfo_screenheight()/4 - self.wheight/4)
@@ -76,6 +76,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-bracketright>', self.temp)
         self.root.bind_all('<Control-Key-g>', self.fcsent)
         self.root.bind_all('<Control-Key-semicolon>', self.emoj)
+        self.root.bind_all('<Control-Key-backslash>', self.fcsent)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -163,6 +164,9 @@ class TreeViewGui:
         self.button27 = ttk.Button(self.bframe, text = 'Ex', command = self.editex)
         self.button27.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button27'] = self.button27
+        self.button30 = ttk.Button(self.bframe, text = 'HTML View', command = self.htmlview)
+        self.button30.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button30'] = self.button30        
         
         # 4th frame for below buttons.
         # Frame for second row buttons.
@@ -210,15 +214,14 @@ class TreeViewGui:
         self.button28 = ttk.Button(self.frb1, text = 'Template', command = self.temp)
         self.button28.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button28'] = self.button28
-        #Wait till new func found again!!!
-        #self.button29 = ttk.Button(self.frb1, text = 'Emoji', command = self.emoj)
-        #self.button29.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        #self.bt['button29'] = self.button29        
+        self.button29 = ttk.Button(self.frb1, text = 'Emoji', command = self.emoj)
+        self.button29.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button29'] = self.button29
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
         ftt = 'verdana 10'
-        self.tframe = Frame(root, width = 1100, height = 550)
+        self.tframe = Frame(root, width = 1170, height = 550)
         self.tframe.pack(anchor = 'w', side = TOP)
         self.tframe.pack_propagate(0)
         self.text = Text(self.tframe, font = ftt, padx = 5, pady = 5, wrap = NONE)
@@ -454,6 +457,8 @@ class TreeViewGui:
                 self.ft()
             elif event.keysym == 'slash':
                 self.oriset()
+            elif event.keysym == 'backslash':
+                self.htmlview()
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -1015,22 +1020,60 @@ class TreeViewGui:
     def saveaspdf(self):
         # Show to browser and directly print as pdf or direct printing.
         
-        if self.checkfile():
-            if '}' in self.text['font']:
-                fon = self.text['font'].partition('}')[0].replace('{','')
-            else:
-                fon = self.text['font'].partition(' ')[0]
-            ask = messagebox.askyesno('TreeViewGui', 'Add checkboxes?')
-            if f'{self.filename}_hid.json' in os.listdir():
-                if ask:
-                    convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon, ckb = True)
+        try:
+            if self.checkfile():
+                if '}' in self.text['font']:
+                    fon = self.text['font'].partition('}')[0].replace('{','')
                 else:
-                    convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon)
-            else:
-                if ask:
-                    convhtml(f'{self.filename}.txt', f'{self.filename}', fon, ckb = True)
+                    fon = self.text['font'].partition(' ')[0]
+                ask = messagebox.askyesno('TreeViewGui', 'Add checkboxes?')
+                if f'{self.filename}_hid.json' in os.listdir():
+                    if ask:
+                        convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon, ckb = True)
+                    else:
+                        convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon)
                 else:
-                    convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
+                    if ask:
+                        convhtml(f'{self.filename}.txt', f'{self.filename}', fon, ckb = True)
+                    else:
+                        convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
+        except Exception as e:
+            messagebox.showerror('TreeViewGui', f'{e}')
+    
+    def htmlview(self):
+        self.hidcheck()
+        if self.unlock:
+            if self.checkfile():
+                if self.lock is False:
+                    path = os.getcwd().rpartition('\\')[0]
+                    ltvg = [i for i in os.listdir(path) if '_tvg' in i]
+                    ghtm = {}
+                    for i in ltvg:
+                        if f'{i.rpartition("_")[0]}.html' in os.listdir(os.path.join(path,i)):
+                            ghtm[i] = f'{i.rpartition("_")[0]}.html'
+                        
+                    if ghtm:
+                        self.lock = True
+                        class MyDialog(simpledialog.Dialog):
+                        
+                            def body(self, master):
+                                self.title('Choose HTML File')
+                                Label(master, text="File: ").grid(row=0, column = 0, columnspan = 3, sticky = E)
+                                self.e1 = ttk.Combobox(master, state = 'readonly')
+                                self.e1['values'] = [f'{j}: {k}' for j, k in ghtm.items()]
+                                self.e1.current(0)
+                                self.e1.grid(row=0, column=1)
+                                return self.e1
+                        
+                            def apply(self):
+                                self.result = self.e1.get()
+                                            
+                        d = MyDialog(self.root)
+                        self.lock = False
+                        if d.result:
+                            os.startfile(os.path.join(path, d.result.partition(':')[0], d.result.partition(':')[2][1:]))
+                    else:
+                        messagebox.showinfo('TreeViewGui', 'Nothing yet!')
                 
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.
@@ -1042,7 +1085,7 @@ class TreeViewGui:
                 if TreeViewGui.MARK:
                     TreeViewGui.MARK = False
                 tvg = tv(self.filename)
-                cks =  tvg.insighttree()
+                cks = tvg.insighttree()
                 num2 = 1
                 if cks:
                     while num2 !=  len(cks):
@@ -1050,20 +1093,20 @@ class TreeViewGui:
                             if cks[num2][0] == 'parent':
                                 if cks[num2 - 1][0] != 'space':
                                     tvg.insertspace(num2)
-                                    cks =  tvg.insighttree()
+                                    cks = tvg.insighttree()
                                 else:
                                     num2 += 1
                             elif cks[num2][0] == 'space':
                                 if cks[num2 - 1][0] == 'space':
                                     tvg.delrow(num2)
-                                    cks =  tvg.insighttree()
+                                    cks = tvg.insighttree()
                                 else:
                                     num2 += 1
                             elif 'child' in cks[num2][0]:
                                 if cks[num2 - 1][0] == 'space':
                                     tvg.delrow(num2-1)
                                     num2 -= 1
-                                    cks =  tvg.insighttree()
+                                    cks = tvg.insighttree()
                                 else:
                                     num2 += 1
                             else:
@@ -1073,7 +1116,7 @@ class TreeViewGui:
                             break
                     if cks[0][0] == 'space':
                         tvg.delrow(0)
-                        cks =  tvg.insighttree()
+                        cks = tvg.insighttree()
                     if cks[len(cks)-1][0] == 'space':
                         tvg.delrow(len(cks)-1)
                     self.view()
