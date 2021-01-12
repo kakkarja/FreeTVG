@@ -110,6 +110,7 @@
         * **~~No~~ Button for emoji, ~~only~~ key binding [Control+';']**
     * **Can view created html from Printing, with HTML View.**
 * **And many more.. :joy:**
+
 ![TVG3](/TVG3.png)
 ![TVG6](/TVG6.png)
 ![TVG7](/TVG7.png)
