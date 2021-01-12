@@ -38,9 +38,10 @@
         * **You have to create Telegram api "https://core.telegram.org/api" to use this incredible function.**
     * **Can choose color for setting the text and listbox background color. [No button, only event binding. Control+.]**
     * **Can change font setting for text and listbox. [No button, only event binding. Control+,]**
-        * **The size is ~~locked~~ on size 10 to 12, to preserve viewing.**
+        * **The size is ~~locked~~ on size 10 to 40.**
         * **TAKE NOTICE:**
-            * **Not all fonts will appear nicely if change the size.**
+            * **Not all fonts are available in html view.**
+                * **If not available the browser will use default font styles.** 
     * **Can delete setting back to original. [No button, only event binding. Control+/]**
     * **~~File Lock~~ has been replace with Editor.** 
         * **FORMAT:**
@@ -109,7 +110,9 @@
         * **~~No~~ Button for emoji, ~~only~~ key binding [Control+';']**
     * **Can view created html from Printing, with HTML View.**
 * **And many more.. :joy:**
-                
+![TVG3](/TVG3.png)
+![TVG6](/TVG6.png)
+![TVG7](/TVG7.png)
 ![TVG](/TVG.png)
 ![TVG5](/TVG5.png)
 ![TVG4](/TVG4.png)
