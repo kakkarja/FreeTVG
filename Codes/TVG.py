@@ -220,7 +220,7 @@ class TreeViewGui:
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
-        ftt = 'verdana 11'
+        ftt = 'consolas 11'
         self.tframe = Frame(root, width = 1170, height = 550)
         self.tframe.pack(anchor = 'w', side = TOP)
         self.tframe.pack_propagate(0)
@@ -245,13 +245,13 @@ class TreeViewGui:
         self.tlframe = Frame(self.tframe, width = 113, height = 550)
         self.tlframe.pack(anchor = 'w', side = LEFT)
         self.tlframe.pack_propagate(0)        
-        self.listb = Listbox(self.tlframe, exportselection = False, font = ftt)
-        self.listb.pack(side = LEFT, fill = 'y', expand = 1)
+        self.listb = Listbox(self.tlframe, font = ftt)
+        self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
         self.sc2frame = Frame(self.tframe, width = 17, height = 550)
         self.sc2frame.pack(anchor = 'w', side = LEFT)
-        self.sc2frame.pack_propagate(0)        
+        self.sc2frame.pack_propagate(0)
         self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
         self.scrollbar2.config(command = self.listb.yview) 
         self.scrollbar2.pack(side = "left", fill = "y")
@@ -1823,8 +1823,8 @@ class TreeViewGui:
                     
     def tvgexit(self, event = None):
         if self.checkfile():
-            os.chdir(os.getcwd().rpartition('\\')[0])
-            with open('lastopen.tvg', 'wb') as lop:
+            ori = os.getcwd().rpartition('\\')[0]
+            with open(os.path.join(ori, 'lastopen.tvg'), 'wb') as lop:
                 lop.write(str({'lop': self.filename}).encode())
         if emo.Emo.status is False:
             emo.Emo.status = True
@@ -1875,9 +1875,9 @@ class TreeViewGui:
                 f = event
             else:
                 if int(f.group()) < 10:
-                    f = event[:(n + f.span()[0])] + '10' + event[(n+f.span()[1]):]
+                    f = event[:(n + f.span()[0])] + '10' + event[(n + f.span()[1]):]
                 else:
-                    f = event[:(n + f.span()[0])] + '40' + event[(n+f.span()[1]):]
+                    f = event[:(n + f.span()[0])] + '40' + event[(n + f.span()[1]):]
         else:
             f = re.search(r'\d+', event)
             fl = event[:f.span()[0]] + '11' + event[f.span()[1]:]
@@ -1885,21 +1885,43 @@ class TreeViewGui:
                 f = event
             else:
                 if int(f.group()) < 10:
-                    f = event[:(n + f.span()[0])] + '10' + event[(n+f.span()[1]):]
+                    f = event[:(f.span()[0])] + '10' + event[(f.span()[1]):]
                 else:
-                    f = event[:(n + f.span()[0])] + '40' + event[(n+f.span()[1]):]
+                    f = event[:(f.span()[0])] + '40' + event[(f.span()[1]):]
         
         if f:
-            self.listb['font'] = fl
             self.text['font'] = f
             for i in self.text.tag_names():
                 self.text.tag_remove(i, '1.0', END)
             self.text.tag_delete(*self.text.tag_names())
             if wr:
+                if fl != self.listb['font']:
+                    self.reblist()      
+                    self.listb['font'] = fl
                 with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
                     ftvg.write(event)
+            else:
+                self.listb['font'] = fl
             if f'{self.filename}_hid.json' not in os.listdir():
                 self.spaces()
+    
+    def reblist(self):
+        # Destroy Listbox and rebuild it again,
+        # for font in listbox to be appear correctly.
+        
+        self.listb.destroy()
+        self.listb = Listbox(self.tlframe, background = self.text['background'],
+                             foreground = self.text['foreground'])
+        self.listb.pack(side = LEFT, fill = 'both', expand = 1)
+        self.listb.pack_propagate(0)
+        self.bt['listb'] = self.listb
+        self.listb.config(yscrollcommand = self.scrollbar2.set)
+        self.scrollbar2.config(command = self.listb.yview)
+        self.listb.bind('<<ListboxSelect>>', self.infobar)
+        self.listb.bind('<MouseWheel>', self.mscrl)
+        self.listb.bind('<Up>', self.mscrl)
+        self.listb.bind('<Down>', self.mscrl)
+        self.listb.bind('<FocusIn>', self.flb)          
     
     def ft(self, event = None, path = None):
         # Initial starting fonts chooser.
@@ -1912,6 +1934,7 @@ class TreeViewGui:
                               '-font', self.text['font'], '-command', 
                               self.root.register(self.clb))
             self.root.tk.call('tk', 'fontchooser', 'show')
+        
     
     def oriset(self, event = None):
         pth = os.getcwd().rpartition('\\')[0]
