@@ -109,6 +109,11 @@
     * **Now can paste emoji to editor.**
         * **~~No~~ Button for emoji, ~~only~~ key binding [Control+';']**
     * **Can view created html from Printing, with HTML View.**
+    * **Can edit just a parent with its childs in Ex.**
+        * **TAKE NOTE:**
+            * **In case want to cancel editing, just click editor back.**
+            * **Or delete everyrhing in editor without leaving an extra blank line.**
+                * **If you wanted to delete them instead, then just leave an extra blank line.** 
 * **And many more.. :joy:**
 
 ![TVG3](/TVG3.png)
