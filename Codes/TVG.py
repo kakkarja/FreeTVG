@@ -81,6 +81,7 @@ class TreeViewGui:
         self.rb = StringVar()
         self.lock = False
         self.store = None
+        self.editorsel = None
         
         # 1st frame. 
         # Frame for label and Entry.
@@ -1565,23 +1566,44 @@ class TreeViewGui:
     def editex(self, event = None):
         # Edit existing file in the editor mode which can be very convinient and powerful.
         # However, before edit in editor mode, it is advice to make backup first!
-        # Just in case you want to get back the previous file. 
+        # Just in case you want to get back to previous file. 
         
         self.hidcheck()
         if self.unlock:
             if self.checkfile:
-                tvg = tv(self.filename)
-                edit = list(tvg.insighttree().values())
-                c = {f'child{i}': f'c{i}'  for i in range(1, 51)}
-                self.editor()
-                for ed in edit:
-                    if ed[0] == 'parent':
-                        self.text.insert(END, f'p:{ed[1][:-2]}\n')
-                    elif ed[0] == 'space':
-                        self.text.insert(END, f's:\n')
+                ask = messagebox.askyesno('TreeViewGui', '"Yes" Edit whole file, or "No" Edit selected parent only?')
+                if ask:
+                    tvg = tv(self.filename)
+                    edit = list(tvg.insighttree().values())
+                    c = {f'child{i}': f'c{i}'  for i in range(1, 51)}
+                    self.editor()
+                    for ed in edit:
+                        if ed[0] == 'parent':
+                            self.text.insert(END, f'p:{ed[1][:-2]}\n')
+                        elif ed[0] == 'space':
+                            self.text.insert(END, f's:\n')
+                        else:
+                            self.text.insert(END, f'{c[ed[0]]}:{ed[1][1:]}')
+                    os.remove(f'{self.filename}.txt')
+                else:
+                    if self.listb.curselection(): 
+                        stor = int(self.listb.curselection()[0])
+                        tvg = tv(self.filename)
+                        ckp = tvg.insighttree()
+                        if ckp[stor][0] == 'parent':
+                            self.editor()
+                            self.text.insert(END, f'p:{ckp[stor][1][:-2]}\n')
+                            num = stor + 1
+                            while num < len(ckp):
+                                if 'child' in ckp[num][0]:
+                                    chn = ckp[num][0].partition('d')[0][0] + ckp[num][0].partition('d')[2]
+                                    self.text.insert(END, f'{chn}:{ckp[num][1][1:]}')
+                                    num += 1
+                                else:
+                                    break
+                            self.editorsel = (stor, num)
                     else:
-                        self.text.insert(END, f'{c[ed[0]]}:{ed[1][1:]}')
-                os.remove(f'{self.filename}.txt')
+                        messagebox.showinfo('TreeViewGui', 'Please select a parent row first!')
     
     def temp(self, event = None):
         # This is to compliment the editor mode.
@@ -1741,29 +1763,61 @@ class TreeViewGui:
                                 self.converting()
                             else:                        
                                 if self.checkfile():
-                                    tvg = tv(self.filename)
-                                    p1 = tvg.insighttree()
-                                    et = len(p1)-1
-                                    ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                                    ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                                    p2 = {}
-                                    for i in ed:
-                                        et += 1
-                                        if 's:' == i.lower()[:2]:
-                                            p2[et] = ('space', '\n')
-                                        elif 'p:' == i.lower()[:2]:
-                                            if i.partition(':')[2].isspace():
-                                                raise Exception('Parent cannot be empty!')
-                                            else:
-                                                p2[et] = ('parent', i[2:].removeprefix(' '))
-                                        elif i.lower().partition(':')[0] in list(ckc):
-                                            if i.partition(':')[2].isspace():
-                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
-                                            else:
-                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
-                                    if len(ed) != len(p2):
-                                        raise Exception('Not Editable!')
-                                    tvg.fileread(p1 | p2)
+                                    if self.editorsel:
+                                        stor = self.editorsel
+                                        tvg = tv(self.filename)
+                                        p1 = {j: k for j, k in tvg.insighttree().items() if j < stor[0]}
+                                        ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                        ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                        et = len(p1)-1
+                                        p2 = {}
+                                        for i in ed:
+                                            et += 1
+                                            if 's:' == i.lower()[:2]:
+                                                p2[et] = ('space', '\n')
+                                            elif 'p:' == i.lower()[:2]:
+                                                if i.partition(':')[2].isspace():
+                                                    raise Exception('Parent cannot be empty!')
+                                                else:
+                                                    p2[et] = ('parent', i[2:].removeprefix(' '))
+                                            elif i.lower().partition(':')[0] in list(ckc):
+                                                if i.partition(':')[2].isspace():
+                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
+                                                else:
+                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                        if len(ed) != len(p2):
+                                            raise Exception('Not Editable!')
+                                        combi = p1 | p2
+                                        p3 = [k for j, k in tvg.insighttree().items() if j > stor[1]]
+                                        if p3:
+                                            p3 = {(len(combi)) + i: p3[i] for i in range(len(p3))}
+                                            tvg.fileread(combi | p3)
+                                        else:
+                                            tvg.fileread(combi)
+                                    else:
+                                        tvg = tv(self.filename)
+                                        p1 = tvg.insighttree()
+                                        et = len(p1)-1
+                                        ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                        ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                        p2 = {}
+                                        for i in ed:
+                                            et += 1
+                                            if 's:' == i.lower()[:2]:
+                                                p2[et] = ('space', '\n')
+                                            elif 'p:' == i.lower()[:2]:
+                                                if i.partition(':')[2].isspace():
+                                                    raise Exception('Parent cannot be empty!')
+                                                else:
+                                                    p2[et] = ('parent', i[2:].removeprefix(' '))
+                                            elif i.lower().partition(':')[0] in list(ckc):
+                                                if i.partition(':')[2].isspace():
+                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
+                                                else:
+                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                        if len(ed) != len(p2):
+                                            raise Exception('Not Editable!')
+                                        tvg.fileread(p1 | p2)
                                 else:
                                     tvg = tv(self.filename)
                                     ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
@@ -1802,6 +1856,10 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 TreeViewGui.FREEZE = False
                                 self.spaces()
+                                if self.editorsel:
+                                    print(f'{self.editorsel[1]+1.0}')
+                                    self.text.see(f'{self.editorsel[0]+1.0}')
+                                    self.editorsel = None
                     else:
                         self.text.config(state = DISABLED)
                         for i in self.bt:
@@ -1818,6 +1876,8 @@ class TreeViewGui:
                                         self.bt[i].config(state='normal')
                         TreeViewGui.FREEZE = False
                         self.spaces()
+                        if self.editorsel:
+                            self.editorsel = None
                 except Exception as a:
                     messagebox.showerror('TreeViewGui', f'{a}')
                     
