@@ -28,10 +28,10 @@ class TreeViewGui:
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
         self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
-        self.wwidth = 1180
-        self.wheight = 660
+        self.wwidth = 1265
+        self.wheight = 665
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
-        self.pheight = int(self.root.winfo_screenheight()/4 - self.wheight/4)
+        self.pheight = int(self.root.winfo_screenheight()/7 - self.wheight/7)
         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
         self.root.resizable(False, False)
         self.root.bind_all('<Control-f>', self.fcsent)
@@ -82,16 +82,18 @@ class TreeViewGui:
         self.lock = False
         self.store = None
         self.editorsel = None
+        stl = ttk.Style(self.root)
+        stl.theme_use('clam')
         
         # 1st frame. 
         # Frame for label and Entry.
-        self.fframe = Frame(root)
+        self.fframe = ttk.Frame(root)
         self.fframe.pack(side = TOP, fill = 'x')
         self.label = ttk.Label(self.fframe, text = 'Words')
         self.label.pack(side = LEFT, pady = 3, fill = 'x')
         self.bt['label'] = self.label
         self.entry = ttk.Entry(self.fframe, validate = 'focusin', validatecommand = self.focus, font = 'consolas 12')
-        self.entry.pack(side = LEFT, ipady = 5, pady = (3, 0), padx = 1, fill = 'x', expand = 1)
+        self.entry.pack(side = LEFT, ipady = 5, pady = (3, 0), fill = 'x', expand = 1)
         self.entry.config(state = 'disable')
         self.bt['entry'] = self.entry
        
@@ -102,10 +104,10 @@ class TreeViewGui:
         self.frrb = ttk.Frame(self.frbt)
         self.frrb.pack(side = BOTTOM)
         self.radio1 = ttk.Radiobutton(self.frbt, text = 'parent', value = 'parent', var = self.rb, command = self.radiobut)
-        self.radio1.pack(side = LEFT,anchor = 'w', padx = 1)
+        self.radio1.pack(side = LEFT,anchor = 'w')
         self.bt['radio1'] = self.radio1
         self.radio2 = ttk.Radiobutton(self.frbt, text = 'child', value = 'child', var = self.rb, command = self.radiobut)
-        self.radio2.pack(side = RIGHT, anchor = 'w', padx = 1)
+        self.radio2.pack(side = RIGHT, anchor = 'w')
         self.bt['radio2'] = self.radio2
         
         # 3rd frame in 2nd frame.
@@ -121,7 +123,7 @@ class TreeViewGui:
         
         # 3rd frame for top buttons.
         # Frame for first row Buttons.
-        self.bframe = Frame(root)
+        self.bframe = ttk.Frame(root)
         self.bframe.pack(side = TOP, fill = 'x')
         self.button5 = ttk.Button(self.bframe, text = 'Insert', command = self.insertwords)
         self.button5.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
@@ -221,20 +223,20 @@ class TreeViewGui:
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
-        ftt = 'consolas 11'
-        self.tframe = Frame(root, width = 1170, height = 550)
+        ftt = 'verdana 11'
+        self.tframe = ttk.Frame(root, width = 1260, height = 550)
         self.tframe.pack(anchor = 'w', side = TOP)
         self.tframe.pack_propagate(0)
-        self.txframe = Frame(self.tframe, width = 1023, height = 550)
+        self.txframe = Frame(self.tframe, width = 1113, height = 550)
         self.txframe.pack(anchor = 'w', side = LEFT)
         self.txframe.pack_propagate(0)
         self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE)
         self.text.config(state = 'disable')
-        self.text.pack(side = LEFT, fill = 'both', padx = (2,0), expand = 1)
+        self.text.pack(side = LEFT, fill = 'both', padx = (2,1), expand = 1)
         self.text.bind('<MouseWheel>', self.mscrt)
         self.text.pack_propagate(0)
         self.bt['text'] = self.text
-        self.sc1frame = Frame(self.tframe, width = 17, height = 550)
+        self.sc1frame = ttk.Frame(self.tframe, width = 15, height = 550)
         self.sc1frame.pack(anchor = 'w', side = LEFT)
         self.sc1frame.pack_propagate(0)
         self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
@@ -243,14 +245,14 @@ class TreeViewGui:
         self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
-        self.tlframe = Frame(self.tframe, width = 113, height = 550)
+        self.tlframe = ttk.Frame(self.tframe, width = 117, height = 550)
         self.tlframe.pack(anchor = 'w', side = LEFT)
         self.tlframe.pack_propagate(0)        
         self.listb = Listbox(self.tlframe, font = ftt)
         self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
-        self.sc2frame = Frame(self.tframe, width = 17, height = 550)
+        self.sc2frame = ttk.Frame(self.tframe, width = 15, height = 550)
         self.sc2frame.pack(anchor = 'w', side = LEFT)
         self.sc2frame.pack_propagate(0)
         self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
@@ -267,7 +269,7 @@ class TreeViewGui:
             
         # 6th frame.
         # Frame for horizontal scrollbar and info label.
-        self.fscr = Frame(root)
+        self.fscr = ttk.Frame(root)
         self.fscr.pack(fill = 'x')
         self.scrolh = ttk.Scrollbar(self.fscr, orient = "horizontal")
         self.scrolh.pack(side = LEFT, fill = 'x', expand = 1)
@@ -275,7 +277,8 @@ class TreeViewGui:
         self.text.config(xscrollcommand = self.scrolh.set)
         self.info = StringVar()
         self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
-        self.labcor = Label(self.fscr, textvariable = self.info, width = 20, justify = CENTER)
+        self.labcor = Label(self.fscr, textvariable = self.info, width = 20,
+                            font = 'consolas 10 bold', justify = CENTER)
         self.labcor.pack(side = LEFT, fill = 'x')
         self.unlock = True
         if 'ft.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
@@ -1604,6 +1607,7 @@ class TreeViewGui:
                             self.editorsel = (stor, num)
                     else:
                         messagebox.showinfo('TreeViewGui', 'Please select a parent row first!')
+        self.text.focus()
     
     def temp(self, event = None):
         # This is to compliment the editor mode.
@@ -1675,6 +1679,7 @@ class TreeViewGui:
                             messagebox.showinfo('TreeViewGui', 'Loading template aborted!')
                     else:
                         messagebox.showinfo('TreeViewGui', 'No templates yet!')
+        self.text.focus()
                         
     def editor(self):
         # This is direct editor on text window.
@@ -1696,6 +1701,7 @@ class TreeViewGui:
                 if self.store:
                     self.text.insert(END, self.store)
                     self.store = None
+                self.text.focus()
             else:
                 try:
                     if self.text.get('1.0', END)[:-1]:

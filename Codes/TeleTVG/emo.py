@@ -41,8 +41,15 @@ class Emo:
                            selectbackground = 'teal', selectforeground = 'gold',
                            exportselection = False, selectmode = 'multiple')
         self.lbe.pack(fill = 'x', expand = 1, padx = 3, pady = (2, 0))
-        with open(filen('emoj.txt')) as emr:
-            a  = [chr(i) for i in eval(emr.read())]
+        try:
+            with open(filen('emoj.txt')) as emr:
+                a = emr.read()
+                if '[' == a[0] and a[-1] == ']':
+                    a = [chr(i) for i in eval(a)]
+                else:
+                    raise Exception('File corrupted!!!')
+        except Exception as e:
+            messagebox.showerror('Emo', 'e')
         for i in a:
             self.lbe.insert(END,i)
         self.lbe.bind('<ButtonRelease>', self.updatesel)
@@ -137,6 +144,7 @@ class Emo:
             if Emo.paste:
                 Emo.paste.text.insert(INSERT, lj)
                 Emo.paste.text.see(INSERT)
+                Emo.paste.text.focus()
             else:
                 self.root.clipboard_clear()
                 self.root.clipboard_append(lj)
@@ -203,6 +211,7 @@ class Emo:
                     if Emo.paste:
                         Emo.paste.text.insert(INSERT, cope)
                         Emo.paste.text.see(INSERT)
+                        Emo.paste.text.focus()
                     else:
                         self.root.clipboard_clear()
                         self.root.clipboard_append(cope)
@@ -210,13 +219,13 @@ class Emo:
                     del cope
                     del d.result
                 else:
-                    ask = messagebox.askyesno('Emo', 'Do you want delete Mark?')
+                    ask = messagebox.askyesno('Emo', 'Do you want delete Mark?', parent = self.root)
                     if ask:
                         if self.lock is False:
                             if 'marking.json' in os.listdir(Emo.pathn):
                                 mrk = db(os.path.join(Emo.pathn,'marking'))
                                 self.lock = True
-                                class MyDialog(simpledialog.Dialog):
+                                class MyMarks(simpledialog.Dialog):
                                 
                                     def body(self, master):
                                         self.title('Choose Mark')
@@ -230,7 +239,7 @@ class Emo:
                                     def apply(self):
                                         self.result = self.e1.get()
                                 
-                                d = MyDialog(self.root)
+                                d = MyMarks(self.root)
                                 self.lock = False
                                 if d.result:
                                     mrk.deldata(d.result)
@@ -261,6 +270,7 @@ def main(paste = None):
         root = Tk()
         Emo(root)
         Emo.mainon = root
+        Emo.mainon.focus_force()
         Emo.mainon.mainloop()
 
 if __name__ == '__main__':
