@@ -342,17 +342,19 @@ class TreeViewGui:
         # Info Bar telling the selected rows in listbox.
         # If nothing, it will display today's date.
         
-        if f'{self.filename}_hid.json' in os.listdir():
+        if TreeViewGui.FREEZE and  str(self.bt['button14']['state']) == 'normal':
             self.info.set('Hidden Mode')
-        elif str(self.listb.cget('selectmode')) == EXTENDED:
+        elif TreeViewGui.FREEZE and str(self.bt['button17']['state']) == 'normal':
             self.info.set('CPP Mode')
+        elif TreeViewGui.FREEZE and str(self.bt['button24']['state']) == 'normal':
+            self.info.set('Editor Mode')
         elif self.listb.curselection():
             tvg = tv(f'{self.filename}')
-            ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:10]
+            ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:15]
             self.info.set(f'{self.listb.curselection()[0]}: {ck[:-1]}...')
             self.text.see(f'{self.listb.curselection()[0]+1.0}')
             del ck
-        elif ':' in self.info.get() or 'Mode' in self.info.get():
+        else:
             self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
                     
     def checkfile(self):
@@ -998,8 +1000,8 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
+                                self.text.see(f'{ask}.0')
                                 self.listb.see(ask)
-                                self.text.yview_moveto(self.listb.yview()[0])
                             else:
                                 for i in self.bt:
                                     if 'label' not in i and 'scrollbar' not in i:
@@ -1321,7 +1323,7 @@ class TreeViewGui:
                                     self.bt[i].config(state='normal')
                     self.listb.config(selectmode = BROWSE)
                     TreeViewGui.FREEZE = False
-                    self.infobar()
+                self.infobar()
             else:
                 messagebox.showinfo('TreeViewGui', 'Hidden parent is recorded, please clear all first!')
             
@@ -1469,6 +1471,7 @@ class TreeViewGui:
         elif str(self.text.cget('state')) == 'normal' and str(self.bt['button20'].cget('state')) == 'normal':
             dtt = f'[{dt.isoformat(dt.today().replace(microsecond = 0)).replace("T"," ")}]'
             self.text.insert(INSERT, f'{dtt} ')
+            self.text.focus()
     
     def endec(self):
         # Data encrypt and saved for sharing.
@@ -1883,8 +1886,10 @@ class TreeViewGui:
                         self.spaces()
                         if self.editorsel:
                             self.editorsel = None
+            
                 except Exception as a:
                     messagebox.showerror('TreeViewGui', f'{a}')
+            self.infobar()
                     
     def tvgexit(self, event = None):
         if self.checkfile():
