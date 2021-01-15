@@ -829,11 +829,12 @@ class Calculator():
         ex = Calculator.MAINST.store
         self.text.config(state = 'normal')
         for _, t in ex.items():
-            for c in t[0].partition(':')[2].strip():
-                self.calculation(self.bt[c])
-            frt = self.entry.get()
-            self.calculation(self.bt['C'])
-            t = (f'CAL: {frt}',) + t[1:]
+            if ',' not in t[0].partition(':')[2].strip():
+                for c in t[0].partition(':')[2].strip():
+                    self.calculation(self.bt[c])
+                frt = self.entry.get()
+                self.calculation(self.bt['C'])
+                t = (f'CAL: {frt}',) + t[1:]
             if len(t) == 2:
                 self.text.insert(END, f'{t[0]}\n{t[1]}\n', 'thg')
             else:

@@ -1701,7 +1701,7 @@ class TreeViewGui:
                     if self.text.get('1.0', END)[:-1]:
                         if 'CAL:' and 'ANS:' in self.text.get('1.0', END)[:-1].upper() and self.text.get('1.0', END)[:-1][:4].upper() == 'CAL:':
                             ckcal = [i for i in self.text.get('1.0', END).split('\n')[:-1] if 'CAL:' in i.upper()]
-                            nck = ['0','1','2','3','4','5','6','7','8','9','-','+','*','/','(',')','.']
+                            nck = ['0','1','2','3','4','5','6','7','8','9','-','+','*','/','(',')','.',',']
                             for cal in ckcal:
                                 for ck in cal.partition(':')[2].strip():
                                     if ck not in nck:
@@ -1731,7 +1731,7 @@ class TreeViewGui:
                             dc = {}
                             n = 1
                             for i in dd:
-                                ga = eval(i[0].partition(':')[2].strip())
+                                ga = eval(i[0].partition(':')[2].strip().replace(',',''))
                                 i[0]= f'CAL: {i[0].partition(":")[2].strip()}'
                                 i[1] = f'ANS: {ga:,}'
                                 if len(i) == 3:
@@ -1857,7 +1857,6 @@ class TreeViewGui:
                                 TreeViewGui.FREEZE = False
                                 self.spaces()
                                 if self.editorsel:
-                                    print(f'{self.editorsel[1]+1.0}')
                                     self.text.see(f'{self.editorsel[0]+1.0}')
                                     self.editorsel = None
                     else:
