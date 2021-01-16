@@ -23,6 +23,7 @@ class TreeViewGui:
     DB = None
     FREEZE = False
     MARK = False
+    MODE = False
     def __init__(self, root, filename):
         self.filename = filename
         self.root = root
@@ -119,7 +120,7 @@ class TreeViewGui:
         self.bt['label3'] = self.label3
         self.entry3 = ttk.Combobox(self.frcc, width = 8, state = 'readonly', justify = 'center')
         self.entry3.pack(side = LEFT, padx = 1, pady = (0, 2), fill = 'x')
-        self.bt['entry3'] = self.entry3        
+        self.bt['entry3'] = self.entry3
         
         # 3rd frame for top buttons.
         # Frame for first row Buttons.
@@ -248,7 +249,7 @@ class TreeViewGui:
         self.tlframe = ttk.Frame(self.tframe, width = 117, height = 550)
         self.tlframe.pack(anchor = 'w', side = LEFT)
         self.tlframe.pack_propagate(0)        
-        self.listb = Listbox(self.tlframe, font = ftt)
+        self.listb = Listbox(self.tlframe, font = ftt, exportselection = False)
         self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
@@ -341,7 +342,7 @@ class TreeViewGui:
     def infobar(self, event = None):
         # Info Bar telling the selected rows in listbox.
         # If nothing, it will display today's date.
-        
+
         if TreeViewGui.FREEZE and  str(self.bt['button14']['state']) == 'normal':
             self.info.set('Hidden Mode')
         elif TreeViewGui.FREEZE and str(self.bt['button17']['state']) == 'normal':
@@ -352,7 +353,7 @@ class TreeViewGui:
             tvg = tv(f'{self.filename}')
             ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:15]
             self.info.set(f'{self.listb.curselection()[0]}: {ck[:-1]}...')
-            self.text.see(f'{self.listb.curselection()[0]+1.0}')
+            self.text.see(f'{self.listb.curselection()[0]}.0')
             del ck
         else:
             self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
@@ -570,7 +571,6 @@ class TreeViewGui:
                 self.listb.delete(0,END)
                 for val in vals:
                     self.listb.insert(END, val)
-                self.entry3.delete(0, END)
                 self.text.yview_moveto(1.0)
                 self.listb.yview_moveto(1.0)
         except:
@@ -658,39 +658,42 @@ class TreeViewGui:
                 else:
                     messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created!')                
             else:
-                tvg = tv(self.filename)
-                cek = ['child', 'parent']
-                rw =  None
-                if self.entry3.get():
-                    if self.entry.get() and self.entry.get() not in cek:
-                        if TreeViewGui.MARK:
-                            rw = self.listb.curselection()[0]
-                            appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
-                            if appr:
-                                if tvg.insighttree()[int(rw)][0] != 'space':
-                                    tvg.edittree(self.entry.get(),int(rw),self.entry3.get())
-                                    self.entry.delete(0,END)
-                        else:
-                            tvg.quickchild(self.entry.get(), self.entry3.get())
-                            self.entry.delete(0,END)
-                        self.spaces()                       
-                else:
-                    if self.entry.get() and self.entry.get() not in cek:
-                        if TreeViewGui.MARK:
-                            rw = self.listb.curselection()[0]
-                            appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
-                            if appr:
-                                if tvg.insighttree()[int(rw)][0] != 'space':
-                                    tvg.edittree(self.entry.get(),int(rw))
-                                    self.entry.delete(0,END)
-                        else:
-                            tvg.addparent(self.entry.get())
-                            self.entry.delete(0,END)
-                        self.spaces()
-                if rw and rw < len(tvg.insighttree())-1:
-                    self.text.see(f'{int(rw)+1}.0')
-                    self.listb.see(rw)
-                        
+                try:
+                    tvg = tv(self.filename)
+                    cek = ['child', 'parent']
+                    rw =  None
+                    if self.entry3.get():
+                        if self.entry.get() and self.entry.get() not in cek:
+                            if TreeViewGui.MARK:
+                                rw = self.listb.curselection()[0]
+                                appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
+                                if appr:
+                                    if tvg.insighttree()[int(rw)][0] != 'space':
+                                        tvg.edittree(self.entry.get(),int(rw),self.entry3.get())
+                                        self.entry.delete(0,END)
+                            else:
+                                tvg.quickchild(self.entry.get(), self.entry3.get())
+                                self.entry.delete(0,END)
+                            self.spaces()                       
+                    else:
+                        if self.entry.get() and self.entry.get() not in cek:
+                            if TreeViewGui.MARK:
+                                rw = self.listb.curselection()[0]
+                                appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
+                                if appr:
+                                    if tvg.insighttree()[int(rw)][0] != 'space':
+                                        tvg.edittree(self.entry.get(),int(rw))
+                                        self.entry.delete(0,END)
+                            else:
+                                tvg.addparent(self.entry.get())
+                                self.entry.delete(0,END)
+                            self.spaces()
+                    if rw and rw < len(tvg.insighttree())-1:
+                        self.text.see(f'{int(rw)}.0')
+                        self.listb.see(rw)
+                except Exception as e:
+                    messagebox.showerror('TreeViewGui', f'{e}')
+                    
     def flb(self, event = None):
         # Set Mark for cheking row for edit.
         
@@ -705,6 +708,7 @@ class TreeViewGui:
                 if self.checkfile():
                     tvg = tv(self.filename)
                     if self.listb.curselection():
+                        TreeViewGui.MODE = True
                         rw = self.listb.curselection()
                         tvg.delrow(int(rw[0]))
                         self.spaces()
@@ -714,23 +718,23 @@ class TreeViewGui:
                             if cp == 'parent' and int(rw[0]) != 0:
                                 self.listb.select_set(int(rw[0])-2)
                                 self.listb.see(int(rw[0])-2)
-                                self.text.see(f'{(int(rw[0])-2)+1}.0')
+                                self.text.see(f'{(int(rw[0])-2)}.0')
                             else:
                                 if cp == 'space':
                                     self.listb.select_set(int(rw[0])-1)
                                     self.listb.see(int(rw[0])-1)
-                                    self.text.see(f'{(int(rw[0])-1)+1}.0')
+                                    self.text.see(f'{(int(rw[0])-1)}.0')
                                 else:
                                     self.listb.select_set(int(rw[0]))
                                     self.listb.see(int(rw[0]))
-                                    self.text.see(f'{int(rw[0])+1}.0')
+                                    self.text.see(f'{int(rw[0])}.0')
                         else:
                             if len(ck) == 1:
                                 self.listb.select_set(0)
                             else:
                                 self.listb.select_set(len(ck)-1)
                                 self.listb.see(len(ck)-1)
-                                self.text.see(f'{(len(ck)-1)+1}.0')
+                                self.text.see(f'{(len(ck)-1)}.0')
                         self.infobar()
             except:
                 self.text.config(state = 'normal')
@@ -745,6 +749,7 @@ class TreeViewGui:
         if self.unlock:
             if self.listb.curselection():
                 if self.entry3.get():
+                    TreeViewGui.MODE = True
                     rw = self.listb.curselection()
                     tvg = tv(self.filename)
                     try:
@@ -753,7 +758,7 @@ class TreeViewGui:
                         self.spaces()
                         self.listb.select_set(int(rw[0]))
                         self.listb.see(int(rw[0]))
-                        self.text.see(f'{int(rw[0])+1}.0')
+                        self.text.see(f'{int(rw[0])}.0')
                     except:
                         self.text.insert(END, 'Parent row is unable to be move to a child')
                         self.text.config(state = 'disable')
@@ -786,17 +791,18 @@ class TreeViewGui:
                     rw = self.listb.curselection()
                     if ck[int(rw[0])][0] != 'space' and 'child' in ck[int(rw[0])][0]:
                         if int(rw[0]) != 0:
+                            TreeViewGui.MODE = True
                             tvg.movetree(int(rw[0]), int(rw[0])-1)
                             self.spaces()
                             ck = tvg.insighttree()
                             if  ck[int(rw[0])-1][0] != 'space':
                                 self.listb.select_set(int(rw[0])-1)
                                 self.listb.see(int(rw[0])-1)
-                                self.text.see(f'{(int(rw[0])-1)+1}.0')
+                                self.text.see(f'{(int(rw[0])-1)}.0')
                             else:
                                 self.listb.select_set(int(rw[0])-2)
                                 self.listb.see(int(rw[0])-2)
-                                self.text.see(f'{(int(rw[0])-2)+1}.0')
+                                self.text.see(f'{(int(rw[0])-2)}.0')
                             self.infobar()
                                 
     def movedown(self, event = None):
@@ -811,6 +817,7 @@ class TreeViewGui:
                     rw = self.listb.curselection()
                     if ck[int(rw[0])][0] != 'space' and 'child' in ck[int(rw[0])][0]:
                         if int(rw[0]) < len(ck)-1:
+                            TreeViewGui.MODE = True
                             if ck[int(rw[0])+1][0] == 'space':
                                 tvg.movetree(int(rw[0]), int(rw[0])+2)
                             else:
@@ -820,11 +827,11 @@ class TreeViewGui:
                             if ck[int(rw[0])+1][0] != 'parent':
                                 self.listb.select_set(int(rw[0])+1)
                                 self.listb.see(int(rw[0])+1)
-                                self.text.see(f'{(int(rw[0])+1)+1}.0')
+                                self.text.see(f'{(int(rw[0])+1)}.0')
                             else:
                                 self.listb.select_set(int(rw[0])+2)
                                 self.listb.see(int(rw[0])+2)
-                                self.text.see(f'{(int(rw[0])+2)+1}.0')
+                                self.text.see(f'{(int(rw[0])+2)}.0')
                             self.infobar()
                                 
     def insertwords(self, event = None):
@@ -849,7 +856,7 @@ class TreeViewGui:
                                     self.entry.delete(0, END)  
                                 self.spaces()
                                 self.listb.see(int(rw[0]))
-                                self.text.see(f'{int(rw[0])+1}.0')
+                                self.text.see(f'{int(rw[0])}.0')
                                  
     def checked(self, event = None):
         # To add checked unicode for finished task.
@@ -864,7 +871,7 @@ class TreeViewGui:
                 self.view()
                 self.listb.select_set(int(rw[0]))
                 self.listb.see(int(rw[0]))
-                self.text.see(f'{int(rw[0])+1}.0')
+                self.text.see(f'{int(rw[0])}.0')
                 self.infobar()
             
     def backup(self, event = None):
@@ -1118,8 +1125,10 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.checkfile():
-                if TreeViewGui.MARK:
+                if TreeViewGui.MARK and TreeViewGui.MODE is False:
                     TreeViewGui.MARK = False
+                else:
+                    TreeViewGui.MODE = False
                 tvg = tv(self.filename)
                 cks = tvg.insighttree()
                 num2 = 1
@@ -1420,7 +1429,7 @@ class TreeViewGui:
                         sw = int(sw)
                         if sw <= num-1:
                             self.listb.see(sw)
-                            self.text.see(f'{sw+1}.0')                            
+                            self.text.see(f'{sw}.0')                            
                             self.listb.focus()
                             self.listb.selection_clear(0, END)
                             self.listb.activate(sw)
@@ -1428,7 +1437,7 @@ class TreeViewGui:
                     else:
                         while sn < num:
                             if sw in dat[sn][1]:
-                                self.text.see(f'{sn+1}.0')
+                                self.text.see(f'{sn}.0')
                                 self.listb.see(sn)
                                 self.listb.selection_clear(0, END)
                                 self.listb.selection_set(sn)
@@ -1866,7 +1875,7 @@ class TreeViewGui:
                                 TreeViewGui.FREEZE = False
                                 self.spaces()
                                 if self.editorsel:
-                                    self.text.see(f'{self.editorsel[0]+1.0}')
+                                    self.text.see(f'{self.editorsel[0]}.0')
                                     self.editorsel = None
                     else:
                         self.text.config(state = DISABLED)
