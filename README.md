@@ -113,7 +113,13 @@
         * **TAKE NOTE:**
             * **In case want to cancel editing, just click editor back.**
             * **Or delete everyrhing in editor without leaving an extra blank line.**
-                * **If you wanted to delete them instead, then just leave an extra blank line.** 
+                * **If you wanted to delete them instead, then just leave an extra blank line.**
+    * **Can scalling pixel in different resolution.**
+        * **TAKE NOTE:**
+            * **When scalling, TVG may appear too small and other app function may appear overly sized.**
+            * **Best resolution is 1366 x 768 [base on dev res] :pray:**
+    * **Can Undo or Redo.**
+        * **[Control+z] for undo and [Control+Shift+z] to redo.** 
 * **And many more.. :joy:**
 
 ![TVG3](/TVG3.png)
