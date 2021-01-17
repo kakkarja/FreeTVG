@@ -241,10 +241,13 @@ class TreeViewGui:
         self.txframe = Frame(self.tframe, width = txw, height = frh)#width = 1113, height = 550)
         self.txframe.pack(anchor = 'w', side = LEFT)
         self.txframe.pack_propagate(0)
-        self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE)
+        self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE, 
+                         undo = True, autoseparators = True, maxundo = -1)
         self.text.config(state = 'disable')
         self.text.pack(side = LEFT, fill = 'both', padx = (2,1), expand = 1)
         self.text.bind('<MouseWheel>', self.mscrt)
+        self.text.bind('<Control-z>', self.undo)
+        self.text.bind('<Control-Shift-Key-Z>', self.redo)
         self.text.pack_propagate(0)
         self.bt['text'] = self.text
         self.sc1frame = ttk.Frame(self.tframe, width = scw, height = frh)#width = 15, height = 550)
@@ -297,6 +300,26 @@ class TreeViewGui:
         if 'theme.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
             self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
             
+    def undo(self, event = None):
+        # Undo only in Editor.
+        
+        if str(self.text['state']) == 'normal':
+            try:
+                self.text.edit_undo()
+            except:
+                messagebox.showerror('TreeViewGui', 'Nothing to undo!')
+        
+    
+    def redo(self, event =None):
+        # Redo only in Editor.
+        
+        if str(self.text['state']) == 'normal':
+            try:
+                self.text.edit_redo()
+            except:
+                messagebox.showerror('TreeViewGui', 'Nothing to redo!')            
+    
+    
     def wrapped(self, event = None):
         # Wrap the records so that it is filling the windows.
         # The scrolling horizontal become inactive.
@@ -1725,6 +1748,7 @@ class TreeViewGui:
                 if self.store:
                     self.text.insert(END, self.store)
                     self.store = None
+                self.text.edit_reset()
                 self.text.focus()
             else:
                 try:
@@ -1910,6 +1934,7 @@ class TreeViewGui:
             
                 except Exception as a:
                     messagebox.showerror('TreeViewGui', f'{a}')
+            self.text.edit_reset()
             self.infobar()
                     
     def tvgexit(self, event = None):
@@ -2122,6 +2147,7 @@ def main():
             begin.infobar()
         else:
             begin.view()
+        begin.text.edit_reset()
         begin.root.mainloop()
     else:
         messagebox.showwarning('File', 'No File Name!')
