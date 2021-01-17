@@ -15,6 +15,7 @@ from FileFind import filen
 from mdh import convhtml
 import emo
 from datetime import datetime as dt
+import ctypes
 
 class TreeViewGui:
     """
@@ -28,11 +29,11 @@ class TreeViewGui:
         self.filename = filename
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
-        self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
-        self.wwidth = 1265
-        self.wheight = 665
+        self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)      
+        self.wwidth = int(round(self.root.winfo_screenwidth() * 0.93))
+        self.wheight = int(round(self.root.winfo_screenheight() * 0.80))
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
-        self.pheight = int(self.root.winfo_screenheight()/7 - self.wheight/7)
+        self.pheight = int(self.root.winfo_screenheight()/10 - self.wheight/10)
         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
         self.root.resizable(False, False)
         self.root.bind_all('<Control-f>', self.fcsent)
@@ -78,6 +79,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-g>', self.fcsent)
         self.root.bind_all('<Control-Key-semicolon>', self.emoj)
         self.root.bind_all('<Control-Key-backslash>', self.fcsent)
+        self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -124,10 +126,13 @@ class TreeViewGui:
         
         # 3rd frame for top buttons.
         # Frame for first row Buttons.
+        #frb = int(round(self.root.winfo_screenwidth() * 0.9))
+        #frbt = 5
         self.bframe = ttk.Frame(root)
         self.bframe.pack(side = TOP, fill = 'x')
         self.button5 = ttk.Button(self.bframe, text = 'Insert', command = self.insertwords)
         self.button5.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button5.propagate(0)
         self.bt['button5'] = self.button5
         self.button6 = ttk.Button(self.bframe, text = 'Write', command =  self.writefile)
         self.button6.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
@@ -224,11 +229,16 @@ class TreeViewGui:
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
+        frw = int(round(self.root.winfo_screenwidth() * 0.9224011713030746))
+        frh = int(round(self.root.winfo_screenheight() * 0.7161458333333334))
+        txw = int(round(frw * 0.8833333333333333))
+        lbw = int(round(frw * 0.09285714285714286))
+        scw = int(round(frw * 0.011904761904761904))
         ftt = 'verdana 11'
-        self.tframe = ttk.Frame(root, width = 1260, height = 550)
+        self.tframe = ttk.Frame(root, width = frw, height = frh)#width = 1260, height = 550)
         self.tframe.pack(anchor = 'w', side = TOP)
         self.tframe.pack_propagate(0)
-        self.txframe = Frame(self.tframe, width = 1113, height = 550)
+        self.txframe = Frame(self.tframe, width = txw, height = frh)#width = 1113, height = 550)
         self.txframe.pack(anchor = 'w', side = LEFT)
         self.txframe.pack_propagate(0)
         self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE)
@@ -237,7 +247,7 @@ class TreeViewGui:
         self.text.bind('<MouseWheel>', self.mscrt)
         self.text.pack_propagate(0)
         self.bt['text'] = self.text
-        self.sc1frame = ttk.Frame(self.tframe, width = 15, height = 550)
+        self.sc1frame = ttk.Frame(self.tframe, width = scw, height = frh)#width = 15, height = 550)
         self.sc1frame.pack(anchor = 'w', side = LEFT)
         self.sc1frame.pack_propagate(0)
         self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
@@ -246,14 +256,14 @@ class TreeViewGui:
         self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
-        self.tlframe = ttk.Frame(self.tframe, width = 117, height = 550)
+        self.tlframe = ttk.Frame(self.tframe, width = lbw, height = frh)#width = 117, height = 550)
         self.tlframe.pack(anchor = 'w', side = LEFT)
         self.tlframe.pack_propagate(0)        
         self.listb = Listbox(self.tlframe, font = ftt, exportselection = False)
         self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
-        self.sc2frame = ttk.Frame(self.tframe, width = 15, height = 550)
+        self.sc2frame = ttk.Frame(self.tframe, width = scw, height = frh)#width = 15, height = 550)
         self.sc2frame.pack(anchor = 'w', side = LEFT)
         self.sc2frame.pack_propagate(0)
         self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
@@ -267,7 +277,7 @@ class TreeViewGui:
         self.listb.bind('<Down>', self.mscrl)
         self.listb.bind('<FocusIn>', self.flb)
         self.bt['scrollbar2'] = self.scrollbar2
-            
+
         # 6th frame.
         # Frame for horizontal scrollbar and info label.
         self.fscr = ttk.Frame(root)
@@ -343,7 +353,7 @@ class TreeViewGui:
         # Info Bar telling the selected rows in listbox.
         # If nothing, it will display today's date.
 
-        if TreeViewGui.FREEZE and  str(self.bt['button14']['state']) == 'normal':
+        if f'{self.filename}_hid.json' in os.listdir():
             self.info.set('Hidden Mode')
         elif TreeViewGui.FREEZE and str(self.bt['button17']['state']) == 'normal':
             self.info.set('CPP Mode')
@@ -479,6 +489,8 @@ class TreeViewGui:
                 self.oriset()
             elif event.keysym == 'backslash':
                 self.htmlview()
+            elif event.keysym == 'question':
+                self.scaling()            
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -1967,7 +1979,7 @@ class TreeViewGui:
                     f = event[:(f.span()[0])] + '10' + event[(f.span()[1]):]
                 else:
                     f = event[:(f.span()[0])] + '40' + event[(f.span()[1]):]
-        
+                    
         if f:
             self.text['font'] = f
             for i in self.text.tag_names():
@@ -1983,7 +1995,7 @@ class TreeViewGui:
                 self.listb['font'] = fl
             if f'{self.filename}_hid.json' not in os.listdir():
                 self.spaces()
-    
+                
     def reblist(self):
         # Destroy Listbox and rebuild it again,
         # for font in listbox to be appear correctly.
@@ -2000,8 +2012,8 @@ class TreeViewGui:
         self.listb.bind('<MouseWheel>', self.mscrl)
         self.listb.bind('<Up>', self.mscrl)
         self.listb.bind('<Down>', self.mscrl)
-        self.listb.bind('<FocusIn>', self.flb)          
-    
+        self.listb.bind('<FocusIn>', self.flb)
+        
     def ft(self, event = None, path = None):
         # Initial starting fonts chooser.
         
@@ -2013,8 +2025,7 @@ class TreeViewGui:
                               '-font', self.text['font'], '-command', 
                               self.root.register(self.clb))
             self.root.tk.call('tk', 'fontchooser', 'show')
-        
-    
+            
     def oriset(self, event = None):
         pth = os.getcwd().rpartition('\\')[0]
         lf = [i for i in os.listdir(pth) if '.tvg' in i and i != 'lastopen.tvg']
@@ -2027,10 +2038,59 @@ class TreeViewGui:
             else:
                 messagebox.showinfo('TreeViewGui', 'None change yet!')
                 
+    def scaling(self, event = None):
+        
+        dpi = ctypes.windll.user32.GetDpiForWindow(self.root.winfo_id())
+        maxscale = int(dpi/72) + 1
+        scl = []
+        for i in range(maxscale):
+            for k in range(10):
+                scl.extend([float(f'{i}.{k}{j}') for j in range(10)])
+        scl = scl[10:]+[maxscale]
+        if self.lock is False:        
+            self.lock = True
+            class MyDialog(simpledialog.Dialog):
+            
+                def body(self, master):
+                    self.title('Choose Scale')
+                    Label(master, text="Scale: ").grid(row=0, column = 0, sticky = E)
+                    self.e1 = ttk.Combobox(master, state = 'readonly')
+                    self.e1['values'] = scl
+                    self.e1.current(scl.index(round(dpi/72, 2)))
+                    self.e1.grid(row=0, column=1)
+                    return self.e1
+
+                def apply(self):
+                    self.result = self.e1.get()
+                    
+            d = MyDialog(self.root)
+            self.lock = False
+            if d.result:
+                path = os.path.join(os.getcwd().rpartition('\\')[0], 'scale.tvg')
+                with open(path, 'w') as s:
+                    s.write(str(d.result))
+                scal(self)
+            else:
+                messagebox.showinfo('TreeViewGui', 'Scaling aborted!')
+                
+def scal(t):
+    ori = os.getcwd().rpartition('\\')[0]
+    t.tvgexit()
+    os.chdir(ori)
+    main()
+     
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
-    root = Tk()  
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    root = Tk()
+    dpi = ctypes.windll.user32.GetDpiForWindow(root.winfo_id())
+    if 'scale.tvg' in os.listdir():
+        with open('scale.tvg') as scl:
+            gs = float(scl.read())
+        root.tk.call('tk', 'scaling', gs)
+    else:
+        root.tk.call('tk', 'scaling', round(dpi/72, 2))
     root.wm_iconbitmap(default = filen('TVG.ico'))
     root.withdraw()
     if 'lastopen.tvg' in os.listdir():
