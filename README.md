@@ -119,7 +119,12 @@
             * **When scalling, TVG may appear too small and other app function may appear overly sized.**
             * **Best resolution is 1366 x 768 [base on dev res] :pray:**
     * **Can Undo or Redo.**
-        * **[Control+z] for undo and [Control+Shift+z] to redo.** 
+        * **[Control+z] for undo and [Control+Shift+z] to redo.**
+    * **Special Function for TeleCalc [no button, only shortcut Control+k].**
+        * **Recalculate changes of a calculation formula in a row.**
+            * **Can recalculate other rows that link from result.**
+                * **Select the "From" and "To" [range that link from result].**
+                * **Avoid recalculate one-by-one [unless not linked]**
 * **And many more.. :joy:**
 
 ![TVG3](/TVG3.png)
