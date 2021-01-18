@@ -84,6 +84,7 @@ class Calculator():
         self.root.bind_all('<Control-s>', self.movc)
         self.root.bind_all('<Control-m>', self.maxim)
         self.root.bind('<Control-q>', self.bye)
+        self.root.bind('<Control-Key-k>', self.typ)
         self.lt = StringVar(self.root)
         self.label = ttk.Label(self.root, textvariable = self.lt, font = 'verdana 9 bold', 
                                background = 'black', foreground = 'white')
@@ -373,6 +374,8 @@ class Calculator():
                 elif event.keysym == 'e':
                     if 'combobox' not in fcom:
                         self.cbc2.focus()
+                elif event.keysym == 'k':
+                    self.linkcalc()
                 
     def retrat(self, event = None):
         #Tracking currency symbol in 2nd combo,
@@ -1194,6 +1197,113 @@ class Calculator():
             self.ops = True
             Calculator.LOCK = False
 
+    def linkcalc(self):
+        #Recalculate rows that link together by result.
+        if self.ops and self.ic is None:
+            if self.lt.get() and self.entry.get():
+                try:
+                    float(self.entry.get().replace(',', ''))
+                    messagebox.showinfo('Calculator', 'Need to be formula!', parent = self.root)
+                except:
+                    self.tpl = 1
+                    std = os.getcwd()
+                    os.chdir('CalculatorData') 
+                    with open(f'{self.lt.get()}.txt') as rd:
+                        cdt = eval(rd.read())
+                        ldc = []
+                        for i in cdt:
+                            ldc.append(f'{i}:{cdt[i]}\n')
+                    
+                    class MyDialog(simpledialog.Dialog):
+                        
+                        def body(self, master):
+                            self.title('Recalc Range')
+                            Label(master, text="From: ").grid(row=0, column = 0, sticky = E)
+                            self.e1 = ttk.Combobox(master, state = 'readonly', width = 35)
+                            self.e1['values'] = ldc
+                            self.e1.current(0)
+                            self.e1.grid(row=0, column=1, pady = 2)
+                            Label(master, text="To: ").grid(row=1, column = 0, sticky = E)
+                            self.e2 = ttk.Combobox(master, state = 'readonly', width = 35)
+                            self.e2['values'] = ldc
+                            self.e2.current(0)
+                            self.e2.grid(row=1, column=1)                        
+                            return self.e1
+                    
+                        def apply(self):
+                            self.result = int(self.e1.get().partition(':')[0])
+                            self.to = int(self.e2.get().partition(':')[0])
+                            
+                    d = MyDialog(self.root)
+                    mvt = None
+                    if d.result and d.to:
+                        ask = d.result
+                        mvt = d.to
+                        try:
+                            if ask > mvt:
+                                raise Exception('The "From" cannot be smaller than the "To"')
+                            form = self.entry.get()
+                            ckc = eval(form.replace(",", ""))
+                            if isinstance(ckc, float):
+                                if ckc.is_integer():
+                                    ckc = int(ckc)                            
+                            ckc = f'{ckc:,}'
+                            pros = None
+                            for i in list(cdt):
+                                if i >= ask and i <= mvt:
+                                    if i == ask:
+                                        pros = eval(cdt[i][0].partition(':')[2][1:].replace(',', ''))
+                                        pros = f'{pros:,}'
+                                        ans = (f'ANS: {ckc}',)
+                                        if len(cdt[i]) == 2:
+                                            cdt[i] = (f'CAL: {form}',) + ans
+                                        else:
+                                            cdt[i] = (f'CAL: {form}',) + ans + (cdt[i][2],)
+                                    else:
+                                        if pros in cdt[i][0].partition(':')[2][1:]:
+                                            spn = re.search(f'{pros}', cdt[i][0].partition(':')[2][1:])
+                                        else:
+                                            spn = re.search(f'{pros.partition(".")[0]}', cdt[i][0].partition(':')[2][1:])
+                                        pros = eval(cdt[i][0].partition(':')[2][1:].replace(',', ''))
+                                        pros = f'{pros:,}'
+                                        if spn:
+                                            spn = spn.span()
+                                            form = cdt[i][0].partition(':')[2][1:][:spn[0]] + ckc + cdt[i][0].partition(':')[2][1:][spn[1]:]
+                                            ckc = eval(form.replace(',', ''))
+                                            if isinstance(ckc, float):
+                                                if ckc.is_integer():
+                                                    ckc = int(ckc)                                            
+                                            ckc = f'{ckc:,}'
+                                            ans = (f'ANS: {ckc}',)
+                                            if len(cdt[i]) == 2:
+                                                cdt[i] = (f'CAL: {form}',) + ans
+                                            else:
+                                                cdt[i] = (f'CAL: {form}',) + ans + (cdt[i][2],)
+                                        else:
+                                            raise Exception('Not able to recalculate!')
+                            with open(f'{self.lt.get()}.txt', 'w') as wr:
+                                wr.write(str(cdt))
+                        except Exception as e:
+                            messagebox.showinfo('Calculator', f'{e}', parent = self.root)
+                    self.tpl = None
+                    os.chdir(std)
+                    self.loadcalc()
+                    with open(f'CalculatorData\{self.lt.get()}.txt') as rd:
+                        cdt = eval(rd.read()) 
+                    tot = 0
+                    if mvt:
+                        if mvt <= len(cdt):
+                            for i in range(mvt):
+                                if len(cdt[i+1])==2:
+                                    tot += 2
+                                else:
+                                    tot += 4
+                            self.text.see(float(tot-1))
+            else:
+                messagebox.showwarning('Calculator', 'Please key in formula first!', parent = self.root)
+        else:
+            messagebox.showwarning('Calculator', 'Unable to recalculate, because Calendar or Rate is active!!!', parent = self.root)
+            
 def main(stat, ori):
     #Get start and making "CalculatorData" dir.
     cdt = os.listdir(os.getcwd())
