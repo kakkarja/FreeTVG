@@ -32,8 +32,8 @@ class Reminder:
         self.root = root
         self.root.resizable(False, False)
         self.root.title('TeleTVG')
-        self.wid = int(self.root.winfo_screenwidth()/2)
-        self.hei = int(self.root.winfo_screenheight()/1.207)
+        self.wid = 705
+        self.hei = 630
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wid/2)
         self.pheight = int(self.root.winfo_screenheight()/3 - self.hei/3)
         self.root.geometry(f'{self.wid}x{self.hei}+{self.pwidth}+{self.pheight}')
@@ -180,6 +180,7 @@ class Reminder:
         Reminder.DEST = None
         Reminder.MAINST.free()
         Reminder.MAINST.root.deiconify()
+        Reminder.MAINST.root.state('zoomed')
         Reminder.MAINST = None
         self.root.destroy()
         
@@ -271,7 +272,7 @@ class Reminder:
             messagebox.showinfo('TeleTVG', 'Please fill "To"!', parent = self.root)            
                 
     async def sent(self, event =  None):
-        # Sending Telegram as Reminder to anyone.
+        # Sending Telegram to anyone.
         
         try:
             gms = int(len(self.text.get('1.0', END)[:-1])/4096)

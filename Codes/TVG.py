@@ -29,13 +29,9 @@ class TreeViewGui:
         self.filename = filename
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
-        self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)      
-        self.wwidth = int(round(self.root.winfo_screenwidth() * 0.93))
-        self.wheight = int(round(self.root.winfo_screenheight() * 0.80))
-        self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
-        self.pheight = int(self.root.winfo_screenheight()/10 - self.wheight/10)
-        self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-        self.root.resizable(False, False)
+        self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
+        self.root.state('zoomed')
+        self.root.resizable(False, True)
         self.root.bind_all('<Control-f>', self.fcsent)
         self.root.bind_all('<Control-r>', self.fcsent)
         self.root.bind_all('<Control-t>', self.fcsent)
@@ -235,11 +231,11 @@ class TreeViewGui:
         lbw = int(round(frw * 0.09285714285714286))
         scw = int(round(frw * 0.011904761904761904))
         ftt = 'verdana 11'
-        self.tframe = ttk.Frame(root, width = frw, height = frh)#width = 1260, height = 550)
-        self.tframe.pack(anchor = 'w', side = TOP)
+        self.tframe = ttk.Frame(root, width = frw, height = frh)
+        self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)
         self.tframe.pack_propagate(0)
-        self.txframe = Frame(self.tframe, width = txw, height = frh)#width = 1113, height = 550)
-        self.txframe.pack(anchor = 'w', side = LEFT)
+        self.txframe = Frame(self.tframe, width = txw, height = frh)
+        self.txframe.pack(anchor = 'w', side = LEFT, fill = 'both', expand = 1)
         self.txframe.pack_propagate(0)
         self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE, 
                          undo = True, autoseparators = True, maxundo = -1)
@@ -250,28 +246,28 @@ class TreeViewGui:
         self.text.bind('<Control-Shift-Key-Z>', self.redo)
         self.text.pack_propagate(0)
         self.bt['text'] = self.text
-        self.sc1frame = ttk.Frame(self.tframe, width = scw, height = frh)#width = 15, height = 550)
-        self.sc1frame.pack(anchor = 'w', side = LEFT)
+        self.sc1frame = ttk.Frame(self.tframe, width = scw, height = frh)
+        self.sc1frame.pack(anchor = 'w', side = LEFT, fill = 'y')
         self.sc1frame.pack_propagate(0)
         self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
         self.scrollbar1.config(command = self.text.yview) 
-        self.scrollbar1.pack(side="left", fill="y") 
+        self.scrollbar1.pack(side="left", fill="y", pady = 1) 
         self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
-        self.tlframe = ttk.Frame(self.tframe, width = lbw, height = frh)#width = 117, height = 550)
-        self.tlframe.pack(anchor = 'w', side = LEFT)
+        self.tlframe = ttk.Frame(self.tframe, width = lbw, height = frh)
+        self.tlframe.pack(anchor = 'w', side = LEFT, fill = 'y')
         self.tlframe.pack_propagate(0)        
         self.listb = Listbox(self.tlframe, font = ftt, exportselection = False)
         self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
-        self.sc2frame = ttk.Frame(self.tframe, width = scw, height = frh)#width = 15, height = 550)
-        self.sc2frame.pack(anchor = 'w', side = LEFT)
+        self.sc2frame = ttk.Frame(self.tframe, width = scw, height = frh)
+        self.sc2frame.pack(anchor = 'w', side = LEFT, fill = 'y')
         self.sc2frame.pack_propagate(0)
         self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
         self.scrollbar2.config(command = self.listb.yview) 
-        self.scrollbar2.pack(side = "left", fill = "y")
+        self.scrollbar2.pack(side = "left", fill = "y", pady = 1)
         self.scrollbar2.bind('<ButtonRelease>', self.mscrl)
         self.listb.config(yscrollcommand = self.scrollbar2.set)
         self.listb.bind('<<ListboxSelect>>', self.infobar)
@@ -284,15 +280,21 @@ class TreeViewGui:
         # 6th frame.
         # Frame for horizontal scrollbar and info label.
         self.fscr = ttk.Frame(root)
-        self.fscr.pack(fill = 'x')
-        self.scrolh = ttk.Scrollbar(self.fscr, orient = "horizontal")
-        self.scrolh.pack(side = LEFT, fill = 'x', expand = 1)
+        self.fscr.pack()
+        self.frsc = ttk.Frame(self.fscr, width = frw-int(frw*0.03640982218458933), height = scw)
+        self.frsc.pack(side = LEFT, fill = 'x', padx = (2, 1))
+        self.frsc.propagate(0)
+        self.scrolh = ttk.Scrollbar(self.frsc, orient = "horizontal")
+        self.scrolh.pack(fill = 'x')
         self.scrolh.config(command = self.text.xview)
+        self.scrolh.propagate(0)
         self.text.config(xscrollcommand = self.scrolh.set)
         self.info = StringVar()
+        self.frlab = ttk.Frame(self.fscr)
+        self.frlab.pack(side = LEFT, fill = 'x')
         self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
-        self.labcor = Label(self.fscr, textvariable = self.info, width = 20,
-                            font = 'consolas 10 bold', justify = CENTER)
+        self.labcor = Label(self.frlab, textvariable = self.info,
+                            font = 'consolas 10 bold', justify = CENTER, width = lbw + (scw*2))
         self.labcor.pack(side = LEFT, fill = 'x')
         self.unlock = True
         if 'ft.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
@@ -384,7 +386,7 @@ class TreeViewGui:
             self.info.set('Editor Mode')
         elif self.listb.curselection():
             tvg = tv(f'{self.filename}')
-            ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:15]
+            ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:12]
             self.info.set(f'{self.listb.curselection()[0]}: {ck[:-1]}...')
             self.text.see(f'{self.listb.curselection()[0]}.0')
             del ck
@@ -1931,7 +1933,6 @@ class TreeViewGui:
                         self.spaces()
                         if self.editorsel:
                             self.editorsel = None
-            
                 except Exception as a:
                     messagebox.showerror('TreeViewGui', f'{a}')
             self.text.edit_reset()
@@ -2004,7 +2005,6 @@ class TreeViewGui:
                     f = event[:(f.span()[0])] + '10' + event[(f.span()[1]):]
                 else:
                     f = event[:(f.span()[0])] + '40' + event[(f.span()[1]):]
-                    
         if f:
             self.text['font'] = f
             for i in self.text.tag_names():
