@@ -118,6 +118,8 @@
         * **TAKE NOTE:**
             * **When scalling, TVG may appear too small and other app function may appear overly sized.**
             * **Best resolution is 1366 x 768 [base on dev res] :pray:**
+            * **Better handling in resolution now.**
+                * **Almost all resolution can adapt [some still need scaling].**
     * **Can Undo or Redo.**
         * **[Control+z] for undo and [Control+Shift+z] to redo.**
     * **Special Function for TeleCalc [no button, only shortcut Control+k].**
@@ -125,6 +127,10 @@
             * **Can recalculate other rows that link from result.**
                 * **Select the "From" and "To" [range that link from result].**
                 * **Avoid recalculate one-by-one [unless not linked]**
+    * **Can write Telethon [Telegram wrapper] markdown style.**
+        * **Difference with markdown only on the italic.**
+            * **Markdown using \*italic\*, in Telegram double underscore.**
+            * **Link webpage, just directly the url.**
 * **And many more.. :joy:**
 
 ![TVG3](/TVG3.png)
