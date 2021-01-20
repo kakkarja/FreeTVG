@@ -1947,6 +1947,7 @@ class TreeViewGui:
             emo.Emo.status = True
             emo.Emo.paste = None
             emo.Emo.mainon.destroy()
+        os.remove(os.path.join(ori, 'pid.tvg'))
         self.root.destroy()
     
     def txtcol(self, event = None, path = None, wr = True):
@@ -2107,50 +2108,59 @@ def scal(t):
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
-    root = Tk()
-    dpi = ctypes.windll.user32.GetDpiForWindow(root.winfo_id())
-    if 'scale.tvg' in os.listdir():
-        with open('scale.tvg') as scl:
-            gs = float(scl.read())
-        root.tk.call('tk', 'scaling', gs)
-    else:
-        root.tk.call('tk', 'scaling', round(dpi/72, 2))
-    root.wm_iconbitmap(default = filen('TVG.ico'))
-    root.withdraw()
-    if 'lastopen.tvg' in os.listdir():
-        root.update()
-        ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
-        if ask:
-            with open('lastopen.tvg', 'rb') as lop:
-                rd = eval(lop.read().decode('utf-8'))
-            filename = rd['lop']
+    if 'pid.tvg' not in os.listdir():
+        with open('pid.tvg', 'w') as wid:
+            wid.write(str(os.getpid()))
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        root = Tk()
+        dpi = ctypes.windll.user32.GetDpiForWindow(root.winfo_id())
+        if 'scale.tvg' in os.listdir():
+            with open('scale.tvg') as scl:
+                gs = float(scl.read())
+            root.tk.call('tk', 'scaling', gs)
         else:
-            os.remove('lastopen.tvg')
-            filename = simpledialog.askstring('Filename', 'Create filename:')
-    else:
-        filename = simpledialog.askstring('Filename', 'Create filename:')    
-    if filename:
-        filename = filename.title()
-        if f'{filename}_tvg' not in os.listdir():
-            try:
-                os.mkdir(f'{filename}_tvg')
+            root.tk.call('tk', 'scaling', round(dpi/72, 2))
+        root.wm_iconbitmap(default = filen('TVG.ico'))
+        root.withdraw()
+        if 'lastopen.tvg' in os.listdir():
+            root.update()
+            ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
+            if ask:
+                with open('lastopen.tvg', 'rb') as lop:
+                    rd = eval(lop.read().decode('utf-8'))
+                filename = rd['lop']
+            else:
+                os.remove('lastopen.tvg')
+                filename = simpledialog.askstring('Filename', 'Create filename:')
+        else:
+            filename = simpledialog.askstring('Filename', 'Create filename:')    
+        if filename:
+            filename = filename.title()
+            if f'{filename}_tvg' not in os.listdir():
+                try:
+                    os.mkdir(f'{filename}_tvg')
+                    os.chdir(f'{filename}_tvg')
+                except:
+                    os.chdir(f'{filename}_tvg')
+            else:
                 os.chdir(f'{filename}_tvg')
-            except:
-                os.chdir(f'{filename}_tvg')
+            begin = TreeViewGui(root = root, filename = filename)
+            begin.root.deiconify()
+            if f'{filename}_hid.json' in os.listdir():
+                begin.hidform()
+                begin.infobar()
+            else:
+                begin.view()
+            begin.text.edit_reset()
+            begin.root.mainloop()
         else:
-            os.chdir(f'{filename}_tvg')
-        begin = TreeViewGui(root = root, filename = filename)
-        begin.root.deiconify()
-        if f'{filename}_hid.json' in os.listdir():
-            begin.hidform()
-            begin.infobar()
-        else:
-            begin.view()
-        begin.text.edit_reset()
-        begin.root.mainloop()
+            messagebox.showwarning('File', 'No File Name!')
+            root.destroy()
     else:
-        messagebox.showwarning('File', 'No File Name!')
+        root = Tk()
+        root.wm_iconbitmap(default = filen('TVG.ico'))
+        root.withdraw()
+        messagebox.showinfo('TreeViewGui', 'Treeview Gui is already open!', parent = root)
         root.destroy()
         
 if __name__ == '__main__':
