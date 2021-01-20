@@ -720,6 +720,8 @@ def main(stat, path, message = None):
                         begin.winexit()
                     except:
                         messagebox.showinfo('TeleTVG', sys.exc_info())
+                        if 'ReminderTel.session' in os.listdir():
+                            os.remove('ReminderTel.session')                        
                         begin.winexit()
                 else:
                     messagebox.showinfo('TeleTVG', 'Please log in first!')
