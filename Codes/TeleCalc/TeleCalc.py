@@ -307,62 +307,68 @@ class Calculator():
             fcom = 'combobox'
         if self.tpl is None:
             nck = ['0','1','2','3','4','5','6','7','8','9','-', '/','.']
-            if event.char in nck:
+            if event.char in nck and 'combobox' not in fcom:
                 self.calculation(self.bt[event.char])
             else:
-                if event.keysym == 'BackSpace':
-                    self.calculation(self.bt['BACK'])
-                elif event.keysym == 'equal':
-                    self.calculation(self.bt['ANS'])
-                elif event.keysym == 'asterisk':
-                    self.calculation(self.bt['*'])
-                elif event.keysym == 'plus':
-                    self.calculation(self.bt['+'])
-                elif event.keysym == 'c':
-                    self.calculation(self.bt['C'])
-                elif event.keysym == 'parenleft':
-                    self.calculation(self.bt['('])
-                elif event.keysym == 'parenright':
-                    self.calculation(self.bt[')']) 
-                elif event.keysym == 'percent':
-                    self.calculation(self.bt['%'])
-                elif event.keysym == 'p':
-                    self.calculation(self.bt['+/-'])
-                elif event.keysym == 'm':
-                    self.calculation(self.bt['M'])                
-                elif event.keysym == 'Left' and 'combobox' not in fcom:
-                    self.pwidth = self.pwidth - 10
-                    self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-                elif event.keysym == 'Right' and 'combobox' not in fcom:
-                    self.pwidth = self.pwidth + 10
-                    self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-                elif event.keysym == 'Down' and 'combobox' not in fcom:
-                    self.pheight = self.pheight + 10
-                    self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-                elif event.keysym == 'Up' and 'combobox' not in fcom:
-                    self.pheight = self.pheight - 10
-                    self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-                elif event.keysym == 'A' and 'combobox' not in fcom:
-                    self.runcal()
-                elif event.keysym == 'C' and 'combobox' not in fcom:
-                    self.copc()          
-                elif event.keysym == 'E' and 'combobox' not in fcom:
-                    self.edt()
-                elif event.keysym == 'L' and 'combobox' not in fcom:
-                    self.loadcalc()
-                elif event.keysym == 'S' and 'combobox' not in fcom:
-                    self.savef()
-                elif event.keysym == 'D' and 'combobox' not in fcom:
-                    self.tdel()
-                elif event.keysym == 'r':
-                    if 'combobox' not in fcom:
+                if 'combobox' not in fcom:
+                    if event.keysym == 'BackSpace':
+                        self.calculation(self.bt['BACK'])
+                    elif event.keysym == 'equal':
+                        self.calculation(self.bt['ANS'])
+                    elif event.keysym == 'asterisk':
+                        self.calculation(self.bt['*'])
+                    elif event.keysym == 'plus':
+                        self.calculation(self.bt['+'])
+                    elif event.keysym == 'c':
+                        self.calculation(self.bt['C'])
+                    elif event.keysym == 'parenleft':
+                        self.calculation(self.bt['('])
+                    elif event.keysym == 'parenright':
+                        self.calculation(self.bt[')']) 
+                    elif event.keysym == 'percent':
+                        self.calculation(self.bt['%'])
+                    elif event.keysym == 'p':
+                        self.calculation(self.bt['+/-'])
+                    elif event.keysym == 'm':
+                        self.calculation(self.bt['M'])                
+                    elif event.keysym == 'Left':
+                        self.pwidth = self.pwidth - 10
+                        self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+                    elif event.keysym == 'Right':
+                        self.pwidth = self.pwidth + 10
+                        self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+                    elif event.keysym == 'Down':
+                        self.pheight = self.pheight + 10
+                        self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+                    elif event.keysym == 'Up':
+                        self.pheight = self.pheight - 10
+                        self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+                    elif event.keysym == 'A':
+                        self.runcal()
+                    elif event.keysym == 'C':
+                        self.copc()          
+                    elif event.keysym == 'E':
+                        self.edt()
+                    elif event.keysym == 'L':
+                        self.loadcalc()
+                    elif event.keysym == 'S':
+                        self.savef()
+                    elif event.keysym == 'D':
+                        self.tdel()
+                    elif event.keysym == 'k':
+                        self.linkcalc()
+                    elif event.keysym == 'r':
+                        if 'combobox' not in fcom:
+                            self.cbc1.focus()
+                    elif event.keysym == 'e':
+                        if 'combobox' not in fcom:
+                            self.cbc2.focus()                    
+                else:
+                    if event.keysym == 'r':
                         self.cbc1.focus()
-                elif event.keysym == 'e':
-                    if 'combobox' not in fcom:
+                    elif event.keysym == 'e':
                         self.cbc2.focus()
-                elif event.keysym == 'k':
-                    self.linkcalc()
-                
+                                
     def retrat(self, event = None):
         #Tracking currency symbol in 2nd combo,
         #to get the rate.
@@ -1124,14 +1130,18 @@ class Calculator():
                 else:
                     messagebox.showinfo('Calculator', 'Copy aborted!', parent = self.root)
             else:
-                gtr = [i for i in self.text.get('1.0', END)[:-1].split('\n') if 'Rate:' in i]
+                gtr = [i for i in self.text.get('1.0', END)[:-1].split('\n') if 'Result:' in i]
                 pas = messagebox.askyesno('Calculator', 'Want to paste Rate?', parent = self.root)
                 if pas:
-                    self.entry.config(state = 'normal')
-                    self.entry.delete(0,END)
-                    self.entry.insert(END, gtr[0][6:])
-                    self.entry.config(state = 'disable')                    
-                    messagebox.showinfo('Calculator', f'Pasted {gtr[0]}!', parent = self.root)
+                    if gtr:
+                        self.entry.config(state = 'normal')
+                        self.entry.delete(0,END)
+                        self.entry.insert(END, gtr[0][8:])
+                        self.entry.config(state = 'disable')
+                        self.tdel()
+                        messagebox.showinfo('Calculator', f'Pasted {gtr[0]}!', parent = self.root)
+                    else:
+                        messagebox.showinfo('Calculator', 'Can paste Conversion Result only and not rate!')
                 else:
                     txt = 'p:Exchange Rate\n'
                     if 'Result:' in self.text.get('1.0', END)[:-1]:
