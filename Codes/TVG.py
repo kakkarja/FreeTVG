@@ -1455,39 +1455,103 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile():
-                if self.entry.get():
-                    tvg = tv(self.filename)
-                    dat = tvg.insighttree()
-                    num = len(dat)
-                    sn = 0                    
-                    sw = self.entry.get()
-                    if sw.isdigit():
-                        sw = int(sw)
-                        if sw <= num-1:
-                            self.listb.see(sw)
-                            self.text.see(f'{sw}.0')                            
-                            self.listb.focus()
-                            self.listb.selection_clear(0, END)
-                            self.listb.activate(sw)
-                            self.listb.selection_set(sw)
-                    else:
-                        while sn < num:
-                            if sw in dat[sn][1]:
-                                self.text.see(f'{sn}.0')
-                                self.listb.see(sn)
-                                self.listb.selection_clear(0, END)
-                                self.listb.selection_set(sn)
-                                ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
-                                self.listb.focus()
-                                self.listb.activate(sn)
-                                if ask:
-                                    sn += 1
-                                    continue
-                                else:
-                                    break
+            if str(self.text.cget('state')) == 'normal' and str(self.bt['button24'].cget('state')) == 'normal':
+                if self.text.get('1.0', END)[:-1]:
+                    
+                    def searchw(words: str):
+                        self.text.tag_config('hw', background = 'gold')
+                        idx = self.text.search(words, '1.0', END, nocase=1)
+                        ghw = None
+                        while idx:
+                            idx2 = f'{idx}+{len(words)}c'
+                            ghw = self.text.get(idx, idx2)
+                            self.text.delete(idx, idx2)
+                            self.text.insert(idx, ghw, 'hw')
+                            self.text.see(idx2)                            
+                            c = messagebox.askyesno('TreeViewGui', 'Continue search?')
+                            if c:
+                                self.text.delete(idx, idx2)
+                                self.text.insert(idx, ghw)
+                                idx = self.text.search(words, idx2, END, nocase = 1)
+                                self.text.mark_set('insert', idx2)
+                                self.text.focus()                                
+                                continue
                             else:
-                                sn += 1
+                                r = messagebox.askyesno('TreeViewGui', 'Replace word?')
+                                if r:
+                                    rpl = simpledialog.askstring('Replace', 'Type word:')
+                                    if rpl:
+                                        self.text.delete(idx, idx2)
+                                        self.text.insert(idx, rpl)
+                                        self.text.mark_set('insert', f"{idx}+{len(rpl)}c")
+                                        self.text.focus()
+                                    else:
+                                        self.text.delete(idx, idx2)
+                                        self.text.insert(idx, ghw)
+                                        self.text.mark_set('insert', idx2)
+                                        self.text.focus()                                        
+                                else:
+                                    self.text.delete(idx, idx2)
+                                    self.text.insert(idx, ghw)
+                                    self.text.mark_set('insert', idx2)
+                                    self.text.focus()                                    
+                                break
+                        self.text.tag_delete(*['hw'])
+                        del ghw
+                        
+                    if self.lock is False:
+                        self.lock = True
+                        self.root.update()
+                        class MyDialog(simpledialog.Dialog):
+                            
+                            def body(self, master):
+                                self.title('Search Words')
+                                Label(master, text="Words: ").grid(row=0, column = 0, sticky = E)
+                                self.e1 = ttk.Entry(master)
+                                self.e1.grid(row=0, column=1)
+                                return self.e1
+                            
+                            def apply(self):
+                                self.result = self.e1.get()
+                            
+                        d = MyDialog(self.root)
+                        self.lock = False
+                        if d.result:
+                            searchw(d.result)
+            else:
+                if self.checkfile():
+                    if self.entry.get():
+                        tvg = tv(self.filename)
+                        dat = tvg.insighttree()
+                        num = len(dat)
+                        sn = 0                    
+                        sw = self.entry.get()
+                        if sw.isdigit():
+                            sw = int(sw)
+                            if sw <= num-1:
+                                self.listb.see(sw)
+                                self.text.see(f'{sw}.0')                            
+                                self.listb.focus()
+                                self.listb.selection_clear(0, END)
+                                self.listb.activate(sw)
+                                self.listb.selection_set(sw)
+                        else:
+                            while sn < num:
+                                if sw in dat[sn][1]:
+                                    self.text.see(f'{sn}.0')
+                                    self.listb.see(sn)
+                                    self.listb.selection_clear(0, END)
+                                    self.listb.selection_set(sn)
+                                    ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
+                                    self.listb.focus()
+                                    self.listb.activate(sn)
+                                    if ask:
+                                        sn += 1
+                                        continue
+                                    else:
+                                        break
+                                else:
+                                    sn += 1
                     self.infobar()
     
     def dattim(self, event = None):
@@ -1727,6 +1791,7 @@ class TreeViewGui:
                         else:
                             messagebox.showinfo('TreeViewGui', 'Loading template aborted!')
                     else:
+                        self.lock = False
                         messagebox.showinfo('TreeViewGui', 'No templates yet!')
         self.text.focus()
                         
@@ -1742,7 +1807,7 @@ class TreeViewGui:
             if str(self.text.cget('state')) == 'disabled':
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
-                ckb = ['button24', 'button28', 'button20', 'button29', 'text']
+                ckb = ['button24', 'button28', 'button20', 'button29', 'button19', 'text']
                 for i in self.bt:
                     if 'label' and 'scrollbar' not in i and i not in ckb:
                         self.bt[i].config(state='disable')
@@ -1939,16 +2004,19 @@ class TreeViewGui:
             self.infobar()
                     
     def tvgexit(self, event = None):
-        if self.checkfile():
+        if TreeViewGui.FREEZE is False:
             ori = os.getcwd().rpartition('\\')[0]
-            with open(os.path.join(ori, 'lastopen.tvg'), 'wb') as lop:
-                lop.write(str({'lop': self.filename}).encode())
-        if emo.Emo.status is False:
-            emo.Emo.status = True
-            emo.Emo.paste = None
-            emo.Emo.mainon.destroy()
-        os.remove(os.path.join(ori, 'pid.tvg'))
-        self.root.destroy()
+            if self.checkfile():
+                with open(os.path.join(ori, 'lastopen.tvg'), 'wb') as lop:
+                    lop.write(str({'lop': self.filename}).encode())
+            if emo.Emo.status is False:
+                emo.Emo.status = True
+                emo.Emo.paste = None
+                emo.Emo.mainon.destroy()
+            os.remove(os.path.join(ori, 'pid.tvg'))
+            self.root.destroy()
+        else:
+            messagebox.showerror('TreeViewGui', 'Do not exit before a function end!!!')
     
     def txtcol(self, event = None, path = None, wr = True):
         # Setting colors for text and listbox.
