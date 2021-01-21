@@ -126,7 +126,7 @@ class Reminder:
                            font = 'consolas 12 bold', relief = GROOVE)
         self.busf.pack(side =  RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
         self.frm4 = Frame(self.root)
-        self.frm4.pack(fill = 'x')
+        self.frm4.pack(fill = 'both')
         self.text2 = Text(self.frm4, font = '-*-Segoe-UI-Emoji-*--*-153-*', pady = 3, padx = 5, 
                          relief = FLAT, wrap = 'word', height = 12)
         self.text2.pack(side = LEFT, padx = (5,0), pady = (0, 5), fill = 'both', expand = 1)
