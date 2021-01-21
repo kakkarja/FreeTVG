@@ -1204,6 +1204,9 @@ class TreeViewGui:
                     self.view()
                 else:
                     self.view()
+            else:
+                if self.listb.get(0, END):
+                    self.listb.delete(0, END)            
             if str(self.root.focus_get()) != '.':
                 self.root.focus()
             self.infobar()
@@ -1700,6 +1703,7 @@ class TreeViewGui:
                             self.text.insert(END, f's:\n')
                         else:
                             self.text.insert(END, f'{c[ed[0]]}:{ed[1][1:]}')
+                    self.text.see(self.text.index(INSERT))
                     os.remove(f'{self.filename}.txt')
                 else:
                     if self.listb.curselection(): 
