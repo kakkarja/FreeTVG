@@ -1466,7 +1466,7 @@ class TreeViewGui:
                 if self.text.get('1.0', END)[:-1]:
                     
                     def searchw(words: str):
-                        self.text.tag_config('hw', background = 'gold')
+                        self.text.tag_config('hw', underline = 1)
                         idx = self.text.search(words, '1.0', END, nocase=1)
                         ghw = None
                         while idx:
