@@ -59,7 +59,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-0>', self.fcsent)
         self.root.bind_all('<Control-minus>', self.fcsent)
         self.root.bind_all('<Control-Key-1>', self.fcsent)
-        self.root.bind_all('<Control-Key-2>', self.fcsent)
+        self.root.bind_all('<Control-Key-2>', self.lookup)
         self.root.bind_all('<Control-Key-3>', self.dattim)
         self.root.bind_all('<Control-Key-4>', self.fcsent)
         self.root.bind_all('<Control-Key-5>', self.fcsent)
@@ -490,8 +490,6 @@ class TreeViewGui:
                 self.chgfile()            
             elif event.keysym == '1':
                 self.sendtel()
-            elif event.keysym == '2':
-                self.lookup()
             elif event.keysym == '4':
                 self.endec()
             elif event.keysym == '5':
