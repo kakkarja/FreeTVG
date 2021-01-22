@@ -76,6 +76,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-semicolon>', self.emoj)
         self.root.bind_all('<Control-Key-backslash>', self.fcsent)
         self.root.bind_all('<Control-Key-question>', self.fcsent)
+        self.root.bind_all('<Shift-Return>', self.inenter)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -302,6 +303,12 @@ class TreeViewGui:
         if 'theme.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
             self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
             
+    def inenter(self, event):
+        ck = ['button', 'radio']
+        fcs = str(event.widget).rpartition('!')[2]
+        if ck[0] in fcs or ck[1] in fcs:
+            event.widget.invoke()
+            
     def undo(self, event = None):
         # Undo only in Editor.
         
@@ -310,7 +317,6 @@ class TreeViewGui:
                 self.text.edit_undo()
             except:
                 messagebox.showerror('TreeViewGui', 'Nothing to undo!')
-        
     
     def redo(self, event =None):
         # Redo only in Editor.
