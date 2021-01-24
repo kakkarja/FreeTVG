@@ -33,7 +33,7 @@ class Reminder:
         self.root.resizable(False, False)
         self.root.title('TeleTVG')
         self.wid = 705
-        self.hei = 630
+        self.hei = 650
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wid/2)
         self.pheight = int(self.root.winfo_screenheight()/3 - self.hei/3)
         self.root.geometry(f'{self.wid}x{self.hei}+{self.pwidth}+{self.pheight}')
@@ -106,7 +106,7 @@ class Reminder:
                            command = self.runsend, font = 'consolas 12 bold', relief = GROOVE)
         self.schb.pack(padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.frm3 = Frame(self.root)
-        self.frm3.pack(fill = 'x')
+        self.frm3.pack(fill = 'both')
         self.text = Text(self.frm3, font = '-*-Segoe-UI-Emoji-*--*-153-*', pady = 3, padx = 5, 
                          relief = FLAT, wrap = 'word', height = 12)
         self.text.pack(side = LEFT, padx = (5,0), pady = (0, 5), fill = 'both', expand = 1)
@@ -126,7 +126,7 @@ class Reminder:
                            font = 'consolas 12 bold', relief = GROOVE)
         self.busf.pack(side =  RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
         self.frm4 = Frame(self.root)
-        self.frm4.pack(fill = 'both')
+        self.frm4.pack(fill = 'both', expand = 1)
         self.text2 = Text(self.frm4, font = '-*-Segoe-UI-Emoji-*--*-153-*', pady = 3, padx = 5, 
                          relief = FLAT, wrap = 'word', height = 12)
         self.text2.pack(side = LEFT, padx = (5,0), pady = (0, 5), fill = 'both', expand = 1)
@@ -136,13 +136,13 @@ class Reminder:
         self.text2.config(yscrollcommand = self.scroll2.set)
         self.text2.config(state = 'disable')
         self.frgr = Frame(self.root)
-        self.frgr.pack(fill = 'x')
+        self.frgr.pack(fill = 'both')
         self.bugr = Button(self.frgr, text = 'G E T  R E P L Y', command = self.getrep, 
                            font = 'consolas 12 bold', relief = GROOVE)
-        self.bugr.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
+        self.bugr.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'both', expand = 1)
         self.bugf = Button(self.frgr, text = 'G E T  F I L E', command = self.gf, 
                            font = 'consolas 12 bold', relief = GROOVE)
-        self.bugf.pack(side = RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
+        self.bugf.pack(side = RIGHT, padx = (0, 2), pady = (0, 5), fill = 'both', expand = 1)        
         self.entto.focus()
     
     def tynam(self, event = None):
@@ -218,34 +218,37 @@ class Reminder:
     async def runs(self, sch: dict):
         # Run Scheduler to send Telegram
         
-        smsg = self.text.get('1.0', END)[:-1]
-        gms = int(len(smsg)/4096)
+        gms = int(len(self.text.get('1.0', END)[:-1])/4096)
         async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
             try:
                 await client.connect()
                 if gms == 0:
-                    await client.send_message(self.users[self.entto.get()], smsg, 
+                    await client.send_message(self.users[self.entto.get()], self.text.get('1.0', END)[:-1], 
                                               schedule = timedelta(days = sch['days'], 
                                                                    hours = sch['hours'],
                                                                    minutes = sch['minutes'],
                                                                    seconds = sch['seconds']))
                 else:
-                    orm = smsg
+                    orm = self.text.get('1.0', END)[:-1].split('\n')
                     while orm:
-                        if len(orm) > 4090:
-                            await client.send_message(self.users[self.entto.get()], orm[:4091],
+                        getm = ''
+                        num = 0
+                        for i in range(len(orm)):
+                            if len(getm) + (len(orm[i])+1) < 4090:
+                                getm += ''.join(orm[i]+'\n')
+                            else:
+                                num = i
+                                break
+                        await client.send_message(self.users[self.entto.get()], getm,
                                                       schedule = timedelta(days = sch['days'], 
                                                                            hours = sch['hours'],
                                                                            minutes = sch['minutes'],
                                                                            seconds = sch['seconds']))
-                            orm = orm[4091:]
+                        if num:
+                            orm = orm[i:]
+                            continue
                         else:
-                            await client.send_message(self.users[self.entto.get()], orm, 
-                                                      schedule = timedelta(days = sch['days'], 
-                                                                           hours = sch['hours'],
-                                                                           minutes = sch['minutes'],
-                                                                           seconds = sch['seconds']))
-                            orm = None
+                            break
                 await client.disconnect()
                 ct = timedelta(days = sch['days'], hours = sch['hours'], minutes = sch['minutes'], seconds = sch['seconds'])
                 ct = str(dt.today().replace(microsecond = 0) + ct)
@@ -281,14 +284,22 @@ class Reminder:
                 if gms == 0:
                     await client.send_message(self.users[self.entto.get()], self.text.get('1.0', END)[:-1])
                 else:
-                    orm = self.text.get('1.0', END)[:-1]
+                    orm = self.text.get('1.0', END)[:-1].split('\n')
                     while orm:
-                        if len(orm) > 4090:
-                            await client.send_message(self.users[self.entto.get()], orm[:4091])
-                            orm = orm[4091:]
+                        getm = ''
+                        num = 0
+                        for i in range(len(orm)):
+                            if len(getm) + (len(orm[i])+1) < 4090:
+                                getm += ''.join(orm[i]+'\n')
+                            else:
+                                num = i
+                                break
+                        await client.send_message(self.users[self.entto.get()], getm)
+                        if num:
+                            orm = orm[i:]
+                            continue
                         else:
-                            await client.send_message(self.users[self.entto.get()], orm)
-                            orm = None
+                            break
                 await client.disconnect()
             tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
             messagebox.showinfo('TeleTVG', tms, parent = self.root)
@@ -340,7 +351,7 @@ class Reminder:
             await client.connect()
             self.text2.config(state = 'normal')
             self.text2.delete('1.0', END)
-            async for message in client.iter_messages(self.users[self.entto.get()], 5):
+            async for message in client.iter_messages(self.users[self.entto.get()], 10):
                 if message.out:
                     td = dt.ctime(dt.astimezone(message.date))
                     self.text2.insert(END, f'{td}\n')
@@ -625,14 +636,22 @@ class Reminder:
                 if gms == 0:
                     await asyncio.gather(*[client.send_message(self.users[user], self.text.get('1.0', END)[:-1]) for user in sen])
                 else:
-                    orm = self.text.get('1.0', END)[:-1]
+                    orm = self.text.get('1.0', END)[:-1].split('\n')
                     while orm:
-                        if len(orm) > 4090:
-                            await asyncio.gather(*[client.send_message(self.users[user], orm[:4091]) for user in sen])
-                            orm = orm[4091:]
+                        getm = ''
+                        num = 0
+                        for i in range(len(orm)):
+                            if len(getm) + (len(orm[i])+1) < 4090:
+                                getm += ''.join(orm[i]+'\n')
+                            else:
+                                num = i
+                                break
+                        await asyncio.gather(*[client.send_message(self.users[user], getm) for user in sen])
+                        if num:
+                            orm = orm[i:]
+                            continue
                         else:
-                            await asyncio.gather(*[client.send_message(self.users[user], orm) for user in sen])
-                            orm = None
+                            break
                 await client.disconnect()
             tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
             messagebox.showinfo('TeleTVG', tms, parent = self.root)
