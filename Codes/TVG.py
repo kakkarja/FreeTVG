@@ -30,8 +30,11 @@ class TreeViewGui:
         self.root = root
         self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
         self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
-        self.root.state('zoomed')
-        self.root.resizable(False, True)
+        self.wwidth = 835
+        self.wheight = 610
+        self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
+        self.pheight = int(self.root.winfo_screenheight()/3 - self.wheight/3)
+        self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
         self.root.bind_all('<Control-f>', self.fcsent)
         self.root.bind_all('<Control-r>', self.fcsent)
         self.root.bind_all('<Control-t>', self.fcsent)
@@ -157,22 +160,7 @@ class TreeViewGui:
         self.bt['button18'] = self.button18
         self.button19 = ttk.Button(self.bframe, text = 'Look Up', command = self.lookup)
         self.button19.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button19'] = self.button19        
-        self.button21 = ttk.Button(self.bframe, text = 'Save', command = self.endec)
-        self.button21.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button21'] = self.button21        
-        self.button23 = ttk.Button(self.bframe, text = 'Create file', command = self.createf)
-        self.button23.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button23'] = self.button23
-        self.button26 = ttk.Button(self.bframe, text = 'Calculator', command = self.calc)
-        self.button26.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button26'] = self.button26
-        self.button27 = ttk.Button(self.bframe, text = 'Ex', command = self.editex)
-        self.button27.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button27'] = self.button27
-        self.button30 = ttk.Button(self.bframe, text = 'HTML View', command = self.htmlview)
-        self.button30.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button30'] = self.button30        
+        self.bt['button19'] = self.button19
         
         # 4th frame for below buttons.
         # Frame for second row buttons.
@@ -208,34 +196,52 @@ class TreeViewGui:
         self.button20 = ttk.Button(self.frb1, text = 'Date-Time', command = self.dattim)
         self.button20.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button20'] = self.button20        
-        self.button22 = ttk.Button(self.frb1, text = 'Open', command = self.openf)
+        
+        # 7th Frame
+        # For third row  of buttons
+        self.frb2 = ttk.Frame(self.root)
+        self.frb2.pack(fill = X)
+        self.button21 = ttk.Button(self.frb2, text = 'Save', command = self.endec)
+        self.button21.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button21'] = self.button21
+        self.button22 = ttk.Button(self.frb2, text = 'Open', command = self.openf)
         self.button22.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button22'] = self.button22        
-        self.button24 = ttk.Button(self.frb1, text = 'Editor', command = self.editor)
+        self.bt['button22'] = self.button22          
+        self.button23 = ttk.Button(self.frb2, text = 'Create file', command = self.createf)
+        self.button23.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button23'] = self.button23
+        self.button24 = ttk.Button(self.frb2, text = 'Editor', command = self.editor)
         self.button24.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button24'] = self.button24        
-        self.button25 = ttk.Button(self.frb1, text = 'Un/Wrap', command = self.wrapped)
+        self.bt['button24'] = self.button24
+        self.button25 = ttk.Button(self.frb2, text = 'Un/Wrap', command = self.wrapped)
         self.button25.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button25'] = self.button25
-        self.button28 = ttk.Button(self.frb1, text = 'Template', command = self.temp)
+        self.bt['button25'] = self.button25        
+        self.button26 = ttk.Button(self.frb2, text = 'Calculator', command = self.calc)
+        self.button26.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button26'] = self.button26
+        self.button27 = ttk.Button(self.frb2, text = 'Ex', command = self.editex)
+        self.button27.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button27'] = self.button27
+        self.button28 = ttk.Button(self.frb2, text = 'Template', command = self.temp)
         self.button28.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button28'] = self.button28
-        self.button29 = ttk.Button(self.frb1, text = 'Emoji', command = self.emoj)
+        self.button29 = ttk.Button(self.frb2, text = 'Emoji', command = self.emoj)
         self.button29.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
         self.bt['button29'] = self.button29
+        self.button30 = ttk.Button(self.frb2, text = 'HTML View', command = self.htmlview)
+        self.button30.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.bt['button30'] = self.button30
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
         frw = int(round(self.root.winfo_screenwidth() * 0.9224011713030746))
-        frh = int(round(self.root.winfo_screenheight() * 0.7161458333333334))
-        txw = int(round(frw * 0.8833333333333333))
         lbw = int(round(frw * 0.09285714285714286))
         scw = int(round(frw * 0.011904761904761904))
         ftt = 'verdana 11'
-        self.tframe = ttk.Frame(root, width = frw, height = frh)
+        self.tframe = ttk.Frame(root)
         self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)
         self.tframe.pack_propagate(0)
-        self.txframe = Frame(self.tframe, width = txw, height = frh)
+        self.txframe = Frame(self.tframe)
         self.txframe.pack(anchor = 'w', side = LEFT, fill = 'both', expand = 1)
         self.txframe.pack_propagate(0)
         self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE, 
@@ -247,7 +253,7 @@ class TreeViewGui:
         self.text.bind('<Control-Shift-Key-Z>', self.redo)
         self.text.pack_propagate(0)
         self.bt['text'] = self.text
-        self.sc1frame = ttk.Frame(self.tframe, width = scw, height = frh)
+        self.sc1frame = ttk.Frame(self.tframe, width = scw)
         self.sc1frame.pack(anchor = 'w', side = LEFT, fill = 'y')
         self.sc1frame.pack_propagate(0)
         self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
@@ -256,14 +262,14 @@ class TreeViewGui:
         self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
-        self.tlframe = ttk.Frame(self.tframe, width = lbw, height = frh)
+        self.tlframe = ttk.Frame(self.tframe, width = lbw)
         self.tlframe.pack(anchor = 'w', side = LEFT, fill = 'y')
         self.tlframe.pack_propagate(0)        
         self.listb = Listbox(self.tlframe, font = ftt, exportselection = False)
         self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
-        self.sc2frame = ttk.Frame(self.tframe, width = scw, height = frh)
+        self.sc2frame = ttk.Frame(self.tframe, width = scw)
         self.sc2frame.pack(anchor = 'w', side = LEFT, fill = 'y')
         self.sc2frame.pack_propagate(0)
         self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
@@ -280,23 +286,25 @@ class TreeViewGui:
 
         # 6th frame.
         # Frame for horizontal scrollbar and info label.
-        self.fscr = ttk.Frame(root)
-        self.fscr.pack()
-        self.frsc = ttk.Frame(self.fscr, width = frw-int(frw*0.03640982218458933), height = scw)
-        self.frsc.pack(side = LEFT, fill = 'x', padx = (2, 1))
+        self.fscr = ttk.Frame(self.root)
+        self.fscr.pack(fill = 'x')
+        self.frsc = ttk.Frame(self.fscr, height = scw)
+        self.frsc.pack(side = LEFT, fill = 'x', padx = (2, 1), expand = 1)
         self.frsc.propagate(0)
         self.scrolh = ttk.Scrollbar(self.frsc, orient = "horizontal")
-        self.scrolh.pack(fill = 'x')
+        self.scrolh.pack(side = LEFT, fill = 'x', expand = 1)
         self.scrolh.config(command = self.text.xview)
         self.scrolh.propagate(0)
         self.text.config(xscrollcommand = self.scrolh.set)
         self.info = StringVar()
-        self.frlab = ttk.Frame(self.fscr)
+        self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')        
+        self.frlab = ttk.Frame(self.fscr, width = lbw + (scw*2), height = scw)
         self.frlab.pack(side = LEFT, fill = 'x')
-        self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
+        self.frlab.propagate(0)
         self.labcor = Label(self.frlab, textvariable = self.info,
-                            font = 'consolas 10 bold', justify = CENTER, width = lbw + (scw*2))
-        self.labcor.pack(side = LEFT, fill = 'x')
+                            font = 'consolas 10 bold', justify = CENTER)
+        self.labcor.pack(side = LEFT, fill = 'x', expand = 1)
+        self.labcor.propagate(0)
         self.unlock = True
         if 'ft.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
             self.ft(path = os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'))        
@@ -304,6 +312,8 @@ class TreeViewGui:
             self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
             
     def inenter(self, event):
+        # For invoking any focus button or radiobutton
+        
         ck = ['button', 'radio']
         fcs = str(event.widget).rpartition('!')[2]
         if ck[0] in fcs or ck[1] in fcs:
@@ -1458,7 +1468,7 @@ class TreeViewGui:
         TeleCalc.main(self, ori)        
             
     def lookup(self):
-        # To lookup word on row.
+        # To lookup word on row and also on editor mode.
         
         self.hidcheck()
         if self.unlock:
@@ -2012,6 +2022,8 @@ class TreeViewGui:
             self.infobar()
                     
     def tvgexit(self, event = None):
+        # Exit mode for TVG and setting everything back to default.
+        
         if TreeViewGui.FREEZE is False:
             ori = os.getcwd().rpartition('\\')[0]
             if self.checkfile():
@@ -2129,8 +2141,10 @@ class TreeViewGui:
             self.root.tk.call('tk', 'fontchooser', 'show')
             
     def oriset(self, event = None):
+        # Set back to original setting of theme and font.
+        
         pth = os.getcwd().rpartition('\\')[0]
-        lf = [i for i in os.listdir(pth) if '.tvg' in i and i != 'lastopen.tvg']
+        lf = [i for i in os.listdir(pth) if i == 'ft.tvg' or i == 'theme.tvg']
         if lf:
             ask = messagebox.askyesno('TreeViewGui', 'Set back to original?')
             if ask:
@@ -2141,6 +2155,7 @@ class TreeViewGui:
                 messagebox.showinfo('TreeViewGui', 'None change yet!')
                 
     def scaling(self, event = None):
+        # Scaling the appearance of TVG to accomadate resolution of a pc.
         
         dpi = ctypes.windll.user32.GetDpiForWindow(self.root.winfo_id())
         maxscale = int(dpi/72) + 1
@@ -2176,6 +2191,8 @@ class TreeViewGui:
                 messagebox.showinfo('TreeViewGui', 'Scaling aborted!')
                 
 def scal(t):
+    # Need to restart after scaling.
+    
     ori = os.getcwd().rpartition('\\')[0]
     t.tvgexit()
     os.chdir(ori)
