@@ -253,7 +253,7 @@ class TreeViewGui:
         self.text.bind('<Control-Shift-Key-Z>', self.redo)
         self.text.pack_propagate(0)
         self.bt['text'] = self.text
-        self.sc1frame = ttk.Frame(self.tframe, width = scw)
+        self.sc1frame = ttk.Frame(self.tframe, width = scw-1)
         self.sc1frame.pack(anchor = 'w', side = LEFT, fill = 'y')
         self.sc1frame.pack_propagate(0)
         self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
@@ -288,7 +288,7 @@ class TreeViewGui:
         # Frame for horizontal scrollbar and info label.
         self.fscr = ttk.Frame(self.root)
         self.fscr.pack(fill = 'x')
-        self.frsc = ttk.Frame(self.fscr, height = scw)
+        self.frsc = ttk.Frame(self.fscr, height = scw+1)
         self.frsc.pack(side = LEFT, fill = 'x', padx = (2, 1), expand = 1)
         self.frsc.propagate(0)
         self.scrolh = ttk.Scrollbar(self.frsc, orient = "horizontal")
@@ -2109,6 +2109,8 @@ class TreeViewGui:
                 self.listb['font'] = fl
             if f'{self.filename}_hid.json' not in os.listdir():
                 self.spaces()
+            else:
+                self.hidform()
                 
     def reblist(self):
         # Destroy Listbox and rebuild it again,
