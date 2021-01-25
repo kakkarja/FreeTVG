@@ -54,7 +54,7 @@
           Format:
              Editor that write directly.
           ```
-    * **~~Convert~~ has been deleted and replace with <u>TeleCalc</u>.**
+    * **~~Convert~~ has been deleted and replace with <ins>TeleCalc</ins>.**
         * **Convert now become part of Editor.~~[2 functions in one]~~**
     * **Can do calculation and get latest exchange rate.**
         * **Built with https://fixer.io api.**
@@ -95,7 +95,7 @@
         * **Template for saving frequently used format of outlines.**
             * **You can load them for applying the template on the editor mode.**
             * **Template can help you to forget about retyping same format again-and-again.**
-    * **~~Save as pdf~~ is replace with <u>Printing</u>.**
+    * **~~Save as pdf~~ is replace with <ins>Printing</ins>.**
         * **Convert TVG file to HTML and open in browser.**
           >**Please get markdown first for Printing to work https://github.com/Python-Markdown/markdown.**
         * **Just click the print button and save to pdf or print direct to a printer.**
@@ -129,7 +129,7 @@
                 * **Avoid recalculate one-by-one [unless not linked]**
     * **Can write Telethon [Telegram wrapper] markdown style.**
         * **Difference with markdown only on the italic.**
-            * **Markdown using \*italic\*, in Telegram double underscore.**
+            * **Markdown using `*italic*` :arrow_right: *italic*, in Telegram double underscore.**
             * **Link webpage, just directly the url.**
     * **Can LookUp in editor mode.**
         * **Look for words and replace it with new words.**
