@@ -133,7 +133,7 @@
             * **Link webpage, just directly the url.**
     * **Can LookUp in editor mode.**
         * **Look for words and replace it with new words.**
-* **And many more.. :joy:**
+    * **TVG now resizeable :joy:**
 
 ![TVG3](/TVG3.png)
 ![TVG6](/TVG6.png)
