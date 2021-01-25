@@ -43,7 +43,7 @@
             * **Not all fonts are available in html view.**
                 * **If not available the browser will use default font styles.** 
     * **Can delete setting back to original. [No button, only event binding. Control+/]**
-    * **~~File Lock~~ has been replace with Editor.** 
+    * **~~File Lock~~ has been replace with <ins>Editor</ins>.** 
         * **FORMAT:**
           >**s: => 'space'**  
           >**p:Format => 'parent'**  
