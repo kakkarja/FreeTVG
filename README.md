@@ -135,10 +135,10 @@
         * **Look for words and replace it with new words.**
     * **TVG now resizeable :joy:**
 
+![TVG](/TVG.png)
 ![TVG3](/TVG3.png)
 ![TVG6](/TVG6.png)
 ![TVG7](/TVG7.png)
-![TVG](/TVG.png)
 ![TVG5](/TVG5.png)
 ![TVG4](/TVG4.png)
 ![TVG2](/TVG2.png)
