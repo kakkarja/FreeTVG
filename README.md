@@ -43,7 +43,7 @@
             * **Not all fonts are available in html view.**
                 * **If not available the browser will use default font styles.** 
     * **Can delete setting back to original. [No button, only event binding. Control+/]**
-    * **~~File Lock~~ has been replace with <ins>Editor</ins>.** 
+    * **~~File Lock~~ has been replace with *<ins>Editor</ins>*.** 
         * **FORMAT:**
           >**s: => 'space'**  
           >**p:Format => 'parent'**  
@@ -54,7 +54,7 @@
           Format:
              Editor that write directly.
           ```
-    * **~~Convert~~ has been deleted and replace with <ins>TeleCalc</ins>.**
+    * **~~Convert~~ has been deleted and replace with *<ins>TeleCalc</ins>*.**
         * **Convert now become part of Editor.~~[2 functions in one]~~**
     * **Can do calculation and get latest exchange rate.**
         * **Built with https://fixer.io api.**
@@ -95,7 +95,7 @@
         * **Template for saving frequently used format of outlines.**
             * **You can load them for applying the template on the editor mode.**
             * **Template can help you to forget about retyping same format again-and-again.**
-    * **~~Save as pdf~~ is replace with <ins>Printing</ins>.**
+    * **~~Save as pdf~~ is replace with *<ins>Printing</ins>*.**
         * **Convert TVG file to HTML and open in browser.**
           >**Please get markdown first for Printing to work https://github.com/Python-Markdown/markdown.**
         * **Just click the print button and save to pdf or print direct to a printer.**
