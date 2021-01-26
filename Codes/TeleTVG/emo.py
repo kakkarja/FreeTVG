@@ -62,7 +62,7 @@ class Emo:
             self.combo.bind('<<ComboboxSelected>>',self.selectcom)
             self.combo.bind('<KeyRelease>',self.tynam)
             self.sp =  IntVar(self.root)
-            self.scl = ttk.Scale(self.fr, from_ = 0, to = len(a)-1, variable = self.sp, command = self.sclupt)
+            self.scl = ttk.Scale(self.fr, from_ = 0, to = len(list(self.lib.values()))-1, variable = self.sp, command = self.sclupt)
             self.scl.pack(fill = 'x', expand = 1)
             self.setscl = (0, len(a)-1)
             self.btc = Button(self.root, text = 'C O P Y', font = 'consolas 10 bold', relief = GROOVE, command = self.copem)
