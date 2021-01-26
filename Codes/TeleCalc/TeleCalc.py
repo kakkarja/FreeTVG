@@ -362,12 +362,7 @@ class Calculator():
                             self.cbc1.focus()
                     elif event.keysym == 'e':
                         if 'combobox' not in fcom:
-                            self.cbc2.focus()                    
-                else:
-                    if event.keysym == 'r':
-                        self.cbc1.focus()
-                    elif event.keysym == 'e':
-                        self.cbc2.focus()
+                            self.cbc2.focus()
                                 
     def retrat(self, event = None):
         #Tracking currency symbol in 2nd combo,
