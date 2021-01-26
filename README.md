@@ -134,6 +134,7 @@
     * **Can LookUp in editor mode.**
         * **Look for words and replace it with new words.**
     * **TVG now resizeable :joy:**
+    * **Can search emoji by its name in the combobox.**
 
 ![TVG](/TVG.png)
 ![TVG3](/TVG3.png)
