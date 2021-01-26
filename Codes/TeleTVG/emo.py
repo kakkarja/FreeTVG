@@ -33,6 +33,7 @@ class Emo:
         self.sel = []
         self.upt = tuple()
         self.lock = False
+        self.lib = None
         self.fr = ttk.Frame(self.root)
         self.fr.pack(fill = 'both')
         self.lbe = Listbox(self.fr, font = '-*-Segoe-UI-Emoji-*--*-300-*', 
@@ -44,25 +45,64 @@ class Emo:
         try:
             with open(filen('emoj.txt')) as emr:
                 a = emr.read()
-                if '[' == a[0] and a[-1] == ']':
-                    a = [chr(i) for i in eval(a)]
+                if '{' == a[0] and a[-1] == '}':
+                    self.lib = {e: chr(j) for e, j in eval(a).items()}
                 else:
                     raise Exception('File corrupted!!!')
         except Exception as e:
-            messagebox.showerror('Emo', 'e')
-        for i in a:
-            self.lbe.insert(END,i)
-        self.lbe.bind('<ButtonRelease>', self.updatesel)
-        self.sp =  IntVar(self.root)
-        self.scl = ttk.Scale(self.fr, from_ = 0, to = len(a)-1, variable = self.sp, command = self.sclupt)
-        self.scl.pack()
-        self.setscl = (0, len(a)-1)
-        self.btc = Button(self.root, text = 'C O P Y', font = 'consolas 10 bold', relief = GROOVE, command = self.copem)
-        self.btc.pack(fill = 'x', expand = 1)
-        self.btm = Button(self.root, text = 'M A R K', font = 'consolas 10 bold', relief = GROOVE, command = self.mark)
-        self.btm.pack(fill = 'x', expand = 1)        
-        self.btm = Button(self.root, text = 'L O A D', font = 'consolas 10 bold', relief = GROOVE, command = self.choind)
-        self.btm.pack(fill = 'x', expand = 1)
+            messagebox.showerror('Emo', f'{e}')
+            self.root.destroy()
+        else:
+            for i in list(self.lib.values()):
+                self.lbe.insert(END,i)
+            self.lbe.bind('<ButtonRelease>', self.updatesel)
+            self.combo = ttk.Combobox(self.root)
+            self.combo.pack(pady = 2, padx = 2, fill = 'both', expand = 1)
+            self.combo['values'] = sorted(list(self.lib.keys()))
+            self.combo.bind('<<ComboboxSelected>>',self.selectcom)
+            self.combo.bind('<KeyRelease>',self.tynam)
+            self.sp =  IntVar(self.root)
+            self.scl = ttk.Scale(self.fr, from_ = 0, to = len(a)-1, variable = self.sp, command = self.sclupt)
+            self.scl.pack(fill = 'x', expand = 1)
+            self.setscl = (0, len(a)-1)
+            self.btc = Button(self.root, text = 'C O P Y', font = 'consolas 10 bold', relief = GROOVE, command = self.copem)
+            self.btc.pack(fill = 'x', expand = 1)
+            self.btm = Button(self.root, text = 'M A R K', font = 'consolas 10 bold', relief = GROOVE, command = self.mark)
+            self.btm.pack(fill = 'x', expand = 1)        
+            self.btm = Button(self.root, text = 'L O A D', font = 'consolas 10 bold', relief = GROOVE, command = self.choind)
+            self.btm.pack(fill = 'x', expand = 1)
+        
+    def tynam(self, event = None):
+        # To predict the key-in typing in combobox.
+        
+        import string
+        
+        try:
+            if event.char.upper() in string.ascii_uppercase:
+                #if self.combo.get():
+                    idx = self.combo.index(INSERT)
+                    gt = self.combo.get()
+                    self.combo.delete(0, END)
+                    self.combo.insert(0, gt[:idx])
+                    if self.combo.get():
+                        for em in self.lib:
+                            if self.combo.get().upper() in em and self.combo.get().upper() == em[:len(self.combo.get())]:
+                                self.combo.current(sorted(list(self.lib)).index(em))
+                                idm = list(self.lib.values()).index(self.lib[em])
+                                self.sp.set(idm)
+                                self.lbe.see(idm)
+                    self.combo.icursor(index = idx)
+        except Exception as e:
+            messagebox.showwarning('TeleTVG', f'{e}', parent = self.root)
+    
+    def selectcom(self, event):
+        # Combobox selection will result emoji ready to be selected.
+        
+        self.lbe.focus()
+        idx = list(self.lib.values()).index(self.lib[self.combo.get()])
+        self.sp.set(idx)
+        self.lbe.activate(idx)
+        self.lbe.see(idx)
         
     def slec(self, event = None):
         # Short-cut to keyboard.
@@ -98,6 +138,7 @@ class Emo:
     def sclupt(self, event = None):
         # Using scale to scroll the listbox of emojies.
         
+        self.combo.current(self.sp.get())
         fc = str(self.root.focus_get())
         if 'listbox' not in fc:
             self.lbe.focus()
@@ -187,64 +228,67 @@ class Emo:
         if self.lock is False:
             if 'marking.json' in os.listdir(Emo.pathn):
                 mrk = db(os.path.join(Emo.pathn,'marking'))
-                self.lock = True
-                class MyDialog(simpledialog.Dialog):
-                
-                    def body(self, master):
-                        self.title('Choose Mark')
-                        Label(master, text="Marking: ").pack(side = LEFT)
-                        self.e1 = ttk.Combobox(master, state = 'readonly')
-                        self.e1.pack(side = LEFT)
-                        self.e1['values'] = list(mrk.loadkeys())
-                        self.e1.current(0)
-                        return self.e1
-                
-                    def apply(self):
-                        self.result = mrk.takedat(self.e1.get())
-                
-                d = MyDialog(self.root)
-                self.lock = False
-                if d.result:
-                    cope = ''
-                    for i in d.result:
-                        cope += ''.join(self.lbe.get(i))
-                    if Emo.paste:
-                        Emo.paste.text.insert(INSERT, cope)
-                        Emo.paste.text.see(INSERT)
-                        Emo.paste.text.focus()
+                if mrk.totalrecs():
+                    self.lock = True
+                    class MyDialog(simpledialog.Dialog):
+                    
+                        def body(self, master):
+                            self.title('Choose Mark')
+                            Label(master, text="Marking: ").pack(side = LEFT)
+                            self.e1 = ttk.Combobox(master, state = 'readonly')
+                            self.e1.pack(side = LEFT)
+                            self.e1['values'] = list(mrk.loadkeys())
+                            self.e1.current(0)
+                            return self.e1
+                    
+                        def apply(self):
+                            self.result = mrk.takedat(self.e1.get())
+                    
+                    d = MyDialog(self.root)
+                    self.lock = False
+                    if d.result:
+                        cope = ''
+                        for i in d.result:
+                            cope += ''.join(self.lbe.get(i))
+                        if Emo.paste:
+                            Emo.paste.text.insert(INSERT, cope)
+                            Emo.paste.text.see(INSERT)
+                            Emo.paste.text.focus()
+                        else:
+                            self.root.clipboard_clear()
+                            self.root.clipboard_append(cope)
+                            messagebox.showinfo('Emo', 'Copied!', parent = self.root)
+                        del cope
+                        del d.result
                     else:
-                        self.root.clipboard_clear()
-                        self.root.clipboard_append(cope)
-                        messagebox.showinfo('Emo', 'Copied!', parent = self.root)
-                    del cope
-                    del d.result
+                        ask = messagebox.askyesno('Emo', 'Do you want delete Mark?', parent = self.root)
+                        if ask:
+                            if self.lock is False:
+                                if 'marking.json' in os.listdir(Emo.pathn):
+                                    mrk = db(os.path.join(Emo.pathn,'marking'))
+                                    self.lock = True
+                                    class MyMarks(simpledialog.Dialog):
+                                    
+                                        def body(self, master):
+                                            self.title('Choose Mark')
+                                            Label(master, text="Marking: ").pack(side = LEFT)
+                                            self.e1 = ttk.Combobox(master, state = 'readonly')
+                                            self.e1.pack(side = LEFT)
+                                            self.e1['values'] = list(mrk.loadkeys())
+                                            self.e1.current(0)
+                                            return self.e1
+                                    
+                                        def apply(self):
+                                            self.result = self.e1.get()
+                                    
+                                    d = MyMarks(self.root)
+                                    self.lock = False
+                                    if d.result:
+                                        mrk.deldata(d.result)
+                                else:
+                                    messagebox.showinfo('Emo', 'No database, please save some first!', parent = self.root)
                 else:
-                    ask = messagebox.askyesno('Emo', 'Do you want delete Mark?', parent = self.root)
-                    if ask:
-                        if self.lock is False:
-                            if 'marking.json' in os.listdir(Emo.pathn):
-                                mrk = db(os.path.join(Emo.pathn,'marking'))
-                                self.lock = True
-                                class MyMarks(simpledialog.Dialog):
-                                
-                                    def body(self, master):
-                                        self.title('Choose Mark')
-                                        Label(master, text="Marking: ").pack(side = LEFT)
-                                        self.e1 = ttk.Combobox(master, state = 'readonly')
-                                        self.e1.pack(side = LEFT)
-                                        self.e1['values'] = list(mrk.loadkeys())
-                                        self.e1.current(0)
-                                        return self.e1
-                                
-                                    def apply(self):
-                                        self.result = self.e1.get()
-                                
-                                d = MyMarks(self.root)
-                                self.lock = False
-                                if d.result:
-                                    mrk.deldata(d.result)
-                            else:
-                                messagebox.showinfo('Emo', 'No database, please save some first!', parent = self.root)
+                    messagebox.showinfo('Emo', 'Database is empty, please save some first!', parent = self.root)
             else:
                 messagebox.showinfo('Emo', 'No database, please save some first!', parent = self.root)
                 
@@ -268,10 +312,16 @@ def main(paste = None):
         if paste:
             Emo.paste = paste
         root = Tk()
-        Emo(root)
-        Emo.mainon = root
-        Emo.mainon.focus_force()
-        Emo.mainon.mainloop()
+        try:
+            Emo(root)
+            Emo.mainon = root
+            Emo.mainon.focus_force()
+            Emo.mainon.mainloop()
+        except:
+            root = Tk()
+            root.withdraw()
+            messagebox.showerror('Emo', 'Emoji data has been corrupted!')
+            root.destroy()
 
 if __name__ == '__main__':
     main()
