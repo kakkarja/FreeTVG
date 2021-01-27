@@ -1451,9 +1451,9 @@ class TreeViewGui:
             emo.Emo.mainon.destroy()        
         self.free()        
         if self.text.get('1.0', END)[:-1]:
-            TeleTVG.main(self, ori, self.text.get('1.0', END)[:-1]) 
+            TeleTVG.main(self, ori, str(self.root.winfo_geometry()), self.text.get('1.0', END)[:-1]) 
         else:
-            TeleTVG.main(self, ori)
+            TeleTVG.main(self, ori, str(self.root.winfo_geometry()))
             
     def calc(self):
         # Calling TeleCalc
@@ -1465,7 +1465,7 @@ class TreeViewGui:
             emo.Emo.paste = None
             emo.Emo.mainon.destroy()        
         self.free()
-        TeleCalc.main(self, ori)        
+        TeleCalc.main(self, ori, str(self.root.winfo_geometry()))
             
     def lookup(self):
         # To lookup word on row and also on editor mode.

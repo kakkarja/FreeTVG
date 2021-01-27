@@ -28,6 +28,7 @@ class Reminder:
     DEST = None
     API = None
     HASH_ = None
+    GEO = None
     def __init__(self, root):
         self.root = root
         self.root.resizable(False, False)
@@ -180,7 +181,8 @@ class Reminder:
         Reminder.DEST = None
         Reminder.MAINST.free()
         Reminder.MAINST.root.deiconify()
-        Reminder.MAINST.root.state('zoomed')
+        Reminder.MAINST.root.geometry(Reminder.GEO)
+        Reminder.GEO = None
         Reminder.MAINST = None
         self.root.destroy()
         
@@ -697,7 +699,7 @@ class Reminder:
                 else:
                     messagebox.showinfo('TeleTVG', 'No message to send?', parent = self.root)
                     
-def main(stat, path, message = None):
+def main(stat, path, geo, message = None):
     # Start app.
     # Please create encryption for app_id and app_hash for security.
     
@@ -720,6 +722,7 @@ def main(stat, path, message = None):
             Reminder.MAINST = stat
             Reminder.MAINST.root.withdraw()
             Reminder.DEST = path
+            Reminder.GEO = geo
             Reminder.API = api
             Reminder.HASH_ = hash_
             begin = Reminder(root)

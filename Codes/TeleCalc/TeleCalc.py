@@ -40,6 +40,7 @@ class Calculator():
     LOCK = False
     MAINST = None
     DEST = None
+    GEO = None
     def __init__(self, root):
         """
         Calculator base on python programming.
@@ -290,11 +291,12 @@ class Calculator():
             os.chdir(Calculator.DEST)
             Calculator.MAINST.free()
             Calculator.MAINST.root.deiconify()
-            Calculator.MAINST.root.state('zoomed')
+            Calculator.MAINST.root.geometry(Calculator.GEO)
             if Calculator.MAINST.store:
                 Calculator.MAINST.editor()
             Calculator.DEST = None
             Calculator.MAINST = None
+            Calculator.GEO = None
             self.root.destroy()
         else:
             messagebox.showinfo('Calculator', 'Please deactivate Calendar first!', parent = self.root)
@@ -1295,7 +1297,7 @@ class Calculator():
         else:
             messagebox.showwarning('Calculator', 'Unable to recalculate, because Calendar or Rate is active!!!', parent = self.root)
             
-def main(stat, ori):
+def main(stat, ori, geo):
     #Get start and making "CalculatorData" dir.
     cdt = os.listdir(os.getcwd())
     if 'CalculatorData' not in cdt:
@@ -1304,6 +1306,7 @@ def main(stat, ori):
     Calculator.MAINST = stat
     Calculator.DEST = ori
     Calculator.MAINST.root.withdraw()
+    Calculator.GEO = geo
     begin = Calculator(root)
     begin.MAINST.root.withdraw()
     if begin.MAINST.store:
