@@ -130,106 +130,106 @@ class TreeViewGui:
         #frbt = 5
         self.bframe = ttk.Frame(root)
         self.bframe.pack(side = TOP, fill = 'x')
-        self.button5 = ttk.Button(self.bframe, text = 'Insert', command = self.insertwords)
-        self.button5.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button5 = ttk.Button(self.bframe, text = 'Insert', width = 3, command = self.insertwords)
+        self.button5.pack(side = LEFT, pady = (0, 3), padx = (1, 1), fill = 'x', expand = 1)
         self.button5.propagate(0)
         self.bt['button5'] = self.button5
-        self.button6 = ttk.Button(self.bframe, text = 'Write', command =  self.writefile)
-        self.button6.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button6 = ttk.Button(self.bframe, text = 'Write', width = 3, command =  self.writefile)
+        self.button6.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button6'] = self.button6
-        self.button9 = ttk.Button(self.bframe, text = 'Delete', command = self.deleterow)
-        self.button9.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button9 = ttk.Button(self.bframe, text = 'Delete', width = 3, command = self.deleterow)
+        self.button9.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button9'] = self.button9        
-        self.button7 = ttk.Button(self.bframe, text = 'BackUp', command = self.backup)
-        self.button7.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button7 = ttk.Button(self.bframe, text = 'BackUp', width = 3, command = self.backup)
+        self.button7.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button7'] = self.button7
-        self.button8 = ttk.Button(self.bframe, text = 'Load', command = self.loadbkp)
-        self.button8.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button8 = ttk.Button(self.bframe, text = 'Load', width = 3, command = self.loadbkp)
+        self.button8.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button8'] = self.button8
-        self.button3 = ttk.Button(self.bframe, text = 'Move Child', command = self.move_lr)
-        self.button3.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button3 = ttk.Button(self.bframe, text = 'Move Child', width = 3, command = self.move_lr)
+        self.button3.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button3'] = self.button3        
-        self.button16 = ttk.Button(self.bframe, text = 'Change File', command = self.chgfile)
-        self.button16.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button16 = ttk.Button(self.bframe, text = 'Change File', width = 3, command = self.chgfile)
+        self.button16.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button16'] = self.button16
-        self.button17 = ttk.Button(self.bframe, text = 'CPP', command = self.cmrows)
-        self.button17.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button17 = ttk.Button(self.bframe, text = 'CPP', width = 3, command = self.cmrows)
+        self.button17.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button17'] = self.button17
-        self.button18 = ttk.Button(self.bframe, text = 'Send Note', command = self.sendtel)
-        self.button18.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button18 = ttk.Button(self.bframe, text = 'Send Note', width = 3, command = self.sendtel)
+        self.button18.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button18'] = self.button18
-        self.button19 = ttk.Button(self.bframe, text = 'Look Up', command = self.lookup)
-        self.button19.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button19 = ttk.Button(self.bframe, text = 'Look Up', width = 3, command = self.lookup)
+        self.button19.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button19'] = self.button19
         
         # 4th frame for below buttons.
         # Frame for second row buttons.
         self.frb1 = ttk.Frame(self.root)
         self.frb1.pack(fill = X)
-        self.button10 = ttk.Button(self.frb1, text = 'Insight', command = self.insight)
-        self.button10.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button10 = ttk.Button(self.frb1, text = 'Insight', width = 3, command = self.insight)
+        self.button10.pack(side = LEFT, pady = (0, 3), padx = (1, 1), fill = 'x', expand = 1)
         self.bt['button10'] = self.button10
-        self.button13 = ttk.Button(self.frb1, text = 'Arrange', command = self.spaces)
-        self.button13.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button13 = ttk.Button(self.frb1, text = 'Arrange', width = 3, command = self.spaces)
+        self.button13.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button13'] = self.button13
-        self.button11 = ttk.Button(self.frb1, text = 'Paste', command = self.copas)
-        self.button11.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button11 = ttk.Button(self.frb1, text = 'Paste', width = 3, command = self.copas)
+        self.button11.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button11'] = self.button11
-        self.button4 = ttk.Button(self.frb1, text = 'Checked', command = self.checked)
-        self.button4.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
-        self.bt['button4'] = self.button4        
-        self.button = ttk.Button(self.frb1, text = 'Up', command = self.moveup)
-        self.button.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button4 = ttk.Button(self.frb1, text = 'Checked', width = 3, command = self.checked)
+        self.button4.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.bt['button4'] = self.button4
+        self.button = ttk.Button(self.frb1, text = 'Up', width = 3, command = self.moveup)
+        self.button.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button'] = self.button
-        self.button2 = ttk.Button(self.frb1, text = 'Down', command = self.movedown)
-        self.button2.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button2 = ttk.Button(self.frb1, text = 'Down', width = 3, command = self.movedown)
+        self.button2.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button2'] = self.button2
-        self.button12 = ttk.Button(self.frb1, text = 'Printing', command = self.saveaspdf)
-        self.button12.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button12 = ttk.Button(self.frb1, text = 'Printing', width = 3, command = self.saveaspdf)
+        self.button12.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button12'] = self.button12
-        self.button14 = ttk.Button(self.frb1, text = 'Hide Parent', command = self.hiddenchl)
-        self.button14.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button14 = ttk.Button(self.frb1, text = 'Hide Parent', width = 3, command = self.hiddenchl)
+        self.button14.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button14'] = self.button14
-        self.button15 = ttk.Button(self.frb1, text = 'Clear hide', command = self.delhid)
-        self.button15.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button15 = ttk.Button(self.frb1, text = 'Clear hide', width = 3, command = self.delhid)
+        self.button15.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button15'] = self.button15
-        self.button20 = ttk.Button(self.frb1, text = 'Date-Time', command = self.dattim)
-        self.button20.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button20 = ttk.Button(self.frb1, text = 'Date-Time', width = 3, command = self.dattim)
+        self.button20.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button20'] = self.button20        
         
         # 7th Frame
         # For third row  of buttons
         self.frb2 = ttk.Frame(self.root)
         self.frb2.pack(fill = X)
-        self.button21 = ttk.Button(self.frb2, text = 'Save', command = self.endec)
-        self.button21.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button21 = ttk.Button(self.frb2, text = 'Save', width = 3, command = self.endec)
+        self.button21.pack(side = LEFT, pady = (0, 3), padx = (1, 1), fill = 'x', expand = 1)
         self.bt['button21'] = self.button21
-        self.button22 = ttk.Button(self.frb2, text = 'Open', command = self.openf)
-        self.button22.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button22 = ttk.Button(self.frb2, text = 'Open', width = 3, command = self.openf)
+        self.button22.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button22'] = self.button22          
-        self.button23 = ttk.Button(self.frb2, text = 'Create file', command = self.createf)
-        self.button23.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button23 = ttk.Button(self.frb2, text = 'Create file', width = 3, command = self.createf)
+        self.button23.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button23'] = self.button23
-        self.button24 = ttk.Button(self.frb2, text = 'Editor', command = self.editor)
-        self.button24.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button24 = ttk.Button(self.frb2, text = 'Editor', width = 3, command = self.editor)
+        self.button24.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button24'] = self.button24
-        self.button25 = ttk.Button(self.frb2, text = 'Un/Wrap', command = self.wrapped)
-        self.button25.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button25 = ttk.Button(self.frb2, text = 'Un/Wrap', width = 3, command = self.wrapped)
+        self.button25.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button25'] = self.button25        
-        self.button26 = ttk.Button(self.frb2, text = 'Calculator', command = self.calc)
-        self.button26.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button26 = ttk.Button(self.frb2, text = 'Calculator', width = 3, command = self.calc)
+        self.button26.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button26'] = self.button26
-        self.button27 = ttk.Button(self.frb2, text = 'Ex', command = self.editex)
-        self.button27.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button27 = ttk.Button(self.frb2, text = 'Ex', width = 3, command = self.editex)
+        self.button27.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button27'] = self.button27
-        self.button28 = ttk.Button(self.frb2, text = 'Template', command = self.temp)
-        self.button28.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button28 = ttk.Button(self.frb2, text = 'Template', width = 3, command = self.temp)
+        self.button28.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button28'] = self.button28
-        self.button29 = ttk.Button(self.frb2, text = 'Emoji', command = self.emoj)
-        self.button29.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button29 = ttk.Button(self.frb2, text = 'Emoji', width = 3, command = self.emoj)
+        self.button29.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button29'] = self.button29
-        self.button30 = ttk.Button(self.frb2, text = 'HTML View', command = self.htmlview)
-        self.button30.pack(side = LEFT, pady = (0, 3), padx = 1, fill = 'x', expand = 1)
+        self.button30 = ttk.Button(self.frb2, text = 'HTML View', width = 3, command = self.htmlview)
+        self.button30.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button30'] = self.button30
         
         # 5th frame.
