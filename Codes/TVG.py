@@ -1767,14 +1767,29 @@ class TreeViewGui:
                     self.lock = True
                     files = [i for i in os.listdir(os.path.join(ori.rpartition('\\')[0], 'Templates'))]
                     if files:
+                        def tynam(event):
+                            try:
+                                if event.widget.get():
+                                    idx = event.widget.index(INSERT)
+                                    gt = event.widget.get()
+                                    event.widget.delete(0, END)
+                                    event.widget.insert(0, gt[:idx])
+                                    if event.widget.get():
+                                        for em in files:
+                                            if event.widget.get() in em and event.widget.get() == em[:len(event.widget.get())]:
+                                                event.widget.current(files.index(em))
+                                    event.widget.icursor(index = idx)
+                            except Exception as e:
+                                messagebox.showwarning('TeleTVG', f'{e}')
+                                    
                         class MyDialog(simpledialog.Dialog):
                         
                             def body(self, master):
                                 self.title('Choose Template')
                                 Label(master, text="File: ").grid(row=0, column = 0, sticky = E)
-                                self.e1 = ttk.Combobox(master, state = 'readonly')
+                                self.e1 = ttk.Combobox(master)
                                 self.e1['values'] = files
-                                self.e1.current(0)
+                                self.e1.bind('<KeyRelease>', tynam)
                                 self.e1.grid(row=0, column=1)
                                 return self.e1
                         
@@ -1789,20 +1804,23 @@ class TreeViewGui:
                                 gf = rdf.read()
                             if gf[0] == '[' and gf[-1] == ']':
                                 gf = eval(gf)
-                                tot = 0
-                                for pr in gf:
-                                    if not tot:
-                                        gw = self.text.get(INSERT, f'{INSERT} lineend')
-                                    if gw == '':
-                                        if int(self.text.index(INSERT).rpartition('.')[2]):
-                                            self.text.insert(INSERT, f'\n{pr}')
+                                if len(gf) == 1:
+                                    self.text.insert(INSERT, gf[0])
+                                else:
+                                    tot = 0
+                                    for pr in gf:
+                                        if not tot:
+                                            gw = self.text.get(INSERT, f'{INSERT} lineend')
+                                        if gw == '':
+                                            if int(self.text.index(INSERT).rpartition('.')[2]):
+                                                self.text.insert(INSERT, f'\n{pr}')
+                                            else:
+                                                self.text.insert(INSERT, f'{pr}\n')
+                                            tot += 1
                                         else:
-                                            self.text.insert(INSERT, f'{pr}\n')
-                                        tot += 1
-                                    else:
-                                        ind = float(self.text.index(INSERT))+float(tot)
-                                        self.text.insert(f'{ind} lineend ', f'\n{pr}')
-                                        tot += 1
+                                            ind = float(self.text.index(INSERT))+float(tot)
+                                            self.text.insert(f'{ind} lineend ', f'\n{pr}')
+                                            tot += 1
                                 del gf
                             else:
                                 messagebox.showerror('TreeViewGui', 'Template has been corrupted!')

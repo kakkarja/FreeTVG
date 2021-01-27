@@ -510,9 +510,28 @@ class Reminder:
         if self.lock is False:
             self.lock = True
             users = sorted(list(self.users))
+            def sure(event):
+                try:
+                    if event.char in string.ascii_letters:
+                        if event.widget.get():
+                            idx = event.widget.index(INSERT)
+                            gt = event.widget.get()
+                            event.widget.delete(0, END)
+                            event.widget.insert(0, gt[:idx])
+                            if event.widget.get():
+                                for name in self.users:
+                                    if event.widget.get().title() in name.title() and name.title().startswith(event.widget.get().title()[0]):
+                                        event.widget.delete(0, END)
+                                        event.widget.insert(END, name)
+                                        MyDialog.am.see(sorted(list(self.users)).index(name))
+                            event.widget.icursor(index = idx)
+                except Exception as e:
+                    messagebox.showwarning('TeleTVG', f'{e}', parent = self.root)
+            
             class MyDialog(simpledialog.Dialog):
-                
+                am = None
                 def body(self, master):
+                    
                     self.title('Select users')
                     fr1 = ttk.Frame(master)
                     fr1.pack()
@@ -521,15 +540,20 @@ class Reminder:
                     for i in users:
                         self.e1.insert(END, i)
                     self.e1.pack(side = LEFT)
+                    MyDialog.am = self.e1
                     self.sce1 = ttk.Scrollbar(fr1, orient = 'vertical')
                     self.sce1.pack(side = RIGHT, fill = 'y')
                     self.sce1.config(command = self.e1.yview)
                     self.e1.config(yscrollcommand = self.sce1.set)
                     fr2 = ttk.Frame(master)
                     fr2.pack(anchor = W)
-                    Label(fr2, text = 'Folder:').grid(row = 0, column = 0, sticky = W)
+                    Label(fr2, text = 'Search:').grid(row = 0, column = 0, sticky = W)
+                    self.e3 = Entry(fr2)
+                    self.e3.grid(row = 0, column = 1)
+                    self.e3.bind('<KeyRelease>', sure)
+                    Label(fr2, text = 'Folder:').grid(row = 1, column = 0, sticky = W)
                     self.e2 = Entry(fr2)
-                    self.e2.grid(row = 0, column = 1)
+                    self.e2.grid(row = 1, column = 1)
             
                 def apply(self):
                     self.result = [users[int(i)] for i in self.e1.curselection()]
