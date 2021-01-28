@@ -115,26 +115,26 @@ class Calculator():
         self.frex = Frame(self.root, background = 'black', width = 76)
         self.frex.pack(fill = 'both', padx = 5)
         self.cbc1 = ttk.Combobox(self.frex, width = 37)
-        self.cbc1.pack(side = LEFT, padx =(0,5), pady = (0,5), fill = 'both', expand = 1) 
+        self.cbc1.pack(side = LEFT, pady = (0,5), fill = 'both', expand = 1) 
         self.cbc1['values'] = self.symbols
         self.cbc1.bind('<KeyRelease>', self.tynam)
         self.cbc1.bind_all('<r>', self.typ)
         self.cbc2 = ttk.Combobox(self.frex, width = 37)
-        self.cbc2.pack(side = LEFT, padx = (5,0), pady = (0,5), fill = 'both', expand = 1) 
+        self.cbc2.pack(side = LEFT, pady = (0,5), fill = 'both', expand = 1) 
         self.cbc2['values'] = self.symbols
         self.cbc2.bind_all('<e>', self.typ)
         self.cbc2.bind('<KeyRelease>', self.tynam)
         self.cbc2.bind('<FocusIn>', self.retrat)
-        self.frex2 = Frame(self.root, background = 'black', width = 76)
-        self.frex2.pack(fill = 'x', padx = 5)
+        self.frex2 = Frame(self.root, background = 'black')
+        self.frex2.pack(fill = 'x', padx = 5, expand = 1)
         self.btrat = Button(self.frex2, text = 'RATES', background = 'teal',
-                            foreground = 'gold', width = 30, font = 'verdna 10 bold',
+                            foreground = 'gold', width = 20, font = 'verdna 10 bold',
                             command = self.getrate)
         self.btrat.pack(side = LEFT, fill = 'x', expand = 1)
         self.btrat.bind_all('<Control-r>', self.getrate)
         self.bt['btrat'] = self.btrat
         self.btcon = Button(self.frex2, text = 'CONVERT', background = 'teal',
-                            foreground = 'gold', width = 30, font = 'verdna 10 bold',
+                            foreground = 'gold', width = 20, font = 'verdna 10 bold',
                             command = self.conv)
         self.btcon.pack(side = LEFT, fill = 'x', expand = 1)
         self.btcon.bind_all('<Control-e>', self.conv)
@@ -155,7 +155,7 @@ class Calculator():
                                         background = 'teal', foreground = 'gold') 
             self.bt[lc[r-1]].configure(command = lambda obj=self.bt[lc[r-1]]: self.calculation(obj))
             if c < 6:
-                self.frm.grid_columnconfigure(c+1, weight = 1, pad = 24)
+                self.frm.grid_columnconfigure(c+1, weight = 1, pad = 25)
                 self.frm.grid_rowconfigure(r-c, weight = 1)
                 self.bt[lc[r-1]].grid(row = r-c, column = c+1, pady = (5, 0), padx = (0, 5), sticky = N+S+W+E) 
                 if lc[r-1] in nck:
@@ -218,7 +218,7 @@ class Calculator():
         self.delb = Button(self.frm, text = 'DEL', font = 'verdana 15', width = 5, 
                       background = 'teal', foreground = 'gold', command = self.tdel)
         self.delb.bind_all('D', self.typ)
-        self.frm.grid_columnconfigure(0, weight = 1, pad = 24)       
+        self.frm.grid_columnconfigure(0, weight = 1, pad = 25)       
         self.delb.grid(row =1, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['delb'] = self.delb
         self.savb = Button(self.frm, text = 'SAVE', font = 'verdana 15', width = 5, 
