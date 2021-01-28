@@ -98,7 +98,7 @@ class Calculator():
         self.text.bind_all('<Down>', self.scrd)
         self.text.tag_config('thg', background = 'yellow', foreground = 'black')
         self.text.pack(side = 'left', padx = (3,0), pady = 5, fill = 'x', expand = 1)
-        self.scroll.pack(side = 'right', fill = 'y', padx = 2, pady = 5)
+        self.scroll.pack(side = 'right', fill = 'y', pady = 5)
         self.scroll.config(command = self.text.yview)
         self.text.config(yscrollcommand = self.scroll.set)
         self.text.tag_add('js', '1.0', END)
@@ -140,9 +140,9 @@ class Calculator():
         self.btcon.bind_all('<Control-e>', self.conv)
         self.bt['btcon'] = self.btcon
         self.frsp = Frame(self.root, background = 'black')
-        self.frsp.pack()
+        self.frsp.pack(expand = 1, fill = 'x')
         self.frm = Frame(self.frsp, background = 'black')
-        self.frm.pack(fill = 'both', expand = 1)
+        self.frm.pack(expand = 1, fill = 'x')
         r = 1
         c = 0
         lck = 1
@@ -155,7 +155,7 @@ class Calculator():
                                         background = 'teal', foreground = 'gold') 
             self.bt[lc[r-1]].configure(command = lambda obj=self.bt[lc[r-1]]: self.calculation(obj))
             if c < 6:
-                self.frm.grid_columnconfigure(c+1, weight = 1)
+                self.frm.grid_columnconfigure(c+1, weight = 1, pad = 24)
                 self.frm.grid_rowconfigure(r-c, weight = 1)
                 self.bt[lc[r-1]].grid(row = r-c, column = c+1, pady = (5, 0), padx = (0, 5), sticky = N+S+W+E) 
                 if lc[r-1] in nck:
@@ -218,28 +218,28 @@ class Calculator():
         self.delb = Button(self.frm, text = 'DEL', font = 'verdana 15', width = 5, 
                       background = 'teal', foreground = 'gold', command = self.tdel)
         self.delb.bind_all('D', self.typ)
-        self.frm.grid_columnconfigure(0, weight = 1)       
+        self.frm.grid_columnconfigure(0, weight = 1, pad = 24)       
         self.delb.grid(row =1, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['delb'] = self.delb
         self.savb = Button(self.frm, text = 'SAVE', font = 'verdana 15', width = 5, 
                      background = 'teal', foreground = 'gold', command = self.savef)
         self.savb.bind_all('S', self.typ)       
-        self.savb.grid(row =7, column =0 , pady = (5, 0), padx = (5, 5),sticky = N+S+W+E)
+        self.savb.grid(row =7, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['savb'] = self.savb
         self.loab = Button(self.frm, text = 'LOAD', font = 'verdana 15', width = 5, 
                       background = 'teal', foreground = 'gold', command = self.loadcalc)
         self.loab.bind_all('L', self.typ)      
-        self.loab.grid(row =13, column =0 , pady = (5, 0), padx = (5, 5),sticky = N+S+W+E)
+        self.loab.grid(row =13, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['loab'] = self.loab
         self.edb = Button(self.frm, text = 'EDIT', font = 'verdana 15', width = 5, 
                      background = 'teal', foreground = 'gold', command = self.edt)
         self.edb.bind_all('E', self.typ)
-        self.edb.grid(row =19, column =0 , pady = (5, 0), padx = (5, 5),sticky = N+S+W+E)
+        self.edb.grid(row =19, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['edb'] = self.edb
         self.copb = Button(self.frm, text = 'COPY', font = 'verdana 15', width = 5, 
                      background = 'teal', foreground = 'gold', command = self.copc)
         self.copb.bind_all('C', self.typ)
-        self.copb.grid(row =20, column =0 , pady = (5, 5), padx = (5, 5),sticky = N+S+W+E)
+        self.copb.grid(row =20, column =0 , pady = (5, 5), padx = (5, 5), sticky = N+S+W+E)
         self.bt['copb'] = self.copb
         self.calb = Button(self.frm, text = 'CAL', font = 'verdana 15', width = 5, 
                      background = 'teal', foreground = 'gold', command = self.runcal)
@@ -247,6 +247,7 @@ class Calculator():
         self.calb.grid(row =20, column = 5, pady = (5, 5), padx = (0, 5), sticky = N+S+W+E)
         self.bt['calb'] = self.calb
         self.root.bind_all('<Key>', self.inspect)
+        
     
     def inspect(self, event = None):
         if event.state == 2:
