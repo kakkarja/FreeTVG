@@ -25,6 +25,7 @@ class TreeViewGui:
     FREEZE = False
     MARK = False
     MODE = False
+    GEO = None
     def __init__(self, root, filename):
         self.filename = filename
         self.root = root
@@ -35,6 +36,19 @@ class TreeViewGui:
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
         self.pheight = int(self.root.winfo_screenheight()/3 - self.wheight/3)
         self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
+        TreeViewGui.GEO = f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}"
+        gpath = os.getcwd().rpartition('\\')[0]
+        gem = None
+        if 'geo.tvg' in os.listdir(gpath):
+            with open(os.path.join(gpath, 'geo.tvg'), 'rb') as geo:
+                gem = geo.read().decode('utf-8')
+            if '{' == gem[0] and '}' == gem[-1]:
+                gem = eval(gem)
+                self.root.geometry(gem['geo'])
+                TreeViewGui.GEO = gem['geo']
+            os.remove(os.path.join(gpath, 'geo.tvg'))
+        del gpath
+        del gem
         self.root.bind_all('<Control-f>', self.fcsent)
         self.root.bind_all('<Control-r>', self.fcsent)
         self.root.bind_all('<Control-t>', self.fcsent)
@@ -2047,6 +2061,17 @@ class TreeViewGui:
             if self.checkfile():
                 with open(os.path.join(ori, 'lastopen.tvg'), 'wb') as lop:
                     lop.write(str({'lop': self.filename}).encode())
+                if str(self.root.winfo_geometry()) == TreeViewGui.GEO:
+                    with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
+                        geo.write(str({'geo': TreeViewGui.GEO}).encode())
+                else:
+                    ask = messagebox.askyesno('TreeViewGui', "Do you want to set your new window's position?")
+                    if ask:
+                        with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
+                            geo.write(str({'geo': str(self.root.winfo_geometry())}).encode())
+                    else:
+                        with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
+                            geo.write(str({'geo': TreeViewGui.GEO}).encode())
             if emo.Emo.status is False:
                 emo.Emo.status = True
                 emo.Emo.paste = None
