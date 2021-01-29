@@ -135,6 +135,8 @@
         * **Look for words and replace it with new words.**
     * **TVG now resizeable :joy:**
     * **Can search emoji by its name in the combobox.**
+    * **Can search saved template in the combobox.**
+    * **Can search a contact in <ins>TeleTVG - Multi</ins>.**
     * **Can set TVG new geometry position as default [will remember the last position and resize that user has set].**
 
 ![TVG](/TVG.png)
