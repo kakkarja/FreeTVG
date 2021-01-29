@@ -5,7 +5,7 @@
 
 **Note: Block using '#' in the code on icon, because not provided in the repository**
 
-### **New addition function :joy:**
+### **New addition function?**
 * **Add send note with Telethon [Telegram api wrapper].**
     * **Please install first Telethon https://github.com/LonamiWebs/Telethon**
 >**Please get ProtectData for Lock File function https://github.com/kakkarja/PTD**  
@@ -27,15 +27,12 @@
     * **No folding child like other outline, but..**
         * **Can hide parents and its childs.**
             * **This function better than folding, when the outline in hide mode, you can save as pdf or even send note for the visible one.**
-    * **Now combine with Telethon wrapper for Telegram.** 
-        * **Send note:**
-            * **With emojies.**
-            * **Scheduler**
-            * **Send file [only the TVG outline note]**
-            * **Get files ~~[except pictures and stickers]~~**
-            * **Multi accounts**
-            * **Send multiple chat in group**
-        * **You have to create Telegram api "https://core.telegram.org/api" to use this incredible function.**
+     * **Send note:**
+        * **With emojies.**
+        * **Scheduler**
+        * **Send file [only the TVG outline note]**
+        * **Get files ~~[except pictures and stickers]~~**
+        * **Send multiple chat in group**
     * **Can choose color for setting the text and listbox background color. [No button, only event binding. Control+.]**
     * **Can change font setting for text and listbox. [No button, only event binding. Control+,]**
         * **The size is ~~locked~~ on size 10 to 40.**
