@@ -30,6 +30,7 @@ class Emo:
         self.root.bind('<Control-c>', self.slec)
         self.root.bind('<Control-m>', self.slec)
         self.root.bind('<Control-l>', self.slec)
+        self.root.bind('<Control-b>', self.slec)
         self.sel = []
         self.upt = tuple()
         self.lock = False
@@ -116,6 +117,8 @@ class Emo:
             self.mark()
         elif event.keysym == 'l':
             self.choind()
+        elif event.keysym == 'b':
+            self.combo.focus()
     
     def jumpsc(self, event = None):
         # Scroll up and down jump by 10.
