@@ -88,7 +88,9 @@
             * **Very quick aditting as well with Editor's format.**
             * **TAKE NOTICE:**
                 * **Is advisable to backup file before edit with Ex function.**
-                * **In case you want to revert back, you can load back anytime with your backup file.**
+            * **WARNING:**
+                * **If you edit using Ex choosing whole document, actually the existing file is deleted.**
+                * **If you do backup, you can revert back to previous file.**
         * **Template for saving frequently used format of outlines.**
             * **You can load them for applying the template on the editor mode.**
             * **Template can help you to forget about retyping same format again-and-again.**
