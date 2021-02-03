@@ -136,6 +136,10 @@
     * **Can search saved template in the combobox.**
     * **Can search a contact in <ins>TeleTVG - Multi</ins>.**
     * **Can set TVG new geometry position as default [will remember the last position and resize that user has set].**
+    * **Can hide buttons for almost full screen text editor**
+        * **Short-Cut keyboards is active :joy:**
+    * **TeleCalc and TeleTVG now resizeable :joy:**
+        * **There are minsize for them, depend on resolution, both may still appear too large.** 
 
 ![TVG](/TVG.png)
 ![TVG3](/TVG3.png)

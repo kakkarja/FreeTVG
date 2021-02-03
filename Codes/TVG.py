@@ -94,6 +94,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-backslash>', self.fcsent)
         self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.root.bind_all('<Shift-Return>', self.inenter)
+        self.root.bind_all('<Control-Key-F2>', self.hidbs)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -140,9 +141,7 @@ class TreeViewGui:
         
         # 3rd frame for top buttons.
         # Frame for first row Buttons.
-        #frb = int(round(self.root.winfo_screenwidth() * 0.9))
-        #frbt = 5
-        self.bframe = ttk.Frame(root)
+        self.bframe = ttk.Frame(self.root)
         self.bframe.pack(side = TOP, fill = 'x')
         self.button5 = ttk.Button(self.bframe, text = 'Insert', width = 3, command = self.insertwords)
         self.button5.pack(side = LEFT, pady = (0, 3), padx = (1, 1), fill = 'x', expand = 1)
@@ -254,7 +253,6 @@ class TreeViewGui:
         ftt = 'verdana 11'
         self.tframe = ttk.Frame(root)
         self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)
-        self.tframe.pack_propagate(0)
         self.txframe = Frame(self.tframe)
         self.txframe.pack(anchor = 'w', side = LEFT, fill = 'both', expand = 1)
         self.txframe.pack_propagate(0)
@@ -323,8 +321,22 @@ class TreeViewGui:
         if 'ft.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
             self.ft(path = os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'))        
         if 'theme.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
-            self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
-            
+            self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)    
+    
+    def hidbs(self, event =  None):
+        # Hide Buttons.
+        
+        self.tframe.pack_forget()
+        self.fscr.pack_forget()
+        frm = [self.bframe, self.frb1, self.frb2]
+        for fr in frm:
+            if bool(fr.winfo_ismapped()):
+                fr.pack_forget()
+            else:
+                fr.pack(side = TOP, fill = 'x')
+        self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)       
+        self.fscr.pack(fill ='x')        
+    
     def inenter(self, event):
         # For invoking any focus button or radiobutton
         
@@ -543,7 +555,14 @@ class TreeViewGui:
             elif event.keysym == 'backslash':
                 self.htmlview()
             elif event.keysym == 'question':
-                self.scaling()            
+                self.scaling()
+        else:
+            if str(self.bt['button17'].cget('state')) == 'normal':
+                self.cmrows()
+            elif str(self.bt['button14'].cget('state')) == 'normal':
+                self.hiddenchl()
+            elif str(self.bt['button24'].cget('state')) == 'normal':
+                self.editor()
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -1954,7 +1973,7 @@ class TreeViewGui:
                                             elif i.lower().partition(':')[0] in list(ckc):
                                                 if i.partition(':')[2].isspace():
                                                     p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
-                                                else:
+                                                elif bool(i.partition(':')[2]):
                                                     p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                         if len(ed) != len(p2):
                                             raise Exception('Not Editable!')
@@ -1984,7 +2003,7 @@ class TreeViewGui:
                                             elif i.lower().partition(':')[0] in list(ckc):
                                                 if i.partition(':')[2].isspace():
                                                     p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
-                                                else:
+                                                elif bool(i.partition(':')[2]):
                                                     p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                         if len(ed) != len(p2):
                                             raise Exception('Not Editable!')
@@ -2007,7 +2026,7 @@ class TreeViewGui:
                                         elif i.lower().partition(':')[0] in list(ckc):
                                             if i.partition(':')[2].isspace():
                                                 p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
-                                            else:
+                                            elif bool(i.partition(':')[2]):
                                                 p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                     if len(ed) != len(p2):
                                         raise Exception('Not Editable!')
@@ -2049,7 +2068,8 @@ class TreeViewGui:
                         if self.editorsel:
                             self.editorsel = None
                 except Exception as a:
-                    messagebox.showerror('TreeViewGui', f'{a}')
+                    raise a
+#                    messagebox.showerror('TreeViewGui', f'{a}')
             self.text.edit_reset()
             self.infobar()
                     
@@ -2242,11 +2262,42 @@ def scal(t):
     t.tvgexit()
     os.chdir(ori)
     main()
-     
+    
+def chkpid():
+    # Check if pid is exist.
+    
+    import subprocess
+    try:
+        if 'pid.tvg' in os.listdir():
+            with open('pid.tvg') as rp:
+                pnam = int(rp.read())
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW            
+            pnam = f'wmic process where processId={pnam} get name'
+            prnms = subprocess.run(pnam, startupinfo = startupinfo, stdout = subprocess.PIPE, stderr = subprocess.PIPE, stdin = subprocess.PIPE, text = True)
+            if not prnms.stderr and 'Tree View Gui.exe' in  prnms.stdout:
+                del pnam
+                del prnms
+                del startupinfo
+                return False
+            else:
+                del pnam
+                del prnms
+                del startupinfo
+                return True
+        else:
+            return True
+    except Exception as e:
+        root = Tk()
+        root.withdraw()
+        root.wm_iconbitmap(default = filen('TVG.ico'))
+        messagebox.showerror('TreeViewGui', f'{e}')
+        root.destroy()
+        
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
-    if 'pid.tvg' not in os.listdir():
+    if chkpid():
         with open('pid.tvg', 'w') as wid:
             wid.write(str(os.getpid()))
         ctypes.windll.shcore.SetProcessDpiAwareness(1)

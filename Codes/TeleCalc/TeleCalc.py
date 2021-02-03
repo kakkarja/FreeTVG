@@ -70,10 +70,11 @@ class Calculator():
         self.base = None
         self.root.config(background = 'black')
         self.root.title("TeleCalc")
-        self.root.resizable(False,False)
+        #self.root.resizable(False,False)
         self.root.protocol('WM_DELETE_WINDOW', self.bye)
         self.wwidth = 630
         self.wheight = 610
+        self.root.minsize(630, 610)
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
         self.pheight = int(self.root.winfo_screenheight()/4 - self.wheight/4)
         self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
@@ -90,14 +91,14 @@ class Calculator():
                                background = 'black', foreground = 'white')
         self.label.pack(pady = 2)
         self.frt = Frame(self.root)
-        self.frt.pack(padx = 5, fill = 'x')
+        self.frt.pack(padx = 5, fill = 'both', expand = 1)
         self.text = Text(self.frt, background = 'black', foreground = 'white', font = 'verdana 11',
                          width=56, height =12, borderwidth = 4, padx = 5, pady = 3)
         self.scroll = Scrollbar(self.frt, background = 'gold')
         self.text.bind_all('<Up>', self.scru)
         self.text.bind_all('<Down>', self.scrd)
         self.text.tag_config('thg', background = 'yellow', foreground = 'black')
-        self.text.pack(side = 'left', padx = (3,0), pady = 5, fill = 'x', expand = 1)
+        self.text.pack(side = 'left', padx = (3,0), pady = 5, fill = 'both', expand = 1)
         self.scroll.pack(side = 'right', fill = 'y', pady = 5)
         self.scroll.config(command = self.text.yview)
         self.text.config(yscrollcommand = self.scroll.set)
@@ -113,36 +114,36 @@ class Calculator():
         with open(filen('curiso'), 'rb') as symfile:
             self.symbols = eval(symfile.readlines()[1].decode('utf-8'))
         self.frex = Frame(self.root, background = 'black', width = 76)
-        self.frex.pack(fill = 'both', padx = 5)
+        self.frex.pack(fill = 'x', padx = 5)
         self.cbc1 = ttk.Combobox(self.frex, width = 37)
-        self.cbc1.pack(side = LEFT, pady = (0,5), fill = 'both', expand = 1) 
+        self.cbc1.pack(side = LEFT, pady = (0,5), fill = 'x', expand = 1) 
         self.cbc1['values'] = self.symbols
         self.cbc1.bind('<KeyRelease>', self.tynam)
         self.cbc1.bind_all('<r>', self.typ)
         self.cbc2 = ttk.Combobox(self.frex, width = 37)
-        self.cbc2.pack(side = LEFT, pady = (0,5), fill = 'both', expand = 1) 
+        self.cbc2.pack(side = LEFT, pady = (0,5), fill = 'x', expand = 1) 
         self.cbc2['values'] = self.symbols
         self.cbc2.bind_all('<e>', self.typ)
         self.cbc2.bind('<KeyRelease>', self.tynam)
         self.cbc2.bind('<FocusIn>', self.retrat)
         self.frex2 = Frame(self.root, background = 'black')
-        self.frex2.pack(fill = 'x', padx = 5, expand = 1)
+        self.frex2.pack(fill = 'both', padx = 5, expand = 1)
         self.btrat = Button(self.frex2, text = 'RATES', background = 'teal',
                             foreground = 'gold', width = 20, font = 'verdna 10 bold',
                             command = self.getrate)
-        self.btrat.pack(side = LEFT, fill = 'x', expand = 1)
+        self.btrat.pack(side = LEFT, fill = 'both', expand = 1)
         self.btrat.bind_all('<Control-r>', self.getrate)
         self.bt['btrat'] = self.btrat
         self.btcon = Button(self.frex2, text = 'CONVERT', background = 'teal',
                             foreground = 'gold', width = 20, font = 'verdna 10 bold',
                             command = self.conv)
-        self.btcon.pack(side = LEFT, fill = 'x', expand = 1)
+        self.btcon.pack(side = LEFT, fill = 'both', expand = 1)
         self.btcon.bind_all('<Control-e>', self.conv)
         self.bt['btcon'] = self.btcon
         self.frsp = Frame(self.root, background = 'black')
-        self.frsp.pack(expand = 1, fill = 'x')
+        self.frsp.pack(expand = 1, fill = 'both')
         self.frm = Frame(self.frsp, background = 'black')
-        self.frm.pack(expand = 1, fill = 'x')
+        self.frm.pack(expand = 1, fill = 'both')
         r = 1
         c = 0
         lck = 1
@@ -155,7 +156,7 @@ class Calculator():
                                         background = 'teal', foreground = 'gold') 
             self.bt[lc[r-1]].configure(command = lambda obj=self.bt[lc[r-1]]: self.calculation(obj))
             if c < 6:
-                self.frm.grid_columnconfigure(c+1, weight = 1, pad = 25)
+                self.frm.grid_columnconfigure(c+1, weight = 1, pad = self.root.winfo_screenwidth())
                 self.frm.grid_rowconfigure(r-c, weight = 1)
                 self.bt[lc[r-1]].grid(row = r-c, column = c+1, pady = (5, 0), padx = (0, 5), sticky = N+S+W+E) 
                 if lc[r-1] in nck:
@@ -197,7 +198,8 @@ class Calculator():
         del r
         
         # Change places of the button. You can chage the button order placement as you like!
-        # Make sure you understand the placement order.        
+        # Make sure you understand the placement order.
+        self.frm.grid_rowconfigure(20, weight = 1)
         self.bt['BACK'].grid(row=20, column = 4, pady = (5, 5), padx = (0, 5))       
         self.bt['M'].grid(row=20, column = 2, pady = (5, 5), padx = (0, 5))
         self.bt['MOVE'].grid(row=20, column = 1, pady = (5, 5), padx = (0, 5))
@@ -218,7 +220,7 @@ class Calculator():
         self.delb = Button(self.frm, text = 'DEL', font = 'verdana 15', width = 5, 
                       background = 'teal', foreground = 'gold', command = self.tdel)
         self.delb.bind_all('D', self.typ)
-        self.frm.grid_columnconfigure(0, weight = 1, pad = 25)       
+        self.frm.grid_columnconfigure(0, weight = 1, pad = self.root.winfo_screenwidth())
         self.delb.grid(row =1, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['delb'] = self.delb
         self.savb = Button(self.frm, text = 'SAVE', font = 'verdana 15', width = 5, 

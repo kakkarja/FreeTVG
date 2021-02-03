@@ -31,10 +31,11 @@ class Reminder:
     GEO = None
     def __init__(self, root):
         self.root = root
-        self.root.resizable(False, False)
+        #self.root.resizable(False, False)
         self.root.title('TeleTVG')
         self.wid = 705
         self.hei = 650
+        self.root.minsize(705, 650)
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wid/2)
         self.pheight = int(self.root.winfo_screenheight()/3 - self.hei/3)
         self.root.geometry(f'{self.wid}x{self.hei}+{self.pwidth}+{self.pheight}')
