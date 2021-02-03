@@ -95,6 +95,7 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.root.bind_all('<Shift-Return>', self.inenter)
         self.root.bind_all('<Control-Key-F2>', self.hidbs)
+        self.root.bind_all('<Control-Key-F1>', self.help)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -111,7 +112,7 @@ class TreeViewGui:
         self.label.pack(side = LEFT, pady = 3, fill = 'x')
         self.bt['label'] = self.label
         self.entry = ttk.Entry(self.fframe, validate = 'focusin', validatecommand = self.focus, font = 'consolas 12')
-        self.entry.pack(side = LEFT, ipady = 5, pady = (3, 0), fill = 'x', expand = 1)
+        self.entry.pack(side = LEFT, ipady = 5, pady = (3, 1), fill = 'both', expand = 1)
         self.entry.config(state = 'disable')
         self.bt['entry'] = self.entry
        
@@ -133,10 +134,10 @@ class TreeViewGui:
         self.frcc = ttk.Frame(self.frrb)
         self.frcc.pack(side = TOP)
         self.label3 = ttk.Label(self.frcc, text = 'Child')
-        self.label3.pack(side = LEFT, padx = 1, pady = (0, 2), fill = 'x')
+        self.label3.pack(side = LEFT, padx = 1, pady = (0, 1), fill = 'x')
         self.bt['label3'] = self.label3
         self.entry3 = ttk.Combobox(self.frcc, width = 8, state = 'readonly', justify = 'center')
-        self.entry3.pack(side = LEFT, padx = 1, pady = (0, 2), fill = 'x')
+        self.entry3.pack(side = LEFT, padx = 1, pady = (0, 1), fill = 'x')
         self.bt['entry3'] = self.entry3
         
         # 3rd frame for top buttons.
@@ -144,35 +145,35 @@ class TreeViewGui:
         self.bframe = ttk.Frame(self.root)
         self.bframe.pack(side = TOP, fill = 'x')
         self.button5 = ttk.Button(self.bframe, text = 'Insert', width = 3, command = self.insertwords)
-        self.button5.pack(side = LEFT, pady = (0, 3), padx = (1, 1), fill = 'x', expand = 1)
+        self.button5.pack(side = LEFT, pady = (2, 3), padx = (1, 1), fill = 'x', expand = 1)
         self.button5.propagate(0)
         self.bt['button5'] = self.button5
         self.button6 = ttk.Button(self.bframe, text = 'Write', width = 3, command =  self.writefile)
-        self.button6.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button6.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button6'] = self.button6
         self.button9 = ttk.Button(self.bframe, text = 'Delete', width = 3, command = self.deleterow)
-        self.button9.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button9.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button9'] = self.button9        
         self.button7 = ttk.Button(self.bframe, text = 'BackUp', width = 3, command = self.backup)
-        self.button7.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button7.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button7'] = self.button7
         self.button8 = ttk.Button(self.bframe, text = 'Load', width = 3, command = self.loadbkp)
-        self.button8.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button8.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button8'] = self.button8
         self.button3 = ttk.Button(self.bframe, text = 'Move Child', width = 3, command = self.move_lr)
-        self.button3.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button3.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button3'] = self.button3        
         self.button16 = ttk.Button(self.bframe, text = 'Change File', width = 3, command = self.chgfile)
-        self.button16.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button16.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button16'] = self.button16
         self.button17 = ttk.Button(self.bframe, text = 'CPP', width = 3, command = self.cmrows)
-        self.button17.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button17.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button17'] = self.button17
         self.button18 = ttk.Button(self.bframe, text = 'Send Note', width = 3, command = self.sendtel)
-        self.button18.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button18.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button18'] = self.button18
         self.button19 = ttk.Button(self.bframe, text = 'Look Up', width = 3, command = self.lookup)
-        self.button19.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button19.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button19'] = self.button19
         
         # 4th frame for below buttons.
@@ -215,34 +216,34 @@ class TreeViewGui:
         self.frb2 = ttk.Frame(self.root)
         self.frb2.pack(fill = X)
         self.button21 = ttk.Button(self.frb2, text = 'Save', width = 3, command = self.endec)
-        self.button21.pack(side = LEFT, pady = (0, 3), padx = (1, 1), fill = 'x', expand = 1)
+        self.button21.pack(side = LEFT, pady = (0, 2), padx = (1, 1), fill = 'x', expand = 1)
         self.bt['button21'] = self.button21
         self.button22 = ttk.Button(self.frb2, text = 'Open', width = 3, command = self.openf)
-        self.button22.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button22.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button22'] = self.button22          
         self.button23 = ttk.Button(self.frb2, text = 'Create file', width = 3, command = self.createf)
-        self.button23.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button23.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button23'] = self.button23
         self.button24 = ttk.Button(self.frb2, text = 'Editor', width = 3, command = self.editor)
-        self.button24.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button24.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button24'] = self.button24
         self.button25 = ttk.Button(self.frb2, text = 'Un/Wrap', width = 3, command = self.wrapped)
-        self.button25.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button25.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button25'] = self.button25        
         self.button26 = ttk.Button(self.frb2, text = 'Calculator', width = 3, command = self.calc)
-        self.button26.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button26.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button26'] = self.button26
         self.button27 = ttk.Button(self.frb2, text = 'Ex', width = 3, command = self.editex)
-        self.button27.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button27.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button27'] = self.button27
         self.button28 = ttk.Button(self.frb2, text = 'Template', width = 3, command = self.temp)
-        self.button28.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button28.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button28'] = self.button28
         self.button29 = ttk.Button(self.frb2, text = 'Emoji', width = 3, command = self.emoj)
-        self.button29.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button29.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button29'] = self.button29
         self.button30 = ttk.Button(self.frb2, text = 'HTML View', width = 3, command = self.htmlview)
-        self.button30.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
+        self.button30.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button30'] = self.button30
         
         # 5th frame.
@@ -259,7 +260,7 @@ class TreeViewGui:
         self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE, 
                          undo = True, autoseparators = True, maxundo = -1)
         self.text.config(state = 'disable')
-        self.text.pack(side = LEFT, fill = 'both', padx = (2,1), expand = 1)
+        self.text.pack(side = LEFT, fill = 'both', padx = (2,1), pady = (1,0), expand = 1)
         self.text.bind('<MouseWheel>', self.mscrt)
         self.text.bind('<Control-z>', self.undo)
         self.text.bind('<Control-Shift-Key-Z>', self.redo)
@@ -321,22 +322,33 @@ class TreeViewGui:
         if 'ft.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
             self.ft(path = os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'))        
         if 'theme.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
-            self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)    
-    
+            self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
+        if os.path.isfile(os.path.join(os.getcwd().rpartition('\\')[0], 'hbts.tvg')):
+            frm = [self.bframe, self.frb1, self.frb2]
+            for fr in frm:
+                fr.pack_forget()
+            del frm
+            
     def hidbs(self, event =  None):
         # Hide Buttons.
         
+        frm = [self.bframe, self.frb1, self.frb2]
+        pth = os.path.join(os.getcwd().rpartition('\\')[0], 'hbts.tvg')        
         self.tframe.pack_forget()
         self.fscr.pack_forget()
-        frm = [self.bframe, self.frb1, self.frb2]
-        for fr in frm:
-            if bool(fr.winfo_ismapped()):
+        if bool(frm[0].winfo_ismapped()):
+            for fr in frm:
                 fr.pack_forget()
-            else:
+            with open(pth, 'w') as bh:
+                bh.write('buttons hide')
+        else:
+            for fr in frm:
                 fr.pack(side = TOP, fill = 'x')
+            os.remove(pth)
         self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)       
-        self.fscr.pack(fill ='x')        
-    
+        self.fscr.pack(fill ='x')
+        del frm
+        
     def inenter(self, event):
         # For invoking any focus button or radiobutton
         
@@ -2254,6 +2266,13 @@ class TreeViewGui:
                 scal(self)
             else:
                 messagebox.showinfo('TreeViewGui', 'Scaling aborted!')
+    
+    def help(self, event = None):
+        #Tutorial help.
+        
+        dst =  os.path.join(os.getcwd().rpartition('\\')[0], 'TVG Tutorial.pdf')
+        if os.path.isfile(dst):
+            os.startfile(dst)
                 
 def scal(t):
     # Need to restart after scaling.
@@ -2340,7 +2359,7 @@ def main():
                 begin.infobar()
             else:
                 begin.view()
-            begin.text.edit_reset()
+            begin.text.edit_reset()            
             begin.root.mainloop()
         else:
             messagebox.showwarning('File', 'No File Name!')
