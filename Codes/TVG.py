@@ -1978,7 +1978,7 @@ class TreeViewGui:
                                             if 's:' == i.lower()[:2]:
                                                 p2[et] = ('space', '\n')
                                             elif 'p:' == i.lower()[:2]:
-                                                if i.partition(':')[2].isspace():
+                                                if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
                                                     raise Exception('Parent cannot be empty!')
                                                 else:
                                                     p2[et] = ('parent', i[2:].removeprefix(' '))
@@ -2008,7 +2008,7 @@ class TreeViewGui:
                                             if 's:' == i.lower()[:2]:
                                                 p2[et] = ('space', '\n')
                                             elif 'p:' == i.lower()[:2]:
-                                                if i.partition(':')[2].isspace():
+                                                if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
                                                     raise Exception('Parent cannot be empty!')
                                                 else:
                                                     p2[et] = ('parent', i[2:].removeprefix(' '))
@@ -2031,7 +2031,7 @@ class TreeViewGui:
                                         if 's:' == i.lower()[:2]:
                                             p2[et] = ('space', '\n')
                                         elif 'p:' == i.lower()[:2]:
-                                            if i.partition(':')[2].isspace():
+                                            if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
                                                 raise Exception('Parent cannot be empty!')
                                             else:
                                                 p2[et] = ('parent', i[2:].removeprefix(' '))
@@ -2080,8 +2080,7 @@ class TreeViewGui:
                         if self.editorsel:
                             self.editorsel = None
                 except Exception as a:
-                    raise a
-#                    messagebox.showerror('TreeViewGui', f'{a}')
+                    messagebox.showerror('TreeViewGui', f'{a}')
             self.text.edit_reset()
             self.infobar()
                     
