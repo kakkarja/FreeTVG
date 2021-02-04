@@ -70,13 +70,12 @@ class Calculator():
         self.base = None
         self.root.config(background = 'black')
         self.root.title("TeleCalc")
-        #self.root.resizable(False,False)
         self.root.protocol('WM_DELETE_WINDOW', self.bye)
-        self.wwidth = 630
-        self.wheight = 610
-        self.root.minsize(630, 610)
+        self.wwidth = 600
+        self.wheight = 650
+        self.root.minsize(600, 650)
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
-        self.pheight = int(self.root.winfo_screenheight()/4 - self.wheight/4)
+        self.pheight = int(self.root.winfo_screenheight()/5 - self.wheight/5)
         self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
         self.root.bind_all('<Control-Left>', self.typ)
         self.root.bind_all('<Control-Right>', self.typ)
@@ -87,33 +86,39 @@ class Calculator():
         self.root.bind('<Control-q>', self.bye)
         self.root.bind('<Control-Key-k>', self.typ)
         self.lt = StringVar(self.root)
-        self.label = ttk.Label(self.root, textvariable = self.lt, font = 'verdana 9 bold', 
+        self.label = ttk.Label(self.root, textvariable = self.lt, font = 'verdana 10 bold', 
                                background = 'black', foreground = 'white')
         self.label.pack(pady = 2)
         self.frt = Frame(self.root)
-        self.frt.pack(padx = 5, fill = 'both', expand = 1)
-        self.text = Text(self.frt, background = 'black', foreground = 'white', font = 'verdana 11',
-                         width=56, height =12, borderwidth = 4, padx = 5, pady = 3)
-        self.scroll = Scrollbar(self.frt, background = 'gold')
+        self.frt.pack(padx = 5, fill = 'both')
+        self.fcal = Frame(self.frt)
+        self.fcal.pack(side = 'left', fill = 'both', expand = 1)
+        self.text = Text(self.fcal, background = 'black', foreground = 'gold', font = 'verdana 17 bold',
+                         width = 30, height = 9, padx = 5, pady = 3)
+        self.fscr = Frame(self.frt)
+        self.fscr.pack(side = LEFT, fill = 'both')
+        self.scroll = Scrollbar(self.fscr, background = 'gold')
         self.text.bind_all('<Up>', self.scru)
         self.text.bind_all('<Down>', self.scrd)
         self.text.tag_config('thg', background = 'yellow', foreground = 'black')
         self.text.pack(side = 'left', padx = (3,0), pady = 5, fill = 'both', expand = 1)
-        self.scroll.pack(side = 'right', fill = 'y', pady = 5)
+        self.text.propagate(0)
+        self.scroll.pack(side = 'left', fill = 'y', pady = 5, expand = 1)
+        self.scroll.propagate(0)
         self.scroll.config(command = self.text.yview)
         self.text.config(yscrollcommand = self.scroll.set)
         self.text.tag_add('js', '1.0', END)
         self.text.tag_configure('js', foreground = 'khaki')
         self.text.config(state = 'disable')
-        self.entry = Entry(self.root, width = 32, font = 'verdana 17', justify = 'right', 
-                      disabledbackground = 'black', disabledforeground = 'white',
+        self.entry = Entry(self.root, width = 32, font = 'verdana 17 bold', justify = 'right', 
+                      disabledbackground = 'black', disabledforeground = 'gold',
                       borderwidth = 2, relief = RAISED)
         self.entry.pack(pady = 5, ipadx = 10, fill = 'x', padx = 5)
         self.entry.config(state = 'disable')
         self.symbols = None
         with open(filen('curiso'), 'rb') as symfile:
             self.symbols = eval(symfile.readlines()[1].decode('utf-8'))
-        self.frex = Frame(self.root, background = 'black', width = 76)
+        self.frex = Frame(self.root, background = 'black')
         self.frex.pack(fill = 'x', padx = 5)
         self.cbc1 = ttk.Combobox(self.frex, width = 37)
         self.cbc1.pack(side = LEFT, pady = (0,5), fill = 'x', expand = 1) 
@@ -127,15 +132,15 @@ class Calculator():
         self.cbc2.bind('<KeyRelease>', self.tynam)
         self.cbc2.bind('<FocusIn>', self.retrat)
         self.frex2 = Frame(self.root, background = 'black')
-        self.frex2.pack(fill = 'both', padx = 5, expand = 1)
-        self.btrat = Button(self.frex2, text = 'RATES', background = 'teal',
-                            foreground = 'gold', width = 20, font = 'verdna 10 bold',
+        self.frex2.pack(fill = 'x', padx = 5)
+        self.btrat = Button(self.frex2, text = 'RATES', background = 'black',
+                            foreground = 'gold', width = 20, font = 'verdna 17 bold',
                             command = self.getrate)
         self.btrat.pack(side = LEFT, fill = 'both', expand = 1)
         self.btrat.bind_all('<Control-r>', self.getrate)
         self.bt['btrat'] = self.btrat
-        self.btcon = Button(self.frex2, text = 'CONVERT', background = 'teal',
-                            foreground = 'gold', width = 20, font = 'verdna 10 bold',
+        self.btcon = Button(self.frex2, text = 'CONVERT', background = 'black',
+                            foreground = 'gold', width = 20, font = 'verdna 17 bold',
                             command = self.conv)
         self.btcon.pack(side = LEFT, fill = 'both', expand = 1)
         self.btcon.bind_all('<Control-e>', self.conv)
@@ -152,8 +157,8 @@ class Calculator():
         nck = ['0','1','2','3','4','5','6','7','8','9', '/','.']        
         while r <= len(lc):
             if lck:
-                self.bt[lc[r-1]] = Button(self.frm, text = lc[r-1], font = 'verdana 15', width = 5, 
-                                        background = 'teal', foreground = 'gold') 
+                self.bt[lc[r-1]] = Button(self.frm, text = lc[r-1], font = 'verdana 17 bold', width = 5, 
+                                        background = 'black', foreground = 'gold') 
             self.bt[lc[r-1]].configure(command = lambda obj=self.bt[lc[r-1]]: self.calculation(obj))
             if c < 6:
                 self.frm.grid_columnconfigure(c+1, weight = 1, pad = self.root.winfo_screenwidth())
@@ -217,34 +222,34 @@ class Calculator():
         self.bt['.'].grid(row=19, column = 3, pady = (5, 0), padx = (0, 5))
         ##########################################################
         
-        self.delb = Button(self.frm, text = 'DEL', font = 'verdana 15', width = 5, 
-                      background = 'teal', foreground = 'gold', command = self.tdel)
+        self.delb = Button(self.frm, text = 'DEL', font = 'verdana 17 bold', width = 5, 
+                      background = 'black', foreground = 'gold', command = self.tdel)
         self.delb.bind_all('D', self.typ)
         self.frm.grid_columnconfigure(0, weight = 1, pad = self.root.winfo_screenwidth())
         self.delb.grid(row =1, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['delb'] = self.delb
-        self.savb = Button(self.frm, text = 'SAVE', font = 'verdana 15', width = 5, 
-                     background = 'teal', foreground = 'gold', command = self.savef)
+        self.savb = Button(self.frm, text = 'SAVE', font = 'verdana 17 bold', width = 5, 
+                     background = 'black', foreground = 'gold', command = self.savef)
         self.savb.bind_all('S', self.typ)       
         self.savb.grid(row =7, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['savb'] = self.savb
-        self.loab = Button(self.frm, text = 'LOAD', font = 'verdana 15', width = 5, 
-                      background = 'teal', foreground = 'gold', command = self.loadcalc)
+        self.loab = Button(self.frm, text = 'LOAD', font = 'verdana 17 bold', width = 5, 
+                      background = 'black', foreground = 'gold', command = self.loadcalc)
         self.loab.bind_all('L', self.typ)      
         self.loab.grid(row =13, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['loab'] = self.loab
-        self.edb = Button(self.frm, text = 'EDIT', font = 'verdana 15', width = 5, 
-                     background = 'teal', foreground = 'gold', command = self.edt)
+        self.edb = Button(self.frm, text = 'EDIT', font = 'verdana 17 bold', width = 5, 
+                     background = 'black', foreground = 'gold', command = self.edt)
         self.edb.bind_all('E', self.typ)
         self.edb.grid(row =19, column =0 , pady = (5, 0), padx = (5, 5), sticky = N+S+W+E)
         self.bt['edb'] = self.edb
-        self.copb = Button(self.frm, text = 'COPY', font = 'verdana 15', width = 5, 
-                     background = 'teal', foreground = 'gold', command = self.copc)
+        self.copb = Button(self.frm, text = 'COPY', font = 'verdana 17 bold', width = 5, 
+                     background = 'black', foreground = 'gold', command = self.copc)
         self.copb.bind_all('C', self.typ)
         self.copb.grid(row =20, column =0 , pady = (5, 5), padx = (5, 5), sticky = N+S+W+E)
         self.bt['copb'] = self.copb
-        self.calb = Button(self.frm, text = 'CAL', font = 'verdana 15', width = 5, 
-                     background = 'teal', foreground = 'gold', command = self.runcal)
+        self.calb = Button(self.frm, text = 'CAL', font = 'verdana 17 bold', width = 5, 
+                     background = 'black', foreground = 'gold', command = self.runcal)
         self.calb.bind_all('A', self.typ)
         self.calb.grid(row =20, column = 5, pady = (5, 5), padx = (0, 5), sticky = N+S+W+E)
         self.bt['calb'] = self.calb
@@ -671,14 +676,14 @@ class Calculator():
                     self.ic = None
                     self.rate = None
                     self.base = None
-                    self.text.config(state = 'normal', font = 'verdana 11')
+                    self.text.config(state = 'normal', font = 'verdana 17')
                     self.text.delete('1.0', END)
                     self.text.config(state ='disable')
                     self.lt.set('')
                 else:
                     messagebox.showinfo('Calculator', 'Exchange Rate is still active!', parent = self.root)
             else:
-                self.text.config(state = 'normal', font = 'verdana 11')
+                self.text.config(state = 'normal', font = 'verdana 17')
                 self.text.delete('1.0', END)
                 self.text.config(state ='disable')
                 self.lt.set('')                
@@ -1169,9 +1174,9 @@ class Calculator():
                 self.text.tag_add('jt', '1.0', END)
                 self.text.tag_config('jt', justify = 'center')
                 self.text.config(state = 'normal')
-                self.text.config(font = 'courier 12 bold')
-                self.text.insert('1.0', f'\n\n{cald}', ('js','jt'))
-                sch1 = self.text.search(str(dt.datetime.today().day),'5.0',END)
+                self.text.config(font = 'consolas 18 bold')
+                self.text.insert('1.0', f'\n{cald}', ('js','jt'))
+                sch1 = self.text.search(str(dt.datetime.today().day),'4.0',END)
                 sch2 = f'{sch1}+{len(str(dt.datetime.today().day))}c'
                 gt = self.text.get(sch1,sch2)
                 self.text.delete(sch1, sch2)
