@@ -29,9 +29,9 @@ class Reminder:
     API = None
     HASH_ = None
     GEO = None
+    RESZ = None
     def __init__(self, root):
         self.root = root
-        #self.root.resizable(False, False)
         self.root.title('TeleTVG')
         self.wid = 705
         self.hei = 650
@@ -39,6 +39,18 @@ class Reminder:
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wid/2)
         self.pheight = int(self.root.winfo_screenheight()/3 - self.hei/3)
         self.root.geometry(f'{self.wid}x{self.hei}+{self.pwidth}+{self.pheight}')
+        Reminder.RESZ = f'{self.wid}x{self.hei}+{self.pwidth}+{self.pheight}'
+        gpath = os.getcwd().rpartition('\\')[0]
+        gem = None
+        if 'telgeo.tvg' in os.listdir(gpath):
+            with open(os.path.join(gpath, 'telgeo.tvg'), 'rb') as geo:
+                gem = geo.read().decode('utf-8')
+            if '{' == gem[0] and '}' == gem[-1]:
+                gem = eval(gem)
+                self.root.geometry(gem['geo'])
+                Reminder.RESZ = gem['geo']
+        del gpath
+        del gem
         self.root.protocol('WM_DELETE_WINDOW', self.winexit)
         self.root.bind_all('<Control-s>', self.chacct)
         self.root.bind_all('<Control-p>', self.paste)
@@ -173,6 +185,19 @@ class Reminder:
     def winexit(self):
         # Will close ReminderTel and Emoji window as well.
 
+        ori = os.getcwd().rpartition('\\')[0]
+        if str(self.root.winfo_geometry()) == Reminder.RESZ:
+            with open(os.path.join(ori, 'telgeo.tvg'), 'wb') as geo:
+                geo.write(str({'geo': Reminder.RESZ}).encode())
+        else:
+            ask = messagebox.askyesno('Calculator', "Do you want to set your new window's position?")
+            if ask:
+                with open(os.path.join(ori, 'telgeo.tvg'), 'wb') as geo:
+                    geo.write(str({'geo': str(self.root.winfo_geometry())}).encode())
+            else:
+                with open(os.path.join(ori, 'telgeo.tvg'), 'wb') as geo:
+                    geo.write(str({'geo': Reminder.RESZ}).encode())
+        del ori        
         if emo.Emo.status is False:
             emo.Emo.status = True
             emo.Emo.paste = None

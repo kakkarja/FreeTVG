@@ -41,6 +41,7 @@ class Calculator():
     MAINST = None
     DEST = None
     GEO = None
+    RESZ = None
     def __init__(self, root):
         """
         Calculator base on python programming.
@@ -77,6 +78,18 @@ class Calculator():
         self.pwidth = int(self.root.winfo_screenwidth()/2 - self.wwidth/2)
         self.pheight = int(self.root.winfo_screenheight()/5 - self.wheight/5)
         self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
+        Calculator.RESZ = f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}"
+        gpath = os.getcwd()
+        gem = None
+        if 'calgeo.tvg' in os.listdir(gpath):
+            with open(os.path.join(gpath, 'calgeo.tvg'), 'rb') as geo:
+                gem = geo.read().decode('utf-8')
+            if '{' == gem[0] and '}' == gem[-1]:
+                gem = eval(gem)
+                self.root.geometry(gem['geo'])
+                Calculator.RESZ = gem['geo']
+        del gpath
+        del gem        
         self.root.bind_all('<Control-Left>', self.typ)
         self.root.bind_all('<Control-Right>', self.typ)
         self.root.bind_all('<Control-Up>',self.typ)
@@ -296,6 +309,19 @@ class Calculator():
     def bye(self, event= None):
         #Stop application event.
         if Calculator.LOCK is False:
+            ori = os.getcwd()
+            if str(self.root.winfo_geometry()) == Calculator.RESZ:
+                with open(os.path.join(ori, 'calgeo.tvg'), 'wb') as geo:
+                    geo.write(str({'geo': Calculator.RESZ}).encode())
+            else:
+                ask = messagebox.askyesno('Calculator', "Do you want to set your new window's position?")
+                if ask:
+                    with open(os.path.join(ori, 'calgeo.tvg'), 'wb') as geo:
+                        geo.write(str({'geo': str(self.root.winfo_geometry())}).encode())
+                else:
+                    with open(os.path.join(ori, 'calgeo.tvg'), 'wb') as geo:
+                        geo.write(str({'geo': Calculator.RESZ}).encode())
+            del ori
             os.chdir(Calculator.DEST)
             Calculator.MAINST.free()
             Calculator.MAINST.root.deiconify()

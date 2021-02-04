@@ -46,7 +46,6 @@ class TreeViewGui:
                 gem = eval(gem)
                 self.root.geometry(gem['geo'])
                 TreeViewGui.GEO = gem['geo']
-            os.remove(os.path.join(gpath, 'geo.tvg'))
         del gpath
         del gem
         self.root.bind_all('<Control-f>', self.fcsent)
