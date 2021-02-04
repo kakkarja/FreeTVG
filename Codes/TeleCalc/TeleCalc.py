@@ -93,7 +93,7 @@ class Calculator():
         self.frt.pack(padx = 5, fill = 'both')
         self.fcal = Frame(self.frt)
         self.fcal.pack(side = 'left', fill = 'both', expand = 1)
-        self.text = Text(self.fcal, background = 'black', foreground = 'gold', font = 'verdana 17 bold',
+        self.text = Text(self.fcal, background = 'black', foreground = 'gold', font = 'verdana 17',
                          width = 30, height = 9, padx = 5, pady = 3)
         self.fscr = Frame(self.frt)
         self.fscr.pack(side = LEFT, fill = 'both')
