@@ -568,11 +568,11 @@ class TreeViewGui:
             elif event.keysym == 'question':
                 self.scaling()
         else:
-            if str(self.bt['button17'].cget('state')) == 'normal':
+            if str(self.bt['button17'].cget('state')) == 'normal' and event.keysym  == 'n':
                 self.cmrows()
-            elif str(self.bt['button14'].cget('state')) == 'normal':
+            elif str(self.bt['button14'].cget('state')) == 'normal' and event.keysym  == 'h':
                 self.hiddenchl()
-            elif str(self.bt['button24'].cget('state')) == 'normal':
+            elif str(self.bt['button24'].cget('state')) == 'normal' and event.keysym  == '7':
                 self.editor()
                 
     def radiobut(self, event = None):
@@ -1511,7 +1511,7 @@ class TreeViewGui:
         self.free()
         TeleCalc.main(self, ori, str(self.root.winfo_geometry()))
             
-    def lookup(self):
+    def lookup(self, event = None):
         # To lookup word on row and also on editor mode.
         
         self.hidcheck()
