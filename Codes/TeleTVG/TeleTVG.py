@@ -190,7 +190,7 @@ class Reminder:
             with open(os.path.join(ori, 'telgeo.tvg'), 'wb') as geo:
                 geo.write(str({'geo': Reminder.RESZ}).encode())
         else:
-            ask = messagebox.askyesno('Calculator', "Do you want to set your new window's position?")
+            ask = messagebox.askyesno('TeleTVG', "Do you want to set your new window's position?")
             if ask:
                 with open(os.path.join(ori, 'telgeo.tvg'), 'wb') as geo:
                     geo.write(str({'geo': str(self.root.winfo_geometry())}).encode())
@@ -230,10 +230,16 @@ class Reminder:
         # Copied text and delete them on screen.
 
         if self.text.get('1.0', END)[:-1]:
-            self.root.clipboard_clear()
-            self.root.clipboard_append(self.text.get('1.0', END)[:-1])
-            self.text.delete('1.0', END)
-            messagebox.showinfo('TeleTVG', 'The text has been copied!', parent = self.root)
+            if self.text.tag_ranges('sel'):
+                self.root.clipboard_clear()
+                self.root.clipboard_append(self.text.selection_get())
+                self.text.tag_remove('sel', 'sel.first', 'sel.last')
+                self.text.mark_set('insert', INSERT)
+                messagebox.showinfo('TeleTVG', 'Selected text has been copied!', parent = self.root)
+            else:
+                self.root.clipboard_clear()
+                self.root.clipboard_append(self.text.get('1.0', END)[:-1])
+                messagebox.showinfo('TeleTVG', 'The text has been copied!', parent = self.root)
     
     def clear(self, event = None):
         # Clear screen.
