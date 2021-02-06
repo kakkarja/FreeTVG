@@ -26,6 +26,7 @@ class TreeViewGui:
     MARK = False
     MODE = False
     GEO = None
+    EMOP = None
     def __init__(self, root, filename):
         self.filename = filename
         self.root = root
@@ -1473,7 +1474,7 @@ class TreeViewGui:
         # Only for Editor mode.
         
         if str(self.text.cget('state')) == 'normal' and str(self.bt['button24'].cget('state')) == 'normal':
-            emo.main(self)
+            emo.main(self, TreeViewGui.EMOP)
     
     def free(self):
         # To lock binding keys while withdraw, 
@@ -2315,6 +2316,7 @@ def main():
     # Starting point of running TVG and making directory for non-existing file.
     
     if chkpid():
+        emop = filen('emoj.txt')
         with open('pid.tvg', 'w') as wid:
             wid.write(str(os.getpid()))
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -2351,6 +2353,7 @@ def main():
             else:
                 os.chdir(f'{filename}_tvg')
             begin = TreeViewGui(root = root, filename = filename)
+            begin.EMOP = emop
             begin.root.deiconify()
             if f'{filename}_hid.json' in os.listdir():
                 begin.hidform()

@@ -12,6 +12,7 @@ class Emo:
     mainon = None
     paste = None
     pathn = None
+    emop = None
     def __init__(self, root):
         """
         Creating Emoji for ReminderTel.
@@ -44,7 +45,7 @@ class Emo:
                            exportselection = False, selectmode = 'multiple')
         self.lbe.pack(fill = 'x', expand = 1, padx = 3, pady = (2, 0))
         try:
-            with open(filen('emoj.txt')) as emr:
+            with open(Emo.emop) as emr:
                 a = emr.read()
                 if '{' == a[0] and a[-1] == '}':
                     self.lib = {e: chr(j) for e, j in eval(a).items()}
@@ -303,15 +304,18 @@ class Emo:
         Emo.paste = None
         self.root.destroy()
            
-def main(paste = None):
+def main(paste = None, emop = None):
     # Create Emoji window for one time until it close.
 
     path = os.getcwd().rpartition('\\')[0]
+    if emop is None:
+        emop = filen('emoj.txt')
     if 'emodb' not in os.listdir(path):
         os.mkdir(os.path.join(path, 'emodb'))
     if Emo.status:
         Emo.pathn = os.path.join(path, 'emodb')
         Emo.status = False
+        Emo.emop = emop
         if paste:
             Emo.paste = paste
         root = Tk()

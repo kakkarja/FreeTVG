@@ -30,6 +30,7 @@ class Reminder:
     HASH_ = None
     GEO = None
     RESZ = None
+    EMOP = None
     def __init__(self, root):
         self.root = root
         self.root.title('TeleTVG')
@@ -180,7 +181,7 @@ class Reminder:
     def emj(self):
         # Emoji window.
         
-        emo.main(self)
+        emo.main(self, Reminder.EMOP)
         
     def winexit(self):
         # Will close ReminderTel and Emoji window as well.
@@ -767,14 +768,13 @@ def main(stat, path, geo, message = None):
     else:
         os.mkdir('Tele_TVG')
         os.chdir('Tele_TVG')
-    if emj and emj.rpartition('\\')[2] not in os.listdir():
-        shutil.copy(emj, os.getcwd())
     if api and hash_:      
         if 'Telacc' not in os.listdir():
             os.mkdir('Telacc')
         if Reminder.STATUS is False:              
             root = Tk()
             Reminder.STATUS = True
+            Reminder.EMOP = emj
             Reminder.MAINST = stat
             Reminder.MAINST.root.withdraw()
             Reminder.DEST = path
@@ -832,5 +832,4 @@ def main(stat, path, geo, message = None):
                 messagebox.showinfo('TeleTVG', 'You need to start over again later!')
                 root.destroy()
         else:
-            root.destroy()
-            
+            root.destroy()  
