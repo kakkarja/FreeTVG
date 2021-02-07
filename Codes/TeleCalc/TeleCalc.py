@@ -1161,9 +1161,10 @@ class Calculator():
                 else:
                     messagebox.showinfo('Calculator', 'Copy aborted!', parent = self.root)
             else:
-                gtr = [i for i in self.text.get('1.0', END)[:-1].split('\n') if 'Result:' in i]
-                pas = messagebox.askyesno('Calculator', 'Want to paste Rate?', parent = self.root)
+                pas = messagebox.askyesno('Calculator', 'Want to paste Result of conversion?["No" copy screen and paste to TVG Editor]', 
+                                          parent = self.root)
                 if pas:
+                    gtr = [i for i in self.text.get('1.0', END)[:-1].split('\n') if 'Result:' in i]
                     if gtr:
                         self.entry.config(state = 'normal')
                         self.entry.delete(0,END)
@@ -1176,7 +1177,12 @@ class Calculator():
                 else:
                     txt = 'p:Exchange Rate\n'
                     if 'Result:' in self.text.get('1.0', END)[:-1]:
-                        txt += f'c1:{self.cbc1.get().partition("-")[0]}{self.entry.get()}\n'
+                        getrate = eval([i for i in self.text.get('1.0', END)[:-1].split('\n') if 'Rate:' in i ][0][6:].replace(',',''))
+                        getres = eval([i for i in self.text.get('1.0', END)[:-1].split('\n') if 'Result:' in i ][0][8:].replace(',',''))
+                        if (getres/getrate).is_integer():
+                            txt += f'c1:{self.cbc1.get().partition("-")[0]}{int(getres/getrate):,}\n'
+                        else:
+                            txt += f'c1:{self.cbc1.get().partition("-")[0]}{getres/getrate:,}\n'
                     frt = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
                     wrd = ''
                     for w in frt:
