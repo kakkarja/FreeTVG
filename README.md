@@ -139,7 +139,10 @@
     * **Can hide buttons for almost full screen text editor**
         * **Short-Cut keyboards is active :joy:**
     * **TeleCalc and TeleTVG now resizeable :joy:**
-        * **There are minsize for them, depend on resolution, both may still appear too large.** 
+        * **There are minsize for them, depend on resolution, both may still appear too large.**
+    * **Can save to mark, emojies that selected in text [only emoji that exist in TVG library].**
+    * **Can call Emoji in TVG without in Editor mode.**
+        * **Can paste on entry box.**
 
 ![TVG](/TVG.png)
 ![TVG3](/TVG3.png)
