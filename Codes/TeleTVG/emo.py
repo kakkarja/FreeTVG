@@ -187,12 +187,23 @@ class Emo:
             for i in gc:
                 lj += ''.join(self.lbe.get(i))
             if Emo.paste:
-                Emo.paste.text.insert(INSERT, lj)
-                Emo.paste.text.see(INSERT)
-                Emo.paste.text.focus()
+                if str(Emo.paste.text.cget('state')) == 'normal':
+                    Emo.paste.text.insert(INSERT, lj)
+                    Emo.paste.text.see(INSERT)
+                    Emo.paste.text.focus()
+                else:
+                    if 'entry' in [str(i).rpartition('!')[2] for i in Emo.paste.root.winfo_children()[0].winfo_children()]:
+                        Emo.paste.entry.insert(INSERT, lj)
+                        Emo.paste.entry.icursor(END)
+                        Emo.paste.entry.focus()
+                    else:
+                        self.root.clipboard_clear()
+                        self.root.clipboard_append(lj)
+                        messagebox.showinfo('Emo', 'Copied!', parent = self.root) 
             else:
                 self.root.clipboard_clear()
                 self.root.clipboard_append(lj)
+                messagebox.showinfo('Emo', 'Copied!', parent = self.root) 
             self.lbe.selection_clear(0, END)
             self.sel = []
             self.upt = tuple()
@@ -204,7 +215,7 @@ class Emo:
     def mark(self):
         # Saving emoji indexes using json database.
         
-        if self.sel:
+        if self.sel and not self.paste.text.tag_ranges('sel'):
             nm = simpledialog.askstring('Emo', 'Name your marking: [if name is exist, will overwrite!]', parent = self.root)
             if nm:            
                 if 'marking.json' in os.listdir(Emo.pathn):
@@ -223,6 +234,35 @@ class Emo:
                     self.upt = tuple()
             else:
                 messagebox.showinfo('Emo', 'Saving Mark aborted!', parent = self.root)
+        elif self.paste.text.tag_ranges('sel'):
+            nm = simpledialog.askstring('Emo', 'Name your marking: [if name is exist, will overwrite!]', parent = self.root)
+            if nm:
+                cke = [i for i in list(self.lib.values())]
+                ge = self.paste.text.selection_get()
+                m = []
+                for j in ge:
+                    if j in cke:
+                        m.append(cke.index(j))
+                    else:
+                        ge = j
+                        break
+                del cke
+                if m:
+                    self.paste.text.tag_remove('sel', 'sel.first', 'sel.last')
+                    m = {f'{nm}': m}
+                    if 'marking.json' in os.listdir(Emo.pathn):
+                        mrk = db(os.path.join(Emo.pathn,'marking'))
+                        mrk.indata(m)
+                    else:
+                        mrk = db(os.path.join(Emo.pathn,'marking'))
+                        mrk.createdb(m)
+                    self.paste.text.mark_set('insert', INSERT)
+                else:
+                    messagebox.showinfo('Emo', f'{ge} is not emoji!', parent = self.root)
+                del m
+                del ge
+            else:
+                messagebox.showinfo('Emo', 'Saving Mark aborted!', parent = self.root)                
         else:
             messagebox.showinfo('Emo', 'Nothing selected yet!', parent = self.root)
                 
@@ -255,9 +295,19 @@ class Emo:
                         for i in d.result:
                             cope += ''.join(self.lbe.get(i))
                         if Emo.paste:
-                            Emo.paste.text.insert(INSERT, cope)
-                            Emo.paste.text.see(INSERT)
-                            Emo.paste.text.focus()
+                            if str(Emo.paste.text.cget('state')) == 'normal':
+                                Emo.paste.text.insert(INSERT, cope)
+                                Emo.paste.text.see(INSERT)
+                                Emo.paste.text.focus()
+                            else:
+                                if 'entry' in [str(i).rpartition('!')[2] for i in Emo.paste.root.winfo_children()[0].winfo_children()]:
+                                    Emo.paste.entry.insert(INSERT, cope)
+                                    Emo.paste.entry.icursor(END)
+                                    Emo.paste.entry.focus()
+                                else:
+                                    self.root.clipboard_clear()
+                                    self.root.clipboard_append(cope)
+                                    messagebox.showinfo('Emo', 'Copied!', parent = self.root)
                         else:
                             self.root.clipboard_clear()
                             self.root.clipboard_append(cope)
