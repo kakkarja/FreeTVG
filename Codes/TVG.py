@@ -729,7 +729,7 @@ class TreeViewGui:
                                 
             d = MyDialog(self.root)
             self.lock = False
-            if d.result:            
+            if d.result:
                 chosen(d.result)
             else:
                 TreeViewGui.FREEZE = False
@@ -1473,8 +1473,7 @@ class TreeViewGui:
         # Can call emoji app for pasting in Editor.
         # Only for Editor mode.
         
-        if str(self.text.cget('state')) == 'normal' and str(self.bt['button24'].cget('state')) == 'normal':
-            emo.main(self, TreeViewGui.EMOP)
+        emo.main(self, TreeViewGui.EMOP)
     
     def free(self):
         # To lock binding keys while withdraw, 
@@ -2311,6 +2310,30 @@ def chkpid():
         root.wm_iconbitmap(default = filen('TVG.ico'))
         messagebox.showerror('TreeViewGui', f'{e}')
         root.destroy()
+
+def askfile(root):
+    # Asking file for creating or opening initial app start.
+    
+    files = [file.rpartition('_')[0] for file in os.listdir(os.getcwd()) if '_tvg' in file]
+    class MyDialog(simpledialog.Dialog):
+        
+        def body(self, master):
+            self.title("Choose File")
+            self.geometry('230x70')
+            Label(master, text="File: ").grid(row=0, column = 0, sticky = E)
+            self.e1 = ttk.Combobox(master)
+            self.e1['values'] = files
+            self.e1.grid(row=0, column=1)
+            return self.e1
+    
+        def apply(self):
+            self.result = self.e1.get()
+                        
+    d = MyDialog(root)
+    if d.result:
+        return d.result
+    else:
+        return None
         
 def main():
     # Starting point of running TVG and making directory for non-existing file.
@@ -2339,9 +2362,9 @@ def main():
                 filename = rd['lop']
             else:
                 os.remove('lastopen.tvg')
-                filename = simpledialog.askstring('Filename', 'Create filename:')
+                filename = askfile(root)
         else:
-            filename = simpledialog.askstring('Filename', 'Create filename:')    
+            filename = askfile(root)    
         if filename:
             filename = filename.title()
             if f'{filename}_tvg' not in os.listdir():
