@@ -685,33 +685,39 @@ class Reminder:
                 else:
                     self.lock = False
                     
-    async def mulsend(self, sen):
+    async def mulsend(self, sen, file = None):
         # Asyncio module of sending multiple.
         
         try:
-            gms = int(len(self.text.get('1.0', END)[:-1])/4090)
-            async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
-                await client.connect()
-                if gms == 0:
-                    await asyncio.gather(*[client.send_message(self.users[user], self.text.get('1.0', END)[:-1]) for user in sen])
-                else:
-                    orm = self.text.get('1.0', END)[:-1].split('\n')
-                    while orm:
-                        getm = ''
-                        num = 0
-                        for i in range(len(orm)):
-                            if len(getm) + (len(orm[i])+1) < 4090:
-                                getm += ''.join(orm[i]+'\n')
+            if file:
+                async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+                    await client.connect()
+                    await asyncio.gather(*[client.send_file(self.users[user], file, caption = 'TreeViewGui') for user in sen])
+                    await client.disconnect()
+            else:
+                gms = int(len(self.text.get('1.0', END)[:-1])/4090)
+                async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
+                    await client.connect()
+                    if gms == 0:
+                        await asyncio.gather(*[client.send_message(self.users[user], self.text.get('1.0', END)[:-1]) for user in sen])
+                    else:
+                        orm = self.text.get('1.0', END)[:-1].split('\n')
+                        while orm:
+                            getm = ''
+                            num = 0
+                            for i in range(len(orm)):
+                                if len(getm) + (len(orm[i])+1) < 4090:
+                                    getm += ''.join(orm[i]+'\n')
+                                else:
+                                    num = i
+                                    break
+                            await asyncio.gather(*[client.send_message(self.users[user], getm) for user in sen])
+                            if num:
+                                orm = orm[i:]
+                                continue
                             else:
-                                num = i
                                 break
-                        await asyncio.gather(*[client.send_message(self.users[user], getm) for user in sen])
-                        if num:
-                            orm = orm[i:]
-                            continue
-                        else:
-                            break
-                await client.disconnect()
+                    await client.disconnect()
             tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
             messagebox.showinfo('TeleTVG', tms, parent = self.root)
         except:
@@ -750,7 +756,15 @@ class Reminder:
                             rd = dict(json.load(us))
                         sen = [i for i in rd[d.result.rpartition("_")[0]] if i in sel]
                         if sen:
-                            asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
+                            gf = messagebox.askyesno('TeleTVG', '"Yes" send message or "No" send file!')
+                            if gf:
+                                asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
+                            else:
+                                askfile = filedialog.askopenfilename(initialdir = os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile'), filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
+                                if askfile:
+                                    asyncio.get_event_loop().run_until_complete(self.mulsend(sen, askfile))
+                                else:
+                                    messagebox.showinfo('TeleTVG', 'Send files aborted!', parent = self.root)
                         else:
                             messagebox.showinfo('TeleTVG', 'This group is no longer exist, please delete it!', parent = self.root)
                 else:
