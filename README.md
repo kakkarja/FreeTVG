@@ -143,6 +143,7 @@
     * **Can save to mark, emojies that selected in text [only emoji that exist in TVG library].**
     * **Can call Emoji in TVG without in Editor mode.**
         * **Can paste on entry box.**
+    * **Can send files to a group.**
 
 ![TVG](/TVG.png)
 ![TVG3](/TVG3.png)
