@@ -966,6 +966,7 @@ class TreeViewGui:
                 tvg.checked(int(rw[0]))
                 self.view()
                 self.listb.select_set(int(rw[0]))
+                self.listb.activate(int(rw[0]))
                 self.listb.see(int(rw[0]))
                 self.text.see(f'{int(rw[0])}.0')
                 self.infobar()
@@ -1653,6 +1654,9 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.checkfile():
+                fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')
+                if os.path.isdir(fpt) is False:
+                    os.mkdir(fpt)                
                 try:
                     checking = list(string.printable)
                     seekchar = ''
@@ -1663,7 +1667,7 @@ class TreeViewGui:
                     enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 5, t2 = 7)
                     ins = f'{enc[0]}'
                     key = f'{[[j for j in i] for i in enc[1]]}'
-                    with open(f'{self.filename}_protected.txt', 'wb') as encrypt:
+                    with open(os.path.join(fpt, f'{self.filename}_protected.txt'), 'wb') as encrypt:
                         encrypt.write(str({key:ins}).encode())
                     messagebox.showinfo('TreeViewGui', 'Encryption created!')
                 except Exception as e:
@@ -1683,7 +1687,10 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            ask = filedialog.askopenfilename(initialdir = os.getcwd().rpartition('\\')[0], filetypes = [("Encryption file","*_protected.txt")])
+            fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')
+            if os.path.isdir(fpt) is False:
+                os.mkdir(fpt)
+            ask = filedialog.askopenfilename(initialdir = fpt, filetypes = [("Encryption file","*_protected.txt")])
             if ask:
                 try:
                     with open(f'{ask}', 'rb') as encrypt:

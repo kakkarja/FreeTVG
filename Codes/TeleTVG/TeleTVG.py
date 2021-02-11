@@ -371,7 +371,10 @@ class Reminder:
         # Sending file using asyncio call
         
         if self.entto.get():
-            ask = filedialog.askopenfilename(initialdir = os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile'), filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
+            fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')
+            if os.path.isdir(fpt) is False:
+                fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile')
+            ask = filedialog.askopenfilename(initialdir = fpt, filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
             if ask:
                 asyncio.get_event_loop().run_until_complete(self.sentfile(ask))
             else:
