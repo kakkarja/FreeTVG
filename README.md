@@ -29,8 +29,7 @@
      * **Send note:**
         * **With emojies.**
         * **Scheduler**
-        * **Send file [only the TVG outline note]**
-        * **Get files ~~[except pictures and stickers]~~**
+        * **Send and Get file [only the TVG outline note]**
         * **Send multiple chat in group**
     * **Can choose color for setting the text and listbox background color. [No button, only event binding. Control+.]**
     * **Can change font setting for text and listbox. [No button, only event binding. Control+,]**
