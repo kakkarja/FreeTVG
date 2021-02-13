@@ -267,11 +267,11 @@ class TreeViewGui:
         self.text.pack_propagate(0)
         self.bt['text'] = self.text
         self.sc1frame = ttk.Frame(self.tframe, width = scw-1)
-        self.sc1frame.pack(anchor = 'w', side = LEFT, fill = 'y')
+        self.sc1frame.pack(anchor = 'w', side = LEFT, fill = 'y', pady = 1)
         self.sc1frame.pack_propagate(0)
         self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
         self.scrollbar1.config(command = self.text.yview) 
-        self.scrollbar1.pack(side="left", fill="y", pady = 1) 
+        self.scrollbar1.pack(side="left", fill="y") 
         self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
         self.text.config(yscrollcommand = self.scrollbar1.set)
         self.bt['scrollbar1'] = self.scrollbar1
@@ -283,11 +283,11 @@ class TreeViewGui:
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
         self.sc2frame = ttk.Frame(self.tframe, width = scw)
-        self.sc2frame.pack(anchor = 'w', side = LEFT, fill = 'y')
+        self.sc2frame.pack(anchor = 'w', side = LEFT, fill = 'y', pady = 1)
         self.sc2frame.pack_propagate(0)
         self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
         self.scrollbar2.config(command = self.listb.yview) 
-        self.scrollbar2.pack(side = "left", fill = "y", pady = 1)
+        self.scrollbar2.pack(side = "left", fill = "y")
         self.scrollbar2.bind('<ButtonRelease>', self.mscrl)
         self.listb.config(yscrollcommand = self.scrollbar2.set)
         self.listb.bind('<<ListboxSelect>>', self.infobar)
@@ -527,16 +527,16 @@ class TreeViewGui:
             elif event.keysym == 'minus':
                 self.delhid()
             elif event.keysym == 'Left' and 'entry' not in fcom:
-                self.pwidth = self.pwidth - 10
+                self.pwidth = self.root.winfo_x() - 1
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
             elif event.keysym == 'Right' and 'entry' not in fcom:
-                self.pwidth = self.pwidth + 10
+                self.pwidth = self.root.winfo_x() + 1
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
             elif event.keysym == 'Down' and 'entry' not in fcom:
-                self.pheight = self.pheight + 10
+                self.pheight = self.root.winfo_y() + 1
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
             elif event.keysym == 'Up' and 'entry' not in fcom:
-                self.pheight = self.pheight - 10
+                self.pheight = self.root.winfo_y() - 1
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
             elif event.keysym == 'n':
                 self.cmrows()

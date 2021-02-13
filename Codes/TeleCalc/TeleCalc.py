@@ -368,16 +368,16 @@ class Calculator():
                     elif event.keysym == 'm':
                         self.calculation(self.bt['M'])                
                     elif event.keysym == 'Left':
-                        self.pwidth = self.pwidth - 10
+                        self.pwidth = self.root.winfo_x() - 1
                         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
                     elif event.keysym == 'Right':
-                        self.pwidth = self.pwidth + 10
+                        self.pwidth = self.root.winfo_x() + 1
                         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
                     elif event.keysym == 'Down':
-                        self.pheight = self.pheight + 10
+                        self.pheight = self.root.winfo_y() + 1
                         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
                     elif event.keysym == 'Up':
-                        self.pheight = self.pheight - 10
+                        self.pheight = self.root.winfo_y() - 1
                         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
                     elif event.keysym == 'A':
                         self.runcal()
@@ -1173,7 +1173,7 @@ class Calculator():
                         self.tdel()
                         messagebox.showinfo('Calculator', f'Pasted {gtr[0]}!', parent = self.root)
                     else:
-                        messagebox.showinfo('Calculator', 'Can paste Conversion Result only and not rate!')
+                        messagebox.showinfo('Calculator', 'Can paste Conversion Result only and not rate!', parent = self.root)
                 else:
                     txt = 'p:Exchange Rate\n'
                     if 'Result:' in self.text.get('1.0', END)[:-1]:
