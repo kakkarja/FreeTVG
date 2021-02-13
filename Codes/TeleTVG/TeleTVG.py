@@ -705,7 +705,7 @@ class Reminder:
                             if gf:
                                 asyncio.get_event_loop().run_until_complete(self.mulsend(sen))
                             else:
-                                askfile = filedialog.askopenfilename(initialdir = os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile'), filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
+                                askfile = filedialog.askopenfilename(initialdir = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro'), filetypes = [("Encryption file","*_protected.txt")], parent = self.root)
                                 if askfile:
                                     asyncio.get_event_loop().run_until_complete(self.mulsend(sen, askfile))
                                 else:
