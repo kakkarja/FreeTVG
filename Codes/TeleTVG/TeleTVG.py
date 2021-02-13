@@ -53,7 +53,6 @@ class Reminder:
         del gpath
         del gem
         self.root.protocol('WM_DELETE_WINDOW', self.winexit)
-        self.root.bind_all('<Control-s>', self.chacct)
         self.root.bind_all('<Control-p>', self.paste)
         self.root.bind_all('<Control-c>', self.copc)
         self.root.bind_all('<Control-x>', self.clear)
@@ -203,15 +202,19 @@ class Reminder:
             emo.Emo.status = True
             emo.Emo.paste = None
             emo.Emo.mainon.destroy()
-        os.chdir(Reminder.DEST)
-        Reminder.STATUS = False
-        Reminder.DEST = None
-        Reminder.MAINST.free()
-        Reminder.MAINST.root.deiconify()
-        Reminder.MAINST.root.geometry(Reminder.GEO)
-        Reminder.GEO = None
-        Reminder.MAINST = None
-        self.root.destroy()
+        if 's_error.tvg' in os.listdir(Reminder.DEST.rpartition('\\')[0]):
+            Reminder.MAINST.root.destroy()
+            self.root.destroy()
+        else:
+            os.chdir(Reminder.DEST)
+            Reminder.STATUS = False
+            Reminder.DEST = None
+            Reminder.MAINST.free()
+            Reminder.MAINST.root.deiconify()
+            Reminder.MAINST.root.geometry(Reminder.GEO)
+            Reminder.GEO = None
+            Reminder.MAINST = None
+            self.root.destroy()
         
     def paste(self, event = None):
         # Paste any copied text.
@@ -372,9 +375,7 @@ class Reminder:
         
         if self.entto.get():
             fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')
-            if os.path.isdir(fpt) is False:
-                fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile')
-            ask = filedialog.askopenfilename(initialdir = fpt, filetypes = [("Encryption file","*_protected.txt"), ("All files", "*.*")], parent = self.root)
+            ask = filedialog.askopenfilename(initialdir = fpt, filetypes = [("Encryption file","*_protected.txt")], parent = self.root)
             if ask:
                 asyncio.get_event_loop().run_until_complete(self.sentfile(ask))
             else:
@@ -411,35 +412,30 @@ class Reminder:
             
     async def getfile(self):
         # Getting file from a user [get the last 5 messages]
-        
-        path = os.path.join(os.getcwd().rpartition('\\')[0],'TeleFile')
+                   
+        path = os.path.join(os.getcwd().rpartition('\\')[0],'TVGPro')
         async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
             try:
                 await client.connect()
                 num = 0
-                async for message in client.iter_messages(self.users[self.entto.get()], 5):
+                async for message in client.iter_messages(self.users[self.entto.get()], None):
                     if message.media:
-                        num += 1
-                        if isinstance(message.media, 
-                                      (types.MessageMediaDocument,
-                                       types.MessageMediaPhoto)
-                                     ):
+                        if isinstance(message.media, types.MessageMediaDocument) and isinstance(message.media.document.attributes[0], types.DocumentAttributeFilename):
+                            num += 1
                             await client.download_media(message, path)
+                            await client.delete_messages(entity = None, message_ids = message)
                 await client.disconnect()
             except:
                 await client.disconnect()
                 messagebox.showerror('TeleTVG', f'{sys.exc_info()[1]}', parent = self.root)
             finally:
                 if num:
-                    ask = messagebox.askquestion('TeleTVG', f'You have dwnload {num} files, want to open file folder?')
+                    ask = messagebox.askyesno('TeleTVG', f'You have download {num} files, want to open file folder?')
                     if ask:
                         os.startfile(path)
                         
     def gf(self):
         # Starting running asyncio get file.
-        
-        if 'TeleFile' not in os.listdir(os.getcwd().rpartition('\\')[0]):
-            os.mkdir(os.path.join(os.getcwd().rpartition('\\')[0], 'TeleFile'))
         
         if self.entto.get():
             asyncio.get_event_loop().run_until_complete(self.getfile())
@@ -481,64 +477,10 @@ class Reminder:
             await client.connect()
             mypro = await client.get_me()
             await client.disconnect()
-            ori = os.getcwd()
-            os.chdir('Telacc')
+            ori = os.path.join(os.getcwd(), 'Telacc')
             self.chacc = f'{mypro.id}'
-            if f'{mypro.id}' not in os.listdir():
-                os.mkdir(f'{mypro.id}')
-            os.chdir(ori)
-            
-    
-    async def accs(self):
-        # Switching existing accounts.
-        
-        async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
-            await client.connect()
-            mypro = await client.get_me()
-            await client.disconnect()
-            ori = os.getcwd()
-            if f'{mypro.id}' != self.chacc:
-                shutil.move('ReminderTel.session', os.path.join(ori, 'Telacc', f'{mypro.id}'))
-                shutil.move(os.path.join(ori, 'Telacc', self.chacc, 'ReminderTel.session'), ori)
-    
-    def newacc(self):
-        # To get existing client stored.
-        
-        ori = os.getcwd()
-        shutil.move('ReminderTel.session', os.path.join(ori, 'Telacc', self.chacc))
-        self.winexit()
-                    
-    def chacct(self, event = None):
-        # Choosing an account in existing accounts.
-        
-        if self.lock is False:
-            self.lock = True
-            accounts = os.listdir('Telacc')
-            gid = accounts.index(self.chacc)
-            accounts.append('New')
-            class MyDialog(simpledialog.Dialog):
-            
-                def body(self, master):
-                    self.title('Choose Account')
-                    Label(master, text="Acc: ").grid(row=0, column = 0, sticky = E)
-                    self.e1 = ttk.Combobox(master, state = 'readonly')
-                    self.e1['values'] = accounts
-                    self.e1.current(gid)
-                    self.e1.grid(row=0, column=1)
-                    return self.e1
-            
-                def apply(self):
-                    self.result = self.e1.get()
-                                
-            d = MyDialog(self.root)
-            self.lock = False
-            if d.result:
-                if d.result == 'New':
-                    self.newacc()
-                else:
-                    self.chacc = d.result
-                    asyncio.get_event_loop().run_until_complete(self.accs())
-                    asyncio.get_event_loop().run_until_complete(self.filcomb())
+            if f'{mypro.id}' not in os.listdir(ori):
+                os.mkdir(os.path.join(ori, f'{mypro.id}'))
                     
     def multiselect(self, event = None):
         # Select multiple recepients and save them under a group.
@@ -780,6 +722,7 @@ def main(stat, path, geo, message = None):
     api = filen("api_id_cpd.json").rpartition('_')[0]
     hash_ = filen("api_hash_cpd.json").rpartition('_')[0]    
     emj = filen("emoj.txt")
+    ope = os.path.join(os.getcwd(), 's_error.tvg')
     if 'Tele_TVG' in os.listdir():
         os.chdir('Tele_TVG')
     else:
@@ -814,9 +757,9 @@ def main(stat, path, geo, message = None):
                         messagebox.showinfo('TeleTVG', 'Please Restart the app!')
                         begin.winexit()
                     except:
+                        with open(ope, 'w') as ers:
+                            ers.write(str(sys.exc_info()))
                         messagebox.showinfo('TeleTVG', sys.exc_info())
-                        if 'ReminderTel.session' in os.listdir():
-                            os.remove('ReminderTel.session')                        
                         begin.winexit()
                 else:
                     messagebox.showinfo('TeleTVG', 'Please log in first!')
@@ -830,6 +773,8 @@ def main(stat, path, geo, message = None):
                         begin.text.insert(END, message)
                     begin.root.mainloop()
                 except:
+                    with open(ope, 'w') as ers:
+                        ers.write(str(sys.exc_info()))                    
                     messagebox.showerror('TreeViewGui', f'{sys.exc_info()}')
                     begin.winexit()
     else:

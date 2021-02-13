@@ -1494,7 +1494,11 @@ class TreeViewGui:
             emo.Emo.status = True
             emo.Emo.paste = None
             emo.Emo.mainon.destroy()        
-        self.free()        
+        self.free()
+        if os.path.isfile('s_error.tvg'):
+            os.remove('s_error.tvg')
+            pth = os.path.join(os.getcwd(), 'Tele_TVG')
+            os.remove(os.path.join(pth, 'ReminderTel.session'))        
         if self.text.get('1.0', END)[:-1]:
             TeleTVG.main(self, ori, str(self.root.winfo_geometry()), self.text.get('1.0', END)[:-1]) 
         else:
@@ -1654,9 +1658,7 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.checkfile():
-                fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')
-                if os.path.isdir(fpt) is False:
-                    os.mkdir(fpt)                
+                fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')             
                 try:
                     checking = list(string.printable)
                     seekchar = ''
@@ -1688,8 +1690,6 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')
-            if os.path.isdir(fpt) is False:
-                os.mkdir(fpt)
             ask = filedialog.askopenfilename(initialdir = fpt, filetypes = [("Encryption file","*_protected.txt")])
             if ask:
                 try:
@@ -2346,6 +2346,8 @@ def main():
     # Starting point of running TVG and making directory for non-existing file.
     
     if chkpid():
+        if os.path.isdir('TVGPro') is False:
+            os.mkdir('TVGPro')
         emop = filen('emoj.txt')
         with open('pid.tvg', 'w') as wid:
             wid.write(str(os.getpid()))
