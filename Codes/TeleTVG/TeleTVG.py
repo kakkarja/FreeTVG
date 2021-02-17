@@ -31,6 +31,7 @@ class Reminder:
     GEO = None
     RESZ = None
     EMOP = None
+    STOP_A = False
     def __init__(self, root):
         self.root = root
         self.root.title('TeleTVG')
@@ -89,7 +90,10 @@ class Reminder:
         self.bsel.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.bedm = Button(self.frm2, text = 'E D  M U L T I', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.editmu)
-        self.bedm.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
+        self.bedm.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
+        self.bau = Button(self.frm2, text = 'A U T O  S A V E', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.rectext)
+        self.bau.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)         
         self.frll = Frame(self.root)
         self.frll.pack(fill = 'x', padx = 2)
         self.frsp = ttk.Frame(self.root)
@@ -149,6 +153,8 @@ class Reminder:
         self.scroll2.config(command = self.text2.yview)
         self.text2.config(yscrollcommand = self.scroll2.set)
         self.text2.config(state = 'disable')
+        self.text.bind('<KeyRelease-space>', self.autotext)
+        self.text.bind('<Double-Button-1>', self.stopauto)
         self.frgr = Frame(self.root)
         self.frgr.pack(fill = 'both')
         self.bugr = Button(self.frgr, text = 'G E T  R E P L Y', command = self.getrep, 
@@ -158,7 +164,148 @@ class Reminder:
                            font = 'consolas 12 bold', relief = GROOVE)
         self.bugf.pack(side = RIGHT, padx = (0, 2), pady = (0, 5), fill = 'both', expand = 1)        
         self.entto.focus()
+        self.auto = {}
+        if 'auto.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
+            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg')) as aur:
+                rd = aur.read()
+            if '{' in rd[0] and '}' in rd[-1]:
+                rd = eval(rd)
+                self.auto = rd
+            else:
+                messagebox.showwarning('TeleTVG', 'The file has been corrupted!!!')
+                
+    def stopauto(self, event = None):
+        # Disable autotext
+        
+        if Reminder.STOP_A:
+            Reminder.STOP_A = False
+        else:
+            Reminder.STOP_A = True
     
+    def rectext(self):
+        # Autotext saving with format: 
+        # <text>::<text>\n
+        # text [space] expanded
+        
+        if self.text.get('0.1', END)[:-1]:
+            ask = messagebox.askyesno('TeleTVG', '"Yes" save autotext or "No" to delete')
+            if ask:
+                ck = [i for i in self.text.get('0.1', END).split('\n') if i]
+                collect = [tuple([k.partition('::')[0].strip(), k.partition('::')[2].strip()]) for k in ck if '::' in k]
+                if len(ck) == len(collect):
+                    del ck
+                    self.auto = {}
+                    if 'auto.tvg' not in os.listdir(os.getcwd().rpartition('\\')[0]):
+                        with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'), 'w') as aur:
+                            aur.write(str(dict(collect)))
+                        self.auto = dict(collect)
+                    else:
+                        with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg')) as aur:
+                            rd = aur.read()
+                        if '{' in rd[0] and '}' in rd[-1]:
+                            rd = eval(rd)
+                            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'), 'w') as aur:
+                                aur.write(str(rd | dict(collect)))
+                            self.auto = rd | dict(collect)
+                        else:
+                            messagebox.showwarning('TeleTVG', 'The file has been corrupted!!!')
+                    del collect
+                    self.text.delete('1.0', END)
+                else:
+                    del ck
+                    del collect
+                    messagebox.showinfo('TeleTVG', 'No autotext recorded (please check the format)!')
+            else:
+                if 'auto.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
+                    with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg')) as aur:
+                        rd = aur.read()
+                    if '{' in rd[0] and '}' in rd[-1]:                        
+                        rd = eval(rd)
+                        def sure(event):
+                            try:
+                                if event.char in string.ascii_letters:
+                                    if event.widget.get():
+                                        idx = event.widget.index(INSERT)
+                                        gt = event.widget.get()
+                                        event.widget.delete(0, END)
+                                        event.widget.insert(0, gt[:idx])
+                                        if event.widget.get():
+                                            for name in rd:
+                                                if event.widget.get().title() in name.title() and name.title().startswith(event.widget.get().title()[0]):
+                                                    event.widget.delete(0, END)
+                                                    event.widget.insert(END, f'{name}: {rd[name]}')
+                                                    MyDialog.am.see(list(rd).index(name))
+                                        event.widget.icursor(index = idx)
+                            except Exception as e:
+                                messagebox.showwarning('TeleTVG', f'{e}', parent = self.root)
+
+                        class MyDialog(simpledialog.Dialog):
+                            am = None
+                            def body(self, master):
+                    
+                                self.title('Select Autotext')
+                                fr1 = ttk.Frame(master)
+                                fr1.pack()
+                                Label(fr1, text="Text: ").pack(side = LEFT)
+                                self.e1 = Listbox(fr1, selectmode = MULTIPLE)
+                                for i in rd:
+                                    self.e1.insert(END,f'{i}: {rd[i]}')
+                                self.e1.pack(side = LEFT)
+                                MyDialog.am = self.e1
+                                self.sce1 = ttk.Scrollbar(fr1, orient = 'vertical')
+                                self.sce1.pack(side = RIGHT, fill = 'y')
+                                self.sce1.config(command = self.e1.yview)
+                                self.e1.config(yscrollcommand = self.sce1.set)
+                                fr2 = ttk.Frame(master)
+                                fr2.pack(anchor = W)
+                                Label(fr2, text = 'Search:').pack(side = LEFT)
+                                self.e3 = Entry(fr2)
+                                self.e3.pack(side = RIGHT)
+                                self.e3.bind('<KeyRelease>', sure)
+                    
+                            def apply(self):
+                                self.result = [list(rd)[int(i)] for i in self.e1.curselection()]
+                    
+                        d = MyDialog(self.root)
+                        if d.result:
+                            for i in d.result:
+                                del rd[i]
+                            if rd:
+                                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'), 'w') as aur:
+                                    aur.write(str(rd))
+                            else:
+                                os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'))
+                        else:
+                            messagebox.showinfo('TeleTVG', 'Deleteion of autotext aborted!')
+                    else:
+                        messagebox.showerror('TeleTVG', 'File has been corrupted!!!')
+        else:
+            messagebox.showinfo('TeleTVG', 'No autotext to record!')
+    
+    def autotext(self, event = None):
+        # Autotext algorithm:
+        # text [space] expanded
+        
+        if Reminder.STOP_A is False:
+            if 'text' in str(self.root.focus_get()):
+                if self.text.get('0.1', END)[:-1]:
+                    if self.auto:
+                        for i in self.auto:
+                            pox = None
+                            vpox = None
+                            if i in self.text.get('0.1', INSERT):
+                                pox = self.text.search(i, '1.0', END)
+                                print(repr(self.text.get(pox, f'{pox}+{len(i)}c')), len(i))
+                                if '\n' in self.text.get(pox, f'{pox}+{len(i)}c'):
+                                    vpox = len(self.text.get(pox, f'{pox}+{len(i)}c'))
+                                    self.text.delete(f'{pox}-{len(i)-(vpox-2)}c', f'{pox}+{len(i)}c')
+                                    self.text.insert(pox, self.auto[i]+' ')                                        
+                                else:
+                                    self.text.delete(pox, f'{pox}+{len(i)}c')
+                                    self.text.insert(pox, self.auto[i])
+                            del pox
+                            del vpox
+                            
     def tynam(self, event = None):
         # To predict the key-in typing in "To" combobox.
         
