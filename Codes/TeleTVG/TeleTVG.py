@@ -290,21 +290,17 @@ class Reminder:
             if 'text' in str(self.root.focus_get()):
                 if self.text.get('0.1', END)[:-1]:
                     if self.auto:
+                        pox = None
+                        vpox = None
                         for i in self.auto:
-                            pox = None
-                            vpox = None
-                            if i in self.text.get('0.1', INSERT):
-                                pox = self.text.search(i, '1.0', END)
-                                print(repr(self.text.get(pox, f'{pox}+{len(i)}c')), len(i))
-                                if '\n' in self.text.get(pox, f'{pox}+{len(i)}c'):
-                                    vpox = len(self.text.get(pox, f'{pox}+{len(i)}c'))
-                                    self.text.delete(f'{pox}-{len(i)-(vpox-2)}c', f'{pox}+{len(i)}c')
-                                    self.text.insert(pox, self.auto[i]+' ')                                        
-                                else:
-                                    self.text.delete(pox, f'{pox}+{len(i)}c')
-                                    self.text.insert(pox, self.auto[i])
-                            del pox
-                            del vpox
+                            vpox = self.text.get(f'{INSERT}-{len(i)+1}c', f'{INSERT}+{1}c')[:-2]
+                            pox = self.text.search(i, f'{INSERT}-{len(i)+1}c', f'{INSERT}+{1}c')
+                            if i == vpox and pox:
+                                self.text.delete(f'{INSERT}-{len(i)+1}c', f'{INSERT}')
+                                self.text.insert(f'{INSERT}', self.auto[i]+' ')
+                                break
+                        del pox
+                        del vpox
                             
     def tynam(self, event = None):
         # To predict the key-in typing in "To" combobox.
@@ -486,8 +482,7 @@ class Reminder:
                         else:
                             break
                 await client.disconnect()
-            tms = f'Message finished sent at {dt.isoformat(dt.now().replace(microsecond = 0)).replace("T", " ")}'
-            messagebox.showinfo('TeleTVG', tms, parent = self.root)
+            self.text.delete('1.0', END)
         except:
             messagebox.showinfo('TeleTVG', f'\n{sys.exc_info()}', parent = self.root)
             await client.disconnect()
@@ -498,6 +493,7 @@ class Reminder:
         if self.entto.get():
             if self.text.get('1.0', END)[:-1]:
                 asyncio.get_event_loop().run_until_complete(self.sent())
+                asyncio.get_event_loop().run_until_complete(self.rep())
             else:
                 messagebox.showinfo('TeleTVG', 'Please write message!', parent = self.root)
         else:
