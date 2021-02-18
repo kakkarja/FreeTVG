@@ -61,6 +61,7 @@ class Reminder:
         self.langs = None
         self.chacc = None
         self.lock = False
+        self.afterid = None
         self.api_id = cp.readcpd(Reminder.API)
         self.api_hash = cp.readcpd(Reminder.HASH_)
         self.users = {}
@@ -73,27 +74,30 @@ class Reminder:
         self.entto.bind('<KeyRelease>', self.tynam)
         self.frm2 = ttk.Frame(self.root)
         self.frm2.pack(fill = 'x')
-        self.bem = Button(self.frm2, text = 'E M O J I', font = 'consolas 10 bold', 
+        self.bem = Button(self.frm2, text = 'EMOJI', font = 'consolas 11 bold', 
                           relief = GROOVE, command = self.emj)
         self.bem.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
-        self.bup = Button(self.frm2, text = 'P A S T E', font = 'consolas 10 bold', 
+        self.bup = Button(self.frm2, text = 'PASTE', font = 'consolas 11 bold', 
                           relief = GROOVE, command = self.paste)
         self.bup.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.buo = Button(self.frm2, text = 'C O P I E D', font = 'consolas 10 bold', 
+        self.buo = Button(self.frm2, text = 'COPIED', font = 'consolas 11 bold', 
                           relief = GROOVE, command = self.copc)
         self.buo.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
-        self.buc = Button(self.frm2, text = 'C L E A R', font = 'consolas 10 bold', 
+        self.buc = Button(self.frm2, text = 'CLEAR', font = 'consolas 11 bold', 
                           relief = GROOVE, command = self.clear)
         self.buc.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)      
-        self.bsel = Button(self.frm2, text = 'M U L T I', font = 'consolas 10 bold', 
+        self.bsel = Button(self.frm2, text = 'MULTI', font = 'consolas 11 bold', 
                           relief = GROOVE, command = self.multiselect)
         self.bsel.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.bedm = Button(self.frm2, text = 'E D  M U L T I', font = 'consolas 10 bold', 
+        self.bedm = Button(self.frm2, text = 'ED MULTI', font = 'consolas 11 bold', 
                           relief = GROOVE, command = self.editmu)
         self.bedm.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.bau = Button(self.frm2, text = 'A U T O  S A V E', font = 'consolas 10 bold', 
+        self.bau = Button(self.frm2, text = 'AUTO SAVE', font = 'consolas 11 bold', 
                           relief = GROOVE, command = self.rectext)
-        self.bau.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)         
+        self.bau.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
+        self.bds = Button(self.frm2, text = 'DEL REPLY', font = 'consolas 11 bold', 
+                          relief = GROOVE, command = self.delscreen)
+        self.bds.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.frll = Frame(self.root)
         self.frll.pack(fill = 'x', padx = 2)
         self.frsp = ttk.Frame(self.root)
@@ -188,7 +192,7 @@ class Reminder:
         # text [space] expanded
         
         if self.text.get('0.1', END)[:-1]:
-            ask = messagebox.askyesno('TeleTVG', '"Yes" save autotext or "No" to delete')
+            ask = messagebox.askyesno('TeleTVG', '"Yes" save autotext or "No" to delete', parent =self.root)
             if ask:
                 ck = [i for i in self.text.get('0.1', END).split('\n') if i]
                 collect = [tuple([k.partition('::')[0].strip(), k.partition('::')[2].strip()]) for k in ck if '::' in k]
@@ -208,13 +212,13 @@ class Reminder:
                                 aur.write(str(rd | dict(collect)))
                             self.auto = rd | dict(collect)
                         else:
-                            messagebox.showwarning('TeleTVG', 'The file has been corrupted!!!')
+                            messagebox.showwarning('TeleTVG', 'The file has been corrupted!!!', parent = self.root)
                     del collect
                     self.text.delete('1.0', END)
                 else:
                     del ck
                     del collect
-                    messagebox.showinfo('TeleTVG', 'No autotext recorded (please check the format)!')
+                    messagebox.showinfo('TeleTVG', 'No autotext recorded (please check the format)!', parent =self.root)
             else:
                 if 'auto.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
                     with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg')) as aur:
@@ -276,12 +280,12 @@ class Reminder:
                             else:
                                 os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'))
                         else:
-                            messagebox.showinfo('TeleTVG', 'Deleteion of autotext aborted!')
+                            messagebox.showinfo('TeleTVG', 'Deleteion of autotext aborted!', parent =self.root)
                     else:
-                        messagebox.showerror('TeleTVG', 'File has been corrupted!!!')
+                        messagebox.showerror('TeleTVG', 'File has been corrupted!!!', parent =self.root)
         else:
-            messagebox.showinfo('TeleTVG', 'No autotext to record!')
-    
+            messagebox.showinfo('TeleTVG', 'No autotext to record!', parent =self.root)
+            
     def autotext(self, event = None):
         # Autotext algorithm:
         # text [space] expanded
@@ -340,7 +344,9 @@ class Reminder:
             else:
                 with open(os.path.join(ori, 'telgeo.tvg'), 'wb') as geo:
                     geo.write(str({'geo': Reminder.RESZ}).encode())
-        del ori        
+        del ori
+        if self.afterid:
+            self.root.after_cancel(self.afterid)
         if emo.Emo.status is False:
             emo.Emo.status = True
             emo.Emo.paste = None
@@ -493,6 +499,8 @@ class Reminder:
         if self.entto.get():
             if self.text.get('1.0', END)[:-1]:
                 asyncio.get_event_loop().run_until_complete(self.sent())
+                if self.afterid:
+                    self.root.after_cancel(self.afterid)
                 asyncio.get_event_loop().run_until_complete(self.rep())
             else:
                 messagebox.showinfo('TeleTVG', 'Please write message!', parent = self.root)
@@ -527,7 +535,7 @@ class Reminder:
             messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)        
     
     async def rep(self):
-        # Getting reply from a user [get the last 5 messages]
+        # Getting reply from a user [get the last 10 messages]
         
         async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:
             await client.connect()
@@ -544,17 +552,50 @@ class Reminder:
                     self.text2.insert(END, f'{message.text}\n\n')
             self.text2.config(state = 'disable')
             await client.disconnect()
+        self.afterid = self.root.after(60000, self.getrep)        
                 
     def getrep(self):
         # Asyncio method of calling for getting reply.
         
         if self.entto.get():
+            if self.afterid:
+                self.root.after_cancel(self.afterid)
             asyncio.get_event_loop().run_until_complete(self.rep())
+            self.rem()
         else:
             messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)
             
+    def delscreen(self):
+        if self.afterid:
+            self.root.after_cancel(self.afterid)
+        self.text2.config(state = 'normal')
+        self.text2.delete('1.0', END)
+        self.text2.config(state = 'disabled')
+            
+    def rem(self):
+        root = Toplevel(self.root)
+        root.attributes('-topmost', 1)
+        def sound(event = None):
+            import winsound
+            winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
+            
+        wd = int(root.winfo_screenwidth()/2 - 250/2)
+        hg = int(root.winfo_screenheight()/3 - 250/3)
+        root.geometry(f'250x250+{wd }+{hg}')
+        root.overrideredirect(1)
+        a = Message(master= root)
+        a.pack()
+        a.tk_strictMotif(1)
+        frm = Frame(a, borderwidth = 7, bg = 'black', width = 250, height = 250)
+        frm.pack(fill = 'both', expand = 1)
+        tx = '<<<TeleTVG>>>\n\nGet Reply\n\nhas been updated!'
+        lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'black', fg = 'gold')
+        lab.pack(fill = 'both', expand = 1)
+        root.after(3000, lambda: root.destroy())
+        root.after(200, sound)
+            
     async def getfile(self):
-        # Getting file from a user [get the last 5 messages]
+        # Getting file from a user [get all TVG protected text file]
                    
         path = os.path.join(os.getcwd().rpartition('\\')[0],'TVGPro')
         async with TelegramClient('ReminderTel', self.api_id, self.api_hash) as client:

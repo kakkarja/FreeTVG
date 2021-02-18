@@ -66,7 +66,7 @@ class Emo:
             self.sp =  IntVar(self.root)
             self.scl = ttk.Scale(self.fr, from_ = 0, to = len(list(self.lib.values()))-1, variable = self.sp, command = self.sclupt)
             self.scl.pack(fill = 'x', expand = 1)
-            self.setscl = (0, len(a)-1)
+            self.setscl = (0, len(self.lib)-1)
             self.btc = Button(self.root, text = 'C O P Y', font = 'consolas 10 bold', relief = GROOVE, command = self.copem)
             self.btc.pack(fill = 'x', expand = 1)
             self.btm = Button(self.root, text = 'M A R K', font = 'consolas 10 bold', relief = GROOVE, command = self.mark)
