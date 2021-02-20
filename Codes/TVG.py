@@ -365,7 +365,7 @@ class TreeViewGui:
                 self.text.edit_undo()
             except:
                 messagebox.showerror('TreeViewGui', 'Nothing to undo!')
-    
+                
     def redo(self, event =None):
         # Redo only in Editor.
         
@@ -373,18 +373,17 @@ class TreeViewGui:
             try:
                 self.text.edit_redo()
             except:
-                messagebox.showerror('TreeViewGui', 'Nothing to redo!')            
-    
-    
+                messagebox.showerror('TreeViewGui', 'Nothing to redo!')
+                
     def wrapped(self, event = None):
-        # Wrap the records so that it is filling the windows.
+        # Wrap the records so that all filled the text window.
         # The scrolling horizontal become inactive.
         
         if str(self.text.cget('wrap')) == 'none':
             self.text.config(wrap = WORD)
         else:
-            self.text.config(wrap = NONE)            
-    
+            self.text.config(wrap = NONE)
+            
     def converting(self, event =  None):
         # Convert any text that is paste or written in text window.
         # Example format:
@@ -2152,7 +2151,6 @@ class TreeViewGui:
         # Setting font for text and listbox.
         
         ckf = [str(i) for i in range(41) if i >= 10]
-        f = None
         if '}' in event:
             n = len(event[:event.find('}')])
             f = re.search(r'\d+', event[event.find('}'):])
@@ -2174,23 +2172,23 @@ class TreeViewGui:
                     f = event[:(f.span()[0])] + '10' + event[(f.span()[1]):]
                 else:
                     f = event[:(f.span()[0])] + '40' + event[(f.span()[1]):]
-        if f:
-            self.text['font'] = f
-            for i in self.text.tag_names():
-                self.text.tag_remove(i, '1.0', END)
-            self.text.tag_delete(*self.text.tag_names())
-            if wr:
-                if fl != self.listb['font']:
-                    self.reblist()      
-                    self.listb['font'] = fl
-                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
-                    ftvg.write(event)
-            else:
+                    
+        for i in self.text.tag_names():
+            self.text.tag_remove(i, '1.0', END)
+        self.text.tag_delete(*self.text.tag_names())
+        self.text['font'] = f
+        if wr:
+            if fl != self.listb['font']:
+                self.reblist()      
                 self.listb['font'] = fl
-            if f'{self.filename}_hid.json' not in os.listdir():
-                self.spaces()
-            else:
-                self.hidform()
+            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
+                ftvg.write(event)
+        else:
+            self.listb['font'] = fl
+        if f'{self.filename}_hid.json' not in os.listdir():
+            self.spaces()
+        else:
+            self.hidform()
                 
     def reblist(self):
         # Destroy Listbox and rebuild it again,
@@ -2317,7 +2315,7 @@ def chkpid():
         root.wm_iconbitmap(default = filen('TVG.ico'))
         messagebox.showerror('TreeViewGui', f'{e}')
         root.destroy()
-
+        
 def askfile(root):
     # Asking file for creating or opening initial app start.
     
