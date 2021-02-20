@@ -176,15 +176,39 @@ class Reminder:
                 rd = eval(rd)
                 self.auto = rd
             else:
-                messagebox.showwarning('TeleTVG', 'The file has been corrupted!!!')
+                os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'))
+                messagebox.showwarning('TeleTVG', 'The file has been corrupted and removed!!!', parent = self.root)
                 
     def stopauto(self, event = None):
         # Disable autotext
         
         if Reminder.STOP_A:
             Reminder.STOP_A = False
+            self.messages('<<Auto-Text>>\n\nis enabled!', 700)
         else:
             Reminder.STOP_A = True
+            self.messages('<<Auto-Text>>\n\nis disabled!', 700)
+            
+    def messages(self, m: str, t_out: int):
+        # Message for informing.
+        
+        root = Toplevel(self.root)
+        root.attributes('-topmost', 1)
+        def exit(event = None):
+            root.destroy()
+        root.after(t_out, exit)
+        wd = int(root.winfo_screenwidth()/2 - 250/2)
+        hg = int(root.winfo_screenheight()/3 - 250/3)
+        root.geometry(f'250x250+{wd}+{hg}')
+        root.overrideredirect(1)
+        a = Message(master= root)
+        a.pack()
+        a.tk_strictMotif(1)
+        frm = Frame(a, borderwidth = 7, bg = 'dark blue', width = 250, height = 250)
+        frm.pack(fill = 'both', expand = 1)
+        tx = m
+        lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'gold', fg = 'black')
+        lab.pack(fill = 'both', expand = 1)
     
     def rectext(self):
         # Autotext saving with format: 
@@ -192,7 +216,7 @@ class Reminder:
         # text [space] expanded
         
         if self.text.get('0.1', END)[:-1]:
-            ask = messagebox.askyesno('TeleTVG', '"Yes" save autotext or "No" to delete', parent =self.root)
+            ask = messagebox.askyesno('TeleTVG', '"Yes" save autotext or "No" to delete', parent = self.root)
             if ask:
                 ck = [i for i in self.text.get('0.1', END).split('\n') if i]
                 collect = [tuple([k.partition('::')[0].strip(), k.partition('::')[2].strip()]) for k in ck if '::' in k]
@@ -212,13 +236,16 @@ class Reminder:
                                 aur.write(str(rd | dict(collect)))
                             self.auto = rd | dict(collect)
                         else:
-                            messagebox.showwarning('TeleTVG', 'The file has been corrupted!!!', parent = self.root)
+                            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'), 'w') as aur:
+                                aur.write(str(dict(collect)))
+                            self.auto = dict(collect)                            
+                            messagebox.showwarning('TeleTVG', 'The file has been corrupted and recreated new!!!', parent = self.root)
                     del collect
                     self.text.delete('1.0', END)
                 else:
                     del ck
                     del collect
-                    messagebox.showinfo('TeleTVG', 'No autotext recorded (please check the format)!', parent =self.root)
+                    messagebox.showinfo('TeleTVG', 'No autotext recorded (please check the format)!', parent = self.root)
             else:
                 if 'auto.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
                     with open(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg')) as aur:
@@ -246,7 +273,6 @@ class Reminder:
                         class MyDialog(simpledialog.Dialog):
                             am = None
                             def body(self, master):
-                    
                                 self.title('Select Autotext')
                                 fr1 = ttk.Frame(master)
                                 fr1.pack()
@@ -280,11 +306,11 @@ class Reminder:
                             else:
                                 os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'auto.tvg'))
                         else:
-                            messagebox.showinfo('TeleTVG', 'Deleteion of autotext aborted!', parent =self.root)
+                            messagebox.showinfo('TeleTVG', 'Deleteion of autotext aborted!', parent = self.root)
                     else:
-                        messagebox.showerror('TeleTVG', 'File has been corrupted!!!', parent =self.root)
+                        messagebox.showerror('TeleTVG', 'File has been corrupted!!!', parent = self.root)
         else:
-            messagebox.showinfo('TeleTVG', 'No autotext to record!', parent =self.root)
+            messagebox.showinfo('TeleTVG', 'No autotext to record!', parent = self.root)
             
     def autotext(self, event = None):
         # Autotext algorithm:
@@ -561,7 +587,7 @@ class Reminder:
             if self.afterid:
                 self.root.after_cancel(self.afterid)
             asyncio.get_event_loop().run_until_complete(self.rep())
-            self.rem()
+            self.messages('<<<TeleTVG>>>\n\nGet Reply\n\nhas been updated!', 1200)
         else:
             messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)
             
@@ -571,28 +597,6 @@ class Reminder:
         self.text2.config(state = 'normal')
         self.text2.delete('1.0', END)
         self.text2.config(state = 'disabled')
-            
-    def rem(self):
-        root = Toplevel(self.root)
-        root.attributes('-topmost', 1)
-        def sound(event = None):
-            import winsound
-            winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
-            
-        wd = int(root.winfo_screenwidth()/2 - 250/2)
-        hg = int(root.winfo_screenheight()/3 - 250/3)
-        root.geometry(f'250x250+{wd }+{hg}')
-        root.overrideredirect(1)
-        a = Message(master= root)
-        a.pack()
-        a.tk_strictMotif(1)
-        frm = Frame(a, borderwidth = 7, bg = 'black', width = 250, height = 250)
-        frm.pack(fill = 'both', expand = 1)
-        tx = '<<<TeleTVG>>>\n\nGet Reply\n\nhas been updated!'
-        lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'black', fg = 'gold')
-        lab.pack(fill = 'both', expand = 1)
-        root.after(3000, lambda: root.destroy())
-        root.after(200, sound)
             
     async def getfile(self):
         # Getting file from a user [get all TVG protected text file]
