@@ -192,14 +192,14 @@ class Reminder:
     def messages(self, m: str, t_out: int):
         # Message for informing.
         
-        root = Toplevel(self.root)
-        root.attributes('-topmost', 1)
         def exit(event = None):
-            root.destroy()
+            root.destroy()        
+        root = Toplevel(self.root)
         root.after(t_out, exit)
+        root.attributes('-topmost', 1)
         wd = int(root.winfo_screenwidth()/2 - 250/2)
         hg = int(root.winfo_screenheight()/3 - 250/3)
-        root.geometry(f'250x250+{wd}+{hg}')
+        root.geometry(f'300x300+{wd}+{hg}')
         root.overrideredirect(1)
         a = Message(master= root)
         a.pack()
@@ -320,16 +320,10 @@ class Reminder:
             if 'text' in str(self.root.focus_get()):
                 if self.text.get('0.1', END)[:-1]:
                     if self.auto:
-                        pox = None
-                        vpox = None
-                        for i in self.auto:
-                            vpox = self.text.get(f'{INSERT}-{len(i)+1}c', f'{INSERT}+{1}c')[:-2]
-                            pox = self.text.search(i, f'{INSERT}-{len(i)+1}c', f'{INSERT}+{1}c')
-                            if i == vpox and pox:
-                                self.text.delete(f'{INSERT}-{len(i)+1}c', f'{INSERT}')
-                                self.text.insert(f'{INSERT}', self.auto[i]+' ')
-                                break
-                        del pox
+                        vpox = self.text.get(f'{INSERT} linestart', f'{INSERT}-1c').split(' ')[-1]
+                        if vpox in list(self.auto):
+                            self.text.delete(f'{INSERT}-{len(vpox)+1}c', f'{INSERT}')
+                            self.text.insert(f'{INSERT}', self.auto[vpox]+' ')
                         del vpox
                             
     def tynam(self, event = None):

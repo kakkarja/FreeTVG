@@ -147,15 +147,15 @@ class Calculator():
         self.frex2 = Frame(self.root, background = 'black')
         self.frex2.pack(fill = 'x', padx = 5)
         self.btrat = Button(self.frex2, text = 'RATES', background = 'black',
-                            foreground = 'gold', width = 20, font = 'verdna 17 bold',
+                            foreground = 'gold', width = 4, font = 'verdana 17 bold',
                             command = self.getrate)
         self.btrat.pack(side = LEFT, fill = 'both', expand = 1)
         self.btrat.bind_all('<Control-r>', self.getrate)
         self.bt['btrat'] = self.btrat
         self.btcon = Button(self.frex2, text = 'CONVERT', background = 'black',
-                            foreground = 'gold', width = 20, font = 'verdna 17 bold',
+                            foreground = 'gold', width = 4, font = 'verdana 17 bold',
                             command = self.conv)
-        self.btcon.pack(side = LEFT, fill = 'both', expand = 1)
+        self.btcon.pack(side = RIGHT, fill = 'both', expand = 1)
         self.btcon.bind_all('<Control-e>', self.conv)
         self.bt['btcon'] = self.btcon
         self.frsp = Frame(self.root, background = 'black')

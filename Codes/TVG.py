@@ -1559,7 +1559,7 @@ class TreeViewGui:
                                     self.text.delete(idx, idx2)
                                     self.text.insert(idx, ghw)
                                     self.text.mark_set('insert', idx2)
-                                    self.text.focus()                                    
+                                    self.text.focus()
                                 break
                         self.text.tag_delete(*['hw'])
                         del ghw
@@ -2237,8 +2237,8 @@ class TreeViewGui:
     def scaling(self, event = None):
         # Scaling the appearance of TVG to accomadate resolution of a pc.
         
-        dpi = ctypes.windll.user32.GetDpiForWindow(self.root.winfo_id())
-        maxscale = int(dpi/72) + 1
+        dpi = 1
+        maxscale = int(dpi) + 1
         scl = []
         for i in range(maxscale):
             for k in range(10):
@@ -2253,7 +2253,7 @@ class TreeViewGui:
                     Label(master, text="Scale: ").grid(row=0, column = 0, sticky = E)
                     self.e1 = ttk.Combobox(master, state = 'readonly')
                     self.e1['values'] = scl
-                    self.e1.current(scl.index(round(dpi/72, 2)))
+                    self.e1.current(scl.index(dpi))
                     self.e1.grid(row=0, column=1)
                     return self.e1
 
@@ -2262,14 +2262,22 @@ class TreeViewGui:
                     
             d = MyDialog(self.root)
             self.lock = False
+            path = os.path.join(os.getcwd().rpartition('\\')[0], 'scale.tvg')
             if d.result:
-                path = os.path.join(os.getcwd().rpartition('\\')[0], 'scale.tvg')
                 with open(path, 'w') as s:
                     s.write(str(d.result))
                 scal(self)
             else:
-                messagebox.showinfo('TreeViewGui', 'Scaling aborted!')
-    
+                askd = messagebox.askyesno('TreeViewGui', 'Want delete recorded scale?')
+                if askd:
+                    if os.path.isfile(path):
+                        os.remove(path)
+                        messagebox.showinfo('TreeViewGui', 'Recorded scale file deleted!')
+                    else:
+                        messagebox.showinfo('TreeViewGui', 'No Recorded scale yet!')
+                else:
+                    messagebox.showinfo('TreeViewGui', 'Scaling aborted!')
+                    
     def help(self, event = None):
         #Tutorial help.
         
@@ -2351,13 +2359,10 @@ def main():
             wid.write(str(os.getpid()))
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
         root = Tk()
-        dpi = ctypes.windll.user32.GetDpiForWindow(root.winfo_id())
         if 'scale.tvg' in os.listdir():
             with open('scale.tvg') as scl:
                 gs = float(scl.read())
             root.tk.call('tk', 'scaling', gs)
-        else:
-            root.tk.call('tk', 'scaling', round(dpi/72, 2))
         root.wm_iconbitmap(default = filen('TVG.ico'))
         root.withdraw()
         if 'lastopen.tvg' in os.listdir():
