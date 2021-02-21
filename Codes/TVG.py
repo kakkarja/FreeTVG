@@ -1496,10 +1496,13 @@ class TreeViewGui:
         self.free()
         if os.path.isfile('s_error.tvg'):
             os.remove('s_error.tvg')
-            pth = os.path.join(os.getcwd(), 'Tele_TVG')
-            os.remove(os.path.join(pth, 'ReminderTel.session'))        
+            os.remove(os.path.join(os.getcwd(), 'Tele_TVG', 'ReminderTel.session'))        
         if self.text.get('1.0', END)[:-1]:
-            TeleTVG.main(self, ori, str(self.root.winfo_geometry()), self.text.get('1.0', END)[:-1]) 
+            quest = messagebox.askyesno('TreeViewGui', 'Do you want send the outline?')
+            if quest:
+                TeleTVG.main(self, ori, str(self.root.winfo_geometry()), self.text.get('1.0', END)[:-1])
+            else:
+                TeleTVG.main(self, ori, str(self.root.winfo_geometry()))
         else:
             TeleTVG.main(self, ori, str(self.root.winfo_geometry()))
             
@@ -1554,7 +1557,7 @@ class TreeViewGui:
                                         self.text.delete(idx, idx2)
                                         self.text.insert(idx, ghw)
                                         self.text.mark_set('insert', idx2)
-                                        self.text.focus()                                        
+                                        self.text.focus()
                                 else:
                                     self.text.delete(idx, idx2)
                                     self.text.insert(idx, ghw)

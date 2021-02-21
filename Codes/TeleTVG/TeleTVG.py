@@ -75,28 +75,28 @@ class Reminder:
         self.frm2 = ttk.Frame(self.root)
         self.frm2.pack(fill = 'x')
         self.bem = Button(self.frm2, text = 'EMOJI', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.emj)
+                          relief = GROOVE, command = self.emj, width = 4)
         self.bem.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
         self.bup = Button(self.frm2, text = 'PASTE', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.paste)
+                          relief = GROOVE, command = self.paste, width = 4)
         self.bup.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.buo = Button(self.frm2, text = 'COPIED', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.copc)
+                          relief = GROOVE, command = self.copc, width = 4)
         self.buo.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
         self.buc = Button(self.frm2, text = 'CLEAR', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.clear)
+                          relief = GROOVE, command = self.clear, width = 4)
         self.buc.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)      
         self.bsel = Button(self.frm2, text = 'MULTI', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.multiselect)
+                          relief = GROOVE, command = self.multiselect, width = 4)
         self.bsel.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.bedm = Button(self.frm2, text = 'ED MULTI', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.editmu)
+                          relief = GROOVE, command = self.editmu, width = 4)
         self.bedm.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.bau = Button(self.frm2, text = 'AUTO SAVE', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.rectext)
+                          relief = GROOVE, command = self.rectext, width = 4)
         self.bau.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.bds = Button(self.frm2, text = 'DEL REPLY', font = 'consolas 11 bold', 
-                          relief = GROOVE, command = self.delscreen)
+                          relief = GROOVE, command = self.delscreen, width = 4)
         self.bds.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.frll = Frame(self.root)
         self.frll.pack(fill = 'x', padx = 2)
@@ -131,29 +131,29 @@ class Reminder:
         self.frm3.pack(fill = 'both')
         self.text = Text(self.frm3, font = '-*-Segoe-UI-Emoji-*--*-153-*', pady = 3, padx = 5, 
                          relief = FLAT, wrap = 'word', height = 12)
-        self.text.pack(side = LEFT, padx = (5,0), pady = (0, 5), fill = 'both', expand = 1)
+        self.text.pack(side = LEFT, padx = (2,0), pady = (0, 5), fill = 'both', expand = 1)
         self.scroll = Scrollbar(self.frm3)
-        self.scroll.pack(side = RIGHT, fill = 'y', padx = (0,5), pady = (0, 5))
+        self.scroll.pack(side = RIGHT, fill = 'y', padx = (0,2), pady = (0, 5))
         self.scroll.config(command = self.text.yview)
         self.text.config(yscrollcommand = self.scroll.set)
         self.frbs = Frame(self.root)
         self.frbs.pack(fill = 'x')
         self.sbut = Button(self.frbs, text = 'S E N D  N O W', command = self.sentem, 
-                           font = 'consolas 12 bold', relief = GROOVE)
+                           font = 'consolas 12 bold', relief = GROOVE, width = 4)
         self.sbut.pack(side =  LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.busf = Button(self.frbs, text = 'S E N D  F I L E', command = self.sf, 
-                           font = 'consolas 12 bold', relief = GROOVE)
+                           font = 'consolas 12 bold', relief = GROOVE, width = 4)
         self.busf.pack(side =  RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)
         self.busf = Button(self.frbs, text = 'S E N D  M U L T I', command = self.multisend, 
-                           font = 'consolas 12 bold', relief = GROOVE)
+                           font = 'consolas 12 bold', relief = GROOVE, width = 4)
         self.busf.pack(side =  RIGHT, padx = (0, 2), pady = (0, 5), fill = 'x', expand = 1)        
         self.frm4 = Frame(self.root)
         self.frm4.pack(fill = 'both', expand = 1)
         self.text2 = Text(self.frm4, font = '-*-Segoe-UI-Emoji-*--*-153-*', pady = 3, padx = 5, 
                          relief = FLAT, wrap = 'word', height = 12)
-        self.text2.pack(side = LEFT, padx = (5,0), pady = (0, 5), fill = 'both', expand = 1)
+        self.text2.pack(side = LEFT, padx = (2,0), pady = (0, 5), fill = 'both', expand = 1)
         self.scroll2 = Scrollbar(self.frm4)
-        self.scroll2.pack(side = RIGHT, fill = 'y', padx = (0,5), pady = (0, 5))
+        self.scroll2.pack(side = RIGHT, fill = 'y', padx = (0,2), pady = (0, 5))
         self.scroll2.config(command = self.text2.yview)
         self.text2.config(yscrollcommand = self.scroll2.set)
         self.text2.config(state = 'disable')
@@ -162,10 +162,10 @@ class Reminder:
         self.frgr = Frame(self.root)
         self.frgr.pack(fill = 'both')
         self.bugr = Button(self.frgr, text = 'G E T  R E P L Y', command = self.getrep, 
-                           font = 'consolas 12 bold', relief = GROOVE)
+                           font = 'consolas 12 bold', relief = GROOVE, width = 4)
         self.bugr.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'both', expand = 1)
         self.bugf = Button(self.frgr, text = 'G E T  F I L E', command = self.gf, 
-                           font = 'consolas 12 bold', relief = GROOVE)
+                           font = 'consolas 12 bold', relief = GROOVE, width = 4)
         self.bugf.pack(side = RIGHT, padx = (0, 2), pady = (0, 5), fill = 'both', expand = 1)        
         self.entto.focus()
         self.auto = {}
