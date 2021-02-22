@@ -57,6 +57,10 @@ class Reminder:
         self.root.bind_all('<Control-p>', self.paste)
         self.root.bind_all('<Control-c>', self.copc)
         self.root.bind_all('<Control-x>', self.clear)
+        self.root.bind_all('<Control-o>', self.stopauto)
+        self.root.bind_all('<Control-m>', self.multiselect)
+        self.root.bind_all('<Control-s>', self.rectext)
+        self.root.bind_all('<Control-d>', self.delscreen)
         self.seconds = None
         self.langs = None
         self.chacc = None
@@ -74,28 +78,31 @@ class Reminder:
         self.entto.bind('<KeyRelease>', self.tynam)
         self.frm2 = ttk.Frame(self.root)
         self.frm2.pack(fill = 'x')
-        self.bem = Button(self.frm2, text = 'EMOJI', font = 'consolas 11 bold', 
+        self.bem = Button(self.frm2, text = 'EMOJI', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.emj, width = 4)
         self.bem.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
-        self.bup = Button(self.frm2, text = 'PASTE', font = 'consolas 11 bold', 
+        self.bup = Button(self.frm2, text = 'PASTE', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.paste, width = 4)
         self.bup.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.buo = Button(self.frm2, text = 'COPIED', font = 'consolas 11 bold', 
+        self.buo = Button(self.frm2, text = 'COPIED', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.copc, width = 4)
         self.buo.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
-        self.buc = Button(self.frm2, text = 'CLEAR', font = 'consolas 11 bold', 
+        self.buc = Button(self.frm2, text = 'CLEAR', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.clear, width = 4)
         self.buc.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)      
-        self.bsel = Button(self.frm2, text = 'MULTI', font = 'consolas 11 bold', 
+        self.bsel = Button(self.frm2, text = 'MULTI', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.multiselect, width = 4)
         self.bsel.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.bedm = Button(self.frm2, text = 'ED MULTI', font = 'consolas 11 bold', 
+        self.bedm = Button(self.frm2, text = 'ED MULTI', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.editmu, width = 4)
         self.bedm.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.bau = Button(self.frm2, text = 'AUTO SAVE', font = 'consolas 11 bold', 
+        self.bau = Button(self.frm2, text = 'AUTO SAVE', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.rectext, width = 4)
         self.bau.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
-        self.bds = Button(self.frm2, text = 'DEL REPLY', font = 'consolas 11 bold', 
+        self.boo = Button(self.frm2, text = 'ON\OFF', font = 'consolas 10 bold', 
+                          relief = GROOVE, command = self.stopauto, width = 4)
+        self.boo.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)        
+        self.bds = Button(self.frm2, text = 'DEL REPLY', font = 'consolas 10 bold', 
                           relief = GROOVE, command = self.delscreen, width = 4)
         self.bds.pack(side = LEFT, padx = 2, pady = (0, 5), fill = 'x', expand = 1)
         self.frll = Frame(self.root)
@@ -158,7 +165,6 @@ class Reminder:
         self.text2.config(yscrollcommand = self.scroll2.set)
         self.text2.config(state = 'disable')
         self.text.bind('<KeyRelease-space>', self.autotext)
-        self.text.bind('<Double-Button-1>', self.stopauto)
         self.frgr = Frame(self.root)
         self.frgr.pack(fill = 'both')
         self.bugr = Button(self.frgr, text = 'G E T  R E P L Y', command = self.getrep, 
@@ -210,7 +216,7 @@ class Reminder:
         lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'gold', fg = 'black')
         lab.pack(fill = 'both', expand = 1)
     
-    def rectext(self):
+    def rectext(self, event = None):
         # Autotext saving with format: 
         # <text>::<text>\n
         # text [space] expanded
@@ -585,7 +591,7 @@ class Reminder:
         else:
             messagebox.showinfo('TeleTVG', 'Please fill "To" first!', parent = self.root)
             
-    def delscreen(self):
+    def delscreen(self, event =  None):
         if self.afterid:
             self.root.after_cancel(self.afterid)
         self.text2.config(state = 'normal')
