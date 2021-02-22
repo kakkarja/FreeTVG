@@ -49,6 +49,7 @@ class TreeViewGui:
                 TreeViewGui.GEO = gem['geo']
         del gpath
         del gem
+        self.sty = ttk.Style(self.root)
         self.root.bind_all('<Control-f>', self.fcsent)
         self.root.bind_all('<Control-r>', self.fcsent)
         self.root.bind_all('<Control-t>', self.fcsent)
@@ -245,6 +246,7 @@ class TreeViewGui:
         self.button30 = ttk.Button(self.frb2, text = 'HTML View', width = 3, command = self.htmlview)
         self.button30.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button30'] = self.button30
+        self.sty.configure('TButton', font = 'verdana 8 bold')
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
@@ -328,6 +330,76 @@ class TreeViewGui:
             for fr in frm:
                 fr.pack_forget()
             del frm
+        self.tpl = None
+        self.ai = None
+        self.scribe = {
+                       'Insert': 'Insert word in outline on selected row', 
+                       'Write': 'Write word to outline base on chosen as parent or child', 
+                       'Delete': 'Delete an outline row', 
+                       'BackUp': 'Backup outline note [max 10 and recycle]', 
+                       'Load': 'Load a backuped note', 
+                       'Move Child': 'Move a child base note to left or right', 
+                       'Change File': 'Change to another existing file', 
+                       'CPP': 'Copy or move selected outline rows', 
+                       'Send Note': 'Switch to TeleTVG for sending note or chat', 
+                       'Look Up': 'Look up word in outline list and in Editor mode', 
+                       'Insight': 'Details about outline position rows', 
+                       'Arrange': 'Clear selected row and arrange outline internally', 
+                       'Paste': 'Paste selected row to word for editing', 
+                       'Checked': 'Insert "Check mark" or "Done" in selected row ', 
+                       'Up': 'Move selected row up', 
+                       'Down': 'Move selected row down', 
+                       'Printing': 'Create html page for printing', 
+                       'Hide Parent': 'Hiding parent and its childs or reverse', 
+                       'Clear hide': 'Clearing hidden back to appearing again', 
+                       'Date-Time': 'Insert time-stamp in Word and Editor mode', 
+                       'Save': 'Save note as encrypted text and can be send', 
+                       'Open': 'Open the encrypted TVG text file and can be saved', 
+                       'Create file': 'Create new empty note', 
+                       'Editor': 'To create outline note without restriction with proper format', 
+                       'Un/Wrap': 'Wrap or unwrap outline note', 
+                       'Calculator': 'Switch to calculator', 
+                       'Ex': 'Edit whole notes or selected parent in Editor mode', 
+                       'Template': 'Create template for use frequently in Editor mode', 
+                       'Emoji': 'Insert emoji to note', 
+                       'HTML View': 'Viewing html page that has been created before',
+                       'parent': 'Create parent',
+                       'child': 'Create child ["Child" for positioning]'
+                       }
+        self.root.bind_class('TButton', '<Enter>', self.ttip)
+        self.root.bind_class('TButton', '<Leave>', self.leave)
+        self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
+        self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
+        
+    def ttip(self, event =  None):
+        # Tooltip for TVG buttons.
+        
+        def exit():
+            self.root.update()
+            self.ai = None
+            self.tpl = None
+            master.destroy()
+        master = Toplevel(self.root)
+        master.overrideredirect(1)
+        tx = self.scribe[event.widget['text']]
+        ft = font.Font(master, font='verdana')
+        if event.widget['text'] in ['Save', 'Insight', 'Insert']:
+            master.geometry(f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()}+{event.widget.winfo_pointery()+30}')
+        elif event.widget['text'] in ['Look Up', 'Date-Time', 'HTML View', 'child']:
+            master.geometry(f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-220}+{event.widget.winfo_pointery()+30}')
+        else:
+            master.geometry(f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}')
+        a = Message(master= master, text = tx, justify = 'center', aspect = int(ft.measure(tx)*50), bg = 'white', font = 'verdana 7')
+        a.pack(fill = 'both', expand = 1)
+        self.ai = self.root.after(3000, exit)
+        self.tpl = master
+        
+    def leave(self, event = None):
+        # On hovering and leaving a button the tooltip will be destroyed.
+        
+        if self.ai and self.tpl:
+            self.root.after_cancel(self.ai)
+            self.tpl.destroy()
             
     def hidbs(self, event =  None):
         # Hide Buttons.
@@ -344,6 +416,7 @@ class TreeViewGui:
         else:
             for fr in frm:
                 fr.pack(side = TOP, fill = 'x')
+            self.sty.configure('TButton', font = 'verdana 8 bold')
             os.remove(pth)
         self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)       
         self.fscr.pack(fill ='x')
