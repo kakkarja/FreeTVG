@@ -49,7 +49,6 @@ class TreeViewGui:
                 TreeViewGui.GEO = gem['geo']
         del gpath
         del gem
-        self.sty = ttk.Style(self.root)
         self.root.bind_all('<Control-f>', self.fcsent)
         self.root.bind_all('<Control-r>', self.fcsent)
         self.root.bind_all('<Control-t>', self.fcsent)
@@ -97,13 +96,18 @@ class TreeViewGui:
         self.root.bind_all('<Shift-Return>', self.inenter)
         self.root.bind_all('<Control-Key-F2>', self.hidbs)
         self.root.bind_all('<Control-Key-F1>', self.help)
+        self.root.bind_class('TButton', '<Enter>', self.ttip)
+        self.root.bind_class('TButton', '<Leave>', self.leave)
+        self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
+        self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
+        self.root.bind_all('<Control-Key-F3>', self.ldmode)        
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
         self.store = None
         self.editorsel = None
-        stl = ttk.Style(self.root)
-        stl.theme_use('clam')
+        self.stl = ttk.Style(self.root)
+        self.stl.theme_use('clam')
         
         # 1st frame. 
         # Frame for label and Entry.
@@ -246,7 +250,7 @@ class TreeViewGui:
         self.button30 = ttk.Button(self.frb2, text = 'HTML View', width = 3, command = self.htmlview)
         self.button30.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button30'] = self.button30
-        self.sty.configure('TButton', font = 'verdana 8 bold')
+        self.stl.configure('TButton', font = 'verdana 8 bold')
         
         # 5th frame.
         # Frame for text, listbox and scrollbars.
@@ -330,6 +334,11 @@ class TreeViewGui:
             for fr in frm:
                 fr.pack_forget()
             del frm
+        if os.path.isfile(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg')):
+            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg')) as ty:
+                rd = ty.read()
+                if rd == 'ease': self.ldmode()
+            del rd
         self.tpl = None
         self.ai = None
         self.scribe = {
@@ -366,11 +375,45 @@ class TreeViewGui:
                        'parent': 'Create parent',
                        'child': 'Create child ["Child" for positioning]'
                        }
-        self.root.bind_class('TButton', '<Enter>', self.ttip)
-        self.root.bind_class('TButton', '<Leave>', self.leave)
-        self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
-        self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
         
+    def ldmode(self, event = None):
+        # Dark mode for easing the eye.
+        
+        oribg = '#dcdad5'
+        chbg = 'grey30'
+        orifg = 'black'
+        chfg = 'white'
+        if self.stl.lookup('.', 'background') != chbg:
+            self.stl.configure('.', background = chbg,
+                               foreground = chfg,
+                               fieldbackground = chbg,
+                               insertcolor = chfg,
+                               troughcolor = chbg,
+                               arrowcolor = chfg,
+                               bordercolor = chbg
+                              )
+            self.stl.map('.', background=[('active', chbg)])
+            self.stl.map('TCombobox', fieldbackground = [('readonly', chbg)],
+                         background = [('active', chbg)])
+            self.labcor.config(bg = chbg, fg = chfg)
+            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'), 'w') as ty:
+                ty.write('ease')
+        else:
+            self.stl.configure('.', background = oribg,
+                               foreground = orifg,
+                               fieldbackground = oribg,
+                               insertcolor = orifg,
+                               troughcolor = '#bab5ab',
+                               arrowcolor = orifg,
+                               bordercolor = '#9e9a91',
+                              )
+            self.stl.map('.', background=[('active', oribg)])
+            self.stl.map('TCombobox', fieldbackground = [('readonly', oribg)],
+                         background = [('active', oribg)]
+                        )
+            self.labcor.config(bg = oribg, fg = orifg)
+            os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'))
+    
     def ttip(self, event =  None):
         # Tooltip for TVG buttons.
         
@@ -416,7 +459,7 @@ class TreeViewGui:
         else:
             for fr in frm:
                 fr.pack(side = TOP, fill = 'x')
-            self.sty.configure('TButton', font = 'verdana 8 bold')
+            self.stl.configure('TButton', font = 'verdana 8 bold')
             os.remove(pth)
         self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)       
         self.fscr.pack(fill ='x')
@@ -1793,12 +1836,19 @@ class TreeViewGui:
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
                     
-    def createf(self):
+    def createf(self, name: str = None):
         # Creating new file not able to open existing one.
         
-        ask = messagebox.askyesno('TreeViewGui', 'Create new file?')
+        if name:
+            ask = name
+        else:
+            ask = messagebox.askyesno('TreeViewGui', 'Create new file?')
         if ask:
-            fl = simpledialog.askstring('TreeViewGui', 'What is the name?')
+            if ask == name:
+                fl = name
+                del ask
+            else:
+                fl = simpledialog.askstring('TreeViewGui', 'What is the name?')
             if fl:
                 mkd = f'{fl.title()}_tvg' 
                 dr = os.getcwd().rpartition('\\')[0]
@@ -1901,9 +1951,12 @@ class TreeViewGui:
                                     event.widget.delete(0, END)
                                     event.widget.insert(0, gt[:idx])
                                     if event.widget.get():
-                                        for em in files:
-                                            if event.widget.get() in em and event.widget.get() == em[:len(event.widget.get())]:
-                                                event.widget.current(files.index(em))
+                                        r = 2
+                                        while r:                                        
+                                            for em in files:
+                                                if event.widget.get().lower() in em.lower() and event.widget.get().lower() == em.lower()[:len(event.widget.get().lower())]:
+                                                    event.widget.current(files.index(em))
+                                            r -= 1
                                     event.widget.icursor(index = idx)
                             except Exception as e:
                                 messagebox.showwarning('TeleTVG', f'{e}')
@@ -1971,7 +2024,7 @@ class TreeViewGui:
                 self.text.delete('1.0', END)
                 ckb = ['button24', 'button28', 'button20', 'button29', 'button19', 'text']
                 for i in self.bt:
-                    if 'label' and 'scrollbar' not in i and i not in ckb:
+                    if 'label' not in i and 'scrollbar' not in i and i not in ckb:
                         self.bt[i].config(state='disable')
                 TreeViewGui.FREEZE = True
                 if self.store:
@@ -2360,6 +2413,13 @@ class TreeViewGui:
         dst =  os.path.join(os.getcwd().rpartition('\\')[0], 'TVG Tutorial.pdf')
         if os.path.isfile(dst):
             os.startfile(dst)
+    
+    #def userinfo(self, event = None):
+        
+        
+        #from Ck_user_serialNum import RegKey
+        
+        #self.createf('UserInfo')
                 
 def scal(t):
     # Need to restart after scaling.
@@ -2379,9 +2439,9 @@ def chkpid():
                 pnam = int(rp.read())
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW            
-            pnam = f'wmic process where processId={pnam} get name'
+            pnam = f'powershell -Command Get-Process -Id {pnam}'
             prnms = subprocess.run(pnam, startupinfo = startupinfo, stdout = subprocess.PIPE, stderr = subprocess.PIPE, stdin = subprocess.PIPE, text = True)
-            if not prnms.stderr and 'Tree View Gui.exe' in  prnms.stdout:
+            if not prnms.stderr and 'Tree View Gui' in  prnms.stdout:
                 del pnam
                 del prnms
                 del startupinfo
