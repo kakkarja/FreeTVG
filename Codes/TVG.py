@@ -1138,89 +1138,174 @@ class TreeViewGui:
                             self.entry.insert(END, rd[int(rw[0])][:-2])
                         
     def cmrows(self):
-        # Copy or move any rows to any point of a row within existing rows
+        # Copy or move any rows to any point of a row within existing rows.
+        # And copy parents and childs in hidden modes to another existing file or new file.
         
-        self.hidcheck()
-        if self.unlock:
-            if self.checkfile():
-                if self.text.get('1.0',END)[:-1]:
-                    ckc = ['listb', 'button17', 'text']
-                    if self.listb.cget('selectmode') == 'browse':
-                        for i in self.bt:
-                            if 'label' not in i and 'scrollbar' not in i:
-                                if i not in ckc:
-                                    self.bt[i].config(state='disable')
-                        self.listb.config(selectmode = EXTENDED)
-                        TreeViewGui.FREEZE = True
+        askmove = messagebox.askyesno('TreeViewGui', 'Want to move to other file?') if self.info.get() == 'Hidden Mode' else None
+        if askmove:
+            def chosen(flname):
+                TreeViewGui.FREEZE = False
+                if flname == 'New':
+                    askname = simpledialog.askstring('TreeViewGui', 'New file name:')
+                    if askname:
+                        if not os.path.isdir(os.path.join(os.getcwd().rpartition('\\')[0], f'{askname.title()}_tvg')):
+                            tak = [f'{i}\n' for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                            self.createf(askname)
+                            tvg = tv(f'{self.filename}')
+                            wtvg = tvg.insighthidden(tak)
+                            tvg.fileread(wtvg)
+                            self.spaces()
+                            self.infobar()
+                        else:
+                            messagebox.showinfo('TreeViewGui', 'Cannot create new file because is already exist!!!')
                     else:
-                        tvg = tv(self.filename)
-                        ins = tvg.insighttree()                        
-                        if self.listb.curselection():
-                            gcs = [int(i) for i in self.listb.curselection()]
-                            ask = simpledialog.askinteger('TreeViewGui', 
-                                                          f'Move to which row? choose between 0 to {len(ins)-1} rows')
-                            if ask is not None and ask < len(ins):
-                                deci = messagebox.askyesno('TreeViewGui', '"Yes" to MOVE to, "No" to COPY to')
-                                if deci:
-                                    with open(f'{self.filename}.txt') as file:
-                                        rd = file.readlines()
-                                        cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
-                                        for i in range(gcs[0], gcs[-1]+1):
-                                            rd[i] = '\n'
-                                        if ask < len(ins)-1:
-                                            if ask == 0:
-                                                if ins[gcs[0]][0] == 'parent':
-                                                    for i in cop[::-1]:
-                                                        rd.insert(ask, i)
+                        messagebox.showinfo('TreeViewGui', 'Copying is aborted!')
+                else:
+                    if f'{flname.rpartition("_")[0]}.txt' in os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], flname)):
+                        if f'{flname.rpartition("_")[0]}_hid.json' not in os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], flname)):
+                            self.filename = flname.rpartition("_")[0]
+                            os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], flname))
+                            self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
+                            with open(f'{self.filename}.txt', 'a') as cp:
+                                cp.write(self.text.get('1.0', END)[:-1])
+                            self.spaces()
+                            self.infobar()
+                        else:
+                            messagebox.showinfo('TreeViewGui', 'You cannot copied to hidden mode file!')
+                    else:
+                        self.filename = flname.rpartition("_")[0]
+                        os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], flname))
+                        self.root.title(f'{os.getcwd()}\\{self.filename}.txt')                        
+                        tak = [f'{i}\n' for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                        tvg = tv(f'{self.filename}')
+                        wtvg = tvg.insighthidden(tak)
+                        tvg.fileread(wtvg)
+                        self.spaces()
+                        self.infobar()                        
+                        
+            TreeViewGui.FREEZE = True        
+            self.lock = True
+            files = [file for file in os.listdir(os.getcwd()[:os.getcwd().rfind('\\')]) if '_tvg' in file]
+            files.insert(0, 'New')
+            class MyDialog(simpledialog.Dialog):
+            
+                def body(self, master):
+                    self.title('Choose File')
+                    Label(master, text="File: ").grid(row=0, column = 0, sticky = E)
+                    self.e1 = ttk.Combobox(master, state = 'readonly')
+                    self.e1['values'] = files
+                    self.e1.current(0)
+                    self.e1.grid(row=0, column=1)
+                    return self.e1
+            
+                def apply(self):
+                    self.result = self.e1.get()
+                                
+            d = MyDialog(self.root)
+            self.lock = False
+            if d.result:
+                chosen(d.result)
+            else:
+                TreeViewGui.FREEZE = False            
+        else:
+            self.hidcheck()
+            if self.unlock:
+                if self.checkfile():
+                    if self.text.get('1.0',END)[:-1]:
+                        ckc = ['listb', 'button17', 'text']
+                        if self.listb.cget('selectmode') == 'browse':
+                            for i in self.bt:
+                                if 'label' not in i and 'scrollbar' not in i:
+                                    if i not in ckc:
+                                        self.bt[i].config(state='disable')
+                            self.listb.config(selectmode = EXTENDED)
+                            TreeViewGui.FREEZE = True
+                        else:
+                            tvg = tv(self.filename)
+                            ins = tvg.insighttree()                        
+                            if self.listb.curselection():
+                                gcs = [int(i) for i in self.listb.curselection()]
+                                ask = simpledialog.askinteger('TreeViewGui', 
+                                                              f'Move to which row? choose between 0 to {len(ins)-1} rows')
+                                if ask is not None and ask < len(ins):
+                                    deci = messagebox.askyesno('TreeViewGui', '"Yes" to MOVE to, "No" to COPY to')
+                                    if deci:
+                                        with open(f'{self.filename}.txt') as file:
+                                            rd = file.readlines()
+                                            cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
+                                            for i in range(gcs[0], gcs[-1]+1):
+                                                rd[i] = '\n'
+                                            if ask < len(ins)-1:
+                                                if ask == 0:
+                                                    if ins[gcs[0]][0] == 'parent':
+                                                        for i in cop[::-1]:
+                                                            rd.insert(ask, i)
+                                                    else:
+                                                        for i in cop[::-1]:
+                                                            rd.insert(ask+1, i)
                                                 else:
                                                     for i in cop[::-1]:
-                                                        rd.insert(ask+1, i)
-                                            else:
-                                                for i in cop[::-1]:
-                                                    rd.insert(ask, i)
-                                        else:
-                                            for i in cop:
-                                                rd.append(i)
-                                    with open(f'{self.filename}.txt', 'w') as file:
-                                        file.writelines(rd)
-                                    self.spaces()
-                                else:
-                                    with open(f'{self.filename}.txt') as file:
-                                        rd = file.readlines()
-                                        cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
-                                        if ask < len(ins)-1:
-                                            if ask == 0:
-                                                if ins[gcs[0]][0] == 'parent':
-                                                    for i in cop[::-1]:
                                                         rd.insert(ask, i)
+                                            else:
+                                                for i in cop:
+                                                    rd.append(i)
+                                        with open(f'{self.filename}.txt', 'w') as file:
+                                            file.writelines(rd)
+                                        self.spaces()
+                                    else:
+                                        with open(f'{self.filename}.txt') as file:
+                                            rd = file.readlines()
+                                            cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
+                                            if ask < len(ins)-1:
+                                                if ask == 0:
+                                                    if ins[gcs[0]][0] == 'parent':
+                                                        for i in cop[::-1]:
+                                                            rd.insert(ask, i)
+                                                    else:
+                                                        for i in cop[::-1]:
+                                                            rd.insert(ask+1, i)
                                                 else:
                                                     for i in cop[::-1]:
-                                                        rd.insert(ask+1, i)
+                                                        rd.insert(ask, i)
                                             else:
-                                                for i in cop[::-1]:
-                                                    rd.insert(ask, i)
-                                        else:
-                                            for i in cop:
-                                                rd.append(i)
-                                    with open(f'{self.filename}.txt', 'w') as file:
-                                        file.writelines(rd)
-                                    self.spaces()
-                                for i in self.bt:
-                                    if 'label' not in i and 'scrollbar' not in i:
-                                        if i not in ckc:
-                                            if i == 'entry3':
-                                                self.bt[i].config(state='readonly')
-                                            elif i == 'entry':
-                                                if not self.rb.get():
-                                                    self.bt[i].config(state='disable')
+                                                for i in cop:
+                                                    rd.append(i)
+                                        with open(f'{self.filename}.txt', 'w') as file:
+                                            file.writelines(rd)
+                                        self.spaces()
+                                    for i in self.bt:
+                                        if 'label' not in i and 'scrollbar' not in i:
+                                            if i not in ckc:
+                                                if i == 'entry3':
+                                                    self.bt[i].config(state='readonly')
+                                                elif i == 'entry':
+                                                    if not self.rb.get():
+                                                        self.bt[i].config(state='disable')
+                                                    else:
+                                                        self.bt[i].config(state='normal')
                                                 else:
                                                     self.bt[i].config(state='normal')
-                                            else:
-                                                self.bt[i].config(state='normal')
-                                self.listb.config(selectmode = BROWSE)
-                                TreeViewGui.FREEZE = False
-                                self.text.see(f'{ask}.0')
-                                self.listb.see(ask)
+                                    self.listb.config(selectmode = BROWSE)
+                                    TreeViewGui.FREEZE = False
+                                    self.text.see(f'{ask}.0')
+                                    self.listb.see(ask)
+                                else:
+                                    for i in self.bt:
+                                        if 'label' not in i and 'scrollbar' not in i:
+                                            if i not in ckc:
+                                                if i == 'entry3':
+                                                    self.bt[i].config(state='readonly')
+                                                elif i == 'entry':
+                                                    if not self.rb.get():
+                                                        self.bt[i].config(state='disable')
+                                                    else:
+                                                        self.bt[i].config(state='normal')
+                                                else:
+                                                    self.bt[i].config(state='normal')
+                                    self.listb.config(selectmode = BROWSE)
+                                    TreeViewGui.FREEZE = False
+                                    if ask:
+                                        messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
                             else:
                                 for i in self.bt:
                                     if 'label' not in i and 'scrollbar' not in i:
@@ -1236,24 +1321,7 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
-                                if ask:
-                                    messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
-                        else:
-                            for i in self.bt:
-                                if 'label' not in i and 'scrollbar' not in i:
-                                    if i not in ckc:
-                                        if i == 'entry3':
-                                            self.bt[i].config(state='readonly')
-                                        elif i == 'entry':
-                                            if not self.rb.get():
-                                                self.bt[i].config(state='disable')
-                                            else:
-                                                self.bt[i].config(state='normal')
-                                        else:
-                                            self.bt[i].config(state='normal')
-                            self.listb.config(selectmode = BROWSE)
-                            TreeViewGui.FREEZE = False
-                    self.infobar()
+                        self.infobar()
                     
     def saveaspdf(self):
         # Show to browser and directly print as pdf or direct printing.
