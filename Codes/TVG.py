@@ -94,13 +94,13 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-backslash>', self.fcsent)
         self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.root.bind_all('<Shift-Return>', self.inenter)
-        self.root.bind_all('<Control-Key-F2>', self.hidbs)
-        self.root.bind_all('<Control-Key-F1>', self.help)
+        self.root.bind_all('<Control-Key-F2>', self.fcsent)
+        self.root.bind_all('<Control-Key-F1>', self.fcsent)
         self.root.bind_class('TButton', '<Enter>', self.ttip)
         self.root.bind_class('TButton', '<Leave>', self.leave)
         self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
         self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
-        self.root.bind_all('<Control-Key-F3>', self.ldmode)        
+        self.root.bind_all('<Control-Key-F3>', self.fcsent)        
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -396,6 +396,11 @@ class TreeViewGui:
             self.stl.map('TCombobox', fieldbackground = [('readonly', chbg)],
                          background = [('active', chbg)])
             self.labcor.config(bg = chbg, fg = chfg)
+            if str(self.text.cget('background')) == 'SystemWindow':
+                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
+                    thm.write('#4d4d4d')
+                self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), wr = False)
+                
             with open(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'), 'w') as ty:
                 ty.write('ease')
         else:
@@ -683,6 +688,12 @@ class TreeViewGui:
                 self.htmlview()
             elif event.keysym == 'question':
                 self.scaling()
+            elif event.keysym == 'F1':
+                self.help()
+            elif event.keysym == 'F2':
+                self.hidbs()
+            elif event.keysym == 'F3':
+                self.ldmode()            
         else:
             if str(self.bt['button17'].cget('state')) == 'normal' and event.keysym  == 'n':
                 self.cmrows()
@@ -1852,11 +1863,11 @@ class TreeViewGui:
                         if char not in checking:
                             seekchar = char
                             raise Exception(f'This "{char}" is not able to be encrypted!')
-                    enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 5, t2 = 7)
+                    enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 1567, t2 = 7897)
                     ins = f'{enc[0]}'
-                    key = f'{[[j for j in i] for i in enc[1]]}'
+                    key = f'{ptd.simplifying(enc[1])}'
                     with open(os.path.join(fpt, f'{self.filename}_protected.txt'), 'wb') as encrypt:
-                        encrypt.write(str({key:ins}).encode())
+                        encrypt.write(ptd.consimp(str({key:ins}), 3))
                     messagebox.showinfo('TreeViewGui', 'Encryption created!')
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
@@ -1880,15 +1891,15 @@ class TreeViewGui:
             if ask:
                 try:
                     with open(f'{ask}', 'rb') as encrypt:
-                        rd  = encrypt.read().decode('utf-8')
+                        rd  = ptd.consimp(encrypt.read(), 3)
                         if rd[0] == '{' and rd[-1] == '}':
                             rd = eval(rd)
                         else:
                             raise Exception('This protected file is corrupted!')
                     key = list(rd)[0]
                     ins = rd[key]
-                    dec = ptd.complek(ins, key =((j for j in i) for i in eval(key)), 
-                                      stat = False, t1 = 5, t2 = 7)
+                    dec = ptd.complek(ins, key = ptd.simplifying(eval(key)),
+                                      stat = False, t1 = 1567, t2 = 7897)
                     self.text.config(state = 'normal')
                     self.text.delete('1.0', END)
                     self.text.insert(END, dec)
@@ -2327,10 +2338,11 @@ class TreeViewGui:
               '6': 6, '7': 7, '8': 8, '9': 9, 'a': 10, 'b': 11,
               'c': 12, 'd': 13, 'e': 14, 'f': 15}
         if color:
-            sn = 0
-            for i in color[1:]:
-                sn += hn[i]
-            if sn < 36:
+            rgb = [hn[i] for i in color[1:]]
+            rgb = [i * 16 + j for i, j in list(zip(rgb[0::2], rgb[1::2]))]
+            l = [i / 255 for i in rgb]
+            l = True if round(((1/2) * (max(l) + min(l))) * 100) < 47 else False
+            if  l:
                 self.text.config(foreground = 'white')
                 self.text.config(insertbackground = 'white')
                 self.listb.config(foreground = 'white')
@@ -2340,6 +2352,7 @@ class TreeViewGui:
                 self.listb.config(foreground = 'black')
             self.text.config(bg = color)
             self.listb.config(bg = color)
+            del rgb, l
             if wr:
                 with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
                     thm.write(color)
@@ -2481,14 +2494,7 @@ class TreeViewGui:
         dst =  os.path.join(os.getcwd().rpartition('\\')[0], 'TVG Tutorial.pdf')
         if os.path.isfile(dst):
             os.startfile(dst)
-    
-    #def userinfo(self, event = None):
-        
-        
-        #from Ck_user_serialNum import RegKey
-        
-        #self.createf('UserInfo')
-                
+                    
 def scal(t):
     # Need to restart after scaling.
     

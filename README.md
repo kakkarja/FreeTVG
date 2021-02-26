@@ -1,15 +1,13 @@
 # TVG
 >## TreeViewGui
 * **TVG is an outline note for viewing in tree structure.**
-* **Please give feedback if there is known error by creating issues.**
 
 **Note: Block using '#' in the code on icon, because not provided in the repository**
 
 ### **New addition function**
 * **Add send note with Telethon [Telegram api wrapper].**
->**Please get ProtectData for Lock File function https://github.com/kakkarja/PTD**  
->  
->**Please get CreatePassword for encrypting telegram apis https://github.com/kakkarja/CP**
+    * **https://github.com/LonamiWebs/Telethon**
+
 ### Changes:
 * **TVG has evolved to more than just taking simple outline note.**
     * **Now can convert a simple note to outline note.**
@@ -136,13 +134,32 @@
     * **Can search a contact in <ins>TeleTVG - Multi</ins>.**
     * **Can set TVG new geometry position as default [will remember the last position and resize that user has set].**
     * **Can hide buttons for almost full screen text editor**
-        * **Short-Cut keyboards is active :joy:**
+        * **Short-Cut keyboards is active**
     * **TeleCalc and TeleTVG now resizeable :joy:**
         * **There are minsize for them, depend on resolution, both may still appear too large.**
     * **Can save to mark, emojies that selected in text [only emoji that exist in TVG library].**
     * **Can call Emoji in TVG without in Editor mode.**
         * **Can paste on entry box.**
-    * **Can send files to a group.**
+    * **Can send file to a group.**
+    * **Can schedule send message to a group.**
+    * **TVG has darker mode for easing eyes :joy:**
+    * **TeleTVG has autotext/textpander function.**
+        * **Save often used words or even emojies to an abbreviation.**
+        * **FORMAT:**
+            * **\<abbreviation\>::<often used words/emojies>**
+            * **EXAMPLE:**
+                * **Tq::Thank You**
+                * **Typed "Tq" :arrow_right: "Thank you".**
+        * **Can save multiple lines of autotext format.**
+    * **Encryption to saved text for sharing to other tvg user, is much better encrypted.**
+        * **TAKE NOTE:**
+            * **However the speed is much slower than previous one for larger file.**
+    * **Add tooltip for TVG buttons.**
+    * **CPP now can copy parents and its childs in hidden mode..**
+        * **to existing file or new file. :joy:** 
+            
+#### **Source codes for TeleTVG and TeleCalc, are no longer available. If anyone wanted to built along with these apps, please do not hesitate to contact the dev.**
+    
 
 ![TVG](/TVG.png)
 ![TVG3](/TVG3.png)
@@ -151,138 +168,3 @@
 ![TVG5](/TVG5.png)
 ![TeleTVG](/TeleTVG.png)
 ![TeleCalc](/TeleCalc.png)
-
----
-# **TreeView**
-
-## **TreeView is part of TVG [TreeViewGUI]**
-
-***https://github.com/kakkarja/TVG***
-
->### **TreeView is an outline note that save to text file in tree structure**
-
-:white_check_mark: **This can be use in console mode**
-
-* **Example write a parent for first time:**
-    ```PYTHON
-    from TreeView import TreeView
-    w = 'Amazing Grace'
-    tv = TreeView('testtv')
-    tv.writetree(w)
-    tv.readtree()
-    ```
-    * **Result:**
-    
-        ```TEXT
-        Amazing Grace:
-        ```
-        
-* **Example write childs:**
-    ```PYTHON
-    for i in range(5):
-        tv.quickchild(w, child = f'child{i}')
-    tv.readtree()
-    ```
-    * **Result:**
-        ```TEXT
-        Amazing Grace:
-        
-            -Amazing Grace
-        
-                -Amazing Grace
-        
-                    -Amazing Grace
-        
-                        -Amazing Grace
-        ```
-* **Example edit:**
-    ```PYTHON
-    tv.edittree('Amazing Grace, how sweet the sound')
-    tv.edittree('Mantaaaaaaap!', row = 4, child = 'child2')
-    tv.readtree()
-    ```
-    * **Result:**
-        ```TEXT
-        Amazing Grace, how sweet the sound:
-        
-            -Amazing Grace
-        
-                -Amazing Grace
-        
-                    -Amazing Grace
-        
-                -Mantaaaaaaap!
-        ```
-* **Example add parent childs and deleting:**
-    ```PYTHON
-    tv.addparent('Wow good job')
-    tv.edittree('Wow good job buddy', row = 6)
-    tv.quickchild('Totally awesome', child = 'child1')
-    tv.quickchild('This is quick child edit', child = 'child2')
-    tv.quickchild('Thank You', child = 'child1')
-    tv.delrow(8)
-    tv.readtree()
-    ```
-    * **Result:**
-        ```TEXT
-        Amazing Grace, how sweet the sound:
-        
-            -Amazing Grace
-        
-                -Amazing Grace
-        
-                    -Amazing Grace
-        
-                -Mantaaaaaaap!
-        
-        Wow good job buddy:
-        
-            -Totally awesome
-        
-            -Thank You
-        ```
-* **Example insert, move tree position and move child position:**
-    ```PYTHON
-    tv.insertrow('God bless you', row = 8, child = 'child1' )
-    tv.movetree(4, 6)
-    tv.movechild(6, child = 'child1')
-    tv.readtree()
-    ```
-    * **Result:**
-        ```TEXT
-        Amazing Grace, how sweet the sound:
-        
-            -Amazing Grace
-        
-                -Amazing Grace
-        
-                    -Amazing Grace
-        
-        Wow good job buddy:
-        
-            -Mantaaaaaaap!
-        
-            -Totally awesome
-        
-            -God bless you
-        
-            -Thank You
-        ```
-* **Example insighttree:**
-    ```PYTHON
-    from pprint import pprint
-    pprint(tv.insighttree())
-    ```
-    * **Result:**
-        ```TEXT
-        {0: ('parent', 'Amazing Grace, how sweet the sound:\n'),
-         1: ('child1', '-Amazing Grace\n'),
-         2: ('child2', '-Amazing Grace\n'),
-         3: ('child3', '-Amazing Grace\n'),
-         4: ('space', '\n'),
-         5: ('parent', 'Wow good job buddy:\n'),
-         6: ('child1', '-Mantaaaaaaap!\n'),
-         7: ('child1', '-Totally awesome\n'),
-         8: ('child1', '-God bless you\n'),
-         9: ('child1', '-Thank You\n')}
-        ```
