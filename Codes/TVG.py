@@ -141,7 +141,7 @@ class TreeViewGui:
         self.label3 = ttk.Label(self.frcc, text = 'Child')
         self.label3.pack(side = LEFT, padx = 1, pady = (0, 1), fill = 'x')
         self.bt['label3'] = self.label3
-        self.entry3 = ttk.Combobox(self.frcc, width = 8, state = 'readonly', justify = 'center')
+        self.entry3 = ttk.Combobox(self.frcc, width = 8, exportselection = False, state = 'readonly', justify = 'center')
         self.entry3.pack(side = LEFT, padx = 1, pady = (0, 1), fill = 'x')
         self.bt['entry3'] = self.entry3
         
@@ -386,37 +386,50 @@ class TreeViewGui:
         if self.stl.lookup('.', 'background') != chbg:
             self.stl.configure('.', background = chbg,
                                foreground = chfg,
-                               fieldbackground = chbg,
                                insertcolor = chfg,
                                troughcolor = chbg,
                                arrowcolor = chfg,
                                bordercolor = chbg
                               )
-            self.stl.map('.', background=[('active', chbg)])
+            self.stl.map('.', background = [('background', chbg)],
+                        )
             self.stl.map('TCombobox', fieldbackground = [('readonly', chbg)],
-                         background = [('active', chbg)])
+                         background = [('active', 'gold')],
+                         arrowcolor = [('active', 'black')]
+                        )
+            self.stl.map('Horizontal.TScrollbar', background = [('active', 'gold')],
+                         arrowcolor = [('active', 'black')],
+                        )
+            self.stl.map('Vertical.TScrollbar', background = [('active', 'gold')],
+                        arrowcolor = [('active', 'black')], 
+                        )            
+            self.stl.configure('TEntry', fieldbackground = chbg)
             self.labcor.config(bg = chbg, fg = chfg)
             if str(self.text.cget('background')) == 'SystemWindow':
                 with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
                     thm.write('#4d4d4d')
                 self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), wr = False)
-                
             with open(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'), 'w') as ty:
                 ty.write('ease')
         else:
             self.stl.configure('.', background = oribg,
                                foreground = orifg,
-                               fieldbackground = oribg,
                                insertcolor = orifg,
                                troughcolor = '#bab5ab',
                                arrowcolor = orifg,
                                bordercolor = '#9e9a91',
                               )
-            self.stl.map('.', background=[('active', oribg)])
-            self.stl.map('TCombobox', fieldbackground = [('readonly', oribg)],
-                         background = [('active', oribg)]
+            self.stl.map('.', background=[('background', oribg)])
+            self.stl.configure('TEntry', fieldbackground = 'white')
+            self.stl.map('TCombobox', foreground = [('focus', 'white')],
+                         fieldbackground = [('focus', 'dark blue'),
+                                            ('readonly', oribg),
+                                           ],
+                         background = [('active', '#eeebe7')],
                         )
-            self.labcor.config(bg = oribg, fg = orifg)
+            self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7')])
+            self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
+            self.labcor.config(bg = 'White', fg = orifg)
             os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'))
     
     def ttip(self, event =  None):
@@ -2334,28 +2347,22 @@ class TreeViewGui:
                 color = rd.read()
         else:
             color = colorchooser.askcolor()[1]
-        hn = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, 
-              '6': 6, '7': 7, '8': 8, '9': 9, 'a': 10, 'b': 11,
-              'c': 12, 'd': 13, 'e': 14, 'f': 15}
-        if color:
-            rgb = [hn[i] for i in color[1:]]
-            rgb = [i * 16 + j for i, j in list(zip(rgb[0::2], rgb[1::2]))]
-            l = [i / 255 for i in rgb]
-            l = True if round(((1/2) * (max(l) + min(l))) * 100) < 47 else False
-            if  l:
-                self.text.config(foreground = 'white')
-                self.text.config(insertbackground = 'white')
-                self.listb.config(foreground = 'white')
-            else:
-                self.text.config(foreground = 'black')
-                self.text.config(insertbackground = 'black')
-                self.listb.config(foreground = 'black')
-            self.text.config(bg = color)
-            self.listb.config(bg = color)
-            del rgb, l
-            if wr:
-                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
-                    thm.write(color)
+        rgb = [int(f'{i}{j}', 16)/255 for i, j in list(zip(color[1:][0::2], color[1:][1::2]))]
+        rgb = True if round(((1/2) * (max(rgb) + min(rgb))) * 100) < 47 else False
+        if  rgb:
+            self.text.config(foreground = 'white')
+            self.text.config(insertbackground = 'white')
+            self.listb.config(foreground = 'white')
+        else:
+            self.text.config(foreground = 'black')
+            self.text.config(insertbackground = 'black')
+            self.listb.config(foreground = 'black')
+        self.text.config(bg = color)
+        self.listb.config(bg = color)
+        del rgb
+        if wr:
+            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
+                thm.write(color)
                     
     def clb(self, event, wr = True):
         # Setting font for text and listbox.
