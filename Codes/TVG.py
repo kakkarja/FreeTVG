@@ -8,8 +8,8 @@ from tkinter import simpledialog, messagebox, filedialog, colorchooser
 from TreeView import TreeView as tv
 import sys
 import os
-import TeleCalc
-import TeleTVG
+#import TeleCalc
+#import TeleTVG
 import re
 from FileFind import filen
 from mdh import convhtml
@@ -174,7 +174,8 @@ class TreeViewGui:
         self.button17 = ttk.Button(self.bframe, text = 'CPP', width = 3, command = self.cmrows)
         self.button17.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button17'] = self.button17
-        self.button18 = ttk.Button(self.bframe, text = 'Send Note', width = 3, command = self.sendtel)
+        self.button18 = ttk.Button(self.bframe, text = 'Send Note', width = 3, 
+                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
         self.button18.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button18'] = self.button18
         self.button19 = ttk.Button(self.bframe, text = 'Look Up', width = 3, command = self.lookup)
@@ -220,10 +221,12 @@ class TreeViewGui:
         # For third row  of buttons
         self.frb2 = ttk.Frame(self.root)
         self.frb2.pack(fill = X)
-        self.button21 = ttk.Button(self.frb2, text = 'Save', width = 3, command = self.endec)
+        self.button21 = ttk.Button(self.frb2, text = 'Save', width = 3, 
+                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
         self.button21.pack(side = LEFT, pady = (0, 2), padx = (1, 1), fill = 'x', expand = 1)
         self.bt['button21'] = self.button21
-        self.button22 = ttk.Button(self.frb2, text = 'Open', width = 3, command = self.openf)
+        self.button22 = ttk.Button(self.frb2, text = 'Open', width = 3, 
+                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
         self.button22.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button22'] = self.button22          
         self.button23 = ttk.Button(self.frb2, text = 'Create file', width = 3, command = self.createf)
@@ -235,7 +238,8 @@ class TreeViewGui:
         self.button25 = ttk.Button(self.frb2, text = 'Un/Wrap', width = 3, command = self.wrapped)
         self.button25.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button25'] = self.button25        
-        self.button26 = ttk.Button(self.frb2, text = 'Calculator', width = 3, command = self.calc)
+        self.button26 = ttk.Button(self.frb2, text = 'Calculator', width = 3, 
+                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
         self.button26.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button26'] = self.button26
         self.button27 = ttk.Button(self.frb2, text = 'Ex', width = 3, command = self.editex)
@@ -2569,8 +2573,8 @@ def main():
     # Starting point of running TVG and making directory for non-existing file.
     
     if chkpid():
-        if os.path.isdir('TVGPro') is False:
-            os.mkdir('TVGPro')
+        #if os.path.isdir('TVGPro') is False:
+            #os.mkdir('TVGPro')
         emop = filen('emoj.txt')
         with open('pid.tvg', 'w') as wid:
             wid.write(str(os.getpid()))
