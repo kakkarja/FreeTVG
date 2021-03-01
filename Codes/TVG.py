@@ -435,12 +435,8 @@ class TreeViewGui:
                                            ],
                          background = [('active', '#eeebe7')],
                         )
-            self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7'),
-                                                                ('disabled', oribg),
-                                                               ])
-            self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7'),
-                                                              ('disabled', oribg),
-                                                             ])
+            self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7')])
+            self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
             self.labcor.config(bg = 'White', fg = orifg)
             os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'))
     
@@ -1476,8 +1472,7 @@ class TreeViewGui:
                             else:
                                 num2 += 1
                         except Exception as e:
-                            raise e
-                            #messagebox.showerror('TreeViewGui', sys.exc_info())
+                            messagebox.showerror('TreeViewGui', f'{e}')
                             break
                     if cks[0][0] == 'space':
                         tvg.delrow(0)
