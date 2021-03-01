@@ -2,8 +2,6 @@
 >## TreeViewGui
 * **TVG is an outline note for viewing in tree structure.**
 
-**Note: Block using '#' in the code on icon, because not provided in the repository**
-
 ### **New addition function**
 * **Add send note with Telethon [Telegram api wrapper].**
     * **https://github.com/LonamiWebs/Telethon**
@@ -153,7 +151,8 @@
         * **Can save multiple lines of autotext format.**
     * **Encryption to saved text for sharing to other tvg user, is much better encrypted.**
         * **TAKE NOTE:**
-            * **However the speed is much slower than previous one for larger file.**
+            * ~~**However the speed is much slower than previous one for larger file.**~~
+            * **Improved speed and fast for encrypting almost 1000 lines of words in outline style.**
     * **Add tooltip for TVG buttons.**
     * **CPP now can copy parents and its childs in hidden mode..**
         * **to existing file or new file. :joy:** 
