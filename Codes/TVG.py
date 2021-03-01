@@ -108,6 +108,8 @@ class TreeViewGui:
         self.editorsel = None
         self.stl = ttk.Style(self.root)
         self.stl.theme_use('clam')
+        self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7')])
+        self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
         
         # 1st frame. 
         # Frame for label and Entry.
@@ -175,7 +177,7 @@ class TreeViewGui:
         self.button17.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button17'] = self.button17
         self.button18 = ttk.Button(self.bframe, text = 'Send Note', width = 3, 
-                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
+                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
         self.button18.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button18'] = self.button18
         self.button19 = ttk.Button(self.bframe, text = 'Look Up', width = 3, command = self.lookup)
@@ -222,11 +224,11 @@ class TreeViewGui:
         self.frb2 = ttk.Frame(self.root)
         self.frb2.pack(fill = X)
         self.button21 = ttk.Button(self.frb2, text = 'Save', width = 3, 
-                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
+                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
         self.button21.pack(side = LEFT, pady = (0, 2), padx = (1, 1), fill = 'x', expand = 1)
         self.bt['button21'] = self.button21
         self.button22 = ttk.Button(self.frb2, text = 'Open', width = 3, 
-                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
+                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
         self.button22.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button22'] = self.button22          
         self.button23 = ttk.Button(self.frb2, text = 'Create file', width = 3, command = self.createf)
@@ -239,7 +241,7 @@ class TreeViewGui:
         self.button25.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button25'] = self.button25        
         self.button26 = ttk.Button(self.frb2, text = 'Calculator', width = 3, 
-                                   command = lambda: messagebox.showinfo('TreeViewGui', 'Not available in free version!'))
+                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
         self.button26.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button26'] = self.button26
         self.button27 = ttk.Button(self.frb2, text = 'Ex', width = 3, command = self.editex)
@@ -390,6 +392,7 @@ class TreeViewGui:
         if self.stl.lookup('.', 'background') != chbg:
             self.stl.configure('.', background = chbg,
                                foreground = chfg,
+                               fieldbackground = chbg,
                                insertcolor = chfg,
                                troughcolor = chbg,
                                arrowcolor = chfg,
@@ -418,6 +421,7 @@ class TreeViewGui:
         else:
             self.stl.configure('.', background = oribg,
                                foreground = orifg,
+                               fieldbackground = oribg,
                                insertcolor = orifg,
                                troughcolor = '#bab5ab',
                                arrowcolor = orifg,
@@ -431,8 +435,12 @@ class TreeViewGui:
                                            ],
                          background = [('active', '#eeebe7')],
                         )
-            self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7')])
-            self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
+            self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7'),
+                                                                ('disabled', oribg),
+                                                               ])
+            self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7'),
+                                                              ('disabled', oribg),
+                                                             ])
             self.labcor.config(bg = 'White', fg = orifg)
             os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'))
     
@@ -949,7 +957,7 @@ class TreeViewGui:
                     if self.listb.curselection():
                         TreeViewGui.MODE = True
                         rw = self.listb.curselection()
-                        tvg.delrow(int(rw[0]))
+                        if int(rw[0]) != 0: tvg.delrow(int(rw[0]))
                         self.spaces()
                         ck = tvg.insighttree()
                         if int(rw[0]) < len(ck):
@@ -1029,7 +1037,7 @@ class TreeViewGui:
                 if self.listb.curselection():
                     rw = self.listb.curselection()
                     if ck[int(rw[0])][0] != 'space' and 'child' in ck[int(rw[0])][0]:
-                        if int(rw[0]) != 0:
+                        if int(rw[0]) != 0 and int(rw[0])-1 != 0:
                             TreeViewGui.MODE = True
                             tvg.movetree(int(rw[0]), int(rw[0])-1)
                             self.spaces()
@@ -1443,7 +1451,7 @@ class TreeViewGui:
                 if cks:
                     while num2 !=  len(cks):
                         try:
-                            if cks[num2][0] == 'parent':
+                            if cks[num2][0] == 'parent' and num2 != 0:
                                 if cks[num2 - 1][0] != 'space':
                                     tvg.insertspace(num2)
                                     cks = tvg.insighttree()
@@ -1456,7 +1464,10 @@ class TreeViewGui:
                                 else:
                                     num2 += 1
                             elif 'child' in cks[num2][0]:
-                                if cks[num2 - 1][0] == 'space':
+                                if num2 == 0:
+                                    tvg.insertrow('[Auto generate a parent]')
+                                    cks = tvg.insighttree()
+                                elif cks[num2 - 1][0] == 'space':
                                     tvg.delrow(num2-1)
                                     num2 -= 1
                                     cks = tvg.insighttree()
@@ -1464,8 +1475,9 @@ class TreeViewGui:
                                     num2 += 1
                             else:
                                 num2 += 1
-                        except:
-                            messagebox.showerror('TreeViewGui', sys.exc_info())
+                        except Exception as e:
+                            raise e
+                            #messagebox.showerror('TreeViewGui', sys.exc_info())
                             break
                     if cks[0][0] == 'space':
                         tvg.delrow(0)
@@ -2505,6 +2517,27 @@ class TreeViewGui:
         dst =  os.path.join(os.getcwd().rpartition('\\')[0], 'TVG Tutorial.pdf')
         if os.path.isfile(dst):
             os.startfile(dst)
+            
+    def messages(self, m: str, t_out: int):
+        # Message for informing.
+        
+        def exit(event = None):
+            root.destroy()        
+        root = Toplevel(self.root)
+        root.after(t_out, exit)
+        root.attributes('-topmost', 1)
+        wd = int(root.winfo_screenwidth()/2 - 250/2)
+        hg = int(root.winfo_screenheight()/3 - 250/3)
+        root.geometry(f'300x300+{wd}+{hg}')
+        root.overrideredirect(1)
+        a = Message(master= root)
+        a.pack()
+        a.tk_strictMotif(1)
+        frm = Frame(a, borderwidth = 7, bg = 'grey30', width = 250, height = 250)
+        frm.pack(fill = 'both', expand = 1)
+        tx = m
+        lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'gray30', fg = 'grey97')
+        lab.pack(fill = 'both', expand = 1)    
                     
 def scal(t):
     # Need to restart after scaling.
