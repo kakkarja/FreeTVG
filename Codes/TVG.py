@@ -75,14 +75,14 @@ class TreeViewGui:
         self.root.bind_all('<Control-y>', self.fcsent)
         self.root.bind_all('<Control-0>', self.fcsent)
         self.root.bind_all('<Control-minus>', self.fcsent)
-        self.root.bind_all('<Control-Key-1>', self.fcsent)
+        #self.root.bind_all('<Control-Key-1>', self.fcsent)
         self.root.bind_all('<Control-Key-2>', self.lookup)
         self.root.bind_all('<Control-Key-3>', self.dattim)
-        self.root.bind_all('<Control-Key-4>', self.fcsent)
-        self.root.bind_all('<Control-Key-5>', self.fcsent)
+        #self.root.bind_all('<Control-Key-4>', self.fcsent)
+        #self.root.bind_all('<Control-Key-5>', self.fcsent)
         self.root.bind_all('<Control-Key-6>', self.fcsent)
         self.root.bind_all('<Control-Key-7>', self.fcsent)
-        self.root.bind_all('<Control-Key-8>', self.fcsent)
+        #self.root.bind_all('<Control-Key-8>', self.fcsent)
         self.root.bind_all('<Control-Key-9>', self.fcsent)
         self.root.bind_all('<Control-Key-period>', self.fcsent)
         self.root.bind_all('<Control-Key-comma>', self.fcsent)
@@ -487,7 +487,7 @@ class TreeViewGui:
                 fr.pack(side = TOP, fill = 'x')
             self.stl.configure('TButton', font = 'verdana 8 bold')
             os.remove(pth)
-        self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)       
+        self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)
         self.fscr.pack(fill ='x')
         del frm
         
@@ -2407,8 +2407,7 @@ class TreeViewGui:
         self.text['font'] = f
         if wr:
             if fl != self.listb['font']:
-                self.reblist()      
-                self.listb['font'] = fl
+                self.reblist(fl)
             with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
                 ftvg.write(event)
         else:
@@ -2418,13 +2417,13 @@ class TreeViewGui:
         else:
             self.hidform()
                 
-    def reblist(self):
+    def reblist(self, fon: str):
         # Destroy Listbox and rebuild it again,
         # for font in listbox to be appear correctly.
         
         self.listb.destroy()
         self.listb = Listbox(self.tlframe, background = self.text['background'],
-                             foreground = self.text['foreground'])
+                             foreground = self.text['foreground'], font = fon)
         self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
@@ -2435,6 +2434,7 @@ class TreeViewGui:
         self.listb.bind('<Up>', self.mscrl)
         self.listb.bind('<Down>', self.mscrl)
         self.listb.bind('<FocusIn>', self.flb)
+        
         
     def ft(self, event = None, path = None):
         # Initial starting fonts chooser.
