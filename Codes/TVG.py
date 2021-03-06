@@ -4,18 +4,17 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import font
-from tkinter import simpledialog, messagebox, filedialog, colorchooser
+from tkinter import simpledialog, messagebox, colorchooser
 from TreeView import TreeView as tv
 import sys
 import os
-#import TeleCalc
-#import TeleTVG
 import re
 from FileFind import filen
 from mdh import convhtml
 import emo
 from datetime import datetime as dt
 import ctypes
+import RegMail
 
 class TreeViewGui:
     """
@@ -75,14 +74,10 @@ class TreeViewGui:
         self.root.bind_all('<Control-y>', self.fcsent)
         self.root.bind_all('<Control-0>', self.fcsent)
         self.root.bind_all('<Control-minus>', self.fcsent)
-        #self.root.bind_all('<Control-Key-1>', self.fcsent)
         self.root.bind_all('<Control-Key-2>', self.lookup)
         self.root.bind_all('<Control-Key-3>', self.dattim)
-        #self.root.bind_all('<Control-Key-4>', self.fcsent)
-        #self.root.bind_all('<Control-Key-5>', self.fcsent)
         self.root.bind_all('<Control-Key-6>', self.fcsent)
         self.root.bind_all('<Control-Key-7>', self.fcsent)
-        #self.root.bind_all('<Control-Key-8>', self.fcsent)
         self.root.bind_all('<Control-Key-9>', self.fcsent)
         self.root.bind_all('<Control-Key-period>', self.fcsent)
         self.root.bind_all('<Control-Key-comma>', self.fcsent)
@@ -100,7 +95,8 @@ class TreeViewGui:
         self.root.bind_class('TButton', '<Leave>', self.leave)
         self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
         self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
-        self.root.bind_all('<Control-Key-F3>', self.fcsent)        
+        self.root.bind_all('<Control-Key-F3>', self.fcsent)
+        self.root.bind_all('<Control-Key-F4>', self.compose)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -382,6 +378,22 @@ class TreeViewGui:
                        'child': 'Create child ["Child" for positioning]'
                        }
         
+    def compose(self, event =  None):
+        msg = """If you have paid for extra modules to work, you need to send email for registration! [User Name and Serial Number will be acquired and encrypted]"""
+        ask = messagebox.askyesno('TreeViewGui', msg)
+        try:
+            if ask:
+                RegMail.composemail(os.getcwd().rpartition('\\')[0])
+            else:
+                messagebox.showinfo('TreeViewGui', 'Email compose for registration is aborted!')
+        except:
+            pth = os.path.join(os.getcwd().rpartition('\\')[0], 'Registration.txt')
+            with open(pth, 'wb') as reg:
+                regis = RegMail.RegKey.writeck(RegMail.RegKey.ckuserserial())
+                reg.write(regis)
+            pth = pth.rpartition("\\")[0]
+            messagebox.showinfo('TreeViewGui', f'Please send this file "Registration.txt" in folder:\n{pth}\nto kakkarja.minder@gmail.com')
+            
     def ldmode(self, event = None):
         # Dark mode for easing the eye.
         
@@ -682,19 +694,11 @@ class TreeViewGui:
             elif event.keysym == 'n':
                 self.cmrows()
             elif event.keysym == 'g':
-                self.chgfile()            
-            elif event.keysym == '1':
-                self.sendtel()
-            elif event.keysym == '4':
-                self.endec()
-            elif event.keysym == '5':
-                self.openf()
+                self.chgfile()
             elif event.keysym == '6':
                 self.createf()
             elif event.keysym == '7':
                 self.editor()
-            elif event.keysym == '8':
-                self.calc()
             elif event.keysym == '9':
                 self.wrapped()
             elif event.keysym == 'bracketleft':
@@ -1702,40 +1706,6 @@ class TreeViewGui:
             TreeViewGui.FREEZE = True
         else:
             TreeViewGui.FREEZE = False
-    
-    def sendtel(self):
-        # This is the sending note with Telethon [Telegram api wrapper].
-        
-        ori = os.getcwd()
-        os.chdir(ori.rpartition('\\')[0])
-        if emo.Emo.status is False:
-            emo.Emo.status = True
-            emo.Emo.paste = None
-            emo.Emo.mainon.destroy()        
-        self.free()
-        if os.path.isfile('s_error.tvg'):
-            os.remove('s_error.tvg')
-            os.remove(os.path.join(os.getcwd(), 'Tele_TVG', 'ReminderTel.session'))        
-        if self.text.get('1.0', END)[:-1]:
-            quest = messagebox.askyesno('TreeViewGui', 'Do you want send the outline?')
-            if quest:
-                TeleTVG.main(self, ori, str(self.root.winfo_geometry()), self.text.get('1.0', END)[:-1])
-            else:
-                TeleTVG.main(self, ori, str(self.root.winfo_geometry()))
-        else:
-            TeleTVG.main(self, ori, str(self.root.winfo_geometry()))
-            
-    def calc(self):
-        # Calling TeleCalc
-        
-        ori = os.getcwd()
-        os.chdir(ori.rpartition('\\')[0])
-        if emo.Emo.status is False:
-            emo.Emo.status = True
-            emo.Emo.paste = None
-            emo.Emo.mainon.destroy()        
-        self.free()
-        TeleCalc.main(self, ori, str(self.root.winfo_geometry()))
             
     def lookup(self, event = None):
         # To lookup word on row and also on editor mode.
@@ -1869,76 +1839,7 @@ class TreeViewGui:
             dtt = f'[{dt.isoformat(dt.today().replace(microsecond = 0)).replace("T"," ")}]'
             self.text.insert(INSERT, f'{dtt} ')
             self.text.focus()
-    
-    def endec(self):
-        # Data encrypt and saved for sharing.
-        
-        from ProtectData import ProtectData as ptd
-        import string
-        
-        self.hidcheck()
-        if self.unlock:
-            if self.checkfile():
-                fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')             
-                try:
-                    checking = list(string.printable)
-                    seekchar = ''
-                    for char in self.text.get('1.0', END)[:-1]:
-                        if char not in checking:
-                            seekchar = char
-                            raise Exception(f'This "{char}" is not able to be encrypted!')
-                    enc = ptd.complek(self.text.get('1.0', END)[:-1], stat = False, t1 = 1567, t2 = 7897)
-                    ins = f'{enc[0]}'
-                    key = f'{ptd.simplifying(enc[1])}'
-                    with open(os.path.join(fpt, f'{self.filename}_protected.txt'), 'wb') as encrypt:
-                        encrypt.write(ptd.consimp(str({key:ins}), 3))
-                    messagebox.showinfo('TreeViewGui', 'Encryption created!')
-                except Exception as e:
-                    messagebox.showerror('TreeViewGui', f'{e}')
-                finally:
-                    if seekchar:
-                        self.rb.set('child')
-                        self.radiobut()
-                        self.entry.delete(0, END)
-                        self.entry.insert(END, seekchar)
-                        self.lookup()
-                        
-    def openf(self):
-        # Data decrypt and can be saved as _tvg file.
-        
-        from ProtectData import ProtectData as ptd
-        
-        self.hidcheck()
-        if self.unlock:
-            fpt = os.path.join(os.getcwd().rpartition('\\')[0], 'TVGPro')
-            ask = filedialog.askopenfilename(initialdir = fpt, filetypes = [("Encryption file","*_protected.txt")])
-            if ask:
-                try:
-                    with open(f'{ask}', 'rb') as encrypt:
-                        rd  = ptd.consimp(encrypt.read(), 3)
-                        if rd[0] == '{' and rd[-1] == '}':
-                            rd = eval(rd)
-                        else:
-                            raise Exception('This protected file is corrupted!')
-                    key = list(rd)[0]
-                    ins = rd[key]
-                    dec = ptd.complek(ins, key = ptd.simplifying(eval(key)),
-                                      stat = False, t1 = 1567, t2 = 7897)
-                    self.text.config(state = 'normal')
-                    self.text.delete('1.0', END)
-                    self.text.insert(END, dec)
-                    self.text.config(state = 'disabled')
-                    que = messagebox.askyesno('TreeViewGui', 'Want to save as this file?')
-                    if que:
-                        tvg = tv(f'{self.filename}')
-                        tak = [f'{i}\n' for i in dec.split('\n') if i]
-                        wtvg = tvg.insighthidden(tak)
-                        tvg.fileread(wtvg)
-                        self.spaces()
-                    os.remove(ask)
-                except Exception as e:
-                    messagebox.showerror('TreeViewGui', f'{e}')
-                    
+            
     def createf(self, name: str = None):
         # Creating new file not able to open existing one.
         
@@ -2138,129 +2039,47 @@ class TreeViewGui:
             else:
                 try:
                     if self.text.get('1.0', END)[:-1]:
-                        if 'CAL:' and 'ANS:' in self.text.get('1.0', END)[:-1].upper() and self.text.get('1.0', END)[:-1][:4].upper() == 'CAL:':
-                            ckcal = [i for i in self.text.get('1.0', END).split('\n')[:-1] if 'CAL:' in i.upper()]
-                            nck = ['0','1','2','3','4','5','6','7','8','9','-','+','*','/','(',')','.',',']
-                            for cal in ckcal:
-                                for ck in cal.partition(':')[2].strip():
-                                    if ck not in nck:
+                        ask = messagebox.askyesno('TreeViewGui', 'Do you want to convert[y] or Edit[n]?')
+                        if ask:
+                            self.converting()
+                        else:                        
+                            if self.checkfile():
+                                if self.editorsel:
+                                    stor = self.editorsel
+                                    tvg = tv(self.filename)
+                                    p1 = {j: k for j, k in tvg.insighttree().items() if j < stor[0]}
+                                    ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                    ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                    et = len(p1)-1
+                                    p2 = {}
+                                    for i in ed:
+                                        et += 1
+                                        if 's:' == i.lower()[:2]:
+                                            p2[et] = ('space', '\n')
+                                        elif 'p:' == i.lower()[:2]:
+                                            if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
+                                                raise Exception('Parent cannot be empty!')
+                                            else:
+                                                p2[et] = ('parent', i[2:].removeprefix(' '))
+                                        elif i.lower().partition(':')[0] in list(ckc):
+                                            if i.partition(':')[2].isspace():
+                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
+                                            elif bool(i.partition(':')[2]):
+                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                    if len(ed) != len(p2):
                                         raise Exception('Not Editable!')
-                            del nck
-                            
-                            dt =[i for i in self.text.get('1.0', END).split('\n')[:-1] if i]
-                            dd = []
-                            while dt:
-                                if len(dt)>2:
-                                    if 'Note:' in dt[2].capitalize():
-                                        dd.append([dt[0], dt[1], dt[2]])
-                                        del dt[0]
-                                        del dt[0]
-                                        del dt[0]
+                                    combi = p1 | p2
+                                    p3 = [k for j, k in tvg.insighttree().items() if j > stor[1]]
+                                    if p3:
+                                        p3 = {(len(combi)) + i: p3[i] for i in range(len(p3))}
+                                        tvg.fileread(combi | p3)
                                     else:
-                                        dd.append([dt[0], dt[1]])
-                                        del dt[0]
-                                        del dt[0]
-                                elif dt:
-                                    dd.append([dt[0], dt[1]])
-                                    del dt[0]
-                                    del dt[0]
-                            if len(ckcal) != len(dd):
-                                raise Exception('Not editble!')
-                            del ckcal
-                            dc = {}
-                            n = 1
-                            for i in dd:
-                                ga = eval(i[0].partition(':')[2].strip().replace(',',''))
-                                i[0]= f'CAL: {i[0].partition(":")[2].strip()}'
-                                i[1] = f'ANS: {ga:,}'
-                                if len(i) == 3:
-                                    i[2] = f'Note: {i[2].partition(":")[2].strip()}'
-                                dc[n] = tuple(i)
-                                n += 1
-                            del dd
-                            self.store = dc
-                            self.text.delete('1.0', END)
-                            self.text.config(state = DISABLED)
-                            for i in self.bt:
-                                if 'label' not in i and 'scrollbar' not in i:
-                                    if i == 'entry3':
-                                        self.bt[i].config(state='readonly')
-                                    elif i == 'entry':
-                                        if not self.rb.get():
-                                            self.bt[i].config(state='disable')
-                                        else:
-                                            self.bt[i].config(state='normal')
-                                    else:
-                                        if i != 'text':
-                                            self.bt[i].config(state='normal')
-                            TreeViewGui.FREEZE = False
-                            self.spaces()
-                            self.calc()
-                        else:
-                            ask = messagebox.askyesno('TreeViewGui', 'Do you want to convert[y] or Edit[n]?')
-                            if ask:
-                                self.converting()
-                            else:                        
-                                if self.checkfile():
-                                    if self.editorsel:
-                                        stor = self.editorsel
-                                        tvg = tv(self.filename)
-                                        p1 = {j: k for j, k in tvg.insighttree().items() if j < stor[0]}
-                                        ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                                        ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                                        et = len(p1)-1
-                                        p2 = {}
-                                        for i in ed:
-                                            et += 1
-                                            if 's:' == i.lower()[:2]:
-                                                p2[et] = ('space', '\n')
-                                            elif 'p:' == i.lower()[:2]:
-                                                if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
-                                                    raise Exception('Parent cannot be empty!')
-                                                else:
-                                                    p2[et] = ('parent', i[2:].removeprefix(' '))
-                                            elif i.lower().partition(':')[0] in list(ckc):
-                                                if i.partition(':')[2].isspace():
-                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
-                                                elif bool(i.partition(':')[2]):
-                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
-                                        if len(ed) != len(p2):
-                                            raise Exception('Not Editable!')
-                                        combi = p1 | p2
-                                        p3 = [k for j, k in tvg.insighttree().items() if j > stor[1]]
-                                        if p3:
-                                            p3 = {(len(combi)) + i: p3[i] for i in range(len(p3))}
-                                            tvg.fileread(combi | p3)
-                                        else:
-                                            tvg.fileread(combi)
-                                    else:
-                                        tvg = tv(self.filename)
-                                        p1 = tvg.insighttree()
-                                        et = len(p1)-1
-                                        ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                                        ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                                        p2 = {}
-                                        for i in ed:
-                                            et += 1
-                                            if 's:' == i.lower()[:2]:
-                                                p2[et] = ('space', '\n')
-                                            elif 'p:' == i.lower()[:2]:
-                                                if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
-                                                    raise Exception('Parent cannot be empty!')
-                                                else:
-                                                    p2[et] = ('parent', i[2:].removeprefix(' '))
-                                            elif i.lower().partition(':')[0] in list(ckc):
-                                                if i.partition(':')[2].isspace():
-                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
-                                                elif bool(i.partition(':')[2]):
-                                                    p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
-                                        if len(ed) != len(p2):
-                                            raise Exception('Not Editable!')
-                                        tvg.fileread(p1 | p2)
+                                        tvg.fileread(combi)
                                 else:
                                     tvg = tv(self.filename)
+                                    p1 = tvg.insighttree()
+                                    et = len(p1)-1
                                     ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                                    et = -1
                                     ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
                                     p2 = {}
                                     for i in ed:
@@ -2279,25 +2098,48 @@ class TreeViewGui:
                                                 p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                     if len(ed) != len(p2):
                                         raise Exception('Not Editable!')
-                                    tvg.fileread(p2)
-                                self.text.config(state = DISABLED)
-                                for i in self.bt:
-                                    if 'label' not in i and 'scrollbar' not in i:
-                                        if i == 'entry3':
-                                            self.bt[i].config(state='readonly')
-                                        elif i == 'entry':
-                                            if not self.rb.get():
-                                                self.bt[i].config(state='disable')
-                                            else:
-                                                self.bt[i].config(state='normal')
+                                    tvg.fileread(p1 | p2)
+                            else:
+                                tvg = tv(self.filename)
+                                ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                et = -1
+                                ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
+                                p2 = {}
+                                for i in ed:
+                                    et += 1
+                                    if 's:' == i.lower()[:2]:
+                                        p2[et] = ('space', '\n')
+                                    elif 'p:' == i.lower()[:2]:
+                                        if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
+                                            raise Exception('Parent cannot be empty!')
                                         else:
-                                            if i != 'text':
-                                                self.bt[i].config(state='normal')
-                                TreeViewGui.FREEZE = False
-                                self.spaces()
-                                if self.editorsel:
-                                    self.text.see(f'{self.editorsel[0]}.0')
-                                    self.editorsel = None
+                                            p2[et] = ('parent', i[2:].removeprefix(' '))
+                                    elif i.lower().partition(':')[0] in list(ckc):
+                                        if i.partition(':')[2].isspace():
+                                            p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
+                                        elif bool(i.partition(':')[2]):
+                                            p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                if len(ed) != len(p2):
+                                    raise Exception('Not Editable!')
+                                tvg.fileread(p2)
+                            self.text.config(state = DISABLED)
+                            for i in self.bt:
+                                if 'label' not in i and 'scrollbar' not in i:
+                                    if i == 'entry3':
+                                        self.bt[i].config(state='readonly')
+                                    elif i == 'entry':
+                                        if not self.rb.get():
+                                            self.bt[i].config(state='disable')
+                                        else:
+                                            self.bt[i].config(state='normal')
+                                    else:
+                                        if i != 'text':
+                                            self.bt[i].config(state='normal')
+                            TreeViewGui.FREEZE = False
+                            self.spaces()
+                            if self.editorsel:
+                                self.text.see(f'{self.editorsel[0]}.0')
+                                self.editorsel = None
                     else:
                         self.text.config(state = DISABLED)
                         for i in self.bt:
