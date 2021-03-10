@@ -1,6 +1,5 @@
-# TVG
->## TreeViewGui
-* **TVG is an outline note for viewing in tree structure.**
+# TVG [Tree View Gui]
+## **Tree View Gui is an outline note for viewing in tree structure.**
 
 ### **New addition function**
 * **Add send note with Telethon [Telegram api wrapper].**
@@ -152,13 +151,17 @@
     * **Encryption to saved text for sharing to other tvg user, is much better encrypted.**
         * **TAKE NOTE:**
             * ~~**However the speed is much slower than previous one for larger file.**~~
-            * **Improved speed and fast for encrypting almost 1000 lines of words in outline style.**
+            * **Improved speed and fast for encrypting ~~almost~~ 1000 over lines of words in outline style.**
     * **Add tooltip for TVG buttons.**
     * **CPP now can copy parents and its childs in hidden mode..**
         * **to existing file or new file. :joy:** 
             
 #### **Source codes for TeleTVG and TeleCalc, are no longer available. If anyone wanted to built along with these apps, please do not hesitate to contact the dev.**
-    
+### **TVG is built for free in exe file with Pyinstaller**
+* **https://github.com/pyinstaller/pyinstaller**
+### **Visit <ins>[TVG](https://treeviewgui.work)</ins> for free download :joy:**
+* **Please report any bugs to dev email.**
+* **Any suggestion is welcome.**
 
 ![TVG](/TVG.png)
 ![TVG3](/TVG3.png)
