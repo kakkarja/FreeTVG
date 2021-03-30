@@ -157,9 +157,7 @@
         * **to existing file or new file. :joy:** 
             
 #### **Source codes for TeleTVG and TeleCalc, are no longer available. If anyone wanted to built along with these apps, please do not hesitate to contact the dev.**
-### **TVG is built for free in exe file with Pyinstaller**
-* **https://github.com/pyinstaller/pyinstaller**
-### **Visit <ins>[TVG](https://treeviewgui.work)</ins> for free download :joy:**
+### **Visit <ins>[TVG](https://treeviewgui.work)</ins>**
 * **Please report any bugs to dev email.**
 * **Any suggestion is welcome.**
 
