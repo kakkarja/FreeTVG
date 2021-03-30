@@ -160,6 +160,14 @@
 ### **Visit <ins>[TVG](https://treeviewgui.work)</ins>**
 * **Please report any bugs to dev email.**
 * **Any suggestion is welcome.**
+# <ins>Latest News on TVG</ins>
+* **TVG [in exe file] has been detected with viruses in VT.**  
+    * **However there is no such malicious files ever added into it.** 
+    * **Therefore, anyone who interested in getting TVG for free is advisable to copy the source codes and built one for yourself.** 
+    * **Not all modules provided like the encryption purposes. Therefore you may clean it in source code.**
+* #### <ins>**Please support the development of TVG.**</ins>
+    * **If you do, you will get the rest of all source code that runs all apps modules.**
+    * **Except the encryption module only. [you may create yourself or using existing library from https://pypi.org/]**
 
 ![TVG](/TVG.png)
 ![TVG3](/TVG3.png)
