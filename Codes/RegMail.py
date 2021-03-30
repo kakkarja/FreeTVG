@@ -10,7 +10,7 @@ def composemail(pth: str):
     pth = os.path.join(pth, 'Registration.txt')
     with open(pth, 'w') as reg:
         reg.write(c)
-    recipient = 'kakkarja.minder@gmail.com' 
+    recipient = 'Dev_Reg_Email' 
     subject = 'REG:[TVG-Registration]'
     body = f"This is encryption of the User and Serial number of this PC:\n{c}\n\n"
     webbrowser.open(f'mailto:{recipient}?subject={subject}&body={parse.quote(body)}', new = 1)
