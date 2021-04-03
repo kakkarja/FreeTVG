@@ -9,12 +9,8 @@ from TreeView import TreeView as tv
 import sys
 import os
 import re
-from FileFind import filen
 from mdh import convhtml
-import emo
 from datetime import datetime as dt
-import ctypes
-import RegMail
 
 class TreeViewGui:
     """
@@ -25,7 +21,6 @@ class TreeViewGui:
     MARK = False
     MODE = False
     GEO = None
-    EMOP = None
     def __init__(self, root, filename):
         self.filename = filename
         self.root = root
@@ -85,18 +80,15 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-bracketleft>', self.fcsent)
         self.root.bind_all('<Control-Key-bracketright>', self.temp)
         self.root.bind_all('<Control-Key-g>', self.fcsent)
-        self.root.bind_all('<Control-Key-semicolon>', self.emoj)
         self.root.bind_all('<Control-Key-backslash>', self.fcsent)
         self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.root.bind_all('<Shift-Return>', self.inenter)
         self.root.bind_all('<Control-Key-F2>', self.fcsent)
-        self.root.bind_all('<Control-Key-F1>', self.fcsent)
         self.root.bind_class('TButton', '<Enter>', self.ttip)
         self.root.bind_class('TButton', '<Leave>', self.leave)
         self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
         self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
         self.root.bind_all('<Control-Key-F3>', self.fcsent)
-        self.root.bind_all('<Control-Key-F4>', self.compose)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -246,7 +238,7 @@ class TreeViewGui:
         self.button28 = ttk.Button(self.frb2, text = 'Template', width = 3, command = self.temp)
         self.button28.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button28'] = self.button28
-        self.button29 = ttk.Button(self.frb2, text = 'Emoji', width = 3, command = self.emoj)
+        self.button29 = ttk.Button(self.frb2, text = 'Emoji', width = 3, command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
         self.button29.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button29'] = self.button29
         self.button30 = ttk.Button(self.frb2, text = 'HTML View', width = 3, command = self.htmlview)
@@ -377,22 +369,6 @@ class TreeViewGui:
                        'parent': 'Create parent',
                        'child': 'Create child ["Child" for positioning]'
                        }
-        
-    def compose(self, event =  None):
-        msg = """If you have paid for extra modules to work, you need to send email for registration! [User Name and Serial Number will be acquired and encrypted]"""
-        ask = messagebox.askyesno('TreeViewGui', msg)
-        try:
-            if ask:
-                RegMail.composemail(os.getcwd().rpartition('\\')[0])
-            else:
-                messagebox.showinfo('TreeViewGui', 'Email compose for registration is aborted!')
-        except:
-            pth = os.path.join(os.getcwd().rpartition('\\')[0], 'Registration.txt')
-            with open(pth, 'wb') as reg:
-                regis = RegMail.RegKey.writeck(RegMail.RegKey.ckuserserial())
-                reg.write(regis)
-            pth = pth.rpartition("\\")[0]
-            messagebox.showinfo('TreeViewGui', f'Please send this file "Registration.txt" in folder:\n{pth}\nto kakkarja.minder@gmail.com')
             
     def ldmode(self, event = None):
         # Dark mode for easing the eye.
@@ -711,10 +687,6 @@ class TreeViewGui:
                 self.oriset()
             elif event.keysym == 'backslash':
                 self.htmlview()
-            elif event.keysym == 'question':
-                self.scaling()
-            elif event.keysym == 'F1':
-                self.help()
             elif event.keysym == 'F2':
                 self.hidbs()
             elif event.keysym == 'F3':
@@ -1691,22 +1663,7 @@ class TreeViewGui:
                 os.remove(f'{self.filename}_hid.json')
                 self.spaces()
                 messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
-            
-    def emoj(self, event = None):
-        # Can call emoji app for pasting in Editor.
-        # Only for Editor mode.
-        
-        emo.main(self, TreeViewGui.EMOP)
-    
-    def free(self):
-        # To lock binding keys while withdraw, 
-        # and release it when deiconify. 
-        
-        if TreeViewGui.FREEZE is False:
-            TreeViewGui.FREEZE = True
-        else:
-            TreeViewGui.FREEZE = False
-            
+                
     def lookup(self, event = None):
         # To lookup word on row and also on editor mode.
         
@@ -2182,11 +2139,6 @@ class TreeViewGui:
                     else:
                         with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
                             geo.write(str({'geo': TreeViewGui.GEO}).encode())
-            if emo.Emo.status is False:
-                emo.Emo.status = True
-                emo.Emo.paste = None
-                emo.Emo.mainon.destroy()
-            os.remove(os.path.join(ori, 'pid.tvg'))
             self.root.destroy()
         else:
             messagebox.showerror('TreeViewGui', 'Do not exit before a function end!!!')
@@ -2200,22 +2152,23 @@ class TreeViewGui:
                 color = rd.read()
         else:
             color = colorchooser.askcolor()[1]
-        rgb = [int(f'{i}{j}', 16)/255 for i, j in list(zip(color[1:][0::2], color[1:][1::2]))]
-        rgb = True if round(((1/2) * (max(rgb) + min(rgb))) * 100) < 47 else False
-        if  rgb:
-            self.text.config(foreground = 'white')
-            self.text.config(insertbackground = 'white')
-            self.listb.config(foreground = 'white')
-        else:
-            self.text.config(foreground = 'black')
-            self.text.config(insertbackground = 'black')
-            self.listb.config(foreground = 'black')
-        self.text.config(bg = color)
-        self.listb.config(bg = color)
-        del rgb
-        if wr:
-            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
-                thm.write(color)
+        if color:
+            rgb = [int(f'{i}{j}', 16)/255 for i, j in list(zip(color[1:][0::2], color[1:][1::2]))]
+            rgb = True if round(((1/2) * (max(rgb) + min(rgb))) * 100) < 47 else False
+            if  rgb:
+                self.text.config(foreground = 'white')
+                self.text.config(insertbackground = 'white')
+                self.listb.config(foreground = 'white')
+            else:
+                self.text.config(foreground = 'black')
+                self.text.config(insertbackground = 'black')
+                self.listb.config(foreground = 'black')
+            self.text.config(bg = color)
+            self.listb.config(bg = color)
+            del rgb
+            if wr:
+                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
+                    thm.write(color)
                     
     def clb(self, event, wr = True):
         # Setting font for text and listbox.
@@ -2303,57 +2256,6 @@ class TreeViewGui:
                 messagebox.showinfo('TreeViewGui', 'All set back to original setting!')
             else:
                 messagebox.showinfo('TreeViewGui', 'None change yet!')
-                
-    def scaling(self, event = None):
-        # Scaling the appearance of TVG to accomadate resolution of a pc.
-        
-        dpi = 1
-        maxscale = int(dpi) + 1
-        scl = []
-        for i in range(maxscale):
-            for k in range(10):
-                scl.extend([float(f'{i}.{k}{j}') for j in range(10)])
-        scl = scl[10:]+[maxscale]
-        if self.lock is False:        
-            self.lock = True
-            class MyDialog(simpledialog.Dialog):
-            
-                def body(self, master):
-                    self.title('Choose Scale')
-                    Label(master, text="Scale: ").grid(row=0, column = 0, sticky = E)
-                    self.e1 = ttk.Combobox(master, state = 'readonly')
-                    self.e1['values'] = scl
-                    self.e1.current(scl.index(dpi))
-                    self.e1.grid(row=0, column=1)
-                    return self.e1
-
-                def apply(self):
-                    self.result = self.e1.get()
-                    
-            d = MyDialog(self.root)
-            self.lock = False
-            path = os.path.join(os.getcwd().rpartition('\\')[0], 'scale.tvg')
-            if d.result:
-                with open(path, 'w') as s:
-                    s.write(str(d.result))
-                scal(self)
-            else:
-                askd = messagebox.askyesno('TreeViewGui', 'Want delete recorded scale?')
-                if askd:
-                    if os.path.isfile(path):
-                        os.remove(path)
-                        messagebox.showinfo('TreeViewGui', 'Recorded scale file deleted!')
-                    else:
-                        messagebox.showinfo('TreeViewGui', 'No Recorded scale yet!')
-                else:
-                    messagebox.showinfo('TreeViewGui', 'Scaling aborted!')
-                    
-    def help(self, event = None):
-        #Tutorial help.
-        
-        dst =  os.path.join(os.getcwd().rpartition('\\')[0], 'TVG Tutorial.pdf')
-        if os.path.isfile(dst):
-            os.startfile(dst)
             
     def messages(self, m: str, t_out: int):
         # Message for informing.
@@ -2375,45 +2277,6 @@ class TreeViewGui:
         tx = m
         lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'gray30', fg = 'grey97')
         lab.pack(fill = 'both', expand = 1)    
-                    
-def scal(t):
-    # Need to restart after scaling.
-    
-    ori = os.getcwd().rpartition('\\')[0]
-    t.tvgexit()
-    os.chdir(ori)
-    main()
-    
-def chkpid():
-    # Check if pid is exist.
-    
-    import subprocess
-    try:
-        if 'pid.tvg' in os.listdir():
-            with open('pid.tvg') as rp:
-                pnam = int(rp.read())
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW            
-            pnam = f'powershell -Command Get-Process -Id {pnam}'
-            prnms = subprocess.run(pnam, startupinfo = startupinfo, stdout = subprocess.PIPE, stderr = subprocess.PIPE, stdin = subprocess.PIPE, text = True)
-            if not prnms.stderr and 'Tree View Gui' in  prnms.stdout:
-                del pnam
-                del prnms
-                del startupinfo
-                return False
-            else:
-                del pnam
-                del prnms
-                del startupinfo
-                return True
-        else:
-            return True
-    except Exception as e:
-        root = Tk()
-        root.withdraw()
-        root.wm_iconbitmap(default = filen('TVG.ico'))
-        messagebox.showerror('TreeViewGui', f'{e}')
-        root.destroy()
         
 def askfile(root):
     # Asking file for creating or opening initial app start.
@@ -2442,60 +2305,43 @@ def askfile(root):
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
-    if chkpid():
-        #if os.path.isdir('TVGPro') is False:
-            #os.mkdir('TVGPro')
-        emop = filen('emoj.txt')
-        with open('pid.tvg', 'w') as wid:
-            wid.write(str(os.getpid()))
-        ctypes.windll.shcore.SetProcessDpiAwareness(1)
-        root = Tk()
-        if 'scale.tvg' in os.listdir():
-            with open('scale.tvg') as scl:
-                gs = float(scl.read())
-            root.tk.call('tk', 'scaling', gs)
-        root.wm_iconbitmap(default = filen('TVG.ico'))
-        root.withdraw()
-        if 'lastopen.tvg' in os.listdir():
-            root.update()
-            ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
-            if ask:
-                with open('lastopen.tvg', 'rb') as lop:
-                    rd = eval(lop.read().decode('utf-8'))
-                filename = rd['lop']
-            else:
-                os.remove('lastopen.tvg')
-                filename = askfile(root)
+    #if os.path.isdir('TVGPro') is False:
+        #os.mkdir('TVGPro')
+    root = Tk()
+    root.withdraw()
+    if 'lastopen.tvg' in os.listdir():
+        root.update()
+        ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
+        if ask:
+            with open('lastopen.tvg', 'rb') as lop:
+                rd = eval(lop.read().decode('utf-8'))
+            filename = rd['lop']
         else:
-            filename = askfile(root)    
-        if filename:
-            filename = filename.title()
-            if f'{filename}_tvg' not in os.listdir():
-                try:
-                    os.mkdir(f'{filename}_tvg')
-                    os.chdir(f'{filename}_tvg')
-                except:
-                    os.chdir(f'{filename}_tvg')
-            else:
-                os.chdir(f'{filename}_tvg')
-            begin = TreeViewGui(root = root, filename = filename)
-            begin.EMOP = emop
-            begin.root.deiconify()
-            if f'{filename}_hid.json' in os.listdir():
-                begin.hidform()
-                begin.infobar()
-            else:
-                begin.view()
-            begin.text.edit_reset()            
-            begin.root.mainloop()
-        else:
-            messagebox.showwarning('File', 'No File Name!')
-            root.destroy()
+            os.remove('lastopen.tvg')
+            filename = askfile(root)
     else:
-        root = Tk()
-        root.wm_iconbitmap(default = filen('TVG.ico'))
-        root.withdraw()
-        messagebox.showinfo('TreeViewGui', 'Treeview Gui is already open!', parent = root)
+        filename = askfile(root)    
+    if filename:
+        filename = filename.title()
+        if f'{filename}_tvg' not in os.listdir():
+            try:
+                os.mkdir(f'{filename}_tvg')
+                os.chdir(f'{filename}_tvg')
+            except:
+                os.chdir(f'{filename}_tvg')
+        else:
+            os.chdir(f'{filename}_tvg')
+        begin = TreeViewGui(root = root, filename = filename)
+        begin.root.deiconify()
+        if f'{filename}_hid.json' in os.listdir():
+            begin.hidform()
+            begin.infobar()
+        else:
+            begin.view()
+        begin.text.edit_reset()            
+        begin.root.mainloop()
+    else:
+        messagebox.showwarning('File', 'No File Name!')
         root.destroy()
         
 if __name__ == '__main__':
