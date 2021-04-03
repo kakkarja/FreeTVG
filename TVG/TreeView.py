@@ -4,7 +4,7 @@
 import re
 import datetime
 import os
-from DataB import Datab as db
+from .DataB import Datab as db
 
 class TreeView:
     """

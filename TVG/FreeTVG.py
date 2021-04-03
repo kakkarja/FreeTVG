@@ -5,11 +5,12 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import font
 from tkinter import simpledialog, messagebox, colorchooser
-from TreeView import TreeView as tv
+from .TreeView import TreeView as tv
 import sys
 import os
 import re
-from mdh import convhtml
+from .mdh import convhtml
+from .DataB import Datab as db
 from datetime import datetime as dt
 
 class TreeViewGui:
@@ -1107,8 +1108,6 @@ class TreeViewGui:
             
     def loadbkp(self, event = None):
         # Load any backup data.
-        
-        from DataB import Datab as db
         
         self.hidcheck()
         if self.unlock:
@@ -2343,6 +2342,3 @@ def main():
     else:
         messagebox.showwarning('File', 'No File Name!')
         root.destroy()
-        
-if __name__ == '__main__':
-    main()
