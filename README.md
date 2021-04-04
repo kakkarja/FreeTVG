@@ -5,8 +5,8 @@
 ```pip install FreeTVG-karjakak```
 ## Usage
 ```Python
-import TVG
+from TVG import main
 
 # Start TVG outline note
-TVG.main()
+main()
 ```
