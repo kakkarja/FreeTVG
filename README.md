@@ -9,7 +9,7 @@
 * ```pip install -U FreeTVG-karjakak```
 * **There new function for Tutuorial TVG [Control+F1]**
 * **For trial purpose:**
-    * **Compose email for registration [Control+F2]**
+    * **Compose email for registration [Control+F4]**
         * **Will be sent link for download after receiving registration mail from user.**
     * **Full functions of TVG++ [For 7 days]:**
         * **Send Note - with Telethon [Telegram wrapper]**
