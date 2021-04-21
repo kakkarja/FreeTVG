@@ -30,3 +30,7 @@ from TVG import main
 # Start TVG outline note
 main()
 ```
+
+## Changes:
+* **Tutorial TVG.pdf is updated**
+* **Clean-up some comment line**

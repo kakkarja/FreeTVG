@@ -12,6 +12,7 @@ import re
 from .mdh import convhtml
 from .DataB import Datab as db
 from datetime import datetime as dt
+from .RegMail import composemail
 
 class TreeViewGui:
     """
@@ -84,12 +85,14 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-backslash>', self.fcsent)
         self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.root.bind_all('<Shift-Return>', self.inenter)
+        self.root.bind_all('<Control-Key-F1>', self.fcsent)
         self.root.bind_all('<Control-Key-F2>', self.fcsent)
         self.root.bind_class('TButton', '<Enter>', self.ttip)
         self.root.bind_class('TButton', '<Leave>', self.leave)
         self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
         self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
         self.root.bind_all('<Control-Key-F3>', self.fcsent)
+        self.root.bind_all('<Control-Key-F4>', self.fcsent)
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -691,7 +694,11 @@ class TreeViewGui:
             elif event.keysym == 'F2':
                 self.hidbs()
             elif event.keysym == 'F3':
-                self.ldmode()            
+                self.ldmode()
+            elif event.keysym == 'F1':
+                self.tutorial()
+            elif event.keysym == 'F4':
+                self.send_reg()              
         else:
             if str(self.bt['button17'].cget('state')) == 'normal' and event.keysym  == 'n':
                 self.cmrows()
@@ -2275,7 +2282,23 @@ class TreeViewGui:
         frm.pack(fill = 'both', expand = 1)
         tx = m
         lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'gray30', fg = 'grey97')
-        lab.pack(fill = 'both', expand = 1)    
+        lab.pack(fill = 'both', expand = 1)
+    
+    def tutorial(self, event = None):
+        # Call for TVG tutorial pdf.
+        
+        pth = os.path.join(__file__.rpartition('\\')[0], 'Tutorial TVG.pdf')
+        if os.path.isfile(pth):
+            os.startfile(pth)
+    
+    def send_reg(self, event = None):
+        # Compose email for registration.
+        
+        try:
+            composemail()
+        except Exception as e:
+            messagebox.showerror('TreeViewGui', f'{e}')
+        
         
 def askfile(root):
     # Asking file for creating or opening initial app start.
@@ -2304,8 +2327,6 @@ def askfile(root):
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
-    #if os.path.isdir('TVGPro') is False:
-        #os.mkdir('TVGPro')
     root = Tk()
     root.withdraw()
     if 'lastopen.tvg' in os.listdir():

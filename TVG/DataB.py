@@ -129,20 +129,3 @@ class Datab:
             return adb.values()
         if adb:
             adb.clear()
-            
-                
-if __name__ == '__main__':
-    a = Datab(os.path.join(os.getcwd(),'coba'))
-    
-    print(a)
-    a.createdb({'mantaaap': 'keren'})
-    a.indata({'keren': 'mantaaap'})
-    print(a.totalrecs())
-    print(list(a.loadall()))
-    print(list(a.loadkeys()))
-    print(list(a.loadvalues()))
-    print(a.takedat('keren'))
-    a.deldata('mantaaap')
-    print(a.loadall())
-    print(a.totalrecs())
-    a.deldb()
