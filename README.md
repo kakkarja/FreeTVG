@@ -21,16 +21,22 @@
         * **Open - TVG note decryption**
             * **Can save or just for viewing.**
         * **Emoji - can add emoji in TVG note**
-        
-
 ## Usage
+**With script:**
 ```Python
 from TVG import main
 
 # Start TVG outline note
 main()
 ```
-
+**Without script:**
+* **Press keyboard buttons at the same time => [(Windows Logo) + "r"].**
+    * **Open "Run" window.**
+    * **In "open" field key in "TVG".**
+    * **Press "ok" button.**
+* **Create TVG folder by default in "\user\Documents" or "\user".**
+    * **Every TVG text note that created will be saved in TVG folder.**
 ## Changes:
-* **Tutorial TVG.pdf is updated**
-* **Clean-up some comment line**
+* **Tutorial TVG.pdf is updated.**
+* **Clean-up some comment line.**
+* **Can run TVG directly without creating a script.**

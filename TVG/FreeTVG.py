@@ -2323,10 +2323,30 @@ def askfile(root):
         return d.result
     else:
         return None
-        
+
+def findpath():
+    # Select default path for TVG.
+    
+    pth = os.path.expanduser('~\\Documents')
+    if os.path.isdir(pth):
+        pth = os.path.join(pth, 'TVG')
+        if os.path.isdir(pth):
+            os.chdir(pth)
+        else:
+            os.mkdir(pth)
+            os.chdir(pth)
+    else:
+        pth = os.path.join(os.path.expanduser('~'), 'TVG')
+        if os.path.isdir(pth):
+            os.chdir(pth)
+        else:
+            os.mkdir(pth)
+            os.chdir(pth)
+                
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
+    findpath()
     root = Tk()
     root.withdraw()
     if 'lastopen.tvg' in os.listdir():
