@@ -82,7 +82,6 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-bracketleft>', self.fcsent)
         self.root.bind_all('<Control-Key-bracketright>', self.temp)
         self.root.bind_all('<Control-Key-g>', self.fcsent)
-        self.root.bind_all('<Control-Key-backslash>', self.fcsent)
         self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.root.bind_all('<Shift-Return>', self.inenter)
         self.root.bind_all('<Control-Key-F1>', self.fcsent)
@@ -168,13 +167,6 @@ class TreeViewGui:
         self.button17 = ttk.Button(self.bframe, text = 'CPP', width = 3, command = self.cmrows)
         self.button17.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button17'] = self.button17
-        self.button18 = ttk.Button(self.bframe, text = 'Send Note', width = 3, 
-                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
-        self.button18.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button18'] = self.button18
-        self.button19 = ttk.Button(self.bframe, text = 'Look Up', width = 3, command = self.lookup)
-        self.button19.pack(side = LEFT, pady = (2, 3), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button19'] = self.button19
         
         # 4th frame for below buttons.
         # Frame for second row buttons.
@@ -198,56 +190,41 @@ class TreeViewGui:
         self.button2 = ttk.Button(self.frb1, text = 'Down', width = 3, command = self.movedown)
         self.button2.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button2'] = self.button2
-        self.button12 = ttk.Button(self.frb1, text = 'Printing', width = 3, command = self.saveaspdf)
-        self.button12.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button12'] = self.button12
         self.button14 = ttk.Button(self.frb1, text = 'Hide Parent', width = 3, command = self.hiddenchl)
         self.button14.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button14'] = self.button14
         self.button15 = ttk.Button(self.frb1, text = 'Clear hide', width = 3, command = self.delhid)
         self.button15.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button15'] = self.button15
-        self.button20 = ttk.Button(self.frb1, text = 'Date-Time', width = 3, command = self.dattim)
-        self.button20.pack(side = LEFT, pady = (0, 3), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button20'] = self.button20        
         
         # 7th Frame
         # For third row  of buttons
         self.frb2 = ttk.Frame(self.root)
         self.frb2.pack(fill = X)
-        self.button21 = ttk.Button(self.frb2, text = 'Save', width = 3, 
-                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
-        self.button21.pack(side = LEFT, pady = (0, 2), padx = (1, 1), fill = 'x', expand = 1)
-        self.bt['button21'] = self.button21
-        self.button22 = ttk.Button(self.frb2, text = 'Open', width = 3, 
-                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
-        self.button22.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button22'] = self.button22          
         self.button23 = ttk.Button(self.frb2, text = 'Create file', width = 3, command = self.createf)
-        self.button23.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
+        self.button23.pack(side = LEFT, pady = (0, 2), padx = (1, 1), fill = 'x', expand = 1)
         self.bt['button23'] = self.button23
         self.button24 = ttk.Button(self.frb2, text = 'Editor', width = 3, command = self.editor)
         self.button24.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button24'] = self.button24
         self.button25 = ttk.Button(self.frb2, text = 'Un/Wrap', width = 3, command = self.wrapped)
         self.button25.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button25'] = self.button25        
-        self.button26 = ttk.Button(self.frb2, text = 'Calculator', width = 3, 
-                                   command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
-        self.button26.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button26'] = self.button26
+        self.bt['button25'] = self.button25
         self.button27 = ttk.Button(self.frb2, text = 'Ex', width = 3, command = self.editex)
         self.button27.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button27'] = self.button27
         self.button28 = ttk.Button(self.frb2, text = 'Template', width = 3, command = self.temp)
         self.button28.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
         self.bt['button28'] = self.button28
-        self.button29 = ttk.Button(self.frb2, text = 'Emoji', width = 3, command = lambda: self.messages('<<TVG>>\n\nNot available\n\nin free version!', 2000))
-        self.button29.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button29'] = self.button29
-        self.button30 = ttk.Button(self.frb2, text = 'HTML View', width = 3, command = self.htmlview)
-        self.button30.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
-        self.bt['button30'] = self.button30
+        self.button20 = ttk.Button(self.frb2, text = 'Date-Time', width = 3, command = self.dattim)
+        self.button20.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
+        self.bt['button20'] = self.button20
+        self.button19 = ttk.Button(self.frb2, text = 'Look Up', width = 3, command = self.lookup)
+        self.button19.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
+        self.bt['button19'] = self.button19        
+        self.button12 = ttk.Button(self.frb2, text = 'Printing', width = 3, command = self.saveaspdf)
+        self.button12.pack(side = LEFT, pady = (0, 2), padx = (0, 1), fill = 'x', expand = 1)
+        self.bt['button12'] = self.button12
         self.stl.configure('TButton', font = 'verdana 8 bold')
         
         # 5th frame.
@@ -689,8 +666,6 @@ class TreeViewGui:
                 self.ft()
             elif event.keysym == 'slash':
                 self.oriset()
-            elif event.keysym == 'backslash':
-                self.htmlview()
             elif event.keysym == 'F2':
                 self.hidbs()
             elif event.keysym == 'F3':
@@ -1374,43 +1349,6 @@ class TreeViewGui:
                         convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
         except Exception as e:
             messagebox.showerror('TreeViewGui', f'{e}')
-    
-    def htmlview(self):
-        # Can view html file that created from Printing from every TVG folders.
-        
-        self.hidcheck()
-        if self.unlock:
-            if self.checkfile():
-                if self.lock is False:
-                    path = os.getcwd().rpartition('\\')[0]
-                    ltvg = [i for i in os.listdir(path) if '_tvg' in i]
-                    ghtm = {}
-                    for i in ltvg:
-                        if f'{i.rpartition("_")[0]}.html' in os.listdir(os.path.join(path,i)):
-                            ghtm[i] = f'{i.rpartition("_")[0]}.html'
-                        
-                    if ghtm:
-                        self.lock = True
-                        class MyDialog(simpledialog.Dialog):
-                        
-                            def body(self, master):
-                                self.title('Choose HTML File')
-                                Label(master, text="File: ").grid(row=0, column = 0, columnspan = 3, sticky = E)
-                                self.e1 = ttk.Combobox(master, state = 'readonly')
-                                self.e1['values'] = [f'{j}: {k}' for j, k in ghtm.items()]
-                                self.e1.current(0)
-                                self.e1.grid(row=0, column=1)
-                                return self.e1
-                        
-                            def apply(self):
-                                self.result = self.e1.get()
-                                            
-                        d = MyDialog(self.root)
-                        self.lock = False
-                        if d.result:
-                            os.startfile(os.path.join(path, d.result.partition(':')[0], d.result.partition(':')[2][1:]))
-                    else:
-                        messagebox.showinfo('TreeViewGui', 'Nothing yet!')
                 
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.

@@ -1,12 +1,11 @@
 # FreeTVG [Tree View Gui]
 
 ## **Tree View Gui is an outline note for viewing in tree structure.**
-### **Visit [TVG](https://treeviewgui.work)**
+### **Visit [TVG](https://treeviewgui.work) for tutorials and support :heart:**
 ## Installation
-```pip install FreeTVG-karjakak==1.1.15```
+```pip install FreeTVG-karjakak```
 
 **If wanted to have TVG++ for trial [7 days]**
-* ```pip install -U FreeTVG-karjakak```
 * **There new function for Tutuorial TVG [Control+F1]**
 * **For trial purpose:**
     * **Compose email for registration [Control+F4]**
@@ -40,3 +39,6 @@ main()
 * **Tutorial TVG.pdf is updated.**
 * **Clean-up some comment line.**
 * **Can run TVG directly without creating a script.**
+* **6 buttons deleted [Calculator, Send Note, Save, Open, Emoji, and ViewHTML].**
+    * **Free from annoying message pop-up. :pray:**
+    * **View HTML deleted as well, because the purpose is not much and basically the same as printing.**
