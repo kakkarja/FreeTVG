@@ -37,6 +37,7 @@ class TreeView:
                 file.write(f'{words}:\n')
             else:
                 print('Need to be string!!!')
+        del words
                 
     def insighttree(self):
         """
@@ -56,6 +57,7 @@ class TreeView:
                 else:
                     di[d] = (childs[re.match(r'\s+', reads[d]).span()[1]], 
                              reads[d][re.match(r'\s+', reads[d]).span()[1]:])
+            del reads, childs
             return di
         except Exception as e:
             raise e
@@ -77,9 +79,11 @@ class TreeView:
                     else:
                         di[d] = (childs[re.match(r'\s+', data[d]).span()[1]], 
                                  data[d][re.match(r'\s+', data[d]).span()[1]:])
+                del data, childs 
                 return di
         except Exception as e:
             raise e
+        del data
             
     def quickchild(self, words, child ):
         """
@@ -91,6 +95,7 @@ class TreeView:
                     file.write(f'{" " * self.childs[child]}-{words}\n')  
             else:
                 print('Need to be string!!!')
+        del words, child
                 
     def edittree(self, words, row = 0, child = None):
         """
@@ -109,6 +114,7 @@ class TreeView:
                             read[row] = f'{" " * self.childs[d[row][0]]}{d[row][1]}'
                             with open(f'{self.filename}.txt', 'w') as file:
                                 file.writelines(read)
+                            del read
                         else:
                             print(f'"row" must be int number and less or equal to {len(d)-1}!')
                     else:
@@ -121,12 +127,15 @@ class TreeView:
                         read[row] = f'{" " * self.parent[d[row][0]]}{d[row][1]}'
                         with open(f'{self.filename}.txt', 'w') as file:
                             file.writelines(read)
+                        del read
                     else:
-                        print(f'"row" must be int number and less or equal to {len(d)-1}!')                    
+                        print(f'"row" must be int number and less or equal to {len(d)-1}!')
+                del d
             else:
-                print('Need to be string!!!')                                
+                print('Need to be string!!!')
         except Exception as e:
             raise e
+        del words, row, child
             
     def addparent(self, words):
         """
@@ -139,8 +148,10 @@ class TreeView:
             read.append(f'{words}:\n')
             with open(f'{self.filename}.txt', 'w') as file:
                 file.writelines(read)
+            del read
         else:
             print('Need to be string!!!')
+        del words
             
     def delrow(self, row):
         """
@@ -155,8 +166,10 @@ class TreeView:
                     file.writelines(read)
             else:
                 print('The row is not exist!')
+            del read
         else:
             print('Need to be integer!')
+        del row
             
     def insertrow(self, words, row = 0, child = None):
         """
@@ -175,8 +188,10 @@ class TreeView:
                     file.writelines(read)
             else:
                 print('"row" need to be less or equal to {len(read)-1}')
+            del read
         else:
             print('Need to be string!!!')
+        del words, row, child
             
     def movetree(self, row, to):
         """
@@ -196,6 +211,7 @@ class TreeView:
                         read.insert(to, moving[0])
             with open(f'{self.filename}.txt', 'w') as file:
                 file.writelines(read)
+            del moving, read, row, to
     
     def movechild(self, row, child):
         """
@@ -211,16 +227,17 @@ class TreeView:
                     read[row] = f'{" " * self.childs[child]}{bond}' 
                     with open(f'{self.filename}.txt', 'w') as file:
                         file.writelines(read)
+                del row, child, read
                             
     def readtree(self):
         """
         Print out your TreeView in console.
         """
-        if self.filename:
-            with open(f'{self.filename}.txt') as file:
-                read = file.readlines()
-                for r in read:
-                    print(r)
+        with open(f'{self.filename}.txt') as file:
+            read = file.readlines()
+            for r in read:
+                print(r)
+        del read
                     
     def fileread(self, file):
         """
@@ -241,32 +258,33 @@ class TreeView:
         If you use existing TreeView structure, all that has been written will be lost.
         The new file will overwrite the existing one.
         """
-        if file:
-            try:
-                if isinstance(file, dict):
-                    file = list(file.values())
+        try:
+            if isinstance(file, dict):
+                file = list(file.values())
 
-                if isinstance(file, list):
-                    with open(f'{self.filename}.txt', 'w') as wfile:
-                        for f in file:
-                            span, word = f
-                            if span == 'parent':
-                                if word[-2:] == ':\n' :
-                                    wfile.write(f'{word}')
-                                else:
-                                    wfile.write(f'{word}:\n')
-                            elif span in self.childs:
-                                if  word[0] == '-' and word[-1] == '\n':
-                                    wfile.write(f'{" " * self.childs[span]}{word}')
-                                else:
-                                    wfile.write(f'{" " * self.childs[span]}-{word}\n')
-                            elif span == 'space':
-                                wfile.write('\n')
-                else:
-                    print('Unidentified file!!!')
-            except Exception as e:
-                raise e
-                
+            if isinstance(file, list):
+                with open(f'{self.filename}.txt', 'w') as wfile:
+                    for f in file:
+                        span, word = f
+                        if span == 'parent':
+                            if word[-2:] == ':\n' :
+                                wfile.write(f'{word}')
+                            else:
+                                wfile.write(f'{word}:\n')
+                        elif span in self.childs:
+                            if  word[0] == '-' and word[-1] == '\n':
+                                wfile.write(f'{" " * self.childs[span]}{word}')
+                            else:
+                                wfile.write(f'{" " * self.childs[span]}-{word}\n')
+                        elif span == 'space':
+                            wfile.write('\n')
+                        del span, word, f
+            else:
+                print('Unidentified file!!!')
+        except Exception as e:
+            raise e
+        del file
+            
     def backuptv(self):
         """
         Backup TreeView structure in json database file. The backup max is 10 records only.
@@ -286,6 +304,7 @@ class TreeView:
                     dbs.indata(do)
                     key = sorted(list(dbs.loadkeys()))[0]
                     dbs.deldata(key)
+            del log, data, do, dbs
         except Exception as e:
             raise e
             
@@ -304,6 +323,8 @@ class TreeView:
                 if row <= dbs.totalrecs()-1:
                     key = sorted(list(dbs.loadkeys()))[row]
                     return {n: tuple(w)  for n,w in enumerate(dbs.takedat(key))}
+            del key
+        del dbs, filename, row, stat
                 
     def checked(self, row):
         """ 
@@ -318,7 +339,7 @@ class TreeView:
                     if not callrows is None and row in callrows:
                         if all(callrows[row][0] != a for a in['parent', 'space']):
                             gety = ''
-                            if locale.getdefaultlocale()[1] == 'cp65001':                                
+                            if locale.getdefaultlocale()[1] == 'cp65001':  
                                 stc = chr(10004)
                             else:
                                 stc = '«[DONE]»'
@@ -334,8 +355,10 @@ class TreeView:
                                 convert[1] = gety                         
                                 callrows[row] = tuple(convert)
                                 self.fileread(callrows)
+                            del gety, stc, convert
                 except Exception as e:
                     raise e
+                del callrows
                     
     def insertspace(self, row):
         """
@@ -348,4 +371,72 @@ class TreeView:
                     read = file.readlines()
                     read.insert(row, '\n')
                 with open(f'{self.filename}.txt', 'w') as file:
-                    file.writelines(read) 
+                    file.writelines(read)
+                del read
+            del d, row
+                    
+if __name__ == '__main__':
+    """
+    For preview purpose to see result of using TreeView
+    """
+    import os
+    from pprint import pprint 
+    
+    w = 'Amazing Grace'
+    tv = TreeView('testtv')
+    tv.writetree(w)
+    for i in range(5):
+        tv.quickchild(w, child = f'child{i}')
+    tv.edittree('Amazing Grace, how sweet the sound')
+    tv.edittree('Mantaaaaaaap!', row = 4, child = 'child2')
+    tv.addparent('Wow good job')
+    tv.edittree('Wow good job buddy', row = 6)
+    tv.quickchild('Totally awesome', child = 'child1')
+    tv.quickchild('This is quick child edit', child = 'child2')
+    tv.quickchild('Thank You', child = 'child1')
+    tv.delrow(8)
+    tv.insertrow('God bless you', row = 8, child = 'child1' )
+    tv.movetree(4, 6)
+    tv.movechild(6, child = 'child1')
+    tv.readtree()
+    pprint(tv.insighttree())
+    print()
+    tv.readtree()
+    tv.backuptv()
+    nf = TreeView('testftv')
+    file = {0:('parent', 'This is the beginning of TreeView structure'),
+            1:('child1', '-This is the child structure\n'),
+           }
+    nf.fileread(file)
+    nf.checked(1)
+    pprint(nf.insighttree())
+    print()
+    nf.checked(1)
+    pprint(nf.insighttree())
+    print()
+    nf.readtree()
+    ans = input('Overwrite Data? ')
+    if isinstance(ans, str):
+        if ans.lower() == 'y':
+            nf.loadbackup('testtv', stat = True)
+            pprint(nf.insighttree())
+            print()
+            nf.readtree()
+        else:
+            pprint(nf.loadbackup('testtv'))
+    
+    if 'testtv.txt' in os.listdir():
+        os.remove('testtv.txt')
+        print('Done')
+    else:
+        print('Nothing')
+    if 'testftv.txt' in os.listdir():
+        os.remove('testftv.txt')
+        print('Done')
+    else:
+        print('Nothing')
+    if 'testtv.json' in os.listdir():
+        os.remove('testtv.json')
+        print('Done')
+    else:
+        print('Nothing')    

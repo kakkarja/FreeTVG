@@ -387,6 +387,7 @@ class TreeViewGui:
                 self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), wr = False)
             with open(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'), 'w') as ty:
                 ty.write('ease')
+            del oribg, chbg, orifg, chfg
         else:
             self.stl.configure('.', background = oribg,
                                foreground = orifg,
@@ -401,6 +402,7 @@ class TreeViewGui:
             self.stl.map('TCombobox', foreground = [('focus', 'white')],
                          fieldbackground = [('focus', 'dark blue'),
                                             ('readonly', oribg),
+                                            ('disabled', 'white'),
                                            ],
                          background = [('active', '#eeebe7')],
                         )
@@ -408,6 +410,7 @@ class TreeViewGui:
             self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
             self.labcor.config(bg = 'White', fg = orifg)
             os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'))
+            del oribg, chbg, orifg, chfg
     
     def ttip(self, event =  None):
         # Tooltip for TVG buttons.
@@ -429,6 +432,7 @@ class TreeViewGui:
             master.geometry(f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}')
         a = Message(master= master, text = tx, justify = 'center', aspect = int(ft.measure(tx)*50), bg = 'white', font = 'verdana 7')
         a.pack(fill = 'both', expand = 1)
+        del tx, ft
         self.ai = self.root.after(3000, exit)
         self.tpl = master
         
@@ -438,6 +442,7 @@ class TreeViewGui:
         if self.ai and self.tpl:
             self.root.after_cancel(self.ai)
             self.tpl.destroy()
+        del self.ai, self.tpl
             
     def hidbs(self, event =  None):
         # Hide Buttons.
@@ -456,9 +461,9 @@ class TreeViewGui:
                 fr.pack(side = TOP, fill = 'x')
             self.stl.configure('TButton', font = 'verdana 8 bold')
             os.remove(pth)
-        self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)
+        self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)       
         self.fscr.pack(fill ='x')
-        del frm
+        del frm, pth
         
     def inenter(self, event):
         # For invoking any focus button or radiobutton
@@ -467,6 +472,7 @@ class TreeViewGui:
         fcs = str(event.widget).rpartition('!')[2]
         if ck[0] in fcs or ck[1] in fcs:
             event.widget.invoke()
+        del ck, fcs
             
     def undo(self, event = None):
         # Undo only in Editor.
@@ -503,7 +509,6 @@ class TreeViewGui:
         #      This is the format that will be converted appropriately. With
         #      no spaces after '\n'. And the period is needed for child. => to child1 [2 child]
         #      """
-        
         if self.text.get('1.0', END)[:-1]:
             gt = self.text.get('1.0', END)[:-1]
             keys = [k for k in gt.split('\n') if k and '.' not in k]
@@ -537,6 +542,7 @@ class TreeViewGui:
                 self.spaces()
             else:
                 messagebox.showinfo('TreeViewGui', 'Unable to convert!')
+            del gt, keys, x, values, conv, tvg
             
     def infobar(self, event = None):
         # Info Bar telling the selected rows in listbox.
@@ -553,7 +559,7 @@ class TreeViewGui:
             ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:12]
             self.info.set(f'{self.listb.curselection()[0]}: {ck[:-1]}...')
             self.text.see(f'{self.listb.curselection()[0]}.0')
-            del ck
+            del ck, tvg
         else:
             self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
                     
@@ -564,7 +570,7 @@ class TreeViewGui:
             return True
         else:
             return False
-        
+
     def mscrt(self, event = None):
         # Mouse scroll on text window, will sync with list box on the right.
         
@@ -681,6 +687,7 @@ class TreeViewGui:
                 self.hiddenchl()
             elif str(self.bt['button24'].cget('state')) == 'normal' and event.keysym  == '7':
                 self.editor()
+        del fcom
                 
     def radiobut(self, event = None):
         # These are the switches on radio buttons, to apply certain rule on child.
@@ -714,6 +721,7 @@ class TreeViewGui:
                 self.entry3.delete(0,END)
                 self.entry3.config(state = 'readonly')
             self.entry.selection_clear()
+        del case
 
     def focus(self, event = None):
         # Validation for Entry
@@ -725,7 +733,8 @@ class TreeViewGui:
                 return True
             else:
                 return False
-            
+            del case
+
     def scrd(self, event = None):
         #Scroll to the bottom on keyboard, down arrow button.
         
@@ -733,6 +742,7 @@ class TreeViewGui:
         a = eval(f'{a}')+0.01
         self.text.yview_moveto(str(a))
         self.listb.yview_moveto(str(a+0.01))
+        del a
         
     def scru(self, event = None):
         #Scroll to the first position on keyboard, up arrow button.
@@ -741,6 +751,7 @@ class TreeViewGui:
         a = eval(f'{a}')-0.01
         self.text.yview_moveto(str(a))
         self.listb.yview_moveto(str(a))
+        del a
         
     def view(self, event = None):
         # Viewing engine for most module fuction.
@@ -751,23 +762,24 @@ class TreeViewGui:
                 self.text.config(state = 'normal')
                 with open(f'{self.filename}.txt') as file:
                     rd = file.readlines()
-                    self.text.delete('1.0', END)
-                    nf = str(self.text.cget('font'))
-                    try:
-                        text_font = font.Font(self.root, font = nf, name = nf, exists=True)
-                    except:
-                        text_font = font.Font(self.root, font = nf, name = nf, exists=False)
-                    g = re.compile(r'\s+')
-                    em = text_font.measure(" ")
-                    for r in rd:
-                        gr = g.match(r)
-                        if gr and gr.span()[1] > 1:
-                            if str(gr.span()[1]) not in self.text.tag_names():
-                                bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
-                                self.text.tag_configure(f"{gr.span()[1]}", lmargin1=em, lmargin2=em+bullet_width)
-                            self.text.insert(END, r, f'{gr.span()[1]}')
-                        else:
-                            self.text.insert(END, r)
+                self.text.delete('1.0', END)
+                nf = str(self.text.cget('font'))
+                try:
+                    text_font = font.Font(self.root, font = nf, name = nf, exists=True)
+                except:
+                    text_font = font.Font(self.root, font = nf, name = nf, exists=False)
+                g = re.compile(r'\s+')
+                em = text_font.measure(" ")
+                for r in rd:
+                    gr = g.match(r)
+                    if gr and gr.span()[1] > 1:
+                        if str(gr.span()[1]) not in self.text.tag_names():
+                            bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
+                            self.text.tag_configure(f"{gr.span()[1]}", lmargin1=em, lmargin2=em+bullet_width)
+                        self.text.insert(END, r, f'{gr.span()[1]}')
+                    else:
+                        self.text.insert(END, r)
+                self.text.edit_reset()
                 self.text.config(state = 'disable')
                 vals = [f' {k}: {c[0]}' for k, c  in list(tvg.insighttree().items())]
                 self.listb.delete(0,END)
@@ -775,6 +787,7 @@ class TreeViewGui:
                     self.listb.insert(END, val)
                 self.text.yview_moveto(1.0)
                 self.listb.yview_moveto(1.0)
+                del tvg, rd, g, em, gr, vals, text_font
         except:
             self.text.insert(END, sys.exc_info()[1])
             self.text.config(state = 'disable')
@@ -814,6 +827,8 @@ class TreeViewGui:
                         messagebox.showinfo('TreeViewGui', 'Deleting directory is aborted!')
                 else:
                     messagebox.showerror('TreeViewGui', 'You are unable to delete present directory!!!')
+                del ori
+            del fi, ask, file
                     
         if self.lock is False:
             TreeViewGui.FREEZE = True        
@@ -839,18 +854,19 @@ class TreeViewGui:
                 chosen(d.result)
             else:
                 TreeViewGui.FREEZE = False
+            del files
                 
     def writefile(self, event = None):
         # Write first entry and on next updated line.
         # Write also on chosen row for update.
         
         self.hidcheck()
+        tvg = tv(self.filename)
+        cek = ['child', 'parent']        
         if self.unlock:
             if not self.checkfile():
                 if self.entry.get():
                     if not self.entry3.get():
-                        tvg = tv(self.filename)
-                        cek = ['child', 'parent']
                         if self.entry.get() not in cek:
                             tvg.writetree(self.entry.get())
                             self.entry.delete(0,END)
@@ -858,11 +874,9 @@ class TreeViewGui:
                     else:
                         messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created please choose parent first!')
                 else:
-                    messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created!')                
+                    messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created!')
             else:
                 try:
-                    tvg = tv(self.filename)
-                    cek = ['child', 'parent']
                     rw =  None
                     if self.entry3.get():
                         if self.entry.get() and self.entry.get() not in cek:
@@ -895,6 +909,8 @@ class TreeViewGui:
                         self.listb.see(rw)
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
+                del rw
+        del tvg, cek
                     
     def flb(self, event = None):
         # Set Mark for cheking row for edit.
@@ -908,9 +924,9 @@ class TreeViewGui:
         if self.unlock:
             try:
                 if self.checkfile():
-                    tvg = tv(self.filename)
                     if self.listb.curselection():
                         TreeViewGui.MODE = True
+                        tvg = tv(self.filename)
                         rw = self.listb.curselection()
                         if int(rw[0]) != 0: tvg.delrow(int(rw[0]))
                         self.spaces()
@@ -930,6 +946,7 @@ class TreeViewGui:
                                     self.listb.select_set(int(rw[0]))
                                     self.listb.see(int(rw[0]))
                                     self.text.see(f'{int(rw[0])}.0')
+                            del cp
                         else:
                             if len(ck) == 1:
                                 self.listb.select_set(0)
@@ -937,6 +954,7 @@ class TreeViewGui:
                                 self.listb.select_set(len(ck)-1)
                                 self.listb.see(len(ck)-1)
                                 self.text.see(f'{(len(ck)-1)}.0')
+                        del rw, ck, tvg
                         self.infobar()
             except:
                 self.text.config(state = 'normal')
@@ -964,6 +982,7 @@ class TreeViewGui:
                     except:
                         self.text.insert(END, 'Parent row is unable to be move to a child')
                         self.text.config(state = 'disable')
+                    del rw, tvg
                     self.infobar()
                         
     def insight(self, event = None):
@@ -979,8 +998,10 @@ class TreeViewGui:
                 self.text.delete('1.0', END)
                 for d in ins:
                     self.text.insert(END, f'{d}')
+                self.text.edit_reset()
                 self.text.config(state = 'disable')
-            
+                del tvg, ins
+                    
     def moveup(self, event = None):
         # Step up a row to upper row.
         
@@ -1006,6 +1027,8 @@ class TreeViewGui:
                                 self.listb.see(int(rw[0])-2)
                                 self.text.see(f'{(int(rw[0])-2)}.0')
                             self.infobar()
+                    del rw
+                del tvg, ck
                                 
     def movedown(self, event = None):
         # Step down a row to below row.
@@ -1035,6 +1058,8 @@ class TreeViewGui:
                                 self.listb.see(int(rw[0])+2)
                                 self.text.see(f'{(int(rw[0])+2)}.0')
                             self.infobar()
+                    del rw
+                del tvg, ck
                                 
     def insertwords(self, event = None):
         # Insert a record to any row appear above the assign row.
@@ -1059,6 +1084,9 @@ class TreeViewGui:
                                 self.spaces()
                                 self.listb.see(int(rw[0]))
                                 self.text.see(f'{int(rw[0])}.0')
+                                del rw
+                        del appr
+                del tvg, cek
                                  
     def checked(self, event = None):
         # To add checked unicode for finished task.
@@ -1066,8 +1094,8 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
             if self.listb.curselection():
+                tvg = tv(self.filename)
                 rw = self.listb.curselection()
                 tvg.checked(int(rw[0]))
                 self.view()
@@ -1075,6 +1103,7 @@ class TreeViewGui:
                 self.listb.activate(int(rw[0]))
                 self.listb.see(int(rw[0]))
                 self.text.see(f'{int(rw[0])}.0')
+                del tvg, rw
                 self.infobar()
             
     def backup(self, event = None):
@@ -1087,6 +1116,7 @@ class TreeViewGui:
                 tvg = tv(self.filename)
                 tvg.backuptv()
                 messagebox.showinfo('Backup', 'Backup done!')
+                del tvg
             
     def loadbkp(self, event = None):
         # Load any backup data.
@@ -1108,7 +1138,8 @@ class TreeViewGui:
                 self.text.delete('1.0', END)
                 self.text.insert(END, sys.exc_info())
                 self.text.config(state = 'disable')
-                
+            del tvg, dbs, row
+
     def copas(self, event = None):
         # Paste a row value to Entry for fixing value.
         
@@ -1125,6 +1156,7 @@ class TreeViewGui:
                     else:
                         if rd[int(rw[0])] != '\n':
                             self.entry.insert(END, rd[int(rw[0])][:-2])
+                del rw, rd
                         
     def cmrows(self):
         # Copy or move any rows to any point of a row within existing rows.
@@ -1143,12 +1175,14 @@ class TreeViewGui:
                             tvg = tv(f'{self.filename}')
                             wtvg = tvg.insighthidden(tak)
                             tvg.fileread(wtvg)
+                            del tak, tvg, wtvg
                             self.spaces()
                             self.infobar()
                         else:
                             messagebox.showinfo('TreeViewGui', 'Cannot create new file because is already exist!!!')
                     else:
                         messagebox.showinfo('TreeViewGui', 'Copying is aborted!')
+                    del askname
                 else:
                     if f'{flname.rpartition("_")[0]}.txt' in os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], flname)):
                         if f'{flname.rpartition("_")[0]}_hid.json' not in os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], flname)):
@@ -1169,8 +1203,10 @@ class TreeViewGui:
                         tvg = tv(f'{self.filename}')
                         wtvg = tvg.insighthidden(tak)
                         tvg.fileread(wtvg)
+                        del tak, tvg, wtvg
                         self.spaces()
-                        self.infobar()                        
+                        self.infobar()
+                del flname
                         
             TreeViewGui.FREEZE = True        
             self.lock = True
@@ -1195,7 +1231,8 @@ class TreeViewGui:
             if d.result:
                 chosen(d.result)
             else:
-                TreeViewGui.FREEZE = False            
+                TreeViewGui.FREEZE = False
+            del files, d.result
         else:
             self.hidcheck()
             if self.unlock:
@@ -1240,6 +1277,7 @@ class TreeViewGui:
                                                     rd.append(i)
                                         with open(f'{self.filename}.txt', 'w') as file:
                                             file.writelines(rd)
+                                        del rd, cop 
                                         self.spaces()
                                     else:
                                         with open(f'{self.filename}.txt') as file:
@@ -1261,6 +1299,7 @@ class TreeViewGui:
                                                     rd.append(i)
                                         with open(f'{self.filename}.txt', 'w') as file:
                                             file.writelines(rd)
+                                        del rd, cop
                                         self.spaces()
                                     for i in self.bt:
                                         if 'label' not in i and 'scrollbar' not in i:
@@ -1295,6 +1334,7 @@ class TreeViewGui:
                                     TreeViewGui.FREEZE = False
                                     if ask:
                                         messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
+                                del gcs, ask
                             else:
                                 for i in self.bt:
                                     if 'label' not in i and 'scrollbar' not in i:
@@ -1310,6 +1350,8 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
+                            del tvg, ins
+                        del ckc
                         self.infobar()
                     
     def saveaspdf(self):
@@ -1347,9 +1389,10 @@ class TreeViewGui:
                         convhtml(f'{self.filename}.txt', f'{self.filename}', fon, ckb = True)
                     else:
                         convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
+                del px, ck, sty, add, ask, fon
         except Exception as e:
             messagebox.showerror('TreeViewGui', f'{e}')
-                
+
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.
         # To appropriate the display better.
@@ -1391,17 +1434,20 @@ class TreeViewGui:
                                     num2 += 1
                             else:
                                 num2 += 1
-                        except Exception as e:
-                            messagebox.showerror('TreeViewGui', f'{e}')
-                            break
+                        except:
+                            messagebox.showerror('TreeViewGui', sys.exc_info())
+                            break    
                     if cks[0][0] == 'space':
                         tvg.delrow(0)
                         cks = tvg.insighttree()
                     if cks[len(cks)-1][0] == 'space':
                         tvg.delrow(len(cks)-1)
+                    del tvg , cks, num2
                     self.view()
                 else:
+                    del tvg, cks
                     self.view()
+                    
             else:
                 if self.listb.get(0, END):
                     self.listb.delete(0, END)            
@@ -1422,6 +1468,7 @@ class TreeViewGui:
             else:
                 self.unlock = False
                 messagebox.showinfo('TreeViewGui', 'This function has been terminated!!!')
+            del ans
         else:
             if self.unlock == False:
                 self.unlock = True
@@ -1431,8 +1478,8 @@ class TreeViewGui:
         
         import json
         
-        tvg = tv(self.filename)
         if f'{self.filename}_hid.json' in os.listdir():
+            tvg = tv(self.filename)
             with open(f'{self.filename}_hid.json') as jfile:
                 rd = dict(json.load(jfile))
             g = re.compile(r'\s+')
@@ -1461,12 +1508,14 @@ class TreeViewGui:
                         self.text.insert(END, i, f'{gr.span()[1]}')
                     else:
                         self.text.insert(END, i)
+                    del gr
                 self.text.config(state = 'disable')
                 vals = [f' {k}: {c[0]}' for k, 
                 c  in list(tvg.insighthidden(showt).items())]
                 self.listb.delete(0,END)
                 for val in vals:
                     self.listb.insert(END, val)
+                del rolrd, showt, text_font, vals, em
             else:
                 self.view()
                 rolrd = [i for i in list(rd.values()) if isinstance(i, list)]
@@ -1491,13 +1540,16 @@ class TreeViewGui:
                         self.text.insert(END, i, f'{gr.span()[1]}')
                     else:
                         self.text.insert(END, i)
+                    del gr
                 self.text.config(state = 'disable')
                 vals = [f' {k}: {c[0]}' for k, 
                 c  in list(tvg.insighthidden(ih).items())]
                 self.listb.delete(0,END)
                 for val in vals:
-                    self.listb.insert(END, val)                
-                    
+                    self.listb.insert(END, val)
+                del rolrd, showt, text_font, vals, em, ih
+            del tvg, rd, g, nf
+            
     def hiddenchl(self, event = None):
         # Create Hidden position of parent and its childs in json file.
         
@@ -1553,9 +1605,11 @@ class TreeViewGui:
                                 with open(f'{self.filename}_hid.json', 'w') as jfile:
                                     json.dump(hd | rev, jfile)
                                 self.hidform()
+                            del ask, rev
                         else:
                             self.listb.selection_clear(0, END)
                             messagebox.showinfo('TreeViewGui', 'Please choose Parent only!')
+                        del tvg, allrows, rows, hd, num
                     for i in self.bt:
                         if 'label' not in i and 'scrollbar' not in i:
                             if i not in ckc:
@@ -1595,6 +1649,7 @@ class TreeViewGui:
                             with open(f'{self.filename}_hid.json', 'w') as jfile:
                                 json.dump(rd | rev, jfile)
                             self.hidform()
+                            del rev
                         else:
                             os.remove(f'{self.filename}_hid.json')
                             self.spaces()
@@ -1603,6 +1658,7 @@ class TreeViewGui:
                     os.remove(f'{self.filename}_hid.json')
                     self.spaces()         
                     messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+                del rd, ans
             else:
                 os.remove(f'{self.filename}_hid.json')
                 self.spaces()
@@ -1655,7 +1711,7 @@ class TreeViewGui:
                                     self.text.focus()
                                 break
                         self.text.tag_delete(*['hw'])
-                        del ghw
+                        del ghw, idx
                         
                     if self.lock is False:
                         self.lock = True
@@ -1676,6 +1732,7 @@ class TreeViewGui:
                         self.lock = False
                         if d.result:
                             searchw(d.result)
+                        del d.result
             else:
                 if self.checkfile():
                     if self.entry.get():
@@ -1710,6 +1767,7 @@ class TreeViewGui:
                                         break
                                 else:
                                     sn += 1
+                        del tvg, dat, num, sn, sw
                     self.infobar()
     
     def dattim(self, event = None):
@@ -1733,14 +1791,17 @@ class TreeViewGui:
                             self.entry.insert(0, f'{dtt} {hold[22:]}')
                     except:
                         self.entry.delete(0, END)
-                        self.entry.insert(0, f'{dtt} {hold}')                        
+                        self.entry.insert(0, f'{dtt} {hold}')
+                del hold, gt
             else:
                 self.entry.insert(0, f'{dtt} ')
+            del dtt, ck
         elif str(self.text.cget('state')) == 'normal' and str(self.bt['button20'].cget('state')) == 'normal':
             dtt = f'[{dt.isoformat(dt.today().replace(microsecond = 0)).replace("T"," ")}]'
             self.text.insert(INSERT, f'{dtt} ')
             self.text.focus()
-            
+            del dtt
+
     def createf(self, name: str = None):
         # Creating new file not able to open existing one.
         
@@ -1772,10 +1833,13 @@ class TreeViewGui:
                     self.listb.delete(0, END)
                 else:
                     messagebox.showinfo('TreeViewGui', f'The file {mkd}/{fl.title()}.txt is already exist!')
+                del mkd, dr, files
             else:
                 messagebox.showinfo('TreeViewGui', 'Nothing created yet!')
+            del fl
         else:
             messagebox.showinfo('TreeViewGui', 'Create new file is aborted!')
+        del name
             
     def editex(self, event = None):
         # Edit existing file in the editor mode which can be very convinient and powerful.
@@ -1800,6 +1864,7 @@ class TreeViewGui:
                             self.text.insert(END, f'{c[ed[0]]}:{ed[1][1:]}')
                     self.text.see(self.text.index(INSERT))
                     os.remove(f'{self.filename}.txt')
+                    del tvg, edit, c
                 else:
                     if self.listb.curselection(): 
                         stor = int(self.listb.curselection()[0])
@@ -1817,8 +1882,11 @@ class TreeViewGui:
                                 else:
                                     break
                             self.editorsel = (stor, num)
+                            del num
+                        del stor, tvg, ckp,
                     else:
                         messagebox.showinfo('TreeViewGui', 'Please select a parent row first!')
+                del ask
         self.text.focus()
     
     def temp(self, event = None):
@@ -1839,8 +1907,10 @@ class TreeViewGui:
                         with open(dest, 'w') as wt:
                             wt.write(str([i for i in self.text.get('1.0', END)[:-1].split('\n') if i]))
                         messagebox.showinfo('TreeViewGui', f'Template {fname}.tvg saved!')
+                        del dest
                     else:
                         messagebox.showinfo('TreeViewGui', 'Save template is aborted!')
+                    del fname
                 else:
                     messagebox.showinfo('TreeViewGui', 'Nothing to be save!')
             else:
@@ -1862,7 +1932,9 @@ class TreeViewGui:
                                                 if event.widget.get().lower() in em.lower() and event.widget.get().lower() == em.lower()[:len(event.widget.get().lower())]:
                                                     event.widget.current(files.index(em))
                                             r -= 1
+                                        del r
                                     event.widget.icursor(index = idx)
+                                    del idx, gt
                             except Exception as e:
                                 messagebox.showwarning('TeleTVG', f'{e}')
                                     
@@ -1905,14 +1977,20 @@ class TreeViewGui:
                                             ind = float(self.text.index(INSERT))+float(tot)
                                             self.text.insert(f'{ind} lineend ', f'\n{pr}')
                                             tot += 1
+                                            del ind
+                                    del tot, gw
                                 del gf
                             else:
                                 messagebox.showerror('TreeViewGui', 'Template has been corrupted!')
+                            del path
                         else:
                             messagebox.showinfo('TreeViewGui', 'Loading template aborted!')
+                        del d.result
                     else:
                         self.lock = False
                         messagebox.showinfo('TreeViewGui', 'No templates yet!')
+                    del files
+            del ask, ori
         self.text.focus()
                         
     def editor(self):
@@ -1937,6 +2015,7 @@ class TreeViewGui:
                     self.store = None
                 self.text.edit_reset()
                 self.text.focus()
+                del ckb
             else:
                 try:
                     if self.text.get('1.0', END)[:-1]:
@@ -1976,6 +2055,7 @@ class TreeViewGui:
                                         tvg.fileread(combi | p3)
                                     else:
                                         tvg.fileread(combi)
+                                    del stor, tvg, p1, ed, ckc, et, p2, combi, p3
                                 else:
                                     tvg = tv(self.filename)
                                     p1 = tvg.insighttree()
@@ -2000,6 +2080,7 @@ class TreeViewGui:
                                     if len(ed) != len(p2):
                                         raise Exception('Not Editable!')
                                     tvg.fileread(p1 | p2)
+                                    del tvg, p1, et, ed, ckc, p2
                             else:
                                 tvg = tv(self.filename)
                                 ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
@@ -2023,6 +2104,7 @@ class TreeViewGui:
                                 if len(ed) != len(p2):
                                     raise Exception('Not Editable!')
                                 tvg.fileread(p2)
+                                del tvg, ed, et, ckc, p2
                             self.text.config(state = DISABLED)
                             for i in self.bt:
                                 if 'label' not in i and 'scrollbar' not in i:
@@ -2083,6 +2165,8 @@ class TreeViewGui:
                     else:
                         with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
                             geo.write(str({'geo': TreeViewGui.GEO}).encode())
+                    del ask
+            del ori
             self.root.destroy()
         else:
             messagebox.showerror('TreeViewGui', 'Do not exit before a function end!!!')
@@ -2096,23 +2180,22 @@ class TreeViewGui:
                 color = rd.read()
         else:
             color = colorchooser.askcolor()[1]
-        if color:
-            rgb = [int(f'{i}{j}', 16)/255 for i, j in list(zip(color[1:][0::2], color[1:][1::2]))]
-            rgb = True if round(((1/2) * (max(rgb) + min(rgb))) * 100) < 47 else False
-            if  rgb:
-                self.text.config(foreground = 'white')
-                self.text.config(insertbackground = 'white')
-                self.listb.config(foreground = 'white')
-            else:
-                self.text.config(foreground = 'black')
-                self.text.config(insertbackground = 'black')
-                self.listb.config(foreground = 'black')
-            self.text.config(bg = color)
-            self.listb.config(bg = color)
-            del rgb
-            if wr:
-                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
-                    thm.write(color)
+        rgb = [int(f'{i}{j}', 16)/255 for i, j in list(zip(color[1:][0::2], color[1:][1::2]))]
+        rgb = True if round(((1/2) * (max(rgb) + min(rgb))) * 100) < 47 else False
+        if  rgb:
+            self.text.config(foreground = 'white')
+            self.text.config(insertbackground = 'white')
+            self.listb.config(foreground = 'white')
+        else:
+            self.text.config(foreground = 'black')
+            self.text.config(insertbackground = 'black')
+            self.listb.config(foreground = 'black')
+        self.text.config(bg = color)
+        self.listb.config(bg = color)
+        if wr:
+            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
+                thm.write(color)
+        del color, rgb, path, wr
                     
     def clb(self, event, wr = True):
         # Setting font for text and listbox.
@@ -2129,6 +2212,7 @@ class TreeViewGui:
                     f = event[:(n + f.span()[0])] + '10' + event[(n + f.span()[1]):]
                 else:
                     f = event[:(n + f.span()[0])] + '40' + event[(n + f.span()[1]):]
+            del n
         else:
             f = re.search(r'\d+', event)
             fl = event[:f.span()[0]] + '11' + event[f.span()[1]:]
@@ -2155,6 +2239,7 @@ class TreeViewGui:
             self.spaces()
         else:
             self.hidform()
+        del ckf, fl, f
                 
     def reblist(self, fon: str):
         # Destroy Listbox and rebuild it again,
@@ -2173,7 +2258,7 @@ class TreeViewGui:
         self.listb.bind('<Up>', self.mscrl)
         self.listb.bind('<Down>', self.mscrl)
         self.listb.bind('<FocusIn>', self.flb)
-        
+        del fon
         
     def ft(self, event = None, path = None):
         # Initial starting fonts chooser.
@@ -2186,6 +2271,7 @@ class TreeViewGui:
                               '-font', self.text['font'], '-command', 
                               self.root.register(self.clb))
             self.root.tk.call('tk', 'fontchooser', 'show')
+        del path
             
     def oriset(self, event = None):
         # Set back to original setting of theme and font.
@@ -2200,28 +2286,9 @@ class TreeViewGui:
                 messagebox.showinfo('TreeViewGui', 'All set back to original setting!')
             else:
                 messagebox.showinfo('TreeViewGui', 'None change yet!')
-            
-    def messages(self, m: str, t_out: int):
-        # Message for informing.
-        
-        def exit(event = None):
-            root.destroy()        
-        root = Toplevel(self.root)
-        root.after(t_out, exit)
-        root.attributes('-topmost', 1)
-        wd = int(root.winfo_screenwidth()/2 - 250/2)
-        hg = int(root.winfo_screenheight()/3 - 250/3)
-        root.geometry(f'300x300+{wd}+{hg}')
-        root.overrideredirect(1)
-        a = Message(master= root)
-        a.pack()
-        a.tk_strictMotif(1)
-        frm = Frame(a, borderwidth = 7, bg = 'grey30', width = 250, height = 250)
-        frm.pack(fill = 'both', expand = 1)
-        tx = m
-        lab = Label(frm, text = tx, justify = 'center', anchor = 'center', font = 'verdana 15 bold', width = 250, height = 250, bg = 'gray30', fg = 'grey97')
-        lab.pack(fill = 'both', expand = 1)
-    
+            del ask
+        del lf, pth
+
     def tutorial(self, event = None):
         # Call for TVG tutorial pdf.
         
@@ -2236,8 +2303,7 @@ class TreeViewGui:
             composemail()
         except Exception as e:
             messagebox.showerror('TreeViewGui', f'{e}')
-        
-        
+         
 def askfile(root):
     # Asking file for creating or opening initial app start.
     

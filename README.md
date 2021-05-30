@@ -1,7 +1,6 @@
 # FreeTVG [Tree View Gui]
-
-## **Tree View Gui is an outline note for viewing in tree structure.**
-### **Visit [TVG](https://treeviewgui.work) for tutorials and support :heart:**
+## **Tree View Gui is an outline note for viewing in tree structure**
+### **Visit [TVG](https://treeviewgui.work) for tutorials and support**
 ## Installation
 ```pip install FreeTVG-karjakak```
 
@@ -19,7 +18,10 @@
             * **Can send it to other TVG++ user.**
         * **Open - TVG note decryption**
             * **Can save or just for viewing.**
-        * **Emoji - can add emoji in TVG note**
+        * **Emoji - can add emoj**
+        * **TEEn - Text Editor Encryption**
+            * **Encryption configuration.**
+            * **Encrypt your valuable datas e.g. passwords, etc.**
 ## Usage
 **With script:**
 ```Python
@@ -40,5 +42,6 @@ main()
 * **Clean-up some comment line.**
 * **Can run TVG directly without creating a script.**
 * **6 buttons deleted [Calculator, Send Note, Save, Open, Emoji, and ViewHTML].**
-    * **Free from annoying message pop-up. :pray:**
+    * **Free from annoying message pop-up.**
     * **View HTML deleted as well, because the purpose is not much and basically the same as printing.**
+* **Bugs fixed on overflowing memory usage.**
