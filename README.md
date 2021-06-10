@@ -2,9 +2,13 @@
 ## **Tree View Gui is an outline note for viewing in tree structure**
 ### **Visit [TVG](https://treeviewgui.work) for tutorials and support**
 ## Installation
-```pip install FreeTVG-karjakak```
+```pip install FreeTVG-karjakak```   
 
-**If wanted to have TVG++ for trial [7 days]**
+**For MacOS X user can install**   
+
+```pip install TVGMacOs-karjakak```  
+
+**If wanted to have TVG++ for trial 7 days [Only for Windows User]**
 * **There new function for Tutuorial TVG [Control+F1]**
 * **For trial purpose:**
     * **Compose email for registration [Control+F4]**
@@ -36,7 +40,13 @@ main()
     * **In "open" field key in "TVG".**
     * **Press "ok" button.**
 * **Create TVG folder by default in "\user\Documents" or "\user".**
-    * **Every TVG text note that created will be saved in TVG folder.**
+    * **Every TVG text note that created will be saved in TVG folder.**  
+
+**Without script for MacOS X user:**  
+```Terminal
+# In Terminal
+% TVG
+```
 ## Changes:
 * **Tutorial TVG.pdf is updated.**
 * **Clean-up some comment line.**
