@@ -8,24 +8,7 @@
 
 ```pip install TVGMacOs-karjakak```  
 
-**If wanted to have TVG++ for trial 7 days [Only for Windows User]**
-* **There new function for Tutuorial TVG [Control+F1]**
-* **For trial purpose:**
-    * **Compose email for registration [Control+F4]**
-        * **Will be sent link for download after receiving registration mail from user.**
-    * **Full functions of TVG++ [For 7 days]:**
-        * **Send Note - with Telethon [Telegram wrapper]**
-            * **Able to send TVG note.**
-        * **Calculator**
-            * **Check currency rate.**
-        * **Save - TVG note encryption**
-            * **Can send it to other TVG++ user.**
-        * **Open - TVG note decryption**
-            * **Can save or just for viewing.**
-        * **Emoji - can add emoj**
-        * **TEEn - Text Editor Encryption**
-            * **Encryption configuration.**
-            * **Encrypt your valuable datas e.g. passwords, etc.**
+
 ## Usage
 **With script:**
 ```Python
@@ -55,3 +38,5 @@ main()
     * **Free from annoying message pop-up.**
     * **View HTML deleted as well, because the purpose is not much and basically the same as printing.**
 * **Bugs fixed on overflowing memory usage.**
+
+![TVG](/Pics/TVG.png)
