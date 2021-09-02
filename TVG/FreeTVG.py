@@ -5,14 +5,15 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import font
 from tkinter import simpledialog, messagebox, colorchooser
-from .TreeView import TreeView as tv
+from treeview import TreeView as tv
+from treeview.dbase import Datab as db
+from itertools import islice
 import sys
 import os
 import re
 from .mdh import convhtml
-from .DataB import Datab as db
 from datetime import datetime as dt
-from .RegMail import composemail
+from .RegMail import composemail, wrwords
 
 class TreeViewGui:
     """
@@ -515,16 +516,17 @@ class TreeViewGui:
             x = re.compile(r'.*?[\.|\!|\?]')
             values = [[w.removeprefix(' ') for w in x.findall(v)] for v in gt.split('\n') if '.' in v]
             conv = dict(zip(keys, values))
-            tvg = tv(self.filename)
             if conv and len(keys) == len (values):
-                for i in conv:
-                    if self.checkfile():
-                        tvg.addparent(i)
-                    else:
-                        tvg.writetree(i)
-                    for j in conv[i]:
-                        if j:
-                            tvg.quickchild(j, 'child1')
+                ckp = None
+                with tv(self.filename) as tvg:
+                    ckp = self.checkfile()
+                    for i in conv:
+                        if ckp:
+                            tvg.addparent(i)
+                        for j in conv[i]:
+                            if j:
+                                tvg.quickchild(j, 'child1')
+                del tvg, ckp
                 self.text.config(state = DISABLED)
                 for i in self.bt:
                     if 'label' not in i and 'scrollbar' not in i:
@@ -542,7 +544,7 @@ class TreeViewGui:
                 self.spaces()
             else:
                 messagebox.showinfo('TreeViewGui', 'Unable to convert!')
-            del gt, keys, x, values, conv, tvg
+            del gt, keys, x, values, conv
             
     def infobar(self, event = None):
         # Info Bar telling the selected rows in listbox.
@@ -555,18 +557,26 @@ class TreeViewGui:
         elif TreeViewGui.FREEZE and str(self.bt['button24']['state']) == 'normal':
             self.info.set('Editor Mode')
         elif self.listb.curselection():
-            tvg = tv(f'{self.filename}')
-            ck = tvg.insighttree()[int(self.listb.curselection()[0])][1][:12]
-            self.info.set(f'{self.listb.curselection()[0]}: {ck[:-1]}...')
-            self.text.see(f'{self.listb.curselection()[0]}.0')
-            del ck, tvg
+            st = int(self.listb.curselection()[0])
+            insight = None
+            with tv(f'{self.filename}') as tvg:
+                insight = tuple(
+                    islice(
+                        tvg.compdatch(True), 
+                        st, st+1
+                    )
+                )
+                ck = insight[0][1][:12]
+            self.info.set(f'{st}: {ck[:-1]}...')
+            self.text.see(f'{st}.0')
+            del ck, tvg, st, insight
         else:
             self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
                     
     def checkfile(self):
         # Checking file if it is exist
         
-        if f'{self.filename}.txt' in os.listdir():
+        if os.path.exists(f'{self.filename}.txt'):
             return True
         else:
             return False
@@ -757,12 +767,10 @@ class TreeViewGui:
         # Viewing engine for most module fuction.
         
         try:
-            if self.checkfile():
-                tvg = tv(self.filename)
+            if self.checkfile() and self.nonetype():
                 self.text.config(state = 'normal')
-                with open(f'{self.filename}.txt') as file:
-                    rd = file.readlines()
                 self.text.delete('1.0', END)
+                self.listb.delete(0,END)
                 nf = str(self.text.cget('font'))
                 try:
                     text_font = font.Font(self.root, font = nf, name = nf, exists=True)
@@ -770,26 +778,25 @@ class TreeViewGui:
                     text_font = font.Font(self.root, font = nf, name = nf, exists=False)
                 g = re.compile(r'\s+')
                 em = text_font.measure(" ")
-                for r in rd:
-                    gr = g.match(r)
-                    if gr and gr.span()[1] > 1:
-                        if str(gr.span()[1]) not in self.text.tag_names():
-                            bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
-                            self.text.tag_configure(f"{gr.span()[1]}", lmargin1=em, lmargin2=em+bullet_width)
-                        self.text.insert(END, r, f'{gr.span()[1]}')
-                    else:
-                        self.text.insert(END, r)
+                with tv(self.filename) as tvg:
+                    for r in tvg.getdata():
+                        gr = g.match(r[1])
+                        if gr and gr.span()[1] > 1:
+                            if str(gr.span()[1]) not in self.text.tag_names():
+                                bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
+                                self.text.tag_configure(f"{gr.span()[1]}", lmargin1=em, lmargin2=em+bullet_width)
+                            self.text.insert(END, r[1], f'{gr.span()[1]}')
+                        else:
+                            self.text.insert(END, r[1])
+                    for k, v in tvg.insighttree():
+                        self.listb.insert(END, f'{k}: {v[0]}')
                 self.text.edit_reset()
                 self.text.config(state = 'disable')
-                vals = [f' {k}: {c[0]}' for k, c  in list(tvg.insighttree().items())]
-                self.listb.delete(0,END)
-                for val in vals:
-                    self.listb.insert(END, val)
                 self.text.yview_moveto(1.0)
                 self.listb.yview_moveto(1.0)
-                del tvg, rd, g, em, gr, vals, text_font
-        except:
-            self.text.insert(END, sys.exc_info()[1])
+                del tvg, g, em, gr, text_font
+        except Exception as e:
+            self.text.insert(END, e)
             self.text.config(state = 'disable')
             
     def chgfile(self):
@@ -861,14 +868,15 @@ class TreeViewGui:
         # Write also on chosen row for update.
         
         self.hidcheck()
-        tvg = tv(self.filename)
         cek = ['child', 'parent']        
         if self.unlock:
             if not self.checkfile():
                 if self.entry.get():
                     if not self.entry3.get():
                         if self.entry.get() not in cek:
-                            tvg.writetree(self.entry.get())
+                            with tv(self.filename) as tvg:
+                                tvg.writetree(self.entry.get())
+                            del tvg
                             self.entry.delete(0,END)
                             self.spaces()
                     else:
@@ -884,12 +892,29 @@ class TreeViewGui:
                                 rw = self.listb.curselection()[0]
                                 appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
                                 if appr:
-                                    if tvg.insighttree()[int(rw)][0] != 'space':
-                                        tvg.edittree(self.entry.get(),int(rw),self.entry3.get())
-                                        self.entry.delete(0,END)
+                                    with tv(self.filename) as tvg:
+                                        insight = tuple(
+                                            islice(
+                                                tvg.compdatch(True),
+                                                int(rw), int(rw)+1
+                                            )
+                                        )
+                                        if insight[0][0] != 'space':
+                                            tvg.edittree(
+                                                self.entry.get(),
+                                                int(rw),
+                                                self.entry3.get()
+                                            )
+                                    del tvg, insight
+                                    self.entry.delete(0,END)
                             else:
-                                tvg.quickchild(self.entry.get(), self.entry3.get())
+                                with tv(self.filename) as tvg:
+                                    tvg.quickchild(
+                                        self.entry.get(), 
+                                        self.entry3.get()
+                                    )
                                 self.entry.delete(0,END)
+                                del tvg
                             self.spaces()                       
                     else:
                         if self.entry.get() and self.entry.get() not in cek:
@@ -897,20 +922,33 @@ class TreeViewGui:
                                 rw = self.listb.curselection()[0]
                                 appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
                                 if appr:
-                                    if tvg.insighttree()[int(rw)][0] != 'space':
-                                        tvg.edittree(self.entry.get(),int(rw))
-                                        self.entry.delete(0,END)
+                                    with tv(self.filename) as tvg:
+                                        insight = tuple(
+                                            islice(
+                                                tvg.compdatch(True),
+                                                int(rw), int(rw)+1
+                                            )
+                                        )
+                                        if insight[0][0] != 'space':
+                                            tvg.edittree(
+                                                self.entry.get(),
+                                                int(rw)
+                                            )
+                                    del tvg, insight
+                                    self.entry.delete(0,END)
                             else:
-                                tvg.addparent(self.entry.get())
+                                with tv(self.filename) as tvg:
+                                    tvg.addparent(self.entry.get())
+                                del tvg
                                 self.entry.delete(0,END)
                             self.spaces()
-                    if rw and rw < len(tvg.insighttree())-1:
+                    if rw and rw < len(self.listb.get(0, END))-1:
                         self.text.see(f'{int(rw)}.0')
                         self.listb.see(rw)
                 except Exception as e:
                     messagebox.showerror('TreeViewGui', f'{e}')
                 del rw
-        del tvg, cek
+        del cek
                     
     def flb(self, event = None):
         # Set Mark for cheking row for edit.
@@ -923,43 +961,50 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             try:
-                if self.checkfile():
+                if self.checkfile() and self.nonetype():
                     if self.listb.curselection():
                         TreeViewGui.MODE = True
-                        tvg = tv(self.filename)
-                        rw = self.listb.curselection()
-                        if int(rw[0]) != 0: tvg.delrow(int(rw[0]))
+                        rw = int(self.listb.curselection()[0])
+                        with tv(self.filename) as tvg:
+                            if rw != 0: 
+                                tvg.delrow(rw)
+                            
+                        del tvg
                         self.spaces()
-                        ck = tvg.insighttree()
-                        if int(rw[0]) < len(ck):
-                            cp = ck[int(rw[0])][0]
-                            if cp == 'parent' and int(rw[0]) != 0:
-                                self.listb.select_set(int(rw[0])-2)
-                                self.listb.see(int(rw[0])-2)
-                                self.text.see(f'{(int(rw[0])-2)}.0')
+                        if rw > self.listb.size()-1:
+                            if self.listb.get(rw - 1):
+                                rw = rw - 1
                             else:
-                                if cp == 'space':
-                                    self.listb.select_set(int(rw[0])-1)
-                                    self.listb.see(int(rw[0])-1)
-                                    self.text.see(f'{(int(rw[0])-1)}.0')
-                                else:
-                                    self.listb.select_set(int(rw[0]))
-                                    self.listb.see(int(rw[0]))
-                                    self.text.see(f'{int(rw[0])}.0')
-                            del cp
+                                rw = rw - 2
+                        ck = tuple(
+                            [
+                                self.listb.size(),
+                                self.listb.get(rw).split(':')[1].strip()
+                            ]
+                        )
+                            
+                        if rw < ck[0]:
+                            if ck[1] != 'space' and rw != 0:
+                                self.listb.select_set(rw)
+                                self.listb.see(rw)
+                                self.text.see(f'{(rw)}.0')
+                            else:
+                                self.listb.select_set(rw-1)
+                                self.listb.see(rw-1)
+                                self.text.see(f'{(rw-1)}.0')
                         else:
-                            if len(ck) == 1:
+                            if ck[0] == 1:
                                 self.listb.select_set(0)
                             else:
                                 self.listb.select_set(len(ck)-1)
                                 self.listb.see(len(ck)-1)
                                 self.text.see(f'{(len(ck)-1)}.0')
-                        del rw, ck, tvg
+                        del rw, ck
                         self.infobar()
-            except:
+            except Exception as e:
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
-                self.text.insert(END, sys.exc_info())
+                self.text.insert(END, e)
                 self.text.config(state = 'disable')
                 
     def move_lr(self, event = None):
@@ -970,19 +1015,21 @@ class TreeViewGui:
             if self.listb.curselection():
                 if self.entry3.get():
                     TreeViewGui.MODE = True
-                    rw = self.listb.curselection()
-                    tvg = tv(self.filename)
                     try:
+                        rw = int(self.listb.curselection()[0])
                         self.text.config(state = 'normal')
-                        tvg.movechild(int(rw[0]), self.entry3.get())
+                        with tv(self.filename) as tvg:
+                            tvg.movechild(rw, self.entry3.get())
+                        del tvg
                         self.spaces()
-                        self.listb.select_set(int(rw[0]))
-                        self.listb.see(int(rw[0]))
-                        self.text.see(f'{int(rw[0])}.0')
+                        self.text.config(state = 'disable')
+                        self.listb.select_set(rw)
+                        self.listb.see(rw)
+                        self.text.see(f'{rw}.0')
                     except:
                         self.text.insert(END, 'Parent row is unable to be move to a child')
                         self.text.config(state = 'disable')
-                    del rw, tvg
+                    del rw
                     self.infobar()
                         
     def insight(self, event = None):
@@ -990,103 +1037,106 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile():
-                tvg = tv(self.filename)
-                ins = tvg.insighttree()
-                ins = [f'row {k}: {v[0]}, {v[1]}' for k, v in ins.items()]
+            if self.checkfile() and self.nonetype():
                 self.text.config(state = 'normal')
-                self.text.delete('1.0', END)
-                for d in ins:
-                    self.text.insert(END, f'{d}')
+                self.text.delete('1.0', END)                
+                with tv(self.filename) as tvg:
+                    for k, v in tvg.insighttree():
+                        self.text.insert(END, f'row {k}: {v[0]}, {v[1]}')
+                del tvg
                 self.text.edit_reset()
                 self.text.config(state = 'disable')
-                del tvg, ins
-                    
+                
     def moveup(self, event = None):
         # Step up a row to upper row.
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile():
-                tvg = tv(self.filename)
-                ck = tvg.insighttree()                
+            if self.checkfile() and self.nonetype():
                 if self.listb.curselection():
-                    rw = self.listb.curselection()
-                    if ck[int(rw[0])][0] != 'space' and 'child' in ck[int(rw[0])][0]:
-                        if int(rw[0]) != 0 and int(rw[0])-1 != 0:
+                    rw = int(self.listb.curselection()[0])
+                    insight = self.listb.get(rw).split(':')[1].strip()                   
+                    if insight != 'space' and 'child' in insight:
+                        if rw != 0 and rw - 1 != 0:
                             TreeViewGui.MODE = True
-                            tvg.movetree(int(rw[0]), int(rw[0])-1)
+                            with tv(self.filename) as tvg:
+                                tvg.movetree(rw, rw - 1)
+                            del tvg
                             self.spaces()
-                            ck = tvg.insighttree()
-                            if  ck[int(rw[0])-1][0] != 'space':
-                                self.listb.select_set(int(rw[0])-1)
-                                self.listb.see(int(rw[0])-1)
-                                self.text.see(f'{(int(rw[0])-1)}.0')
+                            ck = self.listb.get(rw - 1).split(':')[1].strip()
+                            if  ck != 'space':
+                                self.listb.select_set(rw - 1)
+                                self.listb.see(rw - 1)
+                                self.text.see(f'{rw - 1}.0')
                             else:
-                                self.listb.select_set(int(rw[0])-2)
-                                self.listb.see(int(rw[0])-2)
-                                self.text.see(f'{(int(rw[0])-2)}.0')
+                                self.listb.select_set(rw - 2)
+                                self.listb.see(rw - 2)
+                                self.text.see(f'{rw - 2}.0')
                             self.infobar()
-                    del rw
-                del tvg, ck
-                                
+                            del ck
+                    del rw, insight
+                    
     def movedown(self, event = None):
         # Step down a row to below row.
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile():
-                tvg = tv(self.filename)
-                ck = tvg.insighttree()                
+            if self.checkfile() and self.nonetype():
                 if self.listb.curselection():
-                    rw = self.listb.curselection()
-                    if ck[int(rw[0])][0] != 'space' and 'child' in ck[int(rw[0])][0]:
-                        if int(rw[0]) < len(ck)-1:
+                    rw = int(self.listb.curselection()[0])
+                    ck = self.listb.get(rw).split(':')[1].strip()
+                    if 'child' in ck:
+                        if all(self.listb.size() > i  for i in [rw, rw + 1]):
+                            sp = (
+                                True if self.listb.get(rw+1).split(':')[1].strip() == 'space'
+                                else False
+                            )                            
                             TreeViewGui.MODE = True
-                            if ck[int(rw[0])+1][0] == 'space':
-                                tvg.movetree(int(rw[0]), int(rw[0])+2)
-                            else:
-                                tvg.movetree(int(rw[0]), int(rw[0])+1)
+                            with tv(self.filename) as tvg:
+                                if sp:
+                                    tvg.movetree(rw, rw+2)
+                                else:
+                                    tvg.movetree(rw, rw+1)
+                            del tvg, sp
                             self.spaces()
-                            ck = tvg.insighttree()
-                            if ck[int(rw[0])+1][0] != 'parent':
-                                self.listb.select_set(int(rw[0])+1)
-                                self.listb.see(int(rw[0])+1)
-                                self.text.see(f'{(int(rw[0])+1)}.0')
+                            ck = self.listb.get(rw + 1).split(':')[1].strip()
+                            if ck != 'parent':
+                                self.listb.select_set(rw+1)
+                                self.listb.see(rw+1)
+                                self.text.see(f'{(rw+1)}.0')
                             else:
-                                self.listb.select_set(int(rw[0])+2)
-                                self.listb.see(int(rw[0])+2)
-                                self.text.see(f'{(int(rw[0])+2)}.0')
+                                self.listb.select_set(rw+2)
+                                self.listb.see(rw+2)
+                                self.text.see(f'{(rw+2)}.0')
                             self.infobar()
-                    del rw
-                del tvg, ck
+                    del rw, ck
                                 
     def insertwords(self, event = None):
         # Insert a record to any row appear above the assign row.
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile():
-                tvg = tv(self.filename)
+            if self.checkfile() and self.nonetype():
                 cek = ['parent', 'child']
                 if self.entry.get() and self.entry.get() not in cek :
                     if TreeViewGui.MARK:
                         appr = messagebox.askyesno('Edit', f'Edit cell {self.listb.curselection()[0]}?')
                         if appr:                    
                             if self.listb.curselection():
-                                rw = self.listb.curselection()
-                                if self.entry3.get():
-                                    tvg.insertrow(self.entry.get(), int(rw[0]), self.entry3.get())
-                                    self.entry.delete(0, END)
-                                else:
-                                    tvg.insertrow(self.entry.get(), int(rw[0]))
-                                    self.entry.delete(0, END)  
+                                rw = int(self.listb.curselection()[0])
+                                with tv(self.filename) as tvg:
+                                    if self.entry3.get():
+                                        tvg.insertrow(self.entry.get(), rw, self.entry3.get())
+                                    else:
+                                        tvg.insertrow(self.entry.get(), rw)
+                                del tvg
+                                self.entry.delete(0, END)
                                 self.spaces()
-                                self.listb.see(int(rw[0]))
-                                self.text.see(f'{int(rw[0])}.0')
+                                self.listb.see(rw)
+                                self.text.see(f'{rw}.0')
                                 del rw
                         del appr
-                del tvg, cek
+                del cek
                                  
     def checked(self, event = None):
         # To add checked unicode for finished task.
@@ -1095,15 +1145,16 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.listb.curselection():
-                tvg = tv(self.filename)
-                rw = self.listb.curselection()
-                tvg.checked(int(rw[0]))
+                rw = int(self.listb.curselection()[0])
+                with tv(self.filename) as tvg:
+                    tvg.checked(rw)
+                del tvg
                 self.view()
-                self.listb.select_set(int(rw[0]))
-                self.listb.activate(int(rw[0]))
-                self.listb.see(int(rw[0]))
-                self.text.see(f'{int(rw[0])}.0')
-                del tvg, rw
+                self.listb.select_set(rw)
+                self.listb.activate(rw)
+                self.listb.see(rw)
+                self.text.see(f'{rw}.0')
+                del rw
                 self.infobar()
             
     def backup(self, event = None):
@@ -1112,33 +1163,35 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile():
-                tvg = tv(self.filename)
-                tvg.backuptv()
-                messagebox.showinfo('Backup', 'Backup done!')
+            if self.checkfile() and self.nonetype():
+                with tv(self.filename) as tvg:
+                    tvg.backuptv()
                 del tvg
-            
+                messagebox.showinfo('Backup', 'Backup done!')
+                
     def loadbkp(self, event = None):
         # Load any backup data.
         
         self.hidcheck()
         if self.unlock:
-            tvg = tv(self.filename)
             dbs = db(self.filename)
             try:
                 row  = simpledialog.askinteger('Load Backup',
                 f'There are {dbs.totalrecs()} rows, please choose a row:')
                 if row and row <= dbs.totalrecs():
-                    tvg.loadbackup(self.filename, row = row-1, stat = True)
+                    with tv(self.filename) as tvg:
+                        tvg.loadbackup(self.filename, row = row-1, stat = True)
+                    del tvg
                     messagebox.showinfo('Load Backup',
                     'Load backup is done, chek again!')
                     self.spaces()
+                del row
             except:
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
                 self.text.insert(END, sys.exc_info())
                 self.text.config(state = 'disable')
-            del tvg, dbs, row
+            del dbs
 
     def copas(self, event = None):
         # Paste a row value to Entry for fixing value.
@@ -1146,17 +1199,21 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.listb.curselection():
-                rw = self.listb.curselection()
-                with open(f'{self.filename}.txt') as file:
-                    rd = file.readlines()
-                    self.entry.delete(0, END)
-                    if rd[int(rw[0])][0] == ' ':
-                        paste = rd[int(rw[0])][re.match(r'\s+', rd[int(rw[0])]).span()[1]:-1]
-                        self.entry.insert(END, paste[1:])
-                    else:
-                        if rd[int(rw[0])] != '\n':
-                            self.entry.insert(END, rd[int(rw[0])][:-2])
-                del rw, rd
+                self.entry.delete(0, END)
+                rw = int(self.listb.curselection()[0])
+                paste = None
+                with tv(self.filename) as tvg:
+                    for r, l in tvg.getdata():
+                        if r == rw:
+                            if l == '\n':
+                                break
+                            elif l[0] == ' ':
+                                paste = l[re.match(r'\s+', l).span()[1] + 1:-1]
+                            else:
+                                paste = l[:-2]
+                            self.entry.insert(END, paste)
+                            break
+                del tvg, rw, paste
                         
     def cmrows(self):
         # Copy or move any rows to any point of a row within existing rows.
@@ -1169,48 +1226,92 @@ class TreeViewGui:
                 if flname == 'New':
                     askname = simpledialog.askstring('TreeViewGui', 'New file name:')
                     if askname:
-                        if not os.path.isdir(os.path.join(os.getcwd().rpartition('\\')[0], f'{askname.title()}_tvg')):
-                            tak = [f'{i}\n' for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                        if not os.path.isdir(
+                            os.path.join(
+                                os.getcwd().rpartition('\\')[0], 
+                                f'{askname.title()}_tvg'
+                                )
+                            ):
+                            tak = enumerate(
+                                [f'{i}\n' for i in self.text.get('1.0', END)[:-1].split('\n')]
+                            )
                             self.createf(askname)
-                            tvg = tv(f'{self.filename}')
-                            wtvg = tvg.insighthidden(tak)
-                            tvg.fileread(wtvg)
-                            del tak, tvg, wtvg
+                            with tv(f'{askname.title()}') as tvg:
+                                tvg.fileread(tvg.insighthidden(tak, False))
+                            del tak, tvg
                             self.spaces()
                             self.infobar()
                         else:
-                            messagebox.showinfo('TreeViewGui', 'Cannot create new file because is already exist!!!')
+                            messagebox.showinfo(
+                                'TreeViewGui', 
+                                'Cannot create new file because is already exist!!!'
+                            )
                     else:
                         messagebox.showinfo('TreeViewGui', 'Copying is aborted!')
                     del askname
                 else:
-                    if f'{flname.rpartition("_")[0]}.txt' in os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], flname)):
-                        if f'{flname.rpartition("_")[0]}_hid.json' not in os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], flname)):
+                    if os.path.exists(
+                        os.path.join(
+                            os.getcwd().rpartition('\\')[0], 
+                            flname,
+                            f'{flname.rpartition("_")[0]}.txt'
+                            )
+                        ):
+                        if not os.path.exists(
+                            os.path.join(
+                                os.getcwd().rpartition('\\')[0], 
+                                flname,
+                                f'{flname.rpartition("_")[0]}_hid.json'
+                                )
+                            ):
                             self.filename = flname.rpartition("_")[0]
                             os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], flname))
                             self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
-                            with open(f'{self.filename}.txt', 'a') as cp:
-                                cp.write(self.text.get('1.0', END)[:-1])
+                            with tv(self.filename) as tvg:
+                                tak = enumerate(
+                                    [
+                                        f'{i}' 
+                                        for i in self.text.get('1.0', END)[:-1].split('\n') 
+                                        if i
+                                    ]
+                                )
+                                tak = tvg.insighthidden(tak, False)
+                                for p, d in tak:
+                                    if p == 'parent':
+                                        tvg.addparent(d[:-1])
+                                    else:
+                                        tvg.quickchild(d[1:], p)
+                                
+                            del tvg, tak
                             self.spaces()
                             self.infobar()
                         else:
-                            messagebox.showinfo('TreeViewGui', 'You cannot copied to hidden mode file!')
+                            messagebox.showinfo(
+                                'TreeViewGui', 
+                                'You cannot copied to hidden mode file!'
+                            )
                     else:
                         self.filename = flname.rpartition("_")[0]
                         os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], flname))
-                        self.root.title(f'{os.getcwd()}\\{self.filename}.txt')                        
-                        tak = [f'{i}\n' for i in self.text.get('1.0', END)[:-1].split('\n') if i]
-                        tvg = tv(f'{self.filename}')
-                        wtvg = tvg.insighthidden(tak)
-                        tvg.fileread(wtvg)
-                        del tak, tvg, wtvg
+                        self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
+                        with tv(self.filename) as tvg:
+                                tak = enumerate(
+                                    [f'{i}\n' for i in self.text.get('1.0', END)[:-1].split('\n')]
+                                )
+                                tvg.fileread(tvg.insighthidden(tak, False))
+                        del tak, tvg
                         self.spaces()
                         self.infobar()
                 del flname
                         
             TreeViewGui.FREEZE = True        
             self.lock = True
-            files = [file for file in os.listdir(os.getcwd()[:os.getcwd().rfind('\\')]) if '_tvg' in file]
+            files = [
+                file for file in os.listdir(
+                    os.getcwd()[:os.getcwd().rfind('\\')]
+                ) 
+                if '_tvg' in file
+            ]
             files.insert(0, 'New')
             class MyDialog(simpledialog.Dialog):
             
@@ -1236,7 +1337,7 @@ class TreeViewGui:
         else:
             self.hidcheck()
             if self.unlock:
-                if self.checkfile():
+                if self.checkfile() and self.nonetype():
                     if self.text.get('1.0',END)[:-1]:
                         ckc = ['listb', 'button17', 'text']
                         if self.listb.cget('selectmode') == 'browse':
@@ -1247,59 +1348,91 @@ class TreeViewGui:
                             self.listb.config(selectmode = EXTENDED)
                             TreeViewGui.FREEZE = True
                         else:
-                            tvg = tv(self.filename)
-                            ins = tvg.insighttree()                        
                             if self.listb.curselection():
                                 gcs = [int(i) for i in self.listb.curselection()]
-                                ask = simpledialog.askinteger('TreeViewGui', 
-                                                              f'Move to which row? choose between 0 to {len(ins)-1} rows')
-                                if ask is not None and ask < len(ins):
-                                    deci = messagebox.askyesno('TreeViewGui', '"Yes" to MOVE to, "No" to COPY to')
+                                ask = simpledialog.askinteger(
+                                    'TreeViewGui', 
+                                    f'Move to which row? choose between 0 to {self.listb.size()-1} rows'
+                                )
+                                if ask is not None and ask < self.listb.size():
+                                    deci = messagebox.askyesno(
+                                        'TreeViewGui', 
+                                        '"Yes" to MOVE to, "No" to COPY to'
+                                    )
                                     if deci:
-                                        with open(f'{self.filename}.txt') as file:
-                                            rd = file.readlines()
-                                            cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
-                                            for i in range(gcs[0], gcs[-1]+1):
-                                                rd[i] = '\n'
-                                            if ask < len(ins)-1:
-                                                if ask == 0:
-                                                    if ins[gcs[0]][0] == 'parent':
-                                                        for i in cop[::-1]:
-                                                            rd.insert(ask, i)
+                                        with tv(self.filename) as tvg:
+                                            data = list(
+                                                islice(
+                                                    tvg.getdata(),
+                                                    gcs[0], 
+                                                    gcs[-1]+1
+                                                )
+                                            )
+                                            writer = tvg.satofi()
+                                            if ask < tvg.getdatanum()-1:
+                                                for n, d in tvg.getdata():
+                                                    if n == ask == 0:
+                                                        if not data[0][1][0].isspace():
+                                                            for i in data:
+                                                                writer.send(i[1])
+                                                            writer.send(d)
+                                                        else:
+                                                            writer.send(d)
+                                                            for i in data:
+                                                                writer.send(i[1])
+                                                    elif n == ask:
+                                                        for i in data:
+                                                            writer.send(i[1])
+                                                        writer.send(d)
+                                                    elif n in gcs:
+                                                        continue
                                                     else:
-                                                        for i in cop[::-1]:
-                                                            rd.insert(ask+1, i)
-                                                else:
-                                                    for i in cop[::-1]:
-                                                        rd.insert(ask, i)
+                                                        writer.send(d)
                                             else:
-                                                for i in cop:
-                                                    rd.append(i)
-                                        with open(f'{self.filename}.txt', 'w') as file:
-                                            file.writelines(rd)
-                                        del rd, cop 
+                                                for n, d in tvg.getdata():
+                                                    if n in gcs:
+                                                        continue
+                                                    else:
+                                                        writer.send(d)
+                                                for i in data:
+                                                    writer.send(i[1])
+                                            writer.close()
+                                        del tvg, data, writer
                                         self.spaces()
                                     else:
-                                        with open(f'{self.filename}.txt') as file:
-                                            rd = file.readlines()
-                                            cop = [i for i in rd[gcs[0]:gcs[-1]+1]]
-                                            if ask < len(ins)-1:
-                                                if ask == 0:
-                                                    if ins[gcs[0]][0] == 'parent':
-                                                        for i in cop[::-1]:
-                                                            rd.insert(ask, i)
+                                        with tv(self.filename) as tvg:
+                                            data = list(
+                                                islice(
+                                                    tvg.getdata(),
+                                                    gcs[0], 
+                                                    gcs[-1]+1
+                                                )
+                                            )
+                                            writer = tvg.satofi()
+                                            if ask < tvg.getdatanum()-1:
+                                                for n, d in tvg.getdata():
+                                                    if n == ask == 0:
+                                                        if not data[0][1][0].isspace():
+                                                            for i in data:
+                                                                writer.send(i[1])
+                                                            writer.send(d)
+                                                        else:
+                                                            writer.send(d)
+                                                            for i in data:
+                                                                writer.send(i[1])
+                                                    elif n == ask:
+                                                        for i in data:
+                                                            writer.send(i[1])
+                                                        writer.send(d)
                                                     else:
-                                                        for i in cop[::-1]:
-                                                            rd.insert(ask+1, i)
-                                                else:
-                                                    for i in cop[::-1]:
-                                                        rd.insert(ask, i)
+                                                        writer.send(d)
                                             else:
-                                                for i in cop:
-                                                    rd.append(i)
-                                        with open(f'{self.filename}.txt', 'w') as file:
-                                            file.writelines(rd)
-                                        del rd, cop
+                                                for n, d in tvg.getdata():
+                                                    writer.send(d)
+                                                for i in data:
+                                                    writer.send(i[1])
+                                            writer.close()
+                                        del tvg, data, writer
                                         self.spaces()
                                     for i in self.bt:
                                         if 'label' not in i and 'scrollbar' not in i:
@@ -1333,7 +1466,10 @@ class TreeViewGui:
                                     self.listb.config(selectmode = BROWSE)
                                     TreeViewGui.FREEZE = False
                                     if ask:
-                                        messagebox.showerror('TreeViewGui', f'row {ask} is exceed existing rows')
+                                        messagebox.showerror(
+                                            'TreeViewGui', 
+                                            f'row {ask} is exceed existing rows'
+                                        )
                                 del gcs, ask
                             else:
                                 for i in self.bt:
@@ -1350,15 +1486,16 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
-                            del tvg, ins
+                            #del tvg, ins
                         del ckc
+                        self.listb.selection_clear(0, END)
                         self.infobar()
                     
     def saveaspdf(self):
         # Show to browser and directly print as pdf or direct printing.
         
         try:
-            if self.checkfile():
+            if self.checkfile() and self.nonetype():
                 if (a := self.text['font'].find('}')) != -1:
                     px = int(re.search(r'\d+', self.text['font'][a:]).group()) * 1.3333333
                 else:
@@ -1392,6 +1529,20 @@ class TreeViewGui:
                 del px, ck, sty, add, ask, fon
         except Exception as e:
             messagebox.showerror('TreeViewGui', f'{e}')
+    
+    def nonetype(self):
+        try:
+            with tv(self.filename) as tvg:
+                if next(tvg.getdata()):
+                    return True
+        except:
+            self.text.config(state = 'normal')
+            self.text.delete('1.0', END)
+            self.text.config(state = 'disabled')
+            self.listb.delete(0, END)
+            return False
+        finally:
+            del tvg
 
     def spaces(self):
         # Mostly used by other functions to clear an obselete spaces.
@@ -1399,55 +1550,28 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile():
+            if self.checkfile() and self.nonetype():
                 if TreeViewGui.MARK and TreeViewGui.MODE is False:
                     TreeViewGui.MARK = False
                 else:
                     TreeViewGui.MODE = False
-                tvg = tv(self.filename)
-                cks = tvg.insighttree()
-                num2 = 1
-                if cks:
-                    while num2 !=  len(cks):
-                        try:
-                            if cks[num2][0] == 'parent' and num2 != 0:
-                                if cks[num2 - 1][0] != 'space':
-                                    tvg.insertspace(num2)
-                                    cks = tvg.insighttree()
-                                else:
-                                    num2 += 1
-                            elif cks[num2][0] == 'space':
-                                if cks[num2 - 1][0] == 'space':
-                                    tvg.delrow(num2)
-                                    cks = tvg.insighttree()
-                                else:
-                                    num2 += 1
-                            elif 'child' in cks[num2][0]:
-                                if num2 == 0:
-                                    tvg.insertrow('[Auto generate a parent]')
-                                    cks = tvg.insighttree()
-                                elif cks[num2 - 1][0] == 'space':
-                                    tvg.delrow(num2-1)
-                                    num2 -= 1
-                                    cks = tvg.insighttree()
-                                else:
-                                    num2 += 1
+                with tv(self.filename) as tvg:
+                    data = (i[:-1] for _, i in tvg.getdata() if i != '\n')
+                    writer = tvg.satofi()
+                    try:
+                        writer.send(f'{next(data)}\n')
+                    except StopIteration:
+                        writer.close()
+                    else:
+                        for d in data:
+                            if d[0].isspace():
+                                writer.send(f'{d}\n')
                             else:
-                                num2 += 1
-                        except:
-                            messagebox.showerror('TreeViewGui', sys.exc_info())
-                            break    
-                    if cks[0][0] == 'space':
-                        tvg.delrow(0)
-                        cks = tvg.insighttree()
-                    if cks[len(cks)-1][0] == 'space':
-                        tvg.delrow(len(cks)-1)
-                    del tvg , cks, num2
-                    self.view()
-                else:
-                    del tvg, cks
-                    self.view()
-                    
+                                writer.send('\n')
+                                writer.send(f'{d}\n')
+                        writer.close()
+                del tvg, writer, data
+                self.view()
             else:
                 if self.listb.get(0, END):
                     self.listb.delete(0, END)            
@@ -1478,8 +1602,7 @@ class TreeViewGui:
         
         import json
         
-        if f'{self.filename}_hid.json' in os.listdir():
-            tvg = tv(self.filename)
+        if os.path.exists(f'{self.filename}_hid.json'):
             with open(f'{self.filename}_hid.json') as jfile:
                 rd = dict(json.load(jfile))
             g = re.compile(r'\s+')
@@ -1510,11 +1633,17 @@ class TreeViewGui:
                         self.text.insert(END, i)
                     del gr
                 self.text.config(state = 'disable')
-                vals = [f' {k}: {c[0]}' for k, 
-                c  in list(tvg.insighthidden(showt).items())]
+                with tv(self.filename) as tvg:
+                    vals =  enumerate(
+                        [
+                            d[0] for d in
+                            tvg.insighthidden(enumerate(showt), False)
+                        ]
+                    )
+                del tvg
                 self.listb.delete(0,END)
-                for val in vals:
-                    self.listb.insert(END, val)
+                for n, p in vals:
+                    self.listb.insert(END, f'{n}: {p}')
                 del rolrd, showt, text_font, vals, em
             else:
                 self.view()
@@ -1542,21 +1671,27 @@ class TreeViewGui:
                         self.text.insert(END, i)
                     del gr
                 self.text.config(state = 'disable')
-                vals = [f' {k}: {c[0]}' for k, 
-                c  in list(tvg.insighthidden(ih).items())]
+                with tv(self.filename) as tvg:
+                    vals = enumerate(
+                        [
+                            d[0] for d in
+                            tvg.insighthidden(enumerate(ih), False)
+                        ]
+                    )
+                del tvg
                 self.listb.delete(0,END)
-                for val in vals:
-                    self.listb.insert(END, val)
+                for n, p in vals:
+                    self.listb.insert(END, f'{n}: {p}')
                 del rolrd, showt, text_font, vals, em, ih
-            del tvg, rd, g, nf
+            del rd, g, nf
             
     def hiddenchl(self, event = None):
         # Create Hidden position of parent and its childs in json file.
         
         import json
     
-        if self.checkfile():
-            if f'{self.filename}_hid.json' not in os.listdir():
+        if self.checkfile() and self.nonetype():
+            if not os.path.exists(f'{self.filename}_hid.json'):
                 ckc = ['listb', 'button14', 'text']
                 if self.listb.cget('selectmode') == 'browse':
                     for i in self.bt:
@@ -1567,21 +1702,26 @@ class TreeViewGui:
                     TreeViewGui.FREEZE = True
                 else:
                     if self.listb.curselection():
-                        ask = messagebox.askyesno('TreeViewGui', '"Yes" to hide selected, "No" reverse hide instead!')
-                        tvg = tv(self.filename)
+                        ask = messagebox.askyesno(
+                            'TreeViewGui', 
+                            '"Yes" to hide selected, "No" reverse hide instead!'
+                        )
                         allrows = [int(i) for i in self.listb.curselection()]
-                        rows = tvg.insighttree()
+                        rows = {
+                            n: pc.split(':')[1].strip()
+                            for n, pc in enumerate(self.listb.get(0, END))
+                        }
                         hd = {}
                         num = 0
                         for row in allrows:
                             num += 1
                             if row in rows:
                                 if row < len(rows)-1:
-                                    if rows[row][0] == 'parent' and 'child' in rows[row+1][0]:
+                                    if rows[row] == 'parent' and 'child' in rows[row+1]:
                                         srow = row+1
                                         while True:
                                             if srow < len(rows):
-                                                if rows[srow][0] == 'space':
+                                                if rows[srow] == 'space':
                                                     break
                                                 srow +=1
                                             else:
@@ -1589,10 +1729,10 @@ class TreeViewGui:
                                                 break
                                         hd[num] = (row, srow)
                                     else:
-                                        if rows[row][0] == 'parent':
-                                            hd[num] = (row, row+1)                                        
+                                        if rows[row] == 'parent':
+                                            hd[num] = (row, row+1)
                                 else:
-                                    if rows[row][0] == 'parent':
+                                    if rows[row] == 'parent':
                                         hd[num] = (row, row)
                         if hd:
                             if ask:
@@ -1609,7 +1749,7 @@ class TreeViewGui:
                         else:
                             self.listb.selection_clear(0, END)
                             messagebox.showinfo('TreeViewGui', 'Please choose Parent only!')
-                        del tvg, allrows, rows, hd, num
+                        del allrows, rows, hd, num
                     for i in self.bt:
                         if 'label' not in i and 'scrollbar' not in i:
                             if i not in ckc:
@@ -1734,12 +1874,10 @@ class TreeViewGui:
                             searchw(d.result)
                         del d.result
             else:
-                if self.checkfile():
+                if self.checkfile() and self.nonetype():
                     if self.entry.get():
-                        tvg = tv(self.filename)
-                        dat = tvg.insighttree()
-                        num = len(dat)
-                        sn = 0                    
+                        num = self.listb.size()
+                        sn = 1                    
                         sw = self.entry.get()
                         if sw.isdigit():
                             sw = int(sw)
@@ -1751,15 +1889,16 @@ class TreeViewGui:
                                 self.listb.activate(sw)
                                 self.listb.selection_set(sw)
                         else:
-                            while sn < num:
-                                if sw in dat[sn][1]:
+                            while sn <= num:
+                                dat = self.text.get(f'{sn}.0', f'{sn+1}.0')
+                                if sw in dat:
                                     self.text.see(f'{sn}.0')
                                     self.listb.see(sn)
                                     self.listb.selection_clear(0, END)
-                                    self.listb.selection_set(sn)
-                                    ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
+                                    self.listb.selection_set(sn-1)
                                     self.listb.focus()
-                                    self.listb.activate(sn)
+                                    self.listb.activate(sn-1)
+                                    ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
                                     if ask:
                                         sn += 1
                                         continue
@@ -1767,7 +1906,7 @@ class TreeViewGui:
                                         break
                                 else:
                                     sn += 1
-                        del tvg, dat, num, sn, sw
+                        del dat, num, sn, sw
                     self.infobar()
     
     def dattim(self, event = None):
@@ -1848,42 +1987,48 @@ class TreeViewGui:
         
         self.hidcheck()
         if self.unlock:
-            if self.checkfile:
-                ask = messagebox.askyesno('TreeViewGui', '"Yes" Edit whole file, or "No" Edit selected parent only?')
+            if self.checkfile() and self.nonetype():
+                ask = messagebox.askyesno(
+                    'TreeViewGui', 
+                    '"Yes" Edit whole file, or "No" Edit selected parent only?'
+                )
                 if ask:
-                    tvg = tv(self.filename)
-                    edit = list(tvg.insighttree().values())
-                    c = {f'child{i}': f'c{i}'  for i in range(1, 51)}
                     self.editor()
-                    for ed in edit:
-                        if ed[0] == 'parent':
-                            self.text.insert(END, f'p:{ed[1][:-2]}\n')
-                        elif ed[0] == 'space':
-                            self.text.insert(END, f's:\n')
-                        else:
-                            self.text.insert(END, f'{c[ed[0]]}:{ed[1][1:]}')
+                    with tv(self.filename) as tvg:
+                        for p, d in tvg.compdatch(True):
+                            if p == 'parent':
+                                self.text.insert(END, f'p:{d[:-2]}\n')
+                            elif p == 'space':
+                                self.text.insert(END, 's:\n')
+                            else:
+                                self.text.insert(END, f'c{p[5:]}:{d[1:]}')
+                    del tvg, p, d 
                     self.text.see(self.text.index(INSERT))
                     os.remove(f'{self.filename}.txt')
-                    del tvg, edit, c
                 else:
                     if self.listb.curselection(): 
                         stor = int(self.listb.curselection()[0])
-                        tvg = tv(self.filename)
-                        ckp = tvg.insighttree()
-                        if ckp[stor][0] == 'parent':
-                            self.editor()
-                            self.text.insert(END, f'p:{ckp[stor][1][:-2]}\n')
-                            num = stor + 1
-                            while num < len(ckp):
-                                if 'child' in ckp[num][0]:
-                                    chn = ckp[num][0].partition('d')[0][0] + ckp[num][0].partition('d')[2]
-                                    self.text.insert(END, f'{chn}:{ckp[num][1][1:]}')
-                                    num += 1
+                        self.editor()
+                        with tv(self.filename) as tvg:
+                            num = stor
+                            for p, d in islice(tvg.compdatch(True), stor, tvg.getdatanum()):
+                                if num == stor and p != 'parent':
+                                    messagebox.showinfo(
+                                        'TreeViewGui', 
+                                        'Please select a parent row only!'
+                                    )
+                                    break                                
+                                if p == 'parent':
+                                    self.text.insert(END, f'p:{d[:-2]}\n')
+                                elif p.partition('child')[1]:
+                                        self.text.insert(END, f'c{p[5:]}:{d[1:]}')
                                 else:
-                                    break
-                            self.editorsel = (stor, num)
-                            del num
-                        del stor, tvg, ckp,
+                                    if p == 'space' or p == 'parent':
+                                        break
+                                num += 1
+                        self.editorsel = (stor, num)        
+                        del tvg, p, d, stor, num
+                        self.text.see(self.text.index(INSERT))
                     else:
                         messagebox.showinfo('TreeViewGui', 'Please select a parent row first!')
                 del ask
@@ -1916,7 +2061,9 @@ class TreeViewGui:
             else:
                 if self.lock is False:        
                     self.lock = True
-                    files = [i for i in os.listdir(os.path.join(ori.rpartition('\\')[0], 'Templates'))]
+                    files = [
+                        i for i in os.listdir(os.path.join(ori.rpartition('\\')[0], 'Templates'))
+                    ]
                     if files:
                         def tynam(event):
                             try:
@@ -2010,57 +2157,71 @@ class TreeViewGui:
                     if 'label' not in i and 'scrollbar' not in i and i not in ckb:
                         self.bt[i].config(state='disable')
                 TreeViewGui.FREEZE = True
-                if self.store:
-                    self.text.insert(END, self.store)
-                    self.store = None
                 self.text.edit_reset()
                 self.text.focus()
                 del ckb
             else:
                 try:
                     if self.text.get('1.0', END)[:-1]:
-                        ask = messagebox.askyesno('TreeViewGui', 'Do you want to convert[y] or Edit[n]?')
+                        ask = messagebox.askyesno(
+                            'TreeViewGui', 
+                            'Do you want to convert[y] or Edit[n]?'
+                        )
                         if ask:
                             self.converting()
-                        else:                        
-                            if self.checkfile():
+                        else:
+                            self.store = self.text.get('1.0', END)
+                            if self.checkfile() and self.nonetype():
                                 if self.editorsel:
                                     stor = self.editorsel
-                                    tvg = tv(self.filename)
-                                    p1 = {j: k for j, k in tvg.insighttree().items() if j < stor[0]}
-                                    ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                    ed = tuple(i for i in self.store[:-1].split('\n') if i)
                                     ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
-                                    et = len(p1)-1
+                                    et = stor[0]
                                     p2 = {}
+                                    p1 = None
+                                    p3 = None 
                                     for i in ed:
                                         et += 1
                                         if 's:' == i.lower()[:2]:
                                             p2[et] = ('space', '\n')
                                         elif 'p:' == i.lower()[:2]:
-                                            if i.partition(':')[2].isspace() or not bool(i.partition(':')[2]):
+                                            if i.partition(':')[2].isspace() or not \
+                                               bool(i.partition(':')[2]):
                                                 raise Exception('Parent cannot be empty!')
                                             else:
                                                 p2[et] = ('parent', i[2:].removeprefix(' '))
                                         elif i.lower().partition(':')[0] in list(ckc):
                                             if i.partition(':')[2].isspace():
-                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2])
+                                                p2[et] = (
+                                                    ckc[i.partition(':')[0]], 
+                                                    i.partition(':')[2]
+                                                )
                                             elif bool(i.partition(':')[2]):
-                                                p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
+                                                p2[et] = (
+                                                    ckc[i.partition(':')[0]], 
+                                                    i.partition(':')[2].removeprefix(' ')
+                                                )
                                     if len(ed) != len(p2):
                                         raise Exception('Not Editable!')
-                                    combi = p1 | p2
-                                    p3 = [k for j, k in tvg.insighttree().items() if j > stor[1]]
-                                    if p3:
-                                        p3 = {(len(combi)) + i: p3[i] for i in range(len(p3))}
-                                        tvg.fileread(combi | p3)
-                                    else:
+                                    with tv(self.filename) as tvg:
+                                        p1 = islice(tvg.insighttree(), 0, stor[0])
+                                        if stor[1] < tvg.getdatanum()-1:
+                                            p3 = islice(
+                                                tvg.insighttree(), 
+                                                stor[1],
+                                                tvg.getdatanum()
+                                            )                                        
+                                        if p3:
+                                            p3 = tuple(v for v in dict(p3).values())
+                                            p3 = {et + j + 1: p3[j] for j in range(len(p3))}
+                                            combi = iter((dict(p1) | p2 | p3).values())
+                                        else:
+                                            combi = iter((dict(p1) | p2).values())
                                         tvg.fileread(combi)
                                     del stor, tvg, p1, ed, ckc, et, p2, combi, p3
                                 else:
-                                    tvg = tv(self.filename)
-                                    p1 = tvg.insighttree()
-                                    et = len(p1)-1
-                                    ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                    et = self.listb.size()
+                                    ed = tuple(i for i in self.store[:-1].split('\n') if i)
                                     ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
                                     p2 = {}
                                     for i in ed:
@@ -2079,11 +2240,12 @@ class TreeViewGui:
                                                 p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                     if len(ed) != len(p2):
                                         raise Exception('Not Editable!')
-                                    tvg.fileread(p1 | p2)
-                                    del tvg, p1, et, ed, ckc, p2
+                                    with tv(self.filename) as tvg:
+                                        combi = iter((dict(tvg.insighttree())|p2).values())
+                                        tvg.fileread(combi)
+                                    del tvg, et, ed, ckc, p2, combi
                             else:
-                                tvg = tv(self.filename)
-                                ed = [i for i in self.text.get('1.0', END)[:-1].split('\n') if i]
+                                ed = tuple(i for i in self.store[:-1].split('\n') if i)
                                 et = -1
                                 ckc = {f'c{i}': f'child{i}' for i in range(1, 51)}
                                 p2 = {}
@@ -2103,7 +2265,8 @@ class TreeViewGui:
                                             p2[et] = (ckc[i.partition(':')[0]], i.partition(':')[2].removeprefix(' '))
                                 if len(ed) != len(p2):
                                     raise Exception('Not Editable!')
-                                tvg.fileread(p2)
+                                with tv(self.filename) as tvg:
+                                    tvg.fileread(iter(p2.values()))
                                 del tvg, ed, et, ckc, p2
                             self.text.config(state = DISABLED)
                             for i in self.bt:
@@ -2143,6 +2306,7 @@ class TreeViewGui:
                             self.editorsel = None
                 except Exception as a:
                     messagebox.showerror('TreeViewGui', f'{a}')
+            self.store = None
             self.text.edit_reset()
             self.infobar()
                     
@@ -2151,7 +2315,7 @@ class TreeViewGui:
         
         if TreeViewGui.FREEZE is False:
             ori = os.getcwd().rpartition('\\')[0]
-            if self.checkfile():
+            if self.checkfile() and self.nonetype():
                 with open(os.path.join(ori, 'lastopen.tvg'), 'wb') as lop:
                     lop.write(str({'lop': self.filename}).encode())
                 if str(self.root.winfo_geometry()) == TreeViewGui.GEO:
@@ -2300,7 +2464,17 @@ class TreeViewGui:
         # Compose email for registration.
         
         try:
-            composemail()
+            body = ''.join(
+                [
+                    wrwords(i, 80, 1) + '\n' for i in
+                    self.text.get('1.0', END)[:-1].split('\n')
+                ]
+            )
+            if body:
+                composemail(
+                    sub = f'{self.filename}', 
+                    body = body 
+                )
         except Exception as e:
             messagebox.showerror('TreeViewGui', f'{e}')
          
