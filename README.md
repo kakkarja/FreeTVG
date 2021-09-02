@@ -31,6 +31,7 @@ main()
 % TVG
 ```
 ## Changes:
+* **Tutorial TVG.pdf press: <Ctrl+F4>**
 * **Tutorial TVG.pdf is updated.**
 * **Clean-up some comment line.**
 * **Can run TVG directly without creating a script.**
@@ -38,5 +39,8 @@ main()
     * **Free from annoying message pop-up.**
     * **View HTML deleted as well, because the purpose is not much and basically the same as printing.**
 * **Bugs fixed on overflowing memory usage.**
-
-![TVG](/Pics/TVG.png)
+* ### [treeview](https://github.com/kakkarja/TV)
+    * **Part of TVG engine has been seperated and has its own repo.**
+		* **For TVG Windows user only.**
+    * **TVG has been partly overhaul for adapting the new engine.**
+    * **More robust and faster.**
