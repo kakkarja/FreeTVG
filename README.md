@@ -25,8 +25,8 @@ main()
 % TVG
 ```
 ## Changes:
-* **Tutorial TVG.pdf press: <Ctrl+F4>**
-* **Tutorial TVG.pdf is updated.**
+* **Tutorial TVG.pdf press: <Ctrl+F1> or <fn+F1> in MacOS**
+* **Send note from default email: <Ctrl+F4> or <fn+F4> in MacOs**
 * **Clean-up some comment line.**
 * **Can run TVG directly without creating a script.**
 * **6 buttons deleted [Calculator, Send Note, Save, Open, Emoji, and ViewHTML].**
