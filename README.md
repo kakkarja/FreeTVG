@@ -3,12 +3,6 @@
 ### **Visit [TVG](https://treeviewgui.work) for tutorials and support**
 ## Installation
 ```pip install FreeTVG-karjakak```   
-
-**For MacOS X user can install**   
-
-```pip install TVGMacOs-karjakak```  
-
-
 ## Usage
 **With script:**
 ```Python

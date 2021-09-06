@@ -5,6 +5,7 @@
 import markdown
 import os
 import re
+from sys import platform
 
 def convhtml(text: str, filename: str, font: str, ckb: bool = False):
     # Converting your TVG to html and printable directly from browser.
@@ -95,6 +96,9 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
             cssstyle = cssstyle + printed + nxt
         with open(f'{filename}.html', 'w') as whtm:
             whtm.write(cssstyle)
-        os.startfile(f'{filename}.html')
+        if platform.startswith('win'):
+            os.startfile(f'{filename}.html')
+        else:
+            os.system(f'open "{filename}.html"')
     except Exception as e:
         raise e

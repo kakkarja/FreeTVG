@@ -2,11 +2,17 @@
 # Copyright © kakkarja (K A K)
 
 from tkinter import *
-from tkinter import ttk
-from tkinter import font
-from tkinter import simpledialog, messagebox, colorchooser
+from tkinter import (ttk, 
+                     font, 
+                     simpledialog, 
+                     messagebox, 
+                     colorchooser
+                     )
+from sys import platform
 from treeview import TreeView as tv
 from treeview.dbase import Datab as db
+from pathlib import Path
+import ast
 from itertools import islice
 import sys
 import os
@@ -27,7 +33,9 @@ class TreeViewGui:
     def __init__(self, root, filename):
         self.filename = filename
         self.root = root
-        self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
+        self.plat = platform
+        self.glop = Path(os.getcwd())
+        self.root.title(f'{self.glop.joinpath(self.filename)}.txt')
         self.root.protocol('WM_DELETE_WINDOW', self.tvgexit)
         self.wwidth = 835
         self.wheight = 610
@@ -35,13 +43,11 @@ class TreeViewGui:
         self.pheight = int(self.root.winfo_screenheight()/3 - self.wheight/3)
         self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
         TreeViewGui.GEO = f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}"
-        gpath = os.getcwd().rpartition('\\')[0]
+        gpath = self.glop.joinpath(self.glop.parent, 'geo.tvg')
         gem = None
-        if 'geo.tvg' in os.listdir(gpath):
-            with open(os.path.join(gpath, 'geo.tvg'), 'rb') as geo:
-                gem = geo.read().decode('utf-8')
-            if '{' == gem[0] and '}' == gem[-1]:
-                gem = eval(gem)
+        if os.path.exists(gpath):
+            with open(gpath, 'rb') as geo:
+                gem = ast.literal_eval(geo.read().decode('utf-8'))
                 self.root.geometry(gem['geo'])
                 TreeViewGui.GEO = gem['geo']
         del gpath
@@ -85,14 +91,22 @@ class TreeViewGui:
         self.root.bind_all('<Control-Key-g>', self.fcsent)
         self.root.bind_all('<Control-Key-question>', self.fcsent)
         self.root.bind_all('<Shift-Return>', self.inenter)
-        self.root.bind_all('<Control-Key-F1>', self.fcsent)
-        self.root.bind_all('<Control-Key-F2>', self.fcsent)
-        self.root.bind_class('TButton', '<Enter>', self.ttip)
-        self.root.bind_class('TButton', '<Leave>', self.leave)
-        self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
-        self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
-        self.root.bind_all('<Control-Key-F3>', self.fcsent)
-        self.root.bind_all('<Control-Key-F4>', self.fcsent)
+        
+        if self.plat.startswith('win'):
+            self.root.bind_all('<Control-Key-F1>', self.fcsent)
+            self.root.bind_all('<Control-Key-F2>', self.fcsent)
+            self.root.bind_all('<Control-Key-F3>', self.fcsent)
+            self.root.bind_all('<Control-Key-F4>', self.fcsent)            
+            self.root.bind_class('TButton', '<Enter>', self.ttip)
+            self.root.bind_class('TButton', '<Leave>', self.leave)
+            self.root.bind_class('TRadiobutton', '<Enter>', self.ttip)
+            self.root.bind_class('TRadiobutton', '<Leave>', self.leave)
+        else:
+            self.root.bind_all('<Key-F1>', self.fcsent)
+            self.root.bind_all('<Key-F2>', self.fcsent)
+            self.root.bind_all('<Key-F3>', self.fcsent)
+            self.root.bind_all('<Key-F4>', self.fcsent)
+            
         self.bt = {}
         self.rb = StringVar()
         self.lock = False
@@ -100,8 +114,44 @@ class TreeViewGui:
         self.editorsel = None
         self.stl = ttk.Style(self.root)
         self.stl.theme_use('clam')
-        self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7')])
-        self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
+        if self.plat.startswith('win'):
+            self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7')])
+            self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
+        else:
+            self.stl.element_create(
+                "My.Horizontal.Scrollbar.trough", 
+                "from", 
+                "default"
+            )
+            self.stl.layout("My.Horizontal.TScrollbar",
+                [('My.Horizontal.Scrollbar.trough', {'children':
+                    [('Horizontal.Scrollbar.leftarrow', {'side': 'left', 'sticky': ''}),
+                     ('Horizontal.Scrollbar.rightarrow', {'side': 'right', 'sticky': ''}),
+                     ('Horizontal.Scrollbar.thumb', {'unit': '0', 'children':
+                         [('Horizontal.Scrollbar.grip', {'sticky': ''})],
+                    'sticky': 'nswe'})],
+                'sticky': 'we'})])
+            self.stl.element_create(
+                "My.Vertical.Scrollbar.trough", 
+                "from", 
+                "default"
+            )
+            self.stl.layout("My.Vertical.TScrollbar",
+                [('My.Vertical.Scrollbar.trough', {'children':
+                    [('Vertical.Scrollbar.uparrow', {'side': 'top', 'sticky': ''}),
+                     ('Vertical.Scrollbar.downarrow', {'side': 'bottom', 'sticky': ''}),
+                     ('Vertical.Scrollbar.thumb', {'unit': '0', 'children':
+                         [('Vertical.Scrollbar.grip', {'sticky': ''})],
+                    'sticky': 'nswe'})],
+                'sticky': 'ns'})])        
+            self.stl.map(
+                'My.Horizontal.TScrollbar', 
+                background = [('active', '#eeebe7')]
+            )
+            self.stl.map(
+                'My.Vertical.TScrollbar', 
+                background = [('active', '#eeebe7')]
+            )
         
         # 1st frame. 
         # Frame for label and Entry.
@@ -236,7 +286,7 @@ class TreeViewGui:
         ftt = 'verdana 11'
         self.tframe = ttk.Frame(root)
         self.tframe.pack(anchor = 'w', side = TOP, fill = 'both', expand = 1)
-        self.txframe = Frame(self.tframe)
+        self.txframe = ttk.Frame(self.tframe)
         self.txframe.pack(anchor = 'w', side = LEFT, fill = 'both', expand = 1)
         self.txframe.pack_propagate(0)
         self.text = Text(self.txframe, font = ftt, padx = 5, pady = 3, wrap = NONE, 
@@ -251,7 +301,10 @@ class TreeViewGui:
         self.sc1frame = ttk.Frame(self.tframe, width = scw-1)
         self.sc1frame.pack(anchor = 'w', side = LEFT, fill = 'y', pady = 1)
         self.sc1frame.pack_propagate(0)
-        self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
+        if self.plat.startswith('win'):
+            self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient="vertical")
+        else:
+            self.scrollbar1 = ttk.Scrollbar(self.sc1frame, orient = "vertical", style = 'My.Vertical.TScrollbar')
         self.scrollbar1.config(command = self.text.yview) 
         self.scrollbar1.pack(side="left", fill="y") 
         self.scrollbar1.bind('<ButtonRelease>', self.mscrt)
@@ -267,7 +320,10 @@ class TreeViewGui:
         self.sc2frame = ttk.Frame(self.tframe, width = scw)
         self.sc2frame.pack(anchor = 'w', side = LEFT, fill = 'y', pady = 1)
         self.sc2frame.pack_propagate(0)
-        self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
+        if self.plat.startswith('win'):
+            self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical")
+        else:
+            self.scrollbar2 = ttk.Scrollbar(self.sc2frame, orient = "vertical", style = 'My.Vertical.TScrollbar')
         self.scrollbar2.config(command = self.listb.yview) 
         self.scrollbar2.pack(side = "left", fill = "y")
         self.scrollbar2.bind('<ButtonRelease>', self.mscrl)
@@ -286,7 +342,10 @@ class TreeViewGui:
         self.frsc = ttk.Frame(self.fscr, height = scw+1)
         self.frsc.pack(side = LEFT, fill = 'x', padx = (2, 1), expand = 1)
         self.frsc.propagate(0)
-        self.scrolh = ttk.Scrollbar(self.frsc, orient = "horizontal")
+        if self.plat.startswith('win'):
+            self.scrolh = ttk.Scrollbar(self.frsc, orient = "horizontal")
+        else:
+            self.scrolh = ttk.Scrollbar(self.frsc, orient = "horizontal", style = 'My.Horizontal.TScrollbar')
         self.scrolh.pack(side = LEFT, fill = 'x', expand = 1)
         self.scrolh.config(command = self.text.xview)
         self.scrolh.propagate(0)
@@ -301,56 +360,91 @@ class TreeViewGui:
         self.labcor.pack(side = LEFT, fill = 'x', expand = 1)
         self.labcor.propagate(0)
         self.unlock = True
-        if 'ft.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
-            self.ft(path = os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'))        
-        if 'theme.tvg' in os.listdir(os.getcwd().rpartition('\\')[0]):
-            self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0],'theme.tvg'), wr = False)
-        if os.path.isfile(os.path.join(os.getcwd().rpartition('\\')[0], 'hbts.tvg')):
+        
+        if os.path.exists(
+            self.glop.joinpath(
+                self.glop.parent, 
+                'ft.tvg'
+                )
+            ):
+            self.ft(
+                path = self.glop.joinpath(
+                    self.glop.parent, 'ft.tvg'
+                )
+            )
+            
+        if  os.path.exists(
+            self.glop.joinpath(
+                self.glop.parent, 'theme.tvg'
+                )
+            ):
+            self.txtcol(
+                path = self.glop.joinpath(
+                    self.glop.parent, 'theme.tvg'
+                    ), 
+                wr = False
+            )
+            
+        if os.path.isfile(
+            self.glop.joinpath(
+                self.glop.parent, 'hbts.tvg'
+                )
+            ):
             frm = [self.bframe, self.frb1, self.frb2]
             for fr in frm:
                 fr.pack_forget()
             del frm
-        if os.path.isfile(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg')):
-            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg')) as ty:
+            
+        if os.path.isfile(
+            self.glop.joinpath(
+                self.glop.parent, 'sty.tvg'
+                )
+            ):
+            with open(
+                self.glop.joinpath(
+                    self.glop.parent, 'sty.tvg'
+                    )
+                ) as ty:
                 rd = ty.read()
                 if rd == 'ease': self.ldmode()
             del rd
-        self.tpl = None
-        self.ai = None
-        self.scribe = {
-                       'Insert': 'Insert word in outline on selected row', 
-                       'Write': 'Write word to outline base on chosen as parent or child', 
-                       'Delete': 'Delete an outline row', 
-                       'BackUp': 'Backup outline note [max 10 and recycle]', 
-                       'Load': 'Load a backuped note', 
-                       'Move Child': 'Move a child base note to left or right', 
-                       'Change File': 'Change to another existing file', 
-                       'CPP': 'Copy or move selected outline rows', 
-                       'Send Note': 'Switch to TeleTVG for sending note or chat', 
-                       'Look Up': 'Look up word in outline list and in Editor mode', 
-                       'Insight': 'Details about outline position rows', 
-                       'Arrange': 'Clear selected row and arrange outline internally', 
-                       'Paste': 'Paste selected row to word for editing', 
-                       'Checked': 'Insert "Check mark" or "Done" in selected row ', 
-                       'Up': 'Move selected row up', 
-                       'Down': 'Move selected row down', 
-                       'Printing': 'Create html page for printing', 
-                       'Hide Parent': 'Hiding parent and its childs or reverse', 
-                       'Clear hide': 'Clearing hidden back to appearing again', 
-                       'Date-Time': 'Insert time-stamp in Word and Editor mode', 
-                       'Save': 'Save note as encrypted text and can be send', 
-                       'Open': 'Open the encrypted TVG text file and can be saved', 
-                       'Create file': 'Create new empty note', 
-                       'Editor': 'To create outline note without restriction with proper format', 
-                       'Un/Wrap': 'Wrap or unwrap outline note', 
-                       'Calculator': 'Switch to calculator', 
-                       'Ex': 'Edit whole notes or selected parent in Editor mode', 
-                       'Template': 'Create template for use frequently in Editor mode', 
-                       'Emoji': 'Insert emoji to note', 
-                       'HTML View': 'Viewing html page that has been created before',
-                       'parent': 'Create parent',
-                       'child': 'Create child ["Child" for positioning]'
-                       }
+        if self.plat.startswith('win'):
+            self.tpl = None
+            self.ai = None
+            self.scribe = {
+                           'Insert': 'Insert word in outline on selected row', 
+                           'Write': 'Write word to outline base on chosen as parent or child', 
+                           'Delete': 'Delete an outline row', 
+                           'BackUp': 'Backup outline note [max 10 and recycle]', 
+                           'Load': 'Load a backuped note', 
+                           'Move Child': 'Move a child base note to left or right', 
+                           'Change File': 'Change to another existing file', 
+                           'CPP': 'Copy or move selected outline rows', 
+                           'Send Note': 'Switch to TeleTVG for sending note or chat', 
+                           'Look Up': 'Look up word in outline list and in Editor mode', 
+                           'Insight': 'Details about outline position rows', 
+                           'Arrange': 'Clear selected row and arrange outline internally', 
+                           'Paste': 'Paste selected row to word for editing', 
+                           'Checked': 'Insert "Check mark" or "Done" in selected row ', 
+                           'Up': 'Move selected row up', 
+                           'Down': 'Move selected row down', 
+                           'Printing': 'Create html page for printing', 
+                           'Hide Parent': 'Hiding parent and its childs or reverse', 
+                           'Clear hide': 'Clearing hidden back to appearing again', 
+                           'Date-Time': 'Insert time-stamp in Word and Editor mode', 
+                           'Save': 'Save note as encrypted text and can be send', 
+                           'Open': 'Open the encrypted TVG text file and can be saved', 
+                           'Create file': 'Create new empty note', 
+                           'Editor': 'To create outline note without restriction with proper format', 
+                           'Un/Wrap': 'Wrap or unwrap outline note', 
+                           'Calculator': 'Switch to calculator', 
+                           'Ex': 'Edit whole notes or selected parent in Editor mode', 
+                           'Template': 'Create template for use frequently in Editor mode', 
+                           'Emoji': 'Insert emoji to note', 
+                           'HTML View': 'Viewing html page that has been created before',
+                           'parent': 'Create parent',
+                           'child': 'Create child ["Child" for positioning]'
+                           }
             
     def ldmode(self, event = None):
         # Dark mode for easing the eye.
@@ -383,10 +477,25 @@ class TreeViewGui:
             self.stl.configure('TEntry', fieldbackground = chbg)
             self.labcor.config(bg = chbg, fg = chfg)
             if str(self.text.cget('background')) == 'SystemWindow':
-                with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
+                with open(
+                    self.glop.joinpath(
+                        self.glop.parent, 'theme.tvg'
+                        ), 
+                    'w'
+                    ) as thm:
                     thm.write('#4d4d4d')
-                self.txtcol(path = os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), wr = False)
-            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'), 'w') as ty:
+                self.txtcol(
+                    path = self.glop.joinpath(
+                        self.glop.parent, 'theme.tvg'
+                        ), 
+                    wr = False
+                )
+            with open(
+                self.glop.joinpath(
+                    self.glop.parent, 'sty.tvg'
+                    ), 
+                'w'
+                ) as ty:
                 ty.write('ease')
             del oribg, chbg, orifg, chfg
         else:
@@ -410,7 +519,7 @@ class TreeViewGui:
             self.stl.map('Horizontal.TScrollbar', background = [('active', '#eeebe7')])
             self.stl.map('Vertical.TScrollbar', background = [('active', '#eeebe7')])
             self.labcor.config(bg = 'White', fg = orifg)
-            os.remove(os.path.join(os.getcwd().rpartition('\\')[0], 'sty.tvg'))
+            os.remove(self.glop.joinpath(self.glop.parent, 'sty.tvg'))
             del oribg, chbg, orifg, chfg
     
     def ttip(self, event =  None):
@@ -426,12 +535,25 @@ class TreeViewGui:
         tx = self.scribe[event.widget['text']]
         ft = font.Font(master, font='verdana')
         if event.widget['text'] in ['Save', 'Insight', 'Insert']:
-            master.geometry(f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()}+{event.widget.winfo_pointery()+30}')
+            master.geometry(
+                f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()}+{event.widget.winfo_pointery()+30}'
+            )
         elif event.widget['text'] in ['Look Up', 'Date-Time', 'HTML View', 'child']:
-            master.geometry(f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-220}+{event.widget.winfo_pointery()+30}')
+            master.geometry(
+                f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-220}+{event.widget.winfo_pointery()+30}'
+            )
         else:
-            master.geometry(f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}')
-        a = Message(master= master, text = tx, justify = 'center', aspect = int(ft.measure(tx)*50), bg = 'white', font = 'verdana 7')
+            master.geometry(
+                f'{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}'
+            )
+        a = Message(
+            master= master, 
+            text = tx, 
+            justify = 'center', 
+            aspect = int(ft.measure(tx)*50), 
+            bg = 'white', 
+            font = 'verdana 7'
+        )
         a.pack(fill = 'both', expand = 1)
         del tx, ft
         self.ai = self.root.after(3000, exit)
@@ -449,7 +571,7 @@ class TreeViewGui:
         # Hide Buttons.
         
         frm = [self.bframe, self.frb1, self.frb2]
-        pth = os.path.join(os.getcwd().rpartition('\\')[0], 'hbts.tvg')        
+        pth = self.glop.joinpath(self.glop.parent, 'hbts.tvg')        
         self.tframe.pack_forget()
         self.fscr.pack_forget()
         if bool(frm[0].winfo_ismapped()):
@@ -482,7 +604,7 @@ class TreeViewGui:
             try:
                 self.text.edit_undo()
             except:
-                messagebox.showerror('TreeViewGui', 'Nothing to undo!')
+                messagebox.showerror('TreeViewGui', 'Nothing to undo!', parent = self.root)
                 
     def redo(self, event =None):
         # Redo only in Editor.
@@ -491,7 +613,7 @@ class TreeViewGui:
             try:
                 self.text.edit_redo()
             except:
-                messagebox.showerror('TreeViewGui', 'Nothing to redo!')
+                messagebox.showerror('TreeViewGui', 'Nothing to redo!', parent = self.root)
                 
     def wrapped(self, event = None):
         # Wrap the records so that all filled the text window.
@@ -543,7 +665,7 @@ class TreeViewGui:
                 TreeViewGui.FREEZE = False
                 self.spaces()
             else:
-                messagebox.showinfo('TreeViewGui', 'Unable to convert!')
+                messagebox.showinfo('TreeViewGui', 'Unable to convert!', parent = self.root)
             del gt, keys, x, values, conv
             
     def infobar(self, event = None):
@@ -805,13 +927,18 @@ class TreeViewGui:
         def chosen(file):
             fi = file
             TreeViewGui.FREEZE = False
-            ask = messagebox.askyesno('TreeViewGui', '"Yes" to change file, "No" to delete directory')
+            ask = messagebox.askyesno(
+                'TreeViewGui', 
+                '"Yes" to change file, "No" to delete directory', 
+                parent = self.root
+            )
             if ask:
-                os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], fi))
+                os.chdir(self.glop.joinpath(self.glop.parent, fi))
                 self.filename = fi.rpartition('_')[0]
-                self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
-                if f'{self.filename}.txt' in os.listdir():
-                    if f'{self.filename}_hid.json' not in os.listdir():
+                self.glop = Path(self.glop.joinpath(self.glop.parent, fi))
+                self.root.title(f'{self.glop.joinpath(self.filename)}.txt')
+                if os.path.exists(self.glop.joinpath(f'{self.filename}.txt')):
+                    if not os.path.exists(self.glop.joinpath(f'{self.filename}_hid.json')):
                         self.spaces()
                         self.infobar()
                     else:
@@ -824,23 +951,29 @@ class TreeViewGui:
                     self.listb.delete(0,END)
             else:
                 import shutil
-                ori = os.getcwd()
-                if ori.rpartition('\\')[2] != fi:
-                    lf = os.listdir(os.path.join(os.getcwd().rpartition('\\')[0], fi))
-                    lsc = messagebox.askyesno('TreeViewGui', f'Do you really want to delete {fi} directory with all\n{lf}\nfiles?')
+                if self.glop.name != fi:
+                    lf = os.listdir(self.glop.joinpath(self.glop.parent, fi))
+                    lsc = messagebox.askyesno(
+                        'TreeViewGui', 
+                        f'Do you really want to delete {fi} directory with all\n{lf}\nfiles?', 
+                        parent = self.root
+                    )
                     if lsc:
-                        shutil.rmtree(os.path.join(os.getcwd().rpartition('\\')[0], fi))
+                        shutil.rmtree(self.glop.joinpath(self.glop.parent, fi))
                     else:
-                        messagebox.showinfo('TreeViewGui', 'Deleting directory is aborted!')
+                        messagebox.showinfo('TreeViewGui', 'Deleting directory is aborted!', parent = self.root)
                 else:
-                    messagebox.showerror('TreeViewGui', 'You are unable to delete present directory!!!')
-                del ori
+                    messagebox.showerror(
+                        'TreeViewGui', 
+                        'You are unable to delete present directory!!!', 
+                        parent = self.root
+                    )
             del fi, ask, file
                     
         if self.lock is False:
             TreeViewGui.FREEZE = True        
             self.lock = True
-            files = [file for file in os.listdir(os.getcwd()[:os.getcwd().rfind('\\')]) if '_tvg' in file]
+            files = [file for file in os.listdir(self.glop.parent) if '_tvg' in file]
             class MyDialog(simpledialog.Dialog):
             
                 def body(self, master):
@@ -880,9 +1013,17 @@ class TreeViewGui:
                             self.entry.delete(0,END)
                             self.spaces()
                     else:
-                        messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created please choose parent first!')
+                        messagebox.showinfo(
+                            'TreeViewGui', 
+                            f'No {self.filename}.txt file yet created please choose parent first!', 
+                            parent = self.root
+                        )
                 else:
-                    messagebox.showinfo('TreeViewGui', f'No {self.filename}.txt file yet created!')
+                    messagebox.showinfo(
+                        'TreeViewGui', 
+                        f'No {self.filename}.txt file yet created!', 
+                        parent = self.root
+                    )
             else:
                 try:
                     rw =  None
@@ -890,7 +1031,7 @@ class TreeViewGui:
                         if self.entry.get() and self.entry.get() not in cek:
                             if TreeViewGui.MARK:
                                 rw = self.listb.curselection()[0]
-                                appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
+                                appr = messagebox.askyesno('Edit', f'Edit cell {rw}?', parent = self.root)
                                 if appr:
                                     with tv(self.filename) as tvg:
                                         insight = tuple(
@@ -920,7 +1061,7 @@ class TreeViewGui:
                         if self.entry.get() and self.entry.get() not in cek:
                             if TreeViewGui.MARK:
                                 rw = self.listb.curselection()[0]
-                                appr = messagebox.askyesno('Edit', f'Edit cell {rw}?')
+                                appr = messagebox.askyesno('Edit', f'Edit cell {rw}?', parent = self.root)
                                 if appr:
                                     with tv(self.filename) as tvg:
                                         insight = tuple(
@@ -946,7 +1087,7 @@ class TreeViewGui:
                         self.text.see(f'{int(rw)}.0')
                         self.listb.see(rw)
                 except Exception as e:
-                    messagebox.showerror('TreeViewGui', f'{e}')
+                    messagebox.showerror('TreeViewGui', f'{e}', parent = self.root)
                 del rw
         del cek
                     
@@ -1120,7 +1261,11 @@ class TreeViewGui:
                 cek = ['parent', 'child']
                 if self.entry.get() and self.entry.get() not in cek :
                     if TreeViewGui.MARK:
-                        appr = messagebox.askyesno('Edit', f'Edit cell {self.listb.curselection()[0]}?')
+                        appr = messagebox.askyesno(
+                            'Edit', 
+                            f'Edit cell {self.listb.curselection()[0]}?', 
+                            parent = self.root
+                        )
                         if appr:                    
                             if self.listb.curselection():
                                 rw = int(self.listb.curselection()[0])
@@ -1167,7 +1312,7 @@ class TreeViewGui:
                 with tv(self.filename) as tvg:
                     tvg.backuptv()
                 del tvg
-                messagebox.showinfo('Backup', 'Backup done!')
+                messagebox.showinfo('Backup', 'Backup done!', parent = self.root)
                 
     def loadbkp(self, event = None):
         # Load any backup data.
@@ -1176,14 +1321,20 @@ class TreeViewGui:
         if self.unlock:
             dbs = db(self.filename)
             try:
-                row  = simpledialog.askinteger('Load Backup',
-                f'There are {dbs.totalrecs()} rows, please choose a row:')
+                row  = simpledialog.askinteger(
+                    'Load Backup',
+                    f'There are {dbs.totalrecs()} rows, please choose a row:', 
+                    parent = self.root
+                )
                 if row and row <= dbs.totalrecs():
                     with tv(self.filename) as tvg:
                         tvg.loadbackup(self.filename, row = row-1, stat = True)
                     del tvg
-                    messagebox.showinfo('Load Backup',
-                    'Load backup is done, chek again!')
+                    messagebox.showinfo(
+                        'Load Backup',
+                        'Load backup is done, chek again!', 
+                        parent = self.root
+                    )
                     self.spaces()
                 del row
             except:
@@ -1219,16 +1370,20 @@ class TreeViewGui:
         # Copy or move any rows to any point of a row within existing rows.
         # And copy parents and childs in hidden modes to another existing file or new file.
         
-        askmove = messagebox.askyesno('TreeViewGui', 'Want to move to other file?') if self.info.get() == 'Hidden Mode' else None
+        askmove = messagebox.askyesno(
+            'TreeViewGui', 
+            'Want to move to other file?', 
+            parent = self.root
+            ) if self.info.get() == 'Hidden Mode' else None
         if askmove:
             def chosen(flname):
                 TreeViewGui.FREEZE = False
                 if flname == 'New':
-                    askname = simpledialog.askstring('TreeViewGui', 'New file name:')
+                    askname = simpledialog.askstring('TreeViewGui', 'New file name:', parent = self.root)
                     if askname:
                         if not os.path.isdir(
-                            os.path.join(
-                                os.getcwd().rpartition('\\')[0], 
+                            self.glop.joinpath(
+                                self.glop.parent, 
                                 f'{askname.title()}_tvg'
                                 )
                             ):
@@ -1244,29 +1399,31 @@ class TreeViewGui:
                         else:
                             messagebox.showinfo(
                                 'TreeViewGui', 
-                                'Cannot create new file because is already exist!!!'
+                                'Cannot create new file because is already exist!!!', 
+                                parent = self.root
                             )
                     else:
-                        messagebox.showinfo('TreeViewGui', 'Copying is aborted!')
+                        messagebox.showinfo('TreeViewGui', 'Copying is aborted!', parent = self.root)
                     del askname
                 else:
                     if os.path.exists(
-                        os.path.join(
-                            os.getcwd().rpartition('\\')[0], 
+                        self.glop.joinpath(
+                            self.glop.parent, 
                             flname,
                             f'{flname.rpartition("_")[0]}.txt'
                             )
                         ):
                         if not os.path.exists(
-                            os.path.join(
-                                os.getcwd().rpartition('\\')[0], 
+                            self.glop.joinpath(
+                                self.glop.parent, 
                                 flname,
                                 f'{flname.rpartition("_")[0]}_hid.json'
                                 )
                             ):
                             self.filename = flname.rpartition("_")[0]
-                            os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], flname))
-                            self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
+                            self.glop = Path(self.glop.joinpath(self.glop.parent, flname))
+                            os.chdir(self.glop)
+                            self.root.title(f'{self.glop.joinpath(self.filename)}.txt')
                             with tv(self.filename) as tvg:
                                 tak = enumerate(
                                     [
@@ -1288,12 +1445,14 @@ class TreeViewGui:
                         else:
                             messagebox.showinfo(
                                 'TreeViewGui', 
-                                'You cannot copied to hidden mode file!'
+                                'You cannot copied to hidden mode file!', 
+                                parent = self.root                                
                             )
                     else:
                         self.filename = flname.rpartition("_")[0]
-                        os.chdir(os.path.join(os.getcwd().rpartition('\\')[0], flname))
-                        self.root.title(f'{os.getcwd()}\\{self.filename}.txt')
+                        self.glop = Path(self.glop.joinpath(self.glop.parent, flname))
+                        os.chdir(self.glop)
+                        self.root.title(f'{self.glop.joinpath(self.filename)}.txt')
                         with tv(self.filename) as tvg:
                                 tak = enumerate(
                                     [f'{i}\n' for i in self.text.get('1.0', END)[:-1].split('\n')]
@@ -1308,7 +1467,7 @@ class TreeViewGui:
             self.lock = True
             files = [
                 file for file in os.listdir(
-                    os.getcwd()[:os.getcwd().rfind('\\')]
+                    self.glop.parent
                 ) 
                 if '_tvg' in file
             ]
@@ -1352,12 +1511,14 @@ class TreeViewGui:
                                 gcs = [int(i) for i in self.listb.curselection()]
                                 ask = simpledialog.askinteger(
                                     'TreeViewGui', 
-                                    f'Move to which row? choose between 0 to {self.listb.size()-1} rows'
+                                    f'Move to which row? choose between 0 to {self.listb.size()-1} rows', 
+                                    parent = self.root
                                 )
                                 if ask is not None and ask < self.listb.size():
                                     deci = messagebox.askyesno(
                                         'TreeViewGui', 
-                                        '"Yes" to MOVE to, "No" to COPY to'
+                                        '"Yes" to MOVE to, "No" to COPY to', 
+                                        parent = self.root
                                     )
                                     if deci:
                                         with tv(self.filename) as tvg:
@@ -1468,7 +1629,8 @@ class TreeViewGui:
                                     if ask:
                                         messagebox.showerror(
                                             'TreeViewGui', 
-                                            f'row {ask} is exceed existing rows'
+                                            f'row {ask} is exceed existing rows', 
+                                            parent = self.root
                                         )
                                 del gcs, ask
                             else:
@@ -1486,7 +1648,6 @@ class TreeViewGui:
                                                 self.bt[i].config(state='normal')
                                 self.listb.config(selectmode = BROWSE)
                                 TreeViewGui.FREEZE = False
-                            #del tvg, ins
                         del ckc
                         self.listb.selection_clear(0, END)
                         self.infobar()
@@ -1515,7 +1676,7 @@ class TreeViewGui:
                 else:
                     fon = self.text['font'].partition(' ')[0]
                     fon  = f'{add}{fon}'                    
-                ask = messagebox.askyesno('TreeViewGui', 'Add checkboxes?')
+                ask = messagebox.askyesno('TreeViewGui', 'Add checkboxes?', parent = self.root)
                 if f'{self.filename}_hid.json' in os.listdir():
                     if ask:
                         convhtml(self.text.get('1.0', END)[:-1], f'{self.filename}', fon, ckb = True)
@@ -1528,7 +1689,7 @@ class TreeViewGui:
                         convhtml(f'{self.filename}.txt', f'{self.filename}', fon)
                 del px, ck, sty, add, ask, fon
         except Exception as e:
-            messagebox.showerror('TreeViewGui', f'{e}')
+            messagebox.showerror('TreeViewGui', f'{e}', parent = self.root)
     
     def nonetype(self):
         try:
@@ -1582,16 +1743,16 @@ class TreeViewGui:
     def hidcheck(self):
         # Core checking for hidden parent on display, base on existing json file.
         
-        if f'{self.filename}_hid.json' in os.listdir():
-            ans = messagebox.askyesno('TreeViewGui', f'Delete {self.filename}_hid.json?')
+        if os.path.exists(f'{self.filename}_hid.json'):
+            ans = messagebox.askyesno('TreeViewGui', f'Delete {self.filename}_hid.json?', parent = self.root)
             if ans:
                 os.remove(f'{self.filename}_hid.json')
                 self.view()
                 self.unlock = True
-                messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+                messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!', parent = self.root)
             else:
                 self.unlock = False
-                messagebox.showinfo('TreeViewGui', 'This function has been terminated!!!')
+                messagebox.showinfo('TreeViewGui', 'This function has been terminated!!!', parent = self.root)
             del ans
         else:
             if self.unlock == False:
@@ -1633,18 +1794,21 @@ class TreeViewGui:
                         self.text.insert(END, i)
                     del gr
                 self.text.config(state = 'disable')
-                with tv(self.filename) as tvg:
-                    vals =  enumerate(
-                        [
-                            d[0] for d in
-                            tvg.insighthidden(enumerate(showt), False)
-                        ]
-                    )
-                del tvg
-                self.listb.delete(0,END)
-                for n, p in vals:
-                    self.listb.insert(END, f'{n}: {p}')
-                del rolrd, showt, text_font, vals, em
+                if showt:
+                    with tv(self.filename) as tvg:
+                        vals =  enumerate(
+                            [
+                                d[0] for d in
+                                tvg.insighthidden(enumerate(showt), False)
+                            ]
+                        )
+                    self.listb.delete(0,END)
+                    for n, p in vals:
+                        self.listb.insert(END, f'{n}: {p}')
+                    del tvg, vals
+                else:
+                    self.listb.delete(0,END)
+                del rolrd, showt, text_font, em
             else:
                 self.view()
                 rolrd = [i for i in list(rd.values()) if isinstance(i, list)]
@@ -1704,7 +1868,8 @@ class TreeViewGui:
                     if self.listb.curselection():
                         ask = messagebox.askyesno(
                             'TreeViewGui', 
-                            '"Yes" to hide selected, "No" reverse hide instead!'
+                            '"Yes" to hide selected, "No" reverse hide instead!', 
+                            parent = self.root
                         )
                         allrows = [int(i) for i in self.listb.curselection()]
                         rows = {
@@ -1748,7 +1913,7 @@ class TreeViewGui:
                             del ask, rev
                         else:
                             self.listb.selection_clear(0, END)
-                            messagebox.showinfo('TreeViewGui', 'Please choose Parent only!')
+                            messagebox.showinfo('TreeViewGui', 'Please choose Parent only!', parent = self.root)
                         del allrows, rows, hd, num
                     for i in self.bt:
                         if 'label' not in i and 'scrollbar' not in i:
@@ -1766,7 +1931,11 @@ class TreeViewGui:
                     TreeViewGui.FREEZE = False
                 self.infobar()
             else:
-                messagebox.showinfo('TreeViewGui', 'Hidden parent is recorded, please clear all first!')
+                messagebox.showinfo(
+                    'TreeViewGui', 
+                    'Hidden parent is recorded, please clear all first!', 
+                    parent = self.root
+                )
             
     def delhid(self, event = None):
         # Deleting accordingly each position in json file, or can delete the file.
@@ -1778,8 +1947,11 @@ class TreeViewGui:
                 rd = dict(json.load(jfile))
             if rd['reverse'] is False:
                 rd = [i for i in list(rd.values()) if isinstance(i, list)]
-                ans = messagebox.askyesno('TreeViewGui',
-                'Please choose "Yes" to delete ascending order, or "No" to delete all?')
+                ans = messagebox.askyesno(
+                    'TreeViewGui',
+                    'Please choose "Yes" to delete ascending order, or "No" to delete all?', 
+                    parent = self.root
+                )
                 if ans:
                     if rd:
                         rd.pop()
@@ -1793,16 +1965,28 @@ class TreeViewGui:
                         else:
                             os.remove(f'{self.filename}_hid.json')
                             self.spaces()
-                            messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+                            messagebox.showinfo(
+                                'TreeViewGui', 
+                                f'{self.filename}_hid.json has been deleted!', 
+                                parent = self.root
+                            )
                 else:
                     os.remove(f'{self.filename}_hid.json')
                     self.spaces()         
-                    messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+                    messagebox.showinfo(
+                        'TreeViewGui', 
+                        f'{self.filename}_hid.json has been deleted!', 
+                        parent = self.root
+                    )
                 del rd, ans
             else:
                 os.remove(f'{self.filename}_hid.json')
                 self.spaces()
-                messagebox.showinfo('TreeViewGui', f'{self.filename}_hid.json has been deleted!')
+                messagebox.showinfo(
+                    'TreeViewGui', 
+                    f'{self.filename}_hid.json has been deleted!', 
+                    parent = self.root
+                )
                 
     def lookup(self, event = None):
         # To lookup word on row and also on editor mode.
@@ -1822,7 +2006,7 @@ class TreeViewGui:
                             self.text.delete(idx, idx2)
                             self.text.insert(idx, ghw, 'hw')
                             self.text.see(idx2)                            
-                            c = messagebox.askyesno('TreeViewGui', 'Continue search?')
+                            c = messagebox.askyesno('TreeViewGui', 'Continue search?', parent = self.root)
                             if c:
                                 self.text.delete(idx, idx2)
                                 self.text.insert(idx, ghw)
@@ -1831,9 +2015,9 @@ class TreeViewGui:
                                 self.text.focus()                                
                                 continue
                             else:
-                                r = messagebox.askyesno('TreeViewGui', 'Replace word?')
+                                r = messagebox.askyesno('TreeViewGui', 'Replace word?', parent = self.root)
                                 if r:
-                                    rpl = simpledialog.askstring('Replace', 'Type word:')
+                                    rpl = simpledialog.askstring('Replace', 'Type word:', parent = self.root)
                                     if rpl:
                                         self.text.delete(idx, idx2)
                                         self.text.insert(idx, rpl)
@@ -1879,6 +2063,7 @@ class TreeViewGui:
                         num = self.listb.size()
                         sn = 1                    
                         sw = self.entry.get()
+                        dat = None
                         if sw.isdigit():
                             sw = int(sw)
                             if sw <= num-1:
@@ -1898,7 +2083,7 @@ class TreeViewGui:
                                     self.listb.selection_set(sn-1)
                                     self.listb.focus()
                                     self.listb.activate(sn-1)
-                                    ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?')
+                                    ask = messagebox.askyesno('TreeViewGui', 'Continue lookup?', parent = self.root)
                                     if ask:
                                         sn += 1
                                         continue
@@ -1947,16 +2132,16 @@ class TreeViewGui:
         if name:
             ask = name
         else:
-            ask = messagebox.askyesno('TreeViewGui', 'Create new file?')
+            ask = messagebox.askyesno('TreeViewGui', 'Create new file?', parent = self.root)
         if ask:
             if ask == name:
                 fl = name
                 del ask
             else:
-                fl = simpledialog.askstring('TreeViewGui', 'What is the name?')
+                fl = simpledialog.askstring('TreeViewGui', 'What is the name?', parent = self.root)
             if fl:
                 mkd = f'{fl.title()}_tvg' 
-                dr = os.getcwd().rpartition('\\')[0]
+                dr = self.glop.parent
                 files = [file for file in os.listdir(dr) if '_tvg' in file]
                 if mkd not in files:
                     os.mkdir(os.path.join(dr, mkd))
@@ -1971,13 +2156,17 @@ class TreeViewGui:
                     self.entry.config(state = DISABLED)
                     self.listb.delete(0, END)
                 else:
-                    messagebox.showinfo('TreeViewGui', f'The file {mkd}/{fl.title()}.txt is already exist!')
+                    messagebox.showinfo(
+                        'TreeViewGui', 
+                        f'The file {mkd}/{fl.title()}.txt is already exist!', 
+                        parent = self.root
+                    )
                 del mkd, dr, files
             else:
-                messagebox.showinfo('TreeViewGui', 'Nothing created yet!')
+                messagebox.showinfo('TreeViewGui', 'Nothing created yet!', parent = self.root)
             del fl
         else:
-            messagebox.showinfo('TreeViewGui', 'Create new file is aborted!')
+            messagebox.showinfo('TreeViewGui', 'Create new file is aborted!', parent = self.root)
         del name
             
     def editex(self, event = None):
@@ -1990,7 +2179,8 @@ class TreeViewGui:
             if self.checkfile() and self.nonetype():
                 ask = messagebox.askyesno(
                     'TreeViewGui', 
-                    '"Yes" Edit whole file, or "No" Edit selected parent only?'
+                    '"Yes" Edit whole file, or "No" Edit selected parent only?',
+                    parent = self.root
                 )
                 if ask:
                     self.editor()
@@ -2015,7 +2205,8 @@ class TreeViewGui:
                                 if num == stor and p != 'parent':
                                     messagebox.showinfo(
                                         'TreeViewGui', 
-                                        'Please select a parent row only!'
+                                        'Please select a parent row only!', 
+                                        parent = self.root
                                     )
                                     break                                
                                 if p == 'parent':
@@ -2030,7 +2221,7 @@ class TreeViewGui:
                         del tvg, p, d, stor, num
                         self.text.see(self.text.index(INSERT))
                     else:
-                        messagebox.showinfo('TreeViewGui', 'Please select a parent row first!')
+                        messagebox.showinfo('TreeViewGui', 'Please select a parent row first!', parent = self.root)
                 del ask
         self.text.focus()
     
@@ -2039,30 +2230,41 @@ class TreeViewGui:
         # If you have to type several outline that has same format,
         # You can save them as template and re-use again in the editor mode.
         
-        if str(self.text.cget('state')) == 'normal' and str(self.bt['button24'].cget('state')) == 'normal': 
-            ori = os.getcwd()
-            if 'Templates' not in os.listdir(ori.rpartition('\\')[0]):
-                os.mkdir(os.path.join(ori.rpartition('\\')[0], 'Templates'))
-            ask = messagebox.askyesno('TreeViewGui', 'Want to save template? ["No" to load template]')
+        if str(self.text.cget('state')) == 'normal' and str(self.bt['button24'].cget('state')) == 'normal':
+            if not os.path.exists(os.path.join(self.glop.parent, 'Templates')):
+                os.mkdir(os.path.join(self.glop.parent, 'Templates'))
+            ask = messagebox.askyesno(
+                'TreeViewGui', 
+                'Want to save template? ["No" to load template]', 
+                parent = self.root
+            )
             if ask:            
                 if self.text.get('1.0', END)[:-1]:
-                    fname = simpledialog.askstring('TreeViewGui', 'Name?')
+                    fname = simpledialog.askstring('TreeViewGui', 'Name?', parent = self.root)
                     if fname:
-                        dest = os.path.join(ori.rpartition('\\')[0], 'Templates', f'{fname}.tvg')
+                        dest = os.path.join(self.glop.parent, 'Templates', f'{fname}.tvg')
                         with open(dest, 'w') as wt:
-                            wt.write(str([i for i in self.text.get('1.0', END)[:-1].split('\n') if i]))
-                        messagebox.showinfo('TreeViewGui', f'Template {fname}.tvg saved!')
+                            wt.write(
+                                str(
+                                    [
+                                        i for i in 
+                                        self.text.get('1.0', END)[:-1].split('\n') 
+                                        if i
+                                    ]
+                                )
+                            )
+                        messagebox.showinfo('TreeViewGui', f'Template {fname}.tvg saved!', parent = self.root)
                         del dest
                     else:
-                        messagebox.showinfo('TreeViewGui', 'Save template is aborted!')
+                        messagebox.showinfo('TreeViewGui', 'Save template is aborted!', parent = self.root)
                     del fname
                 else:
-                    messagebox.showinfo('TreeViewGui', 'Nothing to be save!')
+                    messagebox.showinfo('TreeViewGui', 'Nothing to be save!', parent = self.root)
             else:
                 if self.lock is False:        
                     self.lock = True
                     files = [
-                        i for i in os.listdir(os.path.join(ori.rpartition('\\')[0], 'Templates'))
+                        i for i in os.listdir(os.path.join(self.glop.parent, 'Templates'))
                     ]
                     if files:
                         def tynam(event):
@@ -2083,7 +2285,7 @@ class TreeViewGui:
                                     event.widget.icursor(index = idx)
                                     del idx, gt
                             except Exception as e:
-                                messagebox.showwarning('TeleTVG', f'{e}')
+                                messagebox.showwarning('TeleTVG', f'{e}', parent = self.root)
                                     
                         class MyDialog(simpledialog.Dialog):
                         
@@ -2102,11 +2304,9 @@ class TreeViewGui:
                         d = MyDialog(self.root)
                         self.lock = False
                         if d.result:
-                            path = os.path.join(ori.rpartition('\\')[0], 'Templates', d.result)
+                            path = os.path.join(self.glop.parent, 'Templates', d.result)
                             with open(path) as rdf:
-                                gf = rdf.read()
-                            if gf[0] == '[' and gf[-1] == ']':
-                                gf = eval(gf)
+                                gf = ast.literal_eval(rdf.read())
                                 if len(gf) == 1:
                                     self.text.insert(INSERT, gf[0])
                                 else:
@@ -2127,17 +2327,15 @@ class TreeViewGui:
                                             del ind
                                     del tot, gw
                                 del gf
-                            else:
-                                messagebox.showerror('TreeViewGui', 'Template has been corrupted!')
                             del path
                         else:
-                            messagebox.showinfo('TreeViewGui', 'Loading template aborted!')
+                            messagebox.showinfo('TreeViewGui', 'Loading template aborted!', parent = self.root)
                         del d.result
                     else:
                         self.lock = False
-                        messagebox.showinfo('TreeViewGui', 'No templates yet!')
+                        messagebox.showinfo('TreeViewGui', 'No templates yet!', parent = self.root)
                     del files
-            del ask, ori
+            del ask
         self.text.focus()
                         
     def editor(self):
@@ -2165,7 +2363,8 @@ class TreeViewGui:
                     if self.text.get('1.0', END)[:-1]:
                         ask = messagebox.askyesno(
                             'TreeViewGui', 
-                            'Do you want to convert[y] or Edit[n]?'
+                            'Do you want to convert[y] or Edit[n]?', 
+                            parent = self.root
                         )
                         if ask:
                             self.converting()
@@ -2305,7 +2504,7 @@ class TreeViewGui:
                         if self.editorsel:
                             self.editorsel = None
                 except Exception as a:
-                    messagebox.showerror('TreeViewGui', f'{a}')
+                    messagebox.showerror('TreeViewGui', f'{a}', parent = self.root)
             self.store = None
             self.text.edit_reset()
             self.infobar()
@@ -2314,26 +2513,41 @@ class TreeViewGui:
         # Exit mode for TVG and setting everything back to default.
         
         if TreeViewGui.FREEZE is False:
-            ori = os.getcwd().rpartition('\\')[0]
-            if self.checkfile() and self.nonetype():
-                with open(os.path.join(ori, 'lastopen.tvg'), 'wb') as lop:
-                    lop.write(str({'lop': self.filename}).encode())
+            if self.checkfile():
+                with open(os.path.join(self.glop.parent, 'lastopen.tvg'), 'wb') as lop:
+                    lop.write(str(
+                            {'lop': self.filename}
+                        ).encode()
+                    )
                 if str(self.root.winfo_geometry()) == TreeViewGui.GEO:
-                    with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
-                        geo.write(str({'geo': TreeViewGui.GEO}).encode())
+                    with open(
+                        os.path.join(self.glop.parent, 'geo.tvg'), 'wb') as geo:
+                        geo.write(str(
+                                {'geo': TreeViewGui.GEO}
+                            ).encode()
+                        )
                 else:
-                    ask = messagebox.askyesno('TreeViewGui', "Do you want to set your new window's position?")
+                    ask = messagebox.askyesno(
+                        'TreeViewGui', 
+                        "Do you want to set your new window's position?", 
+                        parent = self.root
+                    )
                     if ask:
-                        with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
-                            geo.write(str({'geo': str(self.root.winfo_geometry())}).encode())
+                        with open(os.path.join(self.glop.parent, 'geo.tvg'), 'wb') as geo:
+                            geo.write(str(
+                                    {'geo': str(self.root.winfo_geometry())}
+                                ).encode()
+                            )
                     else:
-                        with open(os.path.join(ori, 'geo.tvg'), 'wb') as geo:
-                            geo.write(str({'geo': TreeViewGui.GEO}).encode())
+                        with open(os.path.join(self.glop.parent, 'geo.tvg'), 'wb') as geo:
+                            geo.write(str(
+                                    {'geo': TreeViewGui.GEO}
+                                ).encode()
+                            )
                     del ask
-            del ori
             self.root.destroy()
         else:
-            messagebox.showerror('TreeViewGui', 'Do not exit before a function end!!!')
+            messagebox.showerror('TreeViewGui', 'Do not exit before a function end!!!', parent = self.root)
     
     def txtcol(self, event = None, path = None, wr = True):
         # Setting colors for text and listbox.
@@ -2344,7 +2558,14 @@ class TreeViewGui:
                 color = rd.read()
         else:
             color = colorchooser.askcolor()[1]
-        rgb = [int(f'{i}{j}', 16)/255 for i, j in list(zip(color[1:][0::2], color[1:][1::2]))]
+        rgb = [
+            int(f'{i}{j}', 16)/255 for i, j 
+            in list(zip(
+                    color[1:][0::2], 
+                    color[1:][1::2]
+                )
+            )
+        ]
         rgb = True if round(((1/2) * (max(rgb) + min(rgb))) * 100) < 47 else False
         if  rgb:
             self.text.config(foreground = 'white')
@@ -2357,7 +2578,13 @@ class TreeViewGui:
         self.text.config(bg = color)
         self.listb.config(bg = color)
         if wr:
-            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'theme.tvg'), 'w') as thm:
+            with open(
+                os.path.join(
+                    self.glop.parent,
+                    'theme.tvg'
+                    ), 
+                'w'
+                ) as thm:
                 thm.write(color)
         del color, rgb, path, wr
                     
@@ -2395,11 +2622,17 @@ class TreeViewGui:
         if wr:
             if fl != self.listb['font']:
                 self.reblist(fl)
-            with open(os.path.join(os.getcwd().rpartition('\\')[0], 'ft.tvg'), 'w') as ftvg:
+            with open(
+                os.path.join(
+                    self.glop.parent, 
+                    'ft.tvg'
+                    ), 
+                'w'
+                ) as ftvg:
                 ftvg.write(event)
         else:
             self.listb['font'] = fl
-        if f'{self.filename}_hid.json' not in os.listdir():
+        if not os.path.exists(f'{self.filename}_hid.json'):
             self.spaces()
         else:
             self.hidform()
@@ -2410,8 +2643,12 @@ class TreeViewGui:
         # for font in listbox to be appear correctly.
         
         self.listb.destroy()
-        self.listb = Listbox(self.tlframe, background = self.text['background'],
-                             foreground = self.text['foreground'], font = fon)
+        self.listb = Listbox(
+            self.tlframe, 
+            background = self.text['background'],
+            foreground = self.text['foreground'], 
+            font = fon
+        )
         self.listb.pack(side = LEFT, fill = 'both', expand = 1)
         self.listb.pack_propagate(0)
         self.bt['listb'] = self.listb
@@ -2431,34 +2668,59 @@ class TreeViewGui:
             with open(path) as rd:
                 self.clb(rd.read(), wr = False)
         else:
-            self.root.tk.call('tk', 'fontchooser', 'configure', 
-                              '-font', self.text['font'], '-command', 
-                              self.root.register(self.clb))
+            self.root.tk.call(
+                'tk', 
+                'fontchooser', 
+                'configure', 
+                '-font', 
+                self.text['font'], 
+                '-command', 
+                self.root.register(self.clb)
+            )
             self.root.tk.call('tk', 'fontchooser', 'show')
         del path
             
     def oriset(self, event = None):
         # Set back to original setting of theme and font.
         
-        pth = os.getcwd().rpartition('\\')[0]
-        lf = [i for i in os.listdir(pth) if i == 'ft.tvg' or i == 'theme.tvg']
+        lf = [
+            i for i in os.listdir(self.glop.parent) 
+            if i == 'ft.tvg' or i == 'theme.tvg'
+        ]
         if lf:
-            ask = messagebox.askyesno('TreeViewGui', 'Set back to original?')
+            ask = messagebox.askyesno(
+                'TreeViewGui', 
+                'Set back to original?', 
+                parent = self.root
+            )
             if ask:
                 for i in lf:
-                    os.remove(os.path.join(pth, i))
-                messagebox.showinfo('TreeViewGui', 'All set back to original setting!')
+                    os.remove(os.path.join(self.glop.parent, i))
+                messagebox.showinfo(
+                    'TreeViewGui', 
+                    'All set back to original setting!', 
+                    parent = self.root
+                )
             else:
-                messagebox.showinfo('TreeViewGui', 'None change yet!')
+                messagebox.showinfo(
+                    'TreeViewGui', 
+                    'None change yet!', 
+                    parent = self.root
+                )
             del ask
-        del lf, pth
+        del lf
 
     def tutorial(self, event = None):
         # Call for TVG tutorial pdf.
         
-        pth = os.path.join(__file__.rpartition('\\')[0], 'Tutorial TVG.pdf')
+        pth = os.path.join(
+            Path(__file__).parent, 'Tutorial TVG.pdf'
+        )
         if os.path.isfile(pth):
-            os.startfile(pth)
+            if self.plat.startswith('win'):
+                os.startfile(pth)
+            else:
+                os.system(f'open "{pth}"')
     
     def send_reg(self, event = None):
         # Compose email for registration.
@@ -2470,13 +2732,15 @@ class TreeViewGui:
                     self.text.get('1.0', END)[:-1].split('\n')
                 ]
             )
-            if body:
+            if body != '\n':
                 composemail(
                     sub = f'{self.filename}', 
                     body = body 
                 )
+            else:
+                messagebox.showinfo('TreeViewGui', 'Cannot send empty text!', parent = self.root)
         except Exception as e:
-            messagebox.showerror('TreeViewGui', f'{e}')
+            messagebox.showerror('TreeViewGui', f'{e}', parent = self.root)
          
 def askfile(root):
     # Asking file for creating or opening initial app start.
@@ -2504,30 +2768,33 @@ def askfile(root):
 
 def findpath():
     # Select default path for TVG.
-    
-    pth = os.path.expanduser('~\\Documents')
+     
+    pth = (
+        os.path.join(
+            os.path.expanduser('~'), 'Documents', 'TVG'
+        ) 
+        if os.path.isdir(
+            os.path.join(
+                os.path.expanduser('~'), 'Documents'
+            )
+        ) 
+        else os.path.join(
+            os.path.expanduser('~'), 'TVG'
+        )
+    )
     if os.path.isdir(pth):
-        pth = os.path.join(pth, 'TVG')
-        if os.path.isdir(pth):
-            os.chdir(pth)
-        else:
-            os.mkdir(pth)
-            os.chdir(pth)
+        os.chdir(pth)
     else:
-        pth = os.path.join(os.path.expanduser('~'), 'TVG')
-        if os.path.isdir(pth):
-            os.chdir(pth)
-        else:
-            os.mkdir(pth)
-            os.chdir(pth)
-                
+        os.mkdir(pth)
+        os.chdir(pth)
+        
 def main():
     # Starting point of running TVG and making directory for non-existing file.
     
     findpath()
     root = Tk()
     root.withdraw()
-    if 'lastopen.tvg' in os.listdir():
+    if os.path.exists('lastopen.tvg'):
         root.update()
         ask = messagebox.askyesno('TreeViewGui', 'Want to open previous file?')
         if ask:
@@ -2541,7 +2808,7 @@ def main():
         filename = askfile(root)    
     if filename:
         filename = filename.title()
-        if f'{filename}_tvg' not in os.listdir():
+        if not os.path.exists(f'{filename}_tvg'):
             try:
                 os.mkdir(f'{filename}_tvg')
                 os.chdir(f'{filename}_tvg')
@@ -2551,7 +2818,7 @@ def main():
             os.chdir(f'{filename}_tvg')
         begin = TreeViewGui(root = root, filename = filename)
         begin.root.deiconify()
-        if f'{filename}_hid.json' in os.listdir():
+        if os.path.exists(f'{filename}_hid.json'):
             begin.hidform()
             begin.infobar()
         else:
