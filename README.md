@@ -35,6 +35,5 @@ main()
 * **Bugs fixed on overflowing memory usage.**
 * ### [treeview](https://github.com/kakkarja/TV)
     * **Part of TVG engine has been seperated and has its own repo.**
-		* **For TVG Windows user only.**
     * **TVG has been partly overhaul for adapting the new engine.**
     * **More robust and faster.**
