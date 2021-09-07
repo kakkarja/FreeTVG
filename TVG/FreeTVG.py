@@ -632,11 +632,14 @@ class TreeViewGui:
         #      This is the format that will be converted appropriately. With
         #      no spaces after '\n'. And the period is needed for child. => to child1 [2 child]
         #      """
-        if self.text.get('1.0', END)[:-1]:
+        if self.text.get('1.0', '1.0 lineend')[:-1]:
             gt = self.text.get('1.0', END)[:-1]
-            keys = [k for k in gt.split('\n') if k and '.' not in k]
             x = re.compile(r'.*?[\.|\!|\?]')
-            values = [[w.removeprefix(' ') for w in x.findall(v)] for v in gt.split('\n') if '.' in v]
+            keys = tuple(k for k in gt.split('\n') if k and k[-1].isalpha())
+            values = tuple( 
+                tuple(w.removeprefix(' ') for w in x.findall(v)) 
+                for v in gt.split('\n') if v and v[-1] in '.!?'
+            )
             conv = dict(zip(keys, values))
             if conv and len(keys) == len (values):
                 ckp = None
@@ -1497,15 +1500,10 @@ class TreeViewGui:
             self.hidcheck()
             if self.unlock:
                 if self.checkfile() and self.nonetype():
-                    if self.text.get('1.0',END)[:-1]:
-                        ckc = ['listb', 'button17', 'text']
+                    if self.text.get('1.0', '1.0 lineend')[:-1]:
                         if self.listb.cget('selectmode') == 'browse':
-                            for i in self.bt:
-                                if 'label' not in i and 'scrollbar' not in i:
-                                    if i not in ckc:
-                                        self.bt[i].config(state='disable')
+                            self.disab('listb', 'button17', 'text')
                             self.listb.config(selectmode = EXTENDED)
-                            TreeViewGui.FREEZE = True
                         else:
                             if self.listb.curselection():
                                 gcs = [int(i) for i in self.listb.curselection()]
@@ -1595,37 +1593,13 @@ class TreeViewGui:
                                             writer.close()
                                         del tvg, data, writer
                                         self.spaces()
-                                    for i in self.bt:
-                                        if 'label' not in i and 'scrollbar' not in i:
-                                            if i not in ckc:
-                                                if i == 'entry3':
-                                                    self.bt[i].config(state='readonly')
-                                                elif i == 'entry':
-                                                    if not self.rb.get():
-                                                        self.bt[i].config(state='disable')
-                                                    else:
-                                                        self.bt[i].config(state='normal')
-                                                else:
-                                                    self.bt[i].config(state='normal')
+                                    self.disab(dis = False)
                                     self.listb.config(selectmode = BROWSE)
-                                    TreeViewGui.FREEZE = False
                                     self.text.see(f'{ask}.0')
                                     self.listb.see(ask)
                                 else:
-                                    for i in self.bt:
-                                        if 'label' not in i and 'scrollbar' not in i:
-                                            if i not in ckc:
-                                                if i == 'entry3':
-                                                    self.bt[i].config(state='readonly')
-                                                elif i == 'entry':
-                                                    if not self.rb.get():
-                                                        self.bt[i].config(state='disable')
-                                                    else:
-                                                        self.bt[i].config(state='normal')
-                                                else:
-                                                    self.bt[i].config(state='normal')
+                                    self.disab(dis = False)
                                     self.listb.config(selectmode = BROWSE)
-                                    TreeViewGui.FREEZE = False
                                     if ask:
                                         messagebox.showerror(
                                             'TreeViewGui', 
@@ -1634,21 +1608,8 @@ class TreeViewGui:
                                         )
                                 del gcs, ask
                             else:
-                                for i in self.bt:
-                                    if 'label' not in i and 'scrollbar' not in i:
-                                        if i not in ckc:
-                                            if i == 'entry3':
-                                                self.bt[i].config(state='readonly')
-                                            elif i == 'entry':
-                                                if not self.rb.get():
-                                                    self.bt[i].config(state='disable')
-                                                else:
-                                                    self.bt[i].config(state='normal')
-                                            else:
-                                                self.bt[i].config(state='normal')
+                                self.disab(dis = False)
                                 self.listb.config(selectmode = BROWSE)
-                                TreeViewGui.FREEZE = False
-                        del ckc
                         self.listb.selection_clear(0, END)
                         self.infobar()
                     
@@ -1856,14 +1817,9 @@ class TreeViewGui:
     
         if self.checkfile() and self.nonetype():
             if not os.path.exists(f'{self.filename}_hid.json'):
-                ckc = ['listb', 'button14', 'text']
                 if self.listb.cget('selectmode') == 'browse':
-                    for i in self.bt:
-                        if 'label' not in i and 'scrollbar' not in i:
-                            if i not in ckc:
-                                self.bt[i].config(state='disable')
+                    self.disab('listb', 'button14', 'text')
                     self.listb.config(selectmode = MULTIPLE)
-                    TreeViewGui.FREEZE = True
                 else:
                     if self.listb.curselection():
                         ask = messagebox.askyesno(
@@ -1913,22 +1869,14 @@ class TreeViewGui:
                             del ask, rev
                         else:
                             self.listb.selection_clear(0, END)
-                            messagebox.showinfo('TreeViewGui', 'Please choose Parent only!', parent = self.root)
+                            messagebox.showinfo(
+                                'TreeViewGui', 
+                                'Please choose Parent only!', 
+                                parent = self.root
+                            )
                         del allrows, rows, hd, num
-                    for i in self.bt:
-                        if 'label' not in i and 'scrollbar' not in i:
-                            if i not in ckc:
-                                if i == 'entry3':
-                                    self.bt[i].config(state='readonly')
-                                elif i == 'entry':
-                                    if not self.rb.get():
-                                        self.bt[i].config(state='disable')
-                                    else:
-                                        self.bt[i].config(state='normal')
-                                else:
-                                    self.bt[i].config(state='normal')
+                    self.disab(dis = False)
                     self.listb.config(selectmode = BROWSE)
-                    TreeViewGui.FREEZE = False
                 self.infobar()
             else:
                 messagebox.showinfo(
@@ -2337,7 +2285,29 @@ class TreeViewGui:
                     del files
             del ask
         self.text.focus()
-                        
+    
+    def disab(self, *args, dis = True):
+        if dis and args:
+            for i in self.bt:
+                if 'label' not in i and 'scrollbar' not in i:
+                    if i not in args:
+                        self.bt[i].config(state='disable')
+            TreeViewGui.FREEZE = True
+        else:
+            for i in self.bt:
+                if 'label' not in i and 'scrollbar' not in i:
+                    if i == 'entry3':
+                        self.bt[i].config(state='readonly')
+                    elif i == 'entry':
+                        if not self.rb.get():
+                            self.bt[i].config(state='disable')
+                        else:
+                            self.bt[i].config(state='normal')
+                    else:
+                        if i != 'text':
+                            self.bt[i].config(state='normal')
+            TreeViewGui.FREEZE = False            
+     
     def editor(self):
         # This is direct editor on text window.
         # FORMAT:
@@ -2351,10 +2321,7 @@ class TreeViewGui:
                 self.text.config(state = 'normal')
                 self.text.delete('1.0', END)
                 ckb = ['button24', 'button28', 'button20', 'button29', 'button19', 'text']
-                for i in self.bt:
-                    if 'label' not in i and 'scrollbar' not in i and i not in ckb:
-                        self.bt[i].config(state='disable')
-                TreeViewGui.FREEZE = True
+                self.disab(*ckb)
                 self.text.edit_reset()
                 self.text.focus()
                 del ckb
@@ -2468,38 +2435,14 @@ class TreeViewGui:
                                     tvg.fileread(iter(p2.values()))
                                 del tvg, ed, et, ckc, p2
                             self.text.config(state = DISABLED)
-                            for i in self.bt:
-                                if 'label' not in i and 'scrollbar' not in i:
-                                    if i == 'entry3':
-                                        self.bt[i].config(state='readonly')
-                                    elif i == 'entry':
-                                        if not self.rb.get():
-                                            self.bt[i].config(state='disable')
-                                        else:
-                                            self.bt[i].config(state='normal')
-                                    else:
-                                        if i != 'text':
-                                            self.bt[i].config(state='normal')
-                            TreeViewGui.FREEZE = False
+                            self.disab(dis = False)
                             self.spaces()
                             if self.editorsel:
                                 self.text.see(f'{self.editorsel[0]}.0')
                                 self.editorsel = None
                     else:
                         self.text.config(state = DISABLED)
-                        for i in self.bt:
-                            if 'label' not in i and 'scrollbar' not in i:
-                                if i == 'entry3':
-                                    self.bt[i].config(state='readonly')
-                                elif i == 'entry':
-                                    if not self.rb.get():
-                                        self.bt[i].config(state='disable')
-                                    else:
-                                        self.bt[i].config(state='normal')
-                                else:
-                                    if i != 'text':
-                                        self.bt[i].config(state='normal')
-                        TreeViewGui.FREEZE = False
+                        self.disab(dis = False)
                         self.spaces()
                         if self.editorsel:
                             self.editorsel = None
