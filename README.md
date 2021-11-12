@@ -35,6 +35,7 @@ main()
     * **Free from annoying message pop-up.**
     * **View HTML deleted as well, because the purpose is not much and basically the same as printing.**
 * **Bugs fixed on overflowing memory usage.**
+* **Tooltip now available in MacOS X.**
 * ### [treeview](https://github.com/kakkarja/TV)
     * **Part of TVG engine has been seperated and has its own repo.**
     * **TVG has been partly overhaul for adapting the new engine.**
