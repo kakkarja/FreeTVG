@@ -95,15 +95,16 @@ class TreeViewGui:
             self.root.bind_all("<Control-Key-F2>", self.fcsent)
             self.root.bind_all("<Control-Key-F3>", self.fcsent)
             self.root.bind_all("<Control-Key-F4>", self.fcsent)
-            self.root.bind_class("TButton", "<Enter>", self.ttip)
-            self.root.bind_class("TButton", "<Leave>", self.leave)
-            self.root.bind_class("TRadiobutton", "<Enter>", self.ttip)
-            self.root.bind_class("TRadiobutton", "<Leave>", self.leave)
         else:
             self.root.bind_all("<Key-F1>", self.fcsent)
             self.root.bind_all("<Key-F2>", self.fcsent)
             self.root.bind_all("<Key-F3>", self.fcsent)
             self.root.bind_all("<Key-F4>", self.fcsent)
+        
+        self.root.bind_class("TButton", "<Enter>", self.ttip)
+        self.root.bind_class("TButton", "<Leave>", self.leave)
+        self.root.bind_class("TRadiobutton", "<Enter>", self.ttip)
+        self.root.bind_class("TRadiobutton", "<Leave>", self.leave)
 
         self.bt = {}
         self.rb = StringVar()
@@ -486,43 +487,43 @@ class TreeViewGui:
                 if rd == "ease":
                     self.ldmode()
             del rd
-        if self.plat.startswith("win"):
-            self.tpl = None
-            self.ai = None
-            self.scribe = {
-                "Insert": "Insert word in outline on selected row",
-                "Write": "Write word to outline base on chosen as parent or child",
-                "Delete": "Delete an outline row",
-                "BackUp": "Backup outline note [max 10 and recycle]",
-                "Load": "Load a backuped note",
-                "Move Child": "Move a child base note to left or right",
-                "Change File": "Change to another existing file",
-                "CPP": "Copy or move selected outline rows",
-                "Send Note": "Switch to TeleTVG for sending note or chat",
-                "Look Up": "Look up word in outline list and in Editor mode",
-                "Insight": "Details about outline position rows",
-                "Arrange": "Clear selected row and arrange outline internally",
-                "Paste": "Paste selected row to word for editing",
-                "Checked": 'Insert "Check mark" or "Done" in selected row ',
-                "Up": "Move selected row up",
-                "Down": "Move selected row down",
-                "Printing": "Create html page for printing",
-                "Hide Parent": "Hiding parent and its childs or reverse",
-                "Clear hide": "Clearing hidden back to appearing again",
-                "Date-Time": "Insert time-stamp in Word and Editor mode",
-                "Save": "Save note as encrypted text and can be send",
-                "Open": "Open the encrypted TVG text file and can be saved",
-                "Create file": "Create new empty note",
-                "Editor": "To create outline note without restriction with proper format",
-                "Un/Wrap": "Wrap or unwrap outline note",
-                "Calculator": "Switch to calculator",
-                "Ex": "Edit whole notes or selected parent in Editor mode",
-                "Template": "Create template for use frequently in Editor mode",
-                "Emoji": "Insert emoji to note",
-                "HTML View": "Viewing html page that has been created before",
-                "parent": "Create parent",
-                "child": 'Create child ["Child" for positioning]',
-            }
+
+        self.tpl = None
+        self.ai = None
+        self.scribe = {
+            "Insert": "Insert word in outline on selected row",
+            "Write": "Write word to outline base on chosen as parent or child",
+            "Delete": "Delete an outline row",
+            "BackUp": "Backup outline note [max 10 and recycle]",
+            "Load": "Load a backuped note",
+            "Move Child": "Move a child base note to left or right",
+            "Change File": "Change to another existing file",
+            "CPP": "Copy or move selected outline rows",
+            "Send Note": "Switch to TeleTVG for sending note or chat",
+            "Look Up": "Look up word in outline list and in Editor mode",
+            "Insight": "Details about outline position rows",
+            "Arrange": "Clear selected row and arrange outline internally",
+            "Paste": "Paste selected row to word for editing",
+            "Checked": 'Insert "Check mark" or "Done" in selected row ',
+            "Up": "Move selected row up",
+            "Down": "Move selected row down",
+            "Printing": "Create html page for printing",
+            "Hide Parent": "Hiding parent and its childs or reverse",
+            "Clear hide": "Clearing hidden back to appearing again",
+            "Date-Time": "Insert time-stamp in Word and Editor mode",
+            "Save": "Save note as encrypted text and can be send",
+            "Open": "Open the encrypted TVG text file and can be saved",
+            "Create file": "Create new empty note",
+            "Editor": "To create outline note without restriction with proper format",
+            "Un/Wrap": "Wrap or unwrap outline note",
+            "Calculator": "Switch to calculator",
+            "Ex": "Edit whole notes or selected parent in Editor mode",
+            "Template": "Create template for use frequently in Editor mode",
+            "Emoji": "Insert emoji to note",
+            "HTML View": "Viewing html page that has been created before",
+            "parent": "Create parent",
+            "child": 'Create child ["Child" for positioning]',
+        }
 
     def ldmode(self, event=None):
         # Dark mode for easing the eye.
@@ -629,13 +630,15 @@ class TreeViewGui:
             master.geometry(
                 f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}"
             )
+        fnt = "verdana 7" if self.plat.startswith('win') else "verdana 8" 
         a = Message(
             master=master,
             text=tx,
             justify="center",
             aspect=int(ft.measure(tx) * 50),
             bg="white",
-            font="verdana 7",
+            font=fnt,
+            fg='black'
         )
         a.pack(fill="both", expand=1)
         del tx, ft
