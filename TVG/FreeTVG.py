@@ -651,7 +651,7 @@ class TreeViewGui:
         if self.ai and self.tpl:
             self.root.after_cancel(self.ai)
             self.tpl.destroy()
-        del self.ai, self.tpl
+            self.ai = self.tpl = None
 
     def hidbs(self, event=None):
         # Hide Buttons.
