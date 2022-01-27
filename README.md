@@ -27,8 +27,8 @@ main()
 ## Changes:
 * **Tutorial TVG.pdf press: <Ctrl+F1> or <fn+F1> in MacOS**
 * **Send note from default email: <Ctrl+F4> or <fn+F4> in MacOs**
-	* **Can choose copy to clipboard. (set indentation shorter)**
-		* **Can be use to send message in [TeleTVG](https://github.com/kakkarja/TeleTVG)**
+    * **Can choose copy to clipboard. (set indentation shorter)**
+        * **Can be use to send message in [TeleTVG](https://github.com/kakkarja/TeleTVG)**
 * **Clean-up some comment line.**
 * **Can run TVG directly without creating a script.**
 * **6 buttons deleted [Calculator, Send Note, Save, Open, Emoji, and ViewHTML].**
