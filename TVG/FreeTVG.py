@@ -15,7 +15,15 @@ import re
 from .mdh import convhtml
 from datetime import datetime as dt
 from .RegMail import composemail, wrwords
+import importlib
 
+
+match _addon := importlib.util.find_spec("addon_tvg"):
+    case _addon if _addon is not None and _addon.name == "addon_tvg":
+        print("Add-On for TVG is ready!")
+        from addon_tvg import SumAll, Charts
+    case _:
+        print("Add-On for TVG is missing!")
 
 class TreeViewGui:
     """
@@ -29,6 +37,7 @@ class TreeViewGui:
     GEO = None
 
     def __init__(self, root, filename):
+        self._addon = _addon
         self.filename = filename
         self.root = root
         self.plat = platform
@@ -101,6 +110,11 @@ class TreeViewGui:
             self.root.bind_all("<Key-F3>", self.fcsent)
             self.root.bind_all("<Key-F4>", self.fcsent)
         
+        if self._addon:
+            self.root.bind_all("<Control-Key-1>", self.fcsent)
+            self.root.bind_all("<Control-Key-4>", self.fcsent)
+            self.root.bind_all("<Control-Key-5>", self.fcsent)
+
         self.root.bind_class("TButton", "<Enter>", self.ttip)
         self.root.bind_class("TButton", "<Leave>", self.leave)
         self.root.bind_class("TRadiobutton", "<Enter>", self.ttip)
@@ -367,6 +381,24 @@ class TreeViewGui:
         )
         self.button12.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button12"] = self.button12
+        
+        if self._addon:
+            self.button30 = ttk.Button(
+            self.bframe, text="Sum-Up", width=3, command=self.gettotsum
+            )
+            self.button30.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
+            self.bt["button30"] = self.button30
+            self.button31 = ttk.Button(
+            self.frb1, text="Pie-Chart Graph", width=3, command=self.createpg
+            ) 
+            self.button31.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
+            self.bt["button31"] = self.button31
+            self.button32 = ttk.Button(
+            self.frb2, text="Del Total", width=3, command=self.deltots
+             )
+            self.button32.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
+            self.bt["button32"] = self.button32
+
         self.stl.configure("TButton", font="verdana 8 bold")
 
         # 5th frame.
@@ -525,6 +557,23 @@ class TreeViewGui:
             "child": 'Create child ["Child" for positioning]',
         }
 
+        self.ew = None
+        
+        if self._addon:
+            on = {
+                "Sum-Up": "Summing all add-on",
+                "Pie-Chart Graph": "Graph base on all sums",
+                "Del Total": "Delete total base selected parents"
+            }
+            self.scribe = self.scribe | on
+            self.ew = [
+            "Sum-Up", "Pie-Chart Graph", "Del Total", "child"
+            ]
+        else:
+            self.ew = [
+            "CPP", "Clear hide", "Printing", "child"
+            ]
+
     def ldmode(self, event=None):
         # Dark mode for easing the eye.
 
@@ -618,11 +667,11 @@ class TreeViewGui:
         master.overrideredirect(1)
         tx = self.scribe[event.widget["text"]]
         ft = font.Font(master, font="verdana")
-        if event.widget["text"] in ["Save", "Insight", "Insert"]:
+        if event.widget["text"] in ["Create file", "Insight", "Insert"]:
             master.geometry(
                 f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()}+{event.widget.winfo_pointery()+30}"
             )
-        elif event.widget["text"] in ["Look Up", "Date-Time", "HTML View", "child"]:
+        elif event.widget["text"] in self.ew:
             master.geometry(
                 f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-220}+{event.widget.winfo_pointery()+30}"
             )
@@ -768,7 +817,7 @@ class TreeViewGui:
         # Info Bar telling the selected rows in listbox.
         # If nothing, it will display today's date.
 
-        if f"{self.filename}_hid.json" in os.listdir():
+        if os.path.exists(f"{self.filename}_hid.json"):
             self.info.set("Hidden Mode")
         elif TreeViewGui.FREEZE and str(self.bt["button17"]["state"]) == "normal":
             self.info.set("CPP Mode")
@@ -887,6 +936,12 @@ class TreeViewGui:
                 self.editor()
             elif event.keysym == "9":
                 self.wrapped()
+            elif self._addon and event.keysym == "1":
+                self.gettotsum()
+            elif self._addon and event.keysym == "4":
+                self.createpg()
+            elif self._addon and event.keysym == "5":
+                self.deltots()
             elif event.keysym == "bracketleft":
                 self.editex()
             elif event.keysym == "period":
@@ -1953,7 +2008,7 @@ class TreeViewGui:
                 del rolrd, showt, text_font, vals, em, ih
             del rd, g, nf
 
-    def hiddenchl(self, event=None):
+    def hiddenchl(self, event=None, chs: bool = None):
         # Create Hidden position of parent and its childs in json file.
 
         import json
@@ -1969,7 +2024,7 @@ class TreeViewGui:
                             "TreeViewGui",
                             '"Yes" to hide selected, "No" reverse hide instead!',
                             parent=self.root,
-                        )
+                        ) if chs is None else chs
                         allrows = [int(i) for i in self.listb.curselection()]
                         rows = {
                             n: pc.split(":")[1].strip()
@@ -2949,6 +3004,88 @@ class TreeViewGui:
         except Exception as e:
             messagebox.showerror("TreeViewGui", f"{e}", parent=self.root)
 
+    def gettotsum(self):
+        # Get all sums on all parents that have "+" sign in front
+
+        if self.checkfile() and self.nonetype():
+            sa = SumAll(self.filename, sig = "+")
+            self.listb.config(selectmode=MULTIPLE)
+            match tot := sa.lumpsum():
+                case tot if tot is not None:
+                    if not len(sa):
+                        match os.path.exists(f"{self.filename}_hid.json"):
+                            case False:
+                                idx = sa.getidx(False)
+                                for i in idx:
+                                    self.listb.select_set(i)
+                                self.hiddenchl(chs=False)
+                                self.text.config(state=NORMAL)
+                                if (self.text.get(f"{END} - 2 lines", END)
+                                        .strip()
+                                        .startswith("-TOTAL")
+                                ):
+                                    self.text.insert(END, f"\nTOTAL SUMS = {tot}")
+                                else:
+                                    self.text.insert(END, f"TOTAL SUMS = {tot}")
+                                self.text.config(state=DISABLED)                                
+                                del idx
+                            case True:
+                                messagebox.showinfo(
+                                    "TreeViewGui", 
+                                    "Hidden parent is recorded, please clear all first!",
+                                    parent=self.root
+                                )
+                    else:
+                        sa.sumway()
+                        self.spaces()
+                case _:
+                    messagebox.showinfo("TreeViewGui", "No data to sums!", parent=self.root)
+            self.listb.config(selectmode=BROWSE)
+            del sa, tot
+
+    def chktp(self):
+        """Clearing Toplevel widget"""
+
+        for i in self.root.winfo_children():
+            if ".!toplevel" in str(i):
+                i.destroy()
+                del i
+
+    def createpg(self):
+        # Creating graph for all summable data
+
+        if self.checkfile() and self.nonetype():
+            with SumAll(self.filename, sig = "+") as sal:
+                if tot := sal.lumpsum():
+                    match ast.literal_eval(tot):
+                        case f if f:
+                            self.chktp()
+                            tp = Toplevel(self.root)
+                            pc = Charts(sal.for_graph(), f"{self.filename}")
+                            pc.pchart(tp)
+                            del pc, tp
+                        case _:
+                            messagebox.showinfo(
+                                "TreeViewGui", 
+                                "No data to create Pie Chart!", 
+                                parent=self.root
+                            )
+            del sal, tot
+
+
+    def deltots(self):
+        # Deleting all Totals
+
+        if self.checkfile() and self.nonetype():
+            with SumAll(self.filename, sig = "+") as sal:
+                match tot := sal.lumpsum():
+                    case tot if tot is not None and ast.literal_eval(tot):
+                        sal.del_total()
+                    case _:
+                        messagebox.showinfo("TreeViewGui", "Nothing to delete!", parent=self.root)
+            del sal, tot
+            self.spaces()
+
 
 def askfile(root):
     # Asking file for creating or opening initial app start.
@@ -2994,6 +3131,12 @@ def findpath():
 
 def main():
     # Starting point of running TVG and making directory for non-existing file.
+    
+    global _addon
+    if _addon and _addon.name == "addon_tvg":
+        _addon = True
+    else:
+        _addon = False
 
     findpath()
     root = Tk()
