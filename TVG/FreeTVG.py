@@ -3051,28 +3051,49 @@ class TreeViewGui:
                 i.destroy()
                 del i
 
+    def grchk(self, *values):
+        def ck(val):
+            if val<0:
+                return False
+            else:
+                return True
+        return list(map(ck, values))
+
     def createpg(self):
         # Creating graph for all summable data
 
         if self.checkfile() and self.nonetype():
             with SumAll(self.filename, sig = "+") as sal:
-                if tot := sal.lumpsum():
-                    match ast.literal_eval(tot):
-                        case f if f:
-                            self.chktp()
-                            tp = Toplevel(self.root)
-                            pc = Charts(sal.for_graph(), f"{self.filename}")
-                            pc.pchart(tp)
-                            del pc, tp
-                        case _:
-                            messagebox.showinfo(
-                                "TreeViewGui", 
-                                "No data to create Pie Chart!", 
-                                parent=self.root
-                            )
-            del sal, tot
-
-
+                try:
+                    if tot := sal.lumpsum():
+                        match ast.literal_eval(tot):
+                            case f if f:
+                                self.chktp()
+                                tp = Toplevel(self.root)
+                                gr = sal.for_graph()
+                                if all(self.grchk(*gr.values())):
+                                    pc = Charts(gr, f"{self.filename}")
+                                    pc.pchart(tp)
+                                    del pc
+                                else:
+                                    self.chktp()
+                                    messagebox.showinfo(
+                                        "TreeViewGui", 
+                                        "Unable to produce negative values in pie-chart!", 
+                                        parent=self.root
+                                    )
+                                del tp, gr
+                            case _:
+                                messagebox.showinfo(
+                                    "TreeViewGui", 
+                                    "No data to create Pie Chart!", 
+                                    parent=self.root
+                                )
+                    del sal, tot
+                except Exception as e:
+                    self.chktp()
+                    messagebox.showerror("TreeViewGui", e, parent=self.root)
+            
     def deltots(self):
         # Deleting all Totals
 
