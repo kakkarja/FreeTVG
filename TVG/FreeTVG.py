@@ -1584,6 +1584,7 @@ class TreeViewGui:
                             )
                         ):
                             tak = self.fildat(self.text.get("1.0", END)[:-1])
+                            os.remove(f"{self.filename}_hid.json")
                             self.createf(askname)
                             with tv(f"{askname.title()}") as tvg:
                                 tvg.fileread(tvg.insighthidden(tak, False))
@@ -1614,6 +1615,8 @@ class TreeViewGui:
                                 f'{flname.rpartition("_")[0]}_hid.json',
                             )
                         ):
+                            tak = self.fildat(self.text.get("1.0", END)[:-1], False)
+                            os.remove(f"{self.filename}_hid.json")
                             self.filename = flname.rpartition("_")[0]
                             self.glop = Path(
                                 self.glop.joinpath(self.glop.parent, flname)
@@ -1621,7 +1624,6 @@ class TreeViewGui:
                             os.chdir(self.glop)
                             self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                             with tv(self.filename) as tvg:
-                                tak = self.fildat(self.text.get("1.0", END)[:-1], False)
                                 tak = tvg.insighthidden(tak, False)
                                 for p, d in tak:
                                     if p == "parent":
@@ -1639,12 +1641,13 @@ class TreeViewGui:
                                 parent=self.root,
                             )
                     else:
+                        tak = self.fildat(self.text.get("1.0", END)[:-1])
+                        os.remove(f"{self.filename}_hid.json")
                         self.filename = flname.rpartition("_")[0]
                         self.glop = Path(self.glop.joinpath(self.glop.parent, flname))
                         os.chdir(self.glop)
                         self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                         with tv(self.filename) as tvg:
-                            tak = self.fildat(self.text.get("1.0", END)[:-1])
                             tvg.fileread(tvg.insighthidden(tak, False))
                         del tak, tvg
                         self.spaces()
@@ -3070,7 +3073,7 @@ class TreeViewGui:
             with SumAll(self.filename, sig = "+") as sal:
                 try:
                     if tot := sal.lumpsum():
-                        match ast.literal_eval(tot):
+                        match ast.literal_eval(tot.replace(",","")):
                             case f if f:
                                 self.chktp()
                                 tp = Toplevel(self.root)
@@ -3104,7 +3107,7 @@ class TreeViewGui:
         if self.checkfile() and self.nonetype():
             with SumAll(self.filename, sig = "+") as sal:
                 match tot := sal.lumpsum():
-                    case tot if tot is not None and ast.literal_eval(tot):
+                    case tot if tot is not None and ast.literal_eval(tot.replace(",","")):
                         sal.del_total()
                     case _:
                         messagebox.showinfo("TreeViewGui", "Nothing to delete!", parent=self.root)
