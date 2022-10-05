@@ -5,6 +5,9 @@ import re
 from sys import platform
 
 
+__all__ = [""]
+
+
 def composemail(sub: str, body: str):
     subject = f'[TVG]-{sub}'
     if platform.startswith('win'):

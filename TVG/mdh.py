@@ -7,6 +7,10 @@ import os
 import re
 from sys import platform
 
+
+__all__ = [""]
+
+
 def convhtml(text: str, filename: str, font: str, ckb: bool = False):
     # Converting your TVG to html and printable directly from browser.
     

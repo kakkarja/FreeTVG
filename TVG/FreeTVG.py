@@ -18,12 +18,16 @@ from .RegMail import composemail, wrwords
 import importlib
 
 
+__all__ = ["main"]
+
+
 match _addon := importlib.util.find_spec("addon_tvg"):
     case _addon if _addon is not None and _addon.name == "addon_tvg":
         print("Add-On for TVG is ready!")
         from addon_tvg import SumAll, Charts
     case _:
         print("Add-On for TVG is missing!")
+
 
 class TreeViewGui:
     """
@@ -1536,6 +1540,24 @@ class TreeViewGui:
                             break
                 del tvg, rw, paste
 
+    def fildat(self, dat: str, b: bool = True):
+        
+        if b:
+            return enumerate(
+                [ 
+                    f"{i}\n"
+                    for i in dat.split("\n")
+                    if not i.startswith("TOTAL SUMS =")
+                ]
+            )
+        else:
+            return enumerate(
+                [
+                    i for i in dat.split("\n")
+                    if i and not i.startswith("TOTAL SUMS =")
+                ]
+            )
+
     def cmrows(self):
         # Copy or move any rows to any point of a row within existing rows.
         # And copy parents and childs in hidden modes to another existing file or new file.
@@ -1561,12 +1583,7 @@ class TreeViewGui:
                                 self.glop.parent, f"{askname.title()}_tvg"
                             )
                         ):
-                            tak = enumerate(
-                                [
-                                    f"{i}\n"
-                                    for i in self.text.get("1.0", END)[:-1].split("\n")
-                                ]
-                            )
+                            tak = self.fildat(self.text.get("1.0", END)[:-1])
                             self.createf(askname)
                             with tv(f"{askname.title()}") as tvg:
                                 tvg.fileread(tvg.insighthidden(tak, False))
@@ -1604,15 +1621,7 @@ class TreeViewGui:
                             os.chdir(self.glop)
                             self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                             with tv(self.filename) as tvg:
-                                tak = enumerate(
-                                    [
-                                        f"{i}"
-                                        for i in self.text.get("1.0", END)[:-1].split(
-                                            "\n"
-                                        )
-                                        if i
-                                    ]
-                                )
+                                tak = self.fildat(self.text.get("1.0", END)[:-1], False)
                                 tak = tvg.insighthidden(tak, False)
                                 for p, d in tak:
                                     if p == "parent":
@@ -1635,12 +1644,7 @@ class TreeViewGui:
                         os.chdir(self.glop)
                         self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                         with tv(self.filename) as tvg:
-                            tak = enumerate(
-                                [
-                                    f"{i}\n"
-                                    for i in self.text.get("1.0", END)[:-1].split("\n")
-                                ]
-                            )
+                            tak = self.fildat(self.text.get("1.0", END)[:-1])
                             tvg.fileread(tvg.insighthidden(tak, False))
                         del tak, tvg
                         self.spaces()
