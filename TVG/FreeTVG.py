@@ -24,7 +24,7 @@ __all__ = ["main"]
 match _addon := importlib.util.find_spec("addon_tvg"):
     case _addon if _addon is not None and _addon.name == "addon_tvg":
         print("Add-On for TVG is ready!")
-        from addon_tvg import SumAll, Charts
+        from addon_tvg import SumAll, Charts, EvalExp
     case _:
         print("Add-On for TVG is missing!")
 
@@ -108,11 +108,13 @@ class TreeViewGui:
             self.root.bind_all("<Control-Key-F2>", self.fcsent)
             self.root.bind_all("<Control-Key-F3>", self.fcsent)
             self.root.bind_all("<Control-Key-F4>", self.fcsent)
+            if self._addon: self.root.bind_all("<Control-Key-F5>", self.exprsum)
         else:
             self.root.bind_all("<Key-F1>", self.fcsent)
             self.root.bind_all("<Key-F2>", self.fcsent)
             self.root.bind_all("<Key-F3>", self.fcsent)
             self.root.bind_all("<Key-F4>", self.fcsent)
+            if self._addon: self.root.bind_all("<Key-F5>", self.exprsum)
         
         if self._addon:
             self.root.bind_all("<Control-Key-1>", self.fcsent)
@@ -573,6 +575,9 @@ class TreeViewGui:
             self.ew = [
             "Sum-Up", "Pie-Chart Graph", "Del Total", "child"
             ]
+            if os.path.exists(self.glop.parent.joinpath("sumtot.tvg")):
+                self.sumtot = True
+                os.remove(self.glop.parent.joinpath("sumtot.tvg"))
         else:
             self.ew = [
             "CPP", "Clear hide", "Printing", "child"
@@ -2823,6 +2828,11 @@ class TreeViewGui:
                         ) as geo:
                             geo.write(str({"geo": TreeViewGui.GEO}).encode())
                     del ask
+                if self._addon and hasattr(self, "sumtot"):
+                    with open(
+                            os.path.join(self.glop.parent, "sumtot.tvg"), "wb"
+                        ) as st:
+                            st.write("True".encode())
             self.root.destroy()
         else:
             messagebox.showerror(
@@ -3017,38 +3027,39 @@ class TreeViewGui:
         if self.checkfile() and self.nonetype():
             sa = SumAll(self.filename, sig = "+")
             self.listb.config(selectmode=MULTIPLE)
-            match tot := sa.lumpsum():
-                case tot if tot is not None:
-                    if not len(sa):
-                        match os.path.exists(f"{self.filename}_hid.json"):
-                            case False:
-                                idx = sa.getidx(False)
-                                for i in idx:
-                                    self.listb.select_set(i)
-                                self.hiddenchl(chs=False)
-                                self.text.config(state=NORMAL)
-                                if (self.text.get(f"{END} - 2 lines", END)
-                                        .strip()
-                                        .startswith("-TOTAL")
-                                ):
-                                    self.text.insert(END, f"\nTOTAL SUMS = {tot}")
-                                else:
-                                    self.text.insert(END, f"TOTAL SUMS = {tot}")
-                                self.text.config(state=DISABLED)                                
-                                del idx
-                            case True:
-                                messagebox.showinfo(
-                                    "TreeViewGui", 
-                                    "Hidden parent is recorded, please clear all first!",
-                                    parent=self.root
-                                )
-                    else:
-                        sa.sumway()
-                        self.spaces()
-                case _:
+            match len(sa) > 0:
+                case False if hasattr(self, "sumtot"):
+                    match os.path.exists(f"{self.filename}_hid.json"):
+                        case False:
+                            idx = sa.getidx(False)
+                            tot = sa.lumpsum()
+                            for i in idx:
+                                self.listb.select_set(i)
+                            self.hiddenchl(chs=False)
+                            self.text.config(state=NORMAL)
+                            if (self.text.get(f"{END} - 2 lines", END)
+                                    .strip()
+                                    .startswith("-TOTAL")
+                            ):
+                                self.text.insert(END, f"\nTOTAL SUMS = {tot}")
+                            else:
+                                self.text.insert(END, f"TOTAL SUMS = {tot}")
+                            self.text.config(state=DISABLED)                                
+                            del idx, tot
+                        case True:
+                            messagebox.showinfo(
+                                "TreeViewGui", 
+                                "Hidden parent is recorded, please clear all first!",
+                                parent=self.root
+                            )
+                case True:
+                    self.__setattr__("sumtot", True)
+                    sa.sumway()
+                    self.spaces()
+                case False:
                     messagebox.showinfo("TreeViewGui", "No data to sums!", parent=self.root)
             self.listb.config(selectmode=BROWSE)
-            del sa, tot
+            del sa
 
     def chktp(self):
         """Clearing Toplevel widget"""
@@ -3072,31 +3083,29 @@ class TreeViewGui:
         if self.checkfile() and self.nonetype():
             with SumAll(self.filename, sig = "+") as sal:
                 try:
-                    if tot := sal.lumpsum():
-                        match ast.literal_eval(tot.replace(",","")):
-                            case f if f:
-                                self.chktp()
-                                tp = Toplevel(self.root)
-                                gr = sal.for_graph()
-                                if all(self.grchk(*gr.values())):
-                                    pc = Charts(gr, f"{self.filename}")
-                                    pc.pchart(tp)
-                                    del pc
-                                else:
-                                    self.chktp()
-                                    messagebox.showinfo(
-                                        "TreeViewGui", 
-                                        "Unable to produce negative values in pie-chart!", 
-                                        parent=self.root
-                                    )
-                                del tp, gr
-                            case _:
-                                messagebox.showinfo(
-                                    "TreeViewGui", 
-                                    "No data to create Pie Chart!", 
-                                    parent=self.root
-                                )
-                    del sal, tot
+                    if hasattr(self, "sumtot") and self.sumtot:
+                        self.chktp()
+                        tp = Toplevel(self.root)
+                        gr = sal.for_graph()
+                        if all(self.grchk(*gr.values())):
+                            pc = Charts(gr, f"{self.filename}")
+                            pc.pchart(tp)
+                            del pc
+                        else:
+                            self.chktp()
+                            messagebox.showinfo(
+                                "TreeViewGui", 
+                                "Unable to produce negative values in pie-chart!", 
+                                parent=self.root
+                            )
+                        del tp, gr
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui", 
+                            "No data to create Pie Chart!", 
+                            parent=self.root
+                        )
+                    del sal
                 except Exception as e:
                     self.chktp()
                     messagebox.showerror("TreeViewGui", e, parent=self.root)
@@ -3106,13 +3115,74 @@ class TreeViewGui:
 
         if self.checkfile() and self.nonetype():
             with SumAll(self.filename, sig = "+") as sal:
-                match tot := sal.lumpsum():
-                    case tot if tot is not None and ast.literal_eval(tot.replace(",","")):
-                        sal.del_total()
-                    case _:
-                        messagebox.showinfo("TreeViewGui", "Nothing to delete!", parent=self.root)
-            del sal, tot
+                if hasattr(self, "sumtot") and self.sumtot:
+                    self.__delattr__("sumtot")
+                    sal.del_total()
+                else:
+                    messagebox.showinfo("TreeViewGui", "Nothing to delete!", parent=self.root)
+            del sal
             self.spaces()
+
+    def exprsum(self, event = None):
+
+        from string import digits
+
+        if self.unlock == True:
+            self.unlock = False
+
+            def calc(event = None):
+                try:
+                    if wid.get():
+                        nums = len(wid.get())
+                        if nums > 101:
+                            raise Exception(f"{nums} charcters, is exceeding than 100 chars!")
+                        for i in wid.get():
+                            if i not in tuple(digits + "*/-+()%. "):
+                                raise ValueError(f"{i!r} is not acceptable expression!")
+                        ms = EvalExp(wid.get(), None)
+                        event.widget["text"] = ms.evlex()
+                    else:
+                        raise ValueError("Expression is empty!")
+                except Exception as e:
+                    messagebox.showerror("Error Message", e, parent=self.root)
+            
+            wid = None
+            class MyDialog(simpledialog.Dialog):
+                def body(self, master):
+                    nonlocal wid
+                    self.title("Expression Calc")
+                    self.fr1 = Frame(master)
+                    self.fr1.pack(padx=1, pady=1, fill=X)
+                    Label(self.fr1, text="Expression: ").pack(side=LEFT)
+                    self.e1 = Entry(self.fr1)
+                    self.e1.pack(side=RIGHT)
+                    wid = self.e1
+                    self.e2 = Label(master, text="click for result", relief=GROOVE)
+                    self.e2.pack(padx=1, pady=(0,1), fill=X)
+                    self.e2.bind("<ButtonPress>", calc)
+                    return self.e1
+
+                def apply(self):
+                    match tx := self.e2["text"]:
+                        case tx if tx:
+                            self.result = tx
+                        case _:
+                            if tx := self.e1.get():
+                                tx = EvalExp(tx, None)
+                                self.result = tx.evlex()
+                            else:
+                                self.result = None
+                    del tx
+            
+            d = MyDialog(self.root)
+            self.unlock = True
+            if d.result:
+                if self.text.cget("state") == NORMAL:
+                    self.text.insert(INSERT, f"{d.result:,.2f}")
+                    self.text.focus_set()
+                else:
+                    messagebox.showinfo("TreeViewGui", "Only work for Editor mode", parent=self.root)
+            del wid, d
 
 
 def askfile(root):
