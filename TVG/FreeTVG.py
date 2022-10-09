@@ -3072,10 +3072,10 @@ class TreeViewGui:
     def grchk(self, *values):
         def ck(val):
             if val<0:
-                return False
+                return "r"
             else:
-                return True
-        return list(map(ck, values))
+                return "b"
+        return tuple(map(ck, values))
 
     def createpg(self):
         # Creating graph for all summable data
@@ -3083,22 +3083,13 @@ class TreeViewGui:
         if self.checkfile() and self.nonetype():
             with SumAll(self.filename, sig = "+") as sal:
                 try:
+                    pc = tp = gr = None
                     if hasattr(self, "sumtot") and self.sumtot:
                         self.chktp()
                         tp = Toplevel(self.root)
                         gr = sal.for_graph()
-                        if all(self.grchk(*gr.values())):
-                            pc = Charts(gr, f"{self.filename}")
-                            pc.pchart(tp)
-                            del pc
-                        else:
-                            self.chktp()
-                            messagebox.showinfo(
-                                "TreeViewGui", 
-                                "Unable to produce negative values in pie-chart!", 
-                                parent=self.root
-                            )
-                        del tp, gr
+                        pc = Charts(gr, f"{self.filename}", self.grchk(*gr.values()))
+                        pc.pchart(tp)
                     else:
                         messagebox.showinfo(
                             "TreeViewGui", 
@@ -3109,7 +3100,9 @@ class TreeViewGui:
                 except Exception as e:
                     self.chktp()
                     messagebox.showerror("TreeViewGui", e, parent=self.root)
-            
+                finally:
+                    del pc, tp, gr
+                    
     def deltots(self):
         # Deleting all Totals
 
