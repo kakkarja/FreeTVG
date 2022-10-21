@@ -1090,22 +1090,34 @@ class TreeViewGui:
             self.text.insert(END, e)
             self.text.config(state="disable")
 
+    def _sumchk(self):
+        sumtot = SumAll(self.filename, sig="+")
+        if sumtot.chksign() and sumtot.chktot():
+            if not hasattr(self, "sumtot"):
+                self.__setattr__("sumtot", True)
+        else:
+            if hasattr(self, "sumtot"):
+                self.__delattr__("sumtot")
+        del sumtot
+
     def addonchk(self, sta: bool = True):
         """Checking on addon for sumtot attribute purpose"""
         
         if self._addon:
-            if sta:
-                if hasattr(self, "sumtot"):
-                    with open(self.glop.absolute().joinpath("sumtot.tvg"), "wb") as st:
-                        st.write("True".encode())
-            else:
-                if not self.glop.absolute().joinpath("sumtot.tvg").exists():
+            if self.checkfile():
+                if sta:
                     if hasattr(self, "sumtot"):
-                        self.__delattr__("sumtot")
+                        with open(self.glop.absolute().joinpath("sumtot.tvg"), "wb") as st:
+                            st.write("True".encode())
                 else:
-                    if not hasattr(self, "sumtot"):
-                        self.__setattr__("sumtot", True)
-                    os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
+                    if not self.glop.absolute().joinpath("sumtot.tvg").exists():
+                        self._sumchk()
+                    else:
+                        self._sumchk()
+                        os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
+            else:
+                if hasattr(self, "sumtot"):
+                    self.__delattr__("sumtot")
 
     def chgfile(self):
         """Changing file on active app environment"""
@@ -1541,11 +1553,8 @@ class TreeViewGui:
                     )
                     self.spaces()
                 del row
-            except:
-                self.text.config(state="normal")
-                self.text.delete("1.0", END)
-                self.text.insert(END, sys.exc_info())
-                self.text.config(state="disable")
+            except Exception as e:
+                messagebox.showerror("TreeViewGui", e, parent=self.root)
             del dbs
 
     def copas(self, event=None):
@@ -1620,6 +1629,7 @@ class TreeViewGui:
                             self.createf(askname)
                             with tv(f"{askname.title()}") as tvg:
                                 tvg.fileread(tvg.insighthidden(tak, False))
+                            self.addonchk(False)
                             del tak, tvg
                             self.spaces()
                             self.infobar()
@@ -1683,6 +1693,7 @@ class TreeViewGui:
                         with tv(self.filename) as tvg:
                             tvg.fileread(tvg.insighthidden(tak, False))
                         del tak, tvg
+                        self.addonchk(False)
                         self.spaces()
                         self.infobar()
                 del flname
@@ -2361,6 +2372,7 @@ class TreeViewGui:
                 self.rb.set("")
                 self.entry.config(state=DISABLED)
                 self.listb.delete(0, END)
+                self.addonchk(False)
             else:
                 messagebox.showinfo(
                     "TreeViewGui",
