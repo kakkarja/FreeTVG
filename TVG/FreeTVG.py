@@ -9,7 +9,6 @@ from treeview.dbase import Datab as db
 from pathlib import Path
 import ast
 from itertools import islice
-import sys
 import os
 import re
 from .mdh import convhtml
@@ -2826,11 +2825,20 @@ class TreeViewGui:
                         self.spaces()
                         if self.editorsel:
                             self.editorsel = None
+                        self.chktempo()
                 except Exception as a:
+                    self.chktempo()
                     messagebox.showerror("TreeViewGui", f"{a}", parent=self.root)
             self.store = None
             self.text.edit_reset()
             self.infobar()
+    
+    def chktempo(self):
+        """Checking Add-On expression attribute"""
+
+        if self._addon and hasattr(self, "toptempo"):
+            self.toptempo.destroy()
+            self.__delattr__("toptempo")
 
     def tvgexit(self, event=None):
         """Exit mode for TVG and setting everything back to default"""
@@ -3152,7 +3160,7 @@ class TreeViewGui:
 
         from string import digits
 
-        if self.unlock == True:
+        if self.unlock and self.text.cget("state") == NORMAL:
             self.unlock = False
 
             def calc(event = None):
@@ -3169,12 +3177,28 @@ class TreeViewGui:
                     else:
                         raise ValueError("Expression is empty!")
                 except Exception as e:
-                    messagebox.showerror("Error Message", e, parent=self.root)
+                    messagebox.showerror("Error Message", e)
             
+            def insert():
+                if isinstance(lab['text'], int|float):
+                    match self.labcop:
+                        case lc  if lc is None:
+                            self.labcop = f"{lab['text']:,.2f}"
+                        case lc if self.text.get(f"{INSERT} - {len(lc)}c", END)[:-1] == lc:
+                            self.text.delete(f"{INSERT} - {len(lc)}c", f"{END} - 1c")
+                            self.labcop = f"{lab['text']:,.2f}"
+                        case _:
+                            self.labcop = f"{lab['text']:,.2f}"
+                    self.text.insert(INSERT, self.labcop)
+                    lab["text"] = "click for result"
+                
             wid = None
+            lab = None
             class MyDialog(simpledialog.Dialog):
+                aft = None
+
                 def body(self, master):
-                    nonlocal wid
+                    nonlocal wid, lab
                     self.title("Expression Calc")
                     self.fr1 = Frame(master)
                     self.fr1.pack(padx=1, pady=1, fill=X)
@@ -3185,29 +3209,43 @@ class TreeViewGui:
                     self.e2 = Label(master, text="click for result", relief=GROOVE)
                     self.e2.pack(padx=1, pady=(0,1), fill=X)
                     self.e2.bind("<ButtonPress>", calc)
+                    lab = self.e2
+                    self.bp = Button(master, text="Paste", command=insert)
+                    self.bp.pack(padx=1, pady=(0,1), fill=X)
+                    self.fcs()
                     return self.e1
 
-                def apply(self):
-                    match tx := self.e2["text"]:
-                        case tx if tx:
-                            self.result = tx
-                        case _:
-                            if tx := self.e1.get():
-                                tx = EvalExp(tx, None)
-                                self.result = tx.evlex()
-                            else:
-                                self.result = None
-                    del tx
-            
-            d = MyDialog(self.root)
+                def buttonbox(self) -> None:
+                    fb = Frame(self)
+                    bt = Button(fb, text="Done", command=self.ok)
+                    self.bind("<Return>", self.ok)
+                    bt.pack()
+                    fb.pack()
+                
+                def ok(self, event = None):
+                    if self.aft:
+                        self.after_cancel(self.aft)
+                    self.destroy()
+                
+                def fcs(self):
+                    self.lift()
+                    self.aft = self.after(1000, self.fcs)
+                    self.update()
+
+            mas = Tk()
+            mas.withdraw()
+            self.__setattr__("toptempo", mas)
+            self.__setattr__("labcop", None)
+            d = MyDialog(mas)
             self.unlock = True
-            if d.result:
-                if self.text.cget("state") == NORMAL:
-                    self.text.insert(INSERT, f"{d.result:,.2f}")
-                    self.text.focus_set()
-                else:
-                    messagebox.showinfo("TreeViewGui", "Only work for Editor mode", parent=self.root)
-            del wid, d
+            if hasattr(self, "toptempo"):
+                mas.destroy()
+                self.__delattr__("toptempo")
+            self.__delattr__("labcop")
+            del wid, d, mas
+        else:
+            if not hasattr(self, "toptempo"):
+                messagebox.showinfo("TreeViewGui", "Only work for Editor mode", parent=self.root)
 
 
 def askfile(root):

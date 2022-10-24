@@ -82,6 +82,13 @@ main()
     * **Expression Calculation**
       * **Calculator for Editor Mode**
       * **"F5" for MacOS X and "Ctrl+F5" for Windows**
+      * **Works only in editor mode**
+      * **Will formatting numbers when paste in editor mode**
+
+        ```Python
+        # format with 2 float numbers
+        1,234,567.89
+        ```
 
 ## Changes
 
