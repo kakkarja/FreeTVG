@@ -3184,8 +3184,8 @@ class TreeViewGui:
                     match self.labcop:
                         case lc  if lc is None:
                             self.labcop = f"{lab['text']:,.2f}"
-                        case lc if self.text.get(f"{INSERT} - {len(lc)}c", END)[:-1] == lc:
-                            self.text.delete(f"{INSERT} - {len(lc)}c", f"{END} - 1c")
+                        case lc if self.text.get(f"{INSERT} - {len(lc)}c", INSERT) == lc:
+                            self.text.delete(f"{INSERT} - {len(lc)}c", INSERT)
                             self.labcop = f"{lab['text']:,.2f}"
                         case _:
                             self.labcop = f"{lab['text']:,.2f}"
@@ -3195,7 +3195,6 @@ class TreeViewGui:
             wid = None
             lab = None
             class MyDialog(simpledialog.Dialog):
-                aft = None
 
                 def body(self, master):
                     nonlocal wid, lab
@@ -3223,16 +3222,16 @@ class TreeViewGui:
                     fb.pack()
                 
                 def ok(self, event = None):
-                    if self.aft:
-                        self.after_cancel(self.aft)
                     self.destroy()
                 
                 def fcs(self):
-                    self.lift()
-                    self.aft = self.after(1000, self.fcs)
-                    self.update()
+                    if self.grab_status() is not None:
+                        self.grab_release()
+                        self.attributes("-topmost", 1)
+                    else:
+                        self.after(1000, self.fcs)
 
-            mas = Tk()
+            mas = Toplevel(self.root)
             mas.withdraw()
             self.__setattr__("toptempo", mas)
             self.__setattr__("labcop", None)
@@ -3242,7 +3241,7 @@ class TreeViewGui:
                 mas.destroy()
                 self.__delattr__("toptempo")
             self.__delattr__("labcop")
-            del wid, d, mas
+            del wid, lab, d, mas
         else:
             if not hasattr(self, "toptempo"):
                 messagebox.showinfo("TreeViewGui", "Only work for Editor mode", parent=self.root)
