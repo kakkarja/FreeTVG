@@ -111,3 +111,11 @@ main()
   * **More robust and faster.**
 
 ![TVG](/Pics/TVG.png)
+
+## With Add-On FreeTVG
+
+![SumAll](/Pics/sumup.png)
+
+![PieChart](/Pics/piechart.png)
+
+![ExpressionCalc](/Pics/expressioncalc.png)
