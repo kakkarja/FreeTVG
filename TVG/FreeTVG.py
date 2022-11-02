@@ -3155,28 +3155,42 @@ class TreeViewGui:
             del sal
             self.spaces()
 
+    def _ckwrds(self, wrd: str):
+
+        if self._addon:
+            nums = len(wrd)
+            if nums >= 101:
+                raise Exception(f"{nums} charcters, is exceeding than 100 chars!")
+            
+            for i in wrd:
+                if i not in tuple("0123456789*/-+()%."):
+                    raise ValueError(f"{i!r} is not acceptable expression!")
+            
+            ck = re.compile(r"[\W+]{2}")
+            if ck := ck.search(wrd):
+                raise ValueError(f"These {ck.group()!r} are not allowed!")
+            del ck, nums
+
     def exprsum(self, event = None):
         """Expression Calculation for Editor mode"""
-
-        from string import digits
 
         if self.unlock and self.text.cget("state") == NORMAL:
             self.unlock = False
 
+            err = None
             def calc(event = None):
+                nonlocal err
                 try:
-                    if wid.get():
-                        nums = len(wid.get())
-                        if nums > 101:
-                            raise Exception(f"{nums} charcters, is exceeding than 100 chars!")
-                        for i in wid.get():
-                            if i not in tuple(digits + "*/-+()%. "):
-                                raise ValueError(f"{i!r} is not acceptable expression!")
-                        ms = EvalExp(wid.get(), None)
-                        event.widget["text"] = ms.evlex()
+                    if gw := wid.get():
+                        self._ckwrds(gw)
+                        ms = EvalExp(gw, None)
+                        lab["text"] = ms.evlex()
+                        if err: err = None
+                        del ms, gw
                     else:
                         raise ValueError("Expression is empty!")
                 except Exception as e:
+                    if err is None: err = 1
                     messagebox.showerror("Error Message", e)
             
             def insert():
@@ -3191,6 +3205,15 @@ class TreeViewGui:
                             self.labcop = f"{lab['text']:,.2f}"
                     self.text.insert(INSERT, self.labcop)
                     lab["text"] = "click for result"
+                
+                elif bool(wid.get()):
+                    nonlocal err
+                    
+                    calc()
+                    if err is None:
+                        insert()
+                    else:
+                        err = None
                 
             wid = None
             lab = None
@@ -3241,7 +3264,7 @@ class TreeViewGui:
                 mas.destroy()
                 self.__delattr__("toptempo")
             self.__delattr__("labcop")
-            del wid, lab, d, mas
+            del wid, lab, d, mas, err
         else:
             if not hasattr(self, "toptempo"):
                 messagebox.showinfo("TreeViewGui", "Only work for Editor mode", parent=self.root)

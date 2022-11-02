@@ -37,7 +37,7 @@ main()
 
 ## NEW
 
-* ### **Add-On for TVG \[Beta-Version]**
+* ### **Add-On for TVG**
 
     ```Python
     pip3 install -U addon-tvg-karjakak
@@ -103,12 +103,30 @@ main()
   * **View HTML deleted as well, because the purpose is not much and basically the same as printing.**
 * **Bugs fixed on overflowing memory usage.**
 * **Tooltip now available in MacOS X.**
+* **For Add-On TVG**
+  * **For function Sum-Up**
+    * **Much faster calculation for thousands lines.**
+    * **Just delete "TOTAL..." lines manually that need to be change, will be much faster instead.**
+  * **For Expression Calculation (F5/Ctrl+F5)**
+    * **Works for simple calculation.**
+    * **All double operator like eg. "\*\*", disabled.**
+      * **To avoid overlflow result.**
+    * **Able to paste directly without clicking result first.**
 
 * ### [treeview](https://github.com/kakkarja/TV)
 
   * **Part of TVG engine has been seperated and has its own repo.**
   * **TVG has been partly overhaul for adapting the new engine.**
   * **More robust and faster.**
+
+## Unresolve Issues
+
+* **For Add-On TVG**
+  * **For PieChart-Graph**
+    * **Some issue in matplotlib**
+      * **Will raise exception after closing the graph, if configure window (within the tool bar) is already closed beforhand.**
+    * **Nonetheless**
+      * **Will not raise exception if configure window is not close yet.**
 
 ![TVG](/Pics/TVG.png)
 
