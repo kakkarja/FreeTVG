@@ -107,14 +107,16 @@ class TreeViewGui:
             self.root.bind_all("<Control-Key-F2>", self.fcsent)
             self.root.bind_all("<Control-Key-F3>", self.fcsent)
             self.root.bind_all("<Control-Key-F4>", self.fcsent)
-            if self._addon: self.root.bind_all("<Control-Key-F5>", self.exprsum)
+            if self._addon:
+                self.root.bind_all("<Control-Key-F5>", self.exprsum)
         else:
             self.root.bind_all("<Key-F1>", self.fcsent)
             self.root.bind_all("<Key-F2>", self.fcsent)
             self.root.bind_all("<Key-F3>", self.fcsent)
             self.root.bind_all("<Key-F4>", self.fcsent)
-            if self._addon: self.root.bind_all("<Key-F5>", self.exprsum)
-        
+            if self._addon:
+                self.root.bind_all("<Key-F5>", self.exprsum)
+
         if self._addon:
             self.root.bind_all("<Control-Key-1>", self.fcsent)
             self.root.bind_all("<Control-Key-4>", self.fcsent)
@@ -386,21 +388,21 @@ class TreeViewGui:
         )
         self.button12.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button12"] = self.button12
-        
+
         if self._addon:
             self.button30 = ttk.Button(
-            self.bframe, text="Sum-Up", width=3, command=self.gettotsum
+                self.bframe, text="Sum-Up", width=3, command=self.gettotsum
             )
             self.button30.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
             self.bt["button30"] = self.button30
             self.button31 = ttk.Button(
-            self.frb1, text="Pie-Chart Graph", width=3, command=self.createpg
-            ) 
+                self.frb1, text="Pie-Chart Graph", width=3, command=self.createpg
+            )
             self.button31.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
             self.bt["button31"] = self.button31
             self.button32 = ttk.Button(
-            self.frb2, text="Del Total", width=3, command=self.deltots
-             )
+                self.frb2, text="Del Total", width=3, command=self.deltots
+            )
             self.button32.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
             self.bt["button32"] = self.button32
 
@@ -563,24 +565,20 @@ class TreeViewGui:
         }
 
         self.ew = None
-        
+
         if self._addon:
             on = {
                 "Sum-Up": "Summing all add-on",
                 "Pie-Chart Graph": "Graph base on all sums",
-                "Del Total": "Delete total base selected parents"
+                "Del Total": "Delete total base selected parents",
             }
             self.scribe = self.scribe | on
-            self.ew = [
-            "Sum-Up", "Pie-Chart Graph", "Del Total", "child"
-            ]
+            self.ew = ["Sum-Up", "Pie-Chart Graph", "Del Total", "child"]
             if os.path.exists(self.glop.absolute().joinpath("sumtot.tvg")):
                 self.sumtot = True
                 os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
         else:
-            self.ew = [
-            "CPP", "Clear hide", "Printing", "child"
-            ]
+            self.ew = ["CPP", "Clear hide", "Printing", "child"]
 
     def ldmode(self, event=None):
         """Dark mode for easing the eye"""
@@ -687,7 +685,7 @@ class TreeViewGui:
             master.geometry(
                 f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}"
             )
-        fnt = "verdana 7" if self.plat.startswith('win') else "verdana 8" 
+        fnt = "verdana 7" if self.plat.startswith("win") else "verdana 8"
         a = Message(
             master=master,
             text=tx,
@@ -695,7 +693,7 @@ class TreeViewGui:
             aspect=int(ft.measure(tx) * 50),
             bg="white",
             font=fnt,
-            fg='black'
+            fg="black",
         )
         a.pack(fill="both", expand=1)
         del tx, ft
@@ -774,11 +772,11 @@ class TreeViewGui:
     def converting(self, event=None):
         """Convert any text that is paste or written in text window.
         # Example format:
-        #      
+        #
         #      Testing => to parent
         #      This is the format that will be converted appropriately. With
         #      no spaces after '\\n'. And the period is needed for child. => to child1 [2 child]
-        #      
+        #
         """
 
         if self.text.get("1.0", "1.0 lineend")[:-1]:
@@ -1101,12 +1099,14 @@ class TreeViewGui:
 
     def addonchk(self, sta: bool = True):
         """Checking on addon for sumtot attribute purpose"""
-        
+
         if self._addon:
             if self.checkfile():
                 if sta:
                     if hasattr(self, "sumtot"):
-                        with open(self.glop.absolute().joinpath("sumtot.tvg"), "wb") as st:
+                        with open(
+                            self.glop.absolute().joinpath("sumtot.tvg"), "wb"
+                        ) as st:
                             st.write("True".encode())
                 else:
                     if not self.glop.absolute().joinpath("sumtot.tvg").exists():
@@ -1580,21 +1580,14 @@ class TreeViewGui:
 
     def fildat(self, dat: str, b: bool = True):
         """Returning data pattern to cmrows"""
-        
+
         if b:
             return enumerate(
-                [ 
-                    f"{i}\n"
-                    for i in dat.split("\n")
-                    if not i.startswith("TOTAL SUMS =")
-                ]
+                [f"{i}\n" for i in dat.split("\n") if not i.startswith("TOTAL SUMS =")]
             )
         else:
             return enumerate(
-                [
-                    i for i in dat.split("\n")
-                    if i and not i.startswith("TOTAL SUMS =")
-                ]
+                [i for i in dat.split("\n") if i and not i.startswith("TOTAL SUMS =")]
             )
 
     def cmrows(self):
@@ -2073,11 +2066,15 @@ class TreeViewGui:
                     self.listb.config(selectmode=MULTIPLE)
                 else:
                     if self.listb.curselection():
-                        ask = messagebox.askyesno(
-                            "TreeViewGui",
-                            '"Yes" to hide selected, "No" reverse hide instead!',
-                            parent=self.root,
-                        ) if chs is None else chs
+                        ask = (
+                            messagebox.askyesno(
+                                "TreeViewGui",
+                                '"Yes" to hide selected, "No" reverse hide instead!',
+                                parent=self.root,
+                            )
+                            if chs is None
+                            else chs
+                        )
                         allrows = [int(i) for i in self.listb.curselection()]
                         rows = {
                             n: pc.split(":")[1].strip()
@@ -2351,9 +2348,11 @@ class TreeViewGui:
     def createf(self, name: str = None):
         """Creating new file not able to open existing one"""
 
-        fl = simpledialog.askstring(
-                    "TreeViewGui", "New file name?", parent=self.root
-                ) if name is None else name
+        fl = (
+            simpledialog.askstring("TreeViewGui", "New file name?", parent=self.root)
+            if name is None
+            else name
+        )
         if fl:
             mkd = f"{fl.title()}_tvg"
             files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
@@ -2380,9 +2379,7 @@ class TreeViewGui:
                 )
             del mkd, files
         else:
-            messagebox.showinfo(
-                "TreeViewGui", "Nothing created yet!", parent=self.root
-            )
+            messagebox.showinfo("TreeViewGui", "Nothing created yet!", parent=self.root)
         del fl, name
 
     def editex(self, event=None):
@@ -2832,7 +2829,7 @@ class TreeViewGui:
             self.store = None
             self.text.edit_reset()
             self.infobar()
-    
+
     def chktempo(self):
         """Checking Add-On expression attribute"""
 
@@ -3063,7 +3060,7 @@ class TreeViewGui:
         """Get all sums on all parents that have "+" sign in front"""
 
         if self.checkfile() and self.nonetype():
-            sa = SumAll(self.filename, sig = "+")
+            sa = SumAll(self.filename, sig="+")
             self.listb.config(selectmode=MULTIPLE)
             match len(sa) > 0:
                 case False if hasattr(self, "sumtot"):
@@ -3075,27 +3072,30 @@ class TreeViewGui:
                                 self.listb.select_set(i)
                             self.hiddenchl(chs=False)
                             self.text.config(state=NORMAL)
-                            if (self.text.get(f"{END} - 2 lines", END)
-                                    .strip()
-                                    .startswith("-TOTAL")
+                            if (
+                                self.text.get(f"{END} - 2 lines", END)
+                                .strip()
+                                .startswith("-TOTAL")
                             ):
                                 self.text.insert(END, f"\nTOTAL SUMS = {tot}")
                             else:
                                 self.text.insert(END, f"TOTAL SUMS = {tot}")
-                            self.text.config(state=DISABLED)                                
+                            self.text.config(state=DISABLED)
                             del idx, tot
                         case True:
                             messagebox.showinfo(
-                                "TreeViewGui", 
+                                "TreeViewGui",
                                 "Hidden parent is recorded, please clear all first!",
-                                parent=self.root
+                                parent=self.root,
                             )
                 case True:
                     self.__setattr__("sumtot", True)
                     sa.sumway()
                     self.spaces()
                 case False:
-                    messagebox.showinfo("TreeViewGui", "No data to sums!", parent=self.root)
+                    messagebox.showinfo(
+                        "TreeViewGui", "No data to sums!", parent=self.root
+                    )
             self.listb.config(selectmode=BROWSE)
             del sa
 
@@ -3111,17 +3111,18 @@ class TreeViewGui:
         """Get colors for charts"""
 
         def ck(val):
-            if val<0:
+            if val < 0:
                 return "r"
             else:
                 return "b"
+
         return tuple(map(ck, values))
 
     def createpg(self):
         """Creating graph for all summable data"""
 
         if self.checkfile() and self.nonetype():
-            with SumAll(self.filename, sig = "+") as sal:
+            with SumAll(self.filename, sig="+") as sal:
                 try:
                     pc = tp = gr = None
                     if hasattr(self, "sumtot") and self.sumtot:
@@ -3132,26 +3133,28 @@ class TreeViewGui:
                         pc.pchart(tp)
                     else:
                         messagebox.showinfo(
-                            "TreeViewGui", 
-                            "No data to create Pie Chart!", 
-                            parent=self.root
+                            "TreeViewGui",
+                            "No data to create Pie Chart!",
+                            parent=self.root,
                         )
                 except Exception as e:
                     self.chktp()
                     messagebox.showerror("TreeViewGui", e, parent=self.root)
                 finally:
                     del pc, tp, gr, sal
-                    
+
     def deltots(self):
         """Deleting all Totals"""
 
         if self.checkfile() and self.nonetype():
-            with SumAll(self.filename, sig = "+") as sal:
+            with SumAll(self.filename, sig="+") as sal:
                 if hasattr(self, "sumtot") and self.sumtot:
                     self.__delattr__("sumtot")
                     sal.del_total()
                 else:
-                    messagebox.showinfo("TreeViewGui", "Nothing to delete!", parent=self.root)
+                    messagebox.showinfo(
+                        "TreeViewGui", "Nothing to delete!", parent=self.root
+                    )
             del sal
             self.spaces()
 
@@ -3161,64 +3164,126 @@ class TreeViewGui:
             nums = len(wrd)
             if nums >= 101:
                 raise Exception(f"{nums} charcters, is exceeding than 100 chars!")
-            
+
             for i in wrd:
                 if i not in tuple("0123456789*/-+()%."):
                     raise ValueError(f"{i!r} is not acceptable expression!")
-            
+
             ck = re.compile(r"[\W+]{2}")
             if ck := ck.search(wrd):
                 raise ValueError(f"These {ck.group()!r} are not allowed!")
             del ck, nums
 
-    def exprsum(self, event = None):
+    def exprsum(self, event=None):
         """Expression Calculation for Editor mode"""
 
         if self.unlock and self.text.cget("state") == NORMAL:
             self.unlock = False
 
             err = None
-            def calc(event = None):
+
+            def calc(event=None):
                 nonlocal err
                 try:
                     if gw := wid.get():
                         self._ckwrds(gw)
                         ms = EvalExp(gw, None)
                         lab["text"] = ms.evlex()
-                        if err: err = None
+                        if err:
+                            err = None
                         del ms, gw
                     else:
                         raise ValueError("Expression is empty!")
                 except Exception as e:
-                    if err is None: err = 1
+                    if err is None:
+                        err = 1
                     messagebox.showerror("Error Message", e)
-            
+
+            def utilins(lab: str):
+                gtx = (
+                    self.text.get(
+                        f"{self.text.index(INSERT)} linestart",
+                        f"{self.text.index(INSERT)} lineend",
+                    )
+                    .strip()
+                    .rpartition(" ")[2]
+                )
+                if gtx.replace(",", "").replace(".", "").replace("-", "").isdigit():
+                    idx = self.text.search(
+                        gtx,
+                        self.text.index(f"{self.text.index(INSERT)} linestart"),
+                        self.text.index(f"{self.text.index(INSERT)} lineend"),
+                    )
+                    self.text.delete(idx, f"{idx} + {len(gtx)}c")
+                    self.text.insert(idx, lab)
+                else:
+                    if self.text.index(INSERT) == self.text.index(
+                        f"{self.text.index(INSERT)} lineend"
+                    ):
+                        if self.text.get(f"{INSERT} - 1c", INSERT) == " ":
+                            self.text.insert(INSERT, lab)
+                        else:
+                            self.text.insert(INSERT, f" {lab}")
+                    else:
+                        if (
+                            self.text.get(
+                                f"{self.text.index(f'{self.text.index(INSERT)} lineend')} - 1c",
+                                self.text.index(f"{self.text.index(INSERT)} lineend"),
+                            )
+                            == " "
+                        ):
+                            self.text.insert(
+                                self.text.index(f"{self.text.index(INSERT)} lineend"),
+                                lab,
+                            )
+                        else:
+                            self.text.insert(
+                                self.text.index(f"{self.text.index(INSERT)} lineend"),
+                                f" {lab}",
+                            )
+
+            def updatelab():
+                try:
+                    ms = None
+                    if gw := wid.get():
+                        self._ckwrds(gw)
+                        ms = EvalExp(gw, None)
+                    if lab["text"] != (ms := ms.evlex()):
+                        lab["text"] = ms
+                except:
+                    calc()
+                finally:
+                    del ms, gw
+
             def insert():
-                if isinstance(lab['text'], int|float):
+                if isinstance(lab["text"], int | float):
+                    updatelab()
                     match self.labcop:
-                        case lc  if lc is None:
+                        case lc if lc is None:
                             self.labcop = f"{lab['text']:,.2f}"
-                        case lc if self.text.get(f"{INSERT} - {len(lc)}c", INSERT) == lc:
+                        case lc if self.text.get(
+                            f"{INSERT} - {len(lc)}c", INSERT
+                        ) == lc:
                             self.text.delete(f"{INSERT} - {len(lc)}c", INSERT)
                             self.labcop = f"{lab['text']:,.2f}"
                         case _:
                             self.labcop = f"{lab['text']:,.2f}"
-                    self.text.insert(INSERT, self.labcop)
+                    utilins(self.labcop)
                     lab["text"] = "click for result"
-                
+
                 elif bool(wid.get()):
                     nonlocal err
-                    
+
                     calc()
                     if err is None:
                         insert()
                     else:
                         err = None
-                
+
             wid = None
             lab = None
-            class MyDialog(simpledialog.Dialog):
 
+            class MyDialog(simpledialog.Dialog):
                 def body(self, master):
                     nonlocal wid, lab
                     self.title("Expression Calc")
@@ -3229,24 +3294,23 @@ class TreeViewGui:
                     self.e1.pack(side=RIGHT)
                     wid = self.e1
                     self.e2 = Label(master, text="click for result", relief=GROOVE)
-                    self.e2.pack(padx=1, pady=(0,1), fill=X)
+                    self.e2.pack(padx=1, pady=(0, 1), fill=X)
                     self.e2.bind("<ButtonPress>", calc)
                     lab = self.e2
                     self.bp = Button(master, text="Paste", command=insert)
-                    self.bp.pack(padx=1, pady=(0,1), fill=X)
+                    self.bp.pack(padx=1, pady=(0, 1), fill=X)
                     self.fcs()
                     return self.e1
 
                 def buttonbox(self) -> None:
                     fb = Frame(self)
                     bt = Button(fb, text="Done", command=self.ok)
-                    self.bind("<Return>", self.ok)
-                    bt.pack()
+                    bt.pack(pady=5)
                     fb.pack()
-                
-                def ok(self, event = None):
+
+                def ok(self, event=None):
                     self.destroy()
-                
+
                 def fcs(self):
                     if self.grab_status() is not None:
                         self.grab_release()
@@ -3267,7 +3331,9 @@ class TreeViewGui:
             del wid, lab, d, mas, err
         else:
             if not hasattr(self, "toptempo"):
-                messagebox.showinfo("TreeViewGui", "Only work for Editor mode", parent=self.root)
+                messagebox.showinfo(
+                    "TreeViewGui", "Only work for Editor mode", parent=self.root
+                )
 
 
 def askfile(root):
@@ -3314,7 +3380,7 @@ def findpath():
 
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
-    
+
     global _addon
     if _addon and _addon.name == "addon_tvg":
         _addon = True

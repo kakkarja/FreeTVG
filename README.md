@@ -112,6 +112,7 @@ main()
     * **All double operator like eg. "\*\*", disabled.**
       * **To avoid overlflow result.**
     * **Able to paste directly without clicking result first.**
+    * **Will paste exactly where the position of numbers suppose to be**
 
 * ### [treeview](https://github.com/kakkarja/TV)
 
