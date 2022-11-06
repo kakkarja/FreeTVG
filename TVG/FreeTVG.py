@@ -2629,6 +2629,7 @@ class TreeViewGui:
                         messagebox.showinfo(
                             "TreeViewGui", "No templates yet!", parent=self.root
                         )
+                        self.tempsave()
                     del files
             self.text.focus()
 

@@ -132,6 +132,12 @@ main()
     * **Nonetheless**
       * **Will not raise exception if configure window is not close yet.**
 
+## Notice and Apologize
+
+* **Found very little bug in Template**
+  * **Has been fixed in 2.8.18**
+  * **Sorry for the inconvenience 🙏**
+
 ![TVG](/Pics/TVG.png)
 
 ## With Add-On FreeTVG
