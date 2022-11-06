@@ -113,6 +113,9 @@ main()
       * **To avoid overlflow result.**
     * **Able to paste directly without clicking result first.**
     * **Will paste exactly where the position of numbers suppose to be**
+* **Template has been overhauled for improvement**
+  * **Can delete a saved template**
+* **Look-Up now more informative (not in editor mode)**
 
 * ### [treeview](https://github.com/kakkarja/TV)
 

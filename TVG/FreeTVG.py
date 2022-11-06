@@ -15,9 +15,16 @@ from .mdh import convhtml
 from datetime import datetime as dt
 from .RegMail import composemail, wrwords
 import importlib
+from excptr import excp, excpcls, DIRPATH, DEFAULTDIR, DEFAULTFILE
 
 
 __all__ = ["main"]
+
+
+DEFAULTDIR = os.path.join(DIRPATH, "FreeTVG_TRACE")
+if not os.path.exists(DEFAULTDIR):
+    os.mkdir(DEFAULTDIR)
+DEFAULTFILE = os.path.join(DEFAULTDIR, Path(DEFAULTFILE).name)
 
 
 match _addon := importlib.util.find_spec("addon_tvg"):
@@ -28,6 +35,7 @@ match _addon := importlib.util.find_spec("addon_tvg"):
         print("Add-On for TVG is missing!")
 
 
+@excpcls(m=2, filenm=DEFAULTFILE)
 class TreeViewGui:
     """
     This is the Gui for TreeView engine. This gui is to make the Writing and editing is viewable.
@@ -1176,19 +1184,41 @@ class TreeViewGui:
                     )
             del fi, ask, file
 
-        if self.lock is False:
+        def tynam(event):
+            try:
+                if event.widget.get():
+                    idx = event.widget.index(INSERT)
+                    gt = event.widget.get()
+                    event.widget.delete(0, END)
+                    event.widget.insert(0, gt[:idx])
+                    if event.widget.get():
+                        for em in files:
+                            if (
+                                event.widget.get().lower() in em.lower()
+                                and event.widget.get().lower()[: idx + 1]
+                                == em.lower()[: len(event.widget.get().lower())]
+                            ):
+                                event.widget.current(files.index(em))
+                                break
+                    event.widget.icursor(index=idx)
+                    del idx, gt
+            except Exception as e:
+                messagebox.showwarning("TreeViewGui", f"{e}", parent=self.root)
+
+        files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
+        files.sort()
+        if self.lock is False and files:
             TreeViewGui.FREEZE = True
             self.lock = True
-            files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
 
             class MyDialog(simpledialog.Dialog):
                 def body(self, master):
                     self.title("Choose File")
                     Label(master, text="File: ").grid(row=0, column=0, sticky=E)
-                    self.e1 = ttk.Combobox(master, state="readonly")
+                    self.e1 = ttk.Combobox(master)
                     self.e1["values"] = files
-                    self.e1.current(0)
                     self.e1.grid(row=0, column=1)
+                    self.e1.bind("<KeyRelease>", tynam)
                     return self.e1
 
                 def apply(self):
@@ -1200,7 +1230,8 @@ class TreeViewGui:
                 chosen(d.result)
             else:
                 TreeViewGui.FREEZE = False
-            del files
+            del d
+        del files
 
     def writefile(self, event=None):
         """Write first entry and on next updated line.
@@ -2297,7 +2328,7 @@ class TreeViewGui:
                                     self.listb.activate(sn - 1)
                                     ask = messagebox.askyesno(
                                         "TreeViewGui",
-                                        "Continue lookup?",
+                                        f"Find in row {sn-1}\nText: '{dat.strip()[:100]}...'\nContinue lookup?",
                                         parent=self.root,
                                     )
                                     if ask:
@@ -2445,6 +2476,48 @@ class TreeViewGui:
                 del ask
         self.text.focus()
 
+    def tempsave(self):
+        """Saving template"""
+
+        if wordies := self.text.get("1.0", END)[:-1]:
+            fname = simpledialog.askstring(
+                "Save to template", "Name?", parent=self.root
+            )
+            if fname:
+                dest = os.path.join(self.glop.parent, "Templates", f"{fname}.tvg")
+                with open(dest, "w") as wt:
+                    wr = []
+                    for word in wordies.splitlines():
+                        if (ck := word.partition(":")[0].lower()) in [
+                            "p",
+                            "s",
+                        ] or ck.count("c") == 1:
+                            wr.append(word)
+                        else:
+                            wr.clear()
+                            break
+                    if wr:
+                        wt.write(str(wr))
+                        messagebox.showinfo(
+                            "TreeViewGui",
+                            f"Template {fname}.tvg saved!",
+                            parent=self.root,
+                        )
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui",
+                            "Unable save template, please use right format!",
+                            parent=self.root,
+                        )
+                del dest, wr, wt
+            else:
+                messagebox.showinfo(
+                    "TreeViewGui", "Save template is aborted!", parent=self.root
+                )
+            del fname
+        else:
+            messagebox.showinfo("TreeViewGui", "Nothing to be save!", parent=self.root)
+
     def temp(self, event=None):
         """This is to compliment the editor mode.
         If you have to type several outline that has same format,
@@ -2457,54 +2530,16 @@ class TreeViewGui:
         ):
             if not os.path.exists(os.path.join(self.glop.parent, "Templates")):
                 os.mkdir(os.path.join(self.glop.parent, "Templates"))
-            ask = messagebox.askyesno(
-                "TreeViewGui",
-                'Want to save template? ["No" to load template]',
-                parent=self.root,
-            )
-            if ask:
-                if self.text.get("1.0", END)[:-1]:
-                    fname = simpledialog.askstring(
-                        "TreeViewGui", "Name?", parent=self.root
-                    )
-                    if fname:
-                        dest = os.path.join(
-                            self.glop.parent, "Templates", f"{fname}.tvg"
-                        )
-                        with open(dest, "w") as wt:
-                            wt.write(
-                                str(
-                                    [
-                                        i
-                                        for i in self.text.get("1.0", END)[:-1].split(
-                                            "\n"
-                                        )
-                                        if i
-                                    ]
-                                )
-                            )
-                        messagebox.showinfo(
-                            "TreeViewGui",
-                            f"Template {fname}.tvg saved!",
-                            parent=self.root,
-                        )
-                        del dest
-                    else:
-                        messagebox.showinfo(
-                            "TreeViewGui", "Save template is aborted!", parent=self.root
-                        )
-                    del fname
-                else:
-                    messagebox.showinfo(
-                        "TreeViewGui", "Nothing to be save!", parent=self.root
-                    )
+                self.tempsave()
             else:
                 if self.lock is False:
                     self.lock = True
                     files = [
                         i
                         for i in os.listdir(os.path.join(self.glop.parent, "Templates"))
+                        if ".tvg" in i
                     ]
+                    files.sort()
                     if files:
 
                         def tynam(event):
@@ -2515,41 +2550,58 @@ class TreeViewGui:
                                     event.widget.delete(0, END)
                                     event.widget.insert(0, gt[:idx])
                                     if event.widget.get():
-                                        r = 2
-                                        while r:
-                                            for em in files:
-                                                if (
-                                                    event.widget.get().lower()
-                                                    in em.lower()
-                                                    and event.widget.get().lower()
-                                                    == em.lower()[
-                                                        : len(
-                                                            event.widget.get().lower()
-                                                        )
-                                                    ]
-                                                ):
-                                                    event.widget.current(
-                                                        files.index(em)
-                                                    )
-                                            r -= 1
-                                        del r
+                                        for em in files:
+                                            if (
+                                                event.widget.get().lower() in em.lower()
+                                                and event.widget.get().lower()[
+                                                    : idx + 1
+                                                ]
+                                                == em.lower()[
+                                                    : len(event.widget.get().lower())
+                                                ]
+                                            ):
+                                                event.widget.current(files.index(em))
+                                                break
                                     event.widget.icursor(index=idx)
                                     del idx, gt
                             except Exception as e:
                                 messagebox.showwarning(
-                                    "TeleTVG", f"{e}", parent=self.root
+                                    "TreeViewGui", f"{e}", parent=self.root
                                 )
+
+                        def deltemp():
+                            if gt := cmbb.get():
+                                if ask := messagebox.askyesno(
+                                    "TreeViewGui", "Delete template?", parent=self.root
+                                ):
+                                    pth = os.path.join(
+                                        self.glop.parent, "Templates", gt
+                                    )
+                                    os.remove(pth)
+                                    files.remove(gt)
+                                    cmbb.delete(0, END)
+                                    cmbb["values"] = files
+                                del ask, gt
+
+                        cmbb = None
 
                         class MyDialog(simpledialog.Dialog):
                             def body(self, master):
+                                nonlocal cmbb
                                 self.title("Choose Template")
-                                Label(master, text="File: ").grid(
-                                    row=0, column=0, sticky=E
-                                )
-                                self.e1 = ttk.Combobox(master)
+                                self.fr1 = ttk.Frame(master)
+                                self.fr1.pack()
+                                self.lab = Label(self.fr1, text="File: ")
+                                self.lab.pack(side=LEFT, pady=2, padx=2)
+                                self.e1 = ttk.Combobox(self.fr1)
                                 self.e1["values"] = files
                                 self.e1.bind("<KeyRelease>", tynam)
-                                self.e1.grid(row=0, column=1)
+                                self.e1.pack(side=RIGHT, padx=(0, 2), pady=2)
+                                cmbb = self.e1
+                                self.bt = ttk.Button(
+                                    master, text="Delete", command=deltemp
+                                )
+                                self.bt.pack(fill=X, pady=(0, 2), padx=2)
                                 return self.e1
 
                             def apply(self):
@@ -2561,52 +2613,24 @@ class TreeViewGui:
                             path = os.path.join(self.glop.parent, "Templates", d.result)
                             with open(path) as rdf:
                                 gf = ast.literal_eval(rdf.read())
-                                if len(gf) == 1:
-                                    self.text.insert(INSERT, gf[0])
-                                else:
-                                    tot = 0
-                                    for pr in gf:
-                                        if not tot:
-                                            gw = self.text.get(
-                                                INSERT, f"{INSERT} lineend"
-                                            )
-                                        if gw == "":
-                                            if int(
-                                                self.text.index(INSERT).rpartition(".")[
-                                                    2
-                                                ]
-                                            ):
-                                                self.text.insert(INSERT, f"\n{pr}")
-                                            else:
-                                                self.text.insert(INSERT, f"{pr}\n")
-                                            tot += 1
-                                        else:
-                                            ind = float(
-                                                self.text.index(INSERT)
-                                            ) + float(tot)
-                                            self.text.insert(
-                                                f"{ind} lineend ", f"\n{pr}"
-                                            )
-                                            tot += 1
-                                            del ind
-                                    del tot, gw
-                                del gf
-                            del path
+                            for pr in gf:
+                                self.text.insert(f"{INSERT} linestart", f"{pr}\n")
+                            del path, gf, pr
                         else:
-                            messagebox.showinfo(
+                            if ask := messagebox.askyesno(
                                 "TreeViewGui",
-                                "Loading template aborted!",
+                                "Do you want to save a template?",
                                 parent=self.root,
-                            )
-                        del d.result
+                            ):
+                                self.tempsave()
+                        del d.result, cmbb
                     else:
                         self.lock = False
                         messagebox.showinfo(
                             "TreeViewGui", "No templates yet!", parent=self.root
                         )
                     del files
-            del ask
-        self.text.focus()
+            self.text.focus()
 
     def disab(self, *args, dis=True):
         """Conditioning buttons for functions mode purpose"""
@@ -2701,12 +2725,12 @@ class TreeViewGui:
                                         elif i.lower().partition(":")[0] in list(ckc):
                                             if i.partition(":")[2].isspace():
                                                 p2[et] = (
-                                                    ckc[i.partition(":")[0]],
+                                                    ckc[i.partition(":")[0].lower()],
                                                     i.partition(":")[2],
                                                 )
                                             elif bool(i.partition(":")[2]):
                                                 p2[et] = (
-                                                    ckc[i.partition(":")[0]],
+                                                    ckc[i.partition(":")[0].lower()],
                                                     i.partition(":")[2].removeprefix(
                                                         " "
                                                     ),
@@ -2760,12 +2784,12 @@ class TreeViewGui:
                                         elif i.lower().partition(":")[0] in list(ckc):
                                             if i.partition(":")[2].isspace():
                                                 p2[et] = (
-                                                    ckc[i.partition(":")[0]],
+                                                    ckc[i.partition(":")[0].lower()],
                                                     i.partition(":")[2],
                                                 )
                                             elif bool(i.partition(":")[2]):
                                                 p2[et] = (
-                                                    ckc[i.partition(":")[0]],
+                                                    ckc[i.partition(":")[0].lower()],
                                                     i.partition(":")[2].removeprefix(
                                                         " "
                                                     ),
@@ -2797,12 +2821,12 @@ class TreeViewGui:
                                     elif i.lower().partition(":")[0] in list(ckc):
                                         if i.partition(":")[2].isspace():
                                             p2[et] = (
-                                                ckc[i.partition(":")[0]],
+                                                ckc[i.partition(":")[0].lower()],
                                                 i.partition(":")[2],
                                             )
                                         elif bool(i.partition(":")[2]):
                                             p2[et] = (
-                                                ckc[i.partition(":")[0]],
+                                                ckc[i.partition(":")[0].lower()],
                                                 i.partition(":")[2].removeprefix(" "),
                                             )
                                 if len(ed) != len(p2):
@@ -3336,21 +3360,44 @@ class TreeViewGui:
                 )
 
 
+@excp(m=2, filenm=DEFAULTFILE)
 def askfile(root):
     """Asking file for creating or opening initial app start"""
 
     files = [
         file.rpartition("_")[0] for file in os.listdir(os.getcwd()) if "_tvg" in file
     ]
+    files.sort()
+
+    def tynam(event):
+        try:
+            if event.widget.get():
+                idx = event.widget.index(INSERT)
+                gt = event.widget.get()
+                event.widget.delete(0, END)
+                event.widget.insert(0, gt[:idx])
+                if event.widget.get():
+                    for em in files:
+                        if (
+                            event.widget.get().lower() in em.lower()
+                            and event.widget.get().lower()[: idx + 1]
+                            == em.lower()[: len(event.widget.get().lower())]
+                        ):
+                            event.widget.current(files.index(em))
+                            break
+                event.widget.icursor(index=idx)
+                del idx, gt
+        except Exception as e:
+            messagebox.showwarning("TreeViewGui", f"{e}", parent=root)
 
     class MyDialog(simpledialog.Dialog):
         def body(self, master):
             self.title("Choose File")
-            self.geometry("230x70")
             Label(master, text="File: ").grid(row=0, column=0, sticky=E)
             self.e1 = ttk.Combobox(master)
             self.e1["values"] = files
             self.e1.grid(row=0, column=1)
+            self.e1.bind("<KeyRelease>", tynam)
             return self.e1
 
         def apply(self):
@@ -3363,6 +3410,7 @@ def askfile(root):
         return None
 
 
+@excp(m=2, filenm=DEFAULTFILE)
 def findpath():
     """Select default path for TVG"""
 
@@ -3378,6 +3426,7 @@ def findpath():
         os.chdir(pth)
 
 
+@excp(m=2, filenm=DEFAULTFILE)
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
 
