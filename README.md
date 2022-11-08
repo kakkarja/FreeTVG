@@ -131,6 +131,9 @@ main()
       * **Will raise exception after closing the graph, if configure window (within the tool bar) is already closed beforhand.**
     * **Nonetheless**
       * **Will not raise exception if configure window is not close yet.**
+* **Short-Cut Issues**
+  * **Virtual OS Windows in Mac**
+    * **Some short-cuts works only with "Control" + "Option" or "Shift" + ...**
 
 ## Notice and Apologize
 

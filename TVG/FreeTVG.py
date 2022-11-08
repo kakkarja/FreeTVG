@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 # Copyright © kakkarja (K A K)
 
-from tkinter import *
-from tkinter import ttk, font, simpledialog, messagebox, colorchooser
-from sys import platform
-from treeview import TreeView as tv
-from treeview.dbase import Datab as db
-from pathlib import Path
-import ast
-from itertools import islice
+
 import os
 import re
-from .mdh import convhtml
-from datetime import datetime as dt
-from .RegMail import composemail, wrwords
+import ast
 import importlib
+from tkinter import *
+from sys import platform
+from pathlib import Path
+from itertools import islice
+from functools import partial
+from datetime import datetime as dt
+from tkinter import ttk, font, simpledialog, messagebox, colorchooser
+
+from treeview import TreeView as tv
+from treeview.dbase import Datab as db
+from .RegMail import composemail, wrwords
+from .mdh import convhtml
 from excptr import excp, excpcls, DIRPATH, DEFAULTDIR, DEFAULTFILE
 
 
@@ -88,10 +91,16 @@ class TreeViewGui:
         self.root.bind_all("<Control-e>", self.fcsent)
         self.root.bind_all("<Shift-Up>", self.scru)
         self.root.bind_all("<Shift-Down>", self.scrd)
-        self.root.bind("<Control-Up>", self.fcsent)
-        self.root.bind("<Control-Down>", self.fcsent)
-        self.root.bind("<Control-Left>", self.fcsent)
-        self.root.bind("<Control-Right>", self.fcsent)
+        if self.plat.startswith("win"):
+            self.root.bind("<Control-Up>", self.fcsent)
+            self.root.bind("<Control-Down>", self.fcsent)
+            self.root.bind("<Control-Left>", self.fcsent)
+            self.root.bind("<Control-Right>", self.fcsent)
+        else:
+            self.root.bind_all("<Control-Shift-Up>", self.fcsent)
+            self.root.bind_all("<Control-Shift-Down>", self.fcsent)
+            self.root.bind_all("<Control-Shift-Left>", self.fcsent)
+            self.root.bind_all("<Control-Shift-Right>", self.fcsent)
         self.root.bind_all("<Control-n>", self.fcsent)
         self.root.bind_all("<Control-y>", self.fcsent)
         self.root.bind_all("<Control-0>", self.fcsent)
@@ -440,8 +449,12 @@ class TreeViewGui:
         self.text.config(state="disable")
         self.text.pack(side=LEFT, fill="both", padx=(2, 1), pady=(1, 0), expand=1)
         self.text.bind("<MouseWheel>", self.mscrt)
-        self.text.bind("<Control-z>", self.undo)
-        self.text.bind("<Control-Shift-Key-Z>", self.redo)
+        if self.plat.startswith("win"):
+            self.text.bind("<Control-z>", self.undo)
+            self.text.bind("<Control-Shift-Key-Z>", self.redo)
+        else:
+            self.text.bind("<Command-z>", self.undo)
+            self.text.bind("<Command-y>", self.redo)
         self.text.pack_propagate(0)
         self.bt["text"] = self.text
         self.sc1frame = ttk.Frame(self.tframe, width=scw - 1)
@@ -573,7 +586,6 @@ class TreeViewGui:
         }
 
         self.ew = None
-
         if self._addon:
             on = {
                 "Sum-Up": "Summing all add-on",
@@ -671,42 +683,43 @@ class TreeViewGui:
     def ttip(self, event=None):
         """Tooltip for TVG buttons"""
 
-        def exit():
-            self.root.update()
-            self.ai = None
-            self.tpl = None
-            master.destroy()
+        if tx := self.scribe.get(event.widget["text"], None):
 
-        master = Toplevel(self.root)
-        master.overrideredirect(1)
-        tx = self.scribe[event.widget["text"]]
-        ft = font.Font(master, font="verdana")
-        if event.widget["text"] in ["Create file", "Insight", "Insert"]:
-            master.geometry(
-                f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()}+{event.widget.winfo_pointery()+30}"
+            def exit():
+                self.root.update()
+                self.ai = None
+                self.tpl = None
+                master.destroy()
+
+            master = Toplevel(self.root)
+            master.overrideredirect(1)
+            ft = font.Font(master, font="verdana")
+            if event.widget["text"] in ["Create file", "Insight", "Insert"]:
+                master.geometry(
+                    f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()}+{event.widget.winfo_pointery()+30}"
+                )
+            elif event.widget["text"] in self.ew:
+                master.geometry(
+                    f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-220}+{event.widget.winfo_pointery()+30}"
+                )
+            else:
+                master.geometry(
+                    f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}"
+                )
+            fnt = "verdana 8"
+            a = Message(
+                master=master,
+                text=tx,
+                justify="center",
+                aspect=int(ft.measure(tx) * 50),
+                bg="white",
+                font=fnt,
+                fg="black",
             )
-        elif event.widget["text"] in self.ew:
-            master.geometry(
-                f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-220}+{event.widget.winfo_pointery()+30}"
-            )
-        else:
-            master.geometry(
-                f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}"
-            )
-        fnt = "verdana 7" if self.plat.startswith("win") else "verdana 8"
-        a = Message(
-            master=master,
-            text=tx,
-            justify="center",
-            aspect=int(ft.measure(tx) * 50),
-            bg="white",
-            font=fnt,
-            fg="black",
-        )
-        a.pack(fill="both", expand=1)
-        del tx, ft
-        self.ai = self.root.after(3000, exit)
-        self.tpl = master
+            a.pack(fill="both", expand=1)
+            del ft, tx
+            self.ai = self.root.after(3000, exit)
+            self.tpl = master
 
     def leave(self, event=None):
         """On hovering and leaving a button the tooltip will be destroyed"""
@@ -784,6 +797,7 @@ class TreeViewGui:
         #      Testing => to parent
         #      This is the format that will be converted appropriately. With
         #      no spaces after '\\n'. And the period is needed for child. => to child1 [2 child]
+        #      Making task list with "." as priority, "!" as urgent, and "?" tentative
         #
         """
 
@@ -809,18 +823,7 @@ class TreeViewGui:
                                 tvg.quickchild(j, "child1")
                 del tvg, ckp
                 self.text.config(state=DISABLED)
-                for i in self.bt:
-                    if "label" not in i and "scrollbar" not in i:
-                        if i == "entry3":
-                            self.bt[i].config(state="readonly")
-                        elif i == "entry":
-                            if not self.rb.get():
-                                self.bt[i].config(state="disable")
-                            else:
-                                self.bt[i].config(state="normal")
-                        else:
-                            if i != "text":
-                                self.bt[i].config(state="normal")
+                self.disab(dis=False)
                 TreeViewGui.FREEZE = False
                 self.spaces()
             else:
@@ -1184,33 +1187,13 @@ class TreeViewGui:
                     )
             del fi, ask, file
 
-        def tynam(event):
-            try:
-                if event.widget.get():
-                    idx = event.widget.index(INSERT)
-                    gt = event.widget.get()
-                    event.widget.delete(0, END)
-                    event.widget.insert(0, gt[:idx])
-                    if event.widget.get():
-                        for em in files:
-                            if (
-                                event.widget.get().lower() in em.lower()
-                                and event.widget.get().lower()[: idx + 1]
-                                == em.lower()[: len(event.widget.get().lower())]
-                            ):
-                                event.widget.current(files.index(em))
-                                break
-                    event.widget.icursor(index=idx)
-                    del idx, gt
-            except Exception as e:
-                messagebox.showwarning("TreeViewGui", f"{e}", parent=self.root)
-
         files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
         files.sort()
         if self.lock is False and files:
             TreeViewGui.FREEZE = True
             self.lock = True
 
+            @excpcls(2, DEFAULTFILE)
             class MyDialog(simpledialog.Dialog):
                 def body(self, master):
                     self.title("Choose File")
@@ -1218,7 +1201,9 @@ class TreeViewGui:
                     self.e1 = ttk.Combobox(master)
                     self.e1["values"] = files
                     self.e1.grid(row=0, column=1)
-                    self.e1.bind("<KeyRelease>", tynam)
+                    self.e1.bind(
+                        "<KeyRelease>", partial(TreeViewGui.tynam, files=files)
+                    )
                     return self.e1
 
                 def apply(self):
@@ -1726,6 +1711,7 @@ class TreeViewGui:
             files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
             files.insert(0, "New")
 
+            @excpcls(2, DEFAULTFILE)
             class MyDialog(simpledialog.Dialog):
                 def body(self, master):
                     self.title("Choose File")
@@ -2093,6 +2079,7 @@ class TreeViewGui:
         if self.checkfile() and self.nonetype():
             if not os.path.exists(f"{self.filename}_hid.json"):
                 if self.listb.cget("selectmode") == "browse":
+                    self.info.set("Hidden Mode")
                     self.disab("listb", "button14", "text")
                     self.listb.config(selectmode=MULTIPLE)
                 else:
@@ -2159,7 +2146,7 @@ class TreeViewGui:
                         del allrows, rows, hd, num
                     self.disab(dis=False)
                     self.listb.config(selectmode=BROWSE)
-                self.infobar()
+                    self.infobar()
             else:
                 messagebox.showinfo(
                     "TreeViewGui",
@@ -2282,6 +2269,7 @@ class TreeViewGui:
                         self.lock = True
                         self.root.update()
 
+                        @excpcls(2, DEFAULTFILE)
                         class MyDialog(simpledialog.Dialog):
                             def body(self, master):
                                 self.title("Search Words")
@@ -2518,6 +2506,29 @@ class TreeViewGui:
         else:
             messagebox.showinfo("TreeViewGui", "Nothing to be save!", parent=self.root)
 
+    @excp(2, DEFAULTFILE)
+    @staticmethod
+    def tynam(event, files: list | tuple):
+        try:
+            if event.widget.get():
+                idx = event.widget.index(INSERT)
+                gt = event.widget.get()
+                event.widget.delete(0, END)
+                event.widget.insert(0, gt[:idx])
+                if event.widget.get():
+                    for em in files:
+                        if (
+                            event.widget.get().lower() in em.lower()
+                            and event.widget.get().lower()[: idx + 1]
+                            == em.lower()[: len(event.widget.get().lower())]
+                        ):
+                            event.widget.current(files.index(em))
+                            break
+                event.widget.icursor(index=idx)
+                del idx, gt
+        except Exception as e:
+            raise e
+
     def temp(self, event=None):
         """This is to compliment the editor mode.
         If you have to type several outline that has same format,
@@ -2542,33 +2553,6 @@ class TreeViewGui:
                     files.sort()
                     if files:
 
-                        def tynam(event):
-                            try:
-                                if event.widget.get():
-                                    idx = event.widget.index(INSERT)
-                                    gt = event.widget.get()
-                                    event.widget.delete(0, END)
-                                    event.widget.insert(0, gt[:idx])
-                                    if event.widget.get():
-                                        for em in files:
-                                            if (
-                                                event.widget.get().lower() in em.lower()
-                                                and event.widget.get().lower()[
-                                                    : idx + 1
-                                                ]
-                                                == em.lower()[
-                                                    : len(event.widget.get().lower())
-                                                ]
-                                            ):
-                                                event.widget.current(files.index(em))
-                                                break
-                                    event.widget.icursor(index=idx)
-                                    del idx, gt
-                            except Exception as e:
-                                messagebox.showwarning(
-                                    "TreeViewGui", f"{e}", parent=self.root
-                                )
-
                         def deltemp():
                             if gt := cmbb.get():
                                 if ask := messagebox.askyesno(
@@ -2585,21 +2569,28 @@ class TreeViewGui:
 
                         cmbb = None
 
+                        @excpcls(2, DEFAULTFILE)
                         class MyDialog(simpledialog.Dialog):
                             def body(self, master):
                                 nonlocal cmbb
                                 self.title("Choose Template")
-                                self.fr1 = ttk.Frame(master)
+                                self.fr1 = Frame(master)
                                 self.fr1.pack()
                                 self.lab = Label(self.fr1, text="File: ")
                                 self.lab.pack(side=LEFT, pady=2, padx=2)
                                 self.e1 = ttk.Combobox(self.fr1)
                                 self.e1["values"] = files
-                                self.e1.bind("<KeyRelease>", tynam)
+                                self.e1.bind(
+                                    "<KeyRelease>",
+                                    partial(TreeViewGui.tynam, files=files),
+                                )
                                 self.e1.pack(side=RIGHT, padx=(0, 2), pady=2)
                                 cmbb = self.e1
-                                self.bt = ttk.Button(
-                                    master, text="Delete", command=deltemp
+                                self.bt = Button(
+                                    master,
+                                    text="Delete",
+                                    command=deltemp,
+                                    relief=GROOVE,
                                 )
                                 self.bt.pack(fill=X, pady=(0, 2), padx=2)
                                 return self.e1
@@ -3308,6 +3299,7 @@ class TreeViewGui:
             wid = None
             lab = None
 
+            @excpcls(2, DEFAULTFILE)
             class MyDialog(simpledialog.Dialog):
                 def body(self, master):
                     nonlocal wid, lab
@@ -3322,14 +3314,16 @@ class TreeViewGui:
                     self.e2.pack(padx=1, pady=(0, 1), fill=X)
                     self.e2.bind("<ButtonPress>", calc)
                     lab = self.e2
-                    self.bp = Button(master, text="Paste", command=insert)
+                    self.bp = Button(
+                        master, text="Paste", command=insert, relief=GROOVE
+                    )
                     self.bp.pack(padx=1, pady=(0, 1), fill=X)
                     self.fcs()
                     return self.e1
 
                 def buttonbox(self) -> None:
                     fb = Frame(self)
-                    bt = Button(fb, text="Done", command=self.ok)
+                    bt = Button(fb, text="Done", command=self.ok, relief=GROOVE)
                     bt.pack(pady=5)
                     fb.pack()
 
@@ -3370,27 +3364,7 @@ def askfile(root):
     ]
     files.sort()
 
-    def tynam(event):
-        try:
-            if event.widget.get():
-                idx = event.widget.index(INSERT)
-                gt = event.widget.get()
-                event.widget.delete(0, END)
-                event.widget.insert(0, gt[:idx])
-                if event.widget.get():
-                    for em in files:
-                        if (
-                            event.widget.get().lower() in em.lower()
-                            and event.widget.get().lower()[: idx + 1]
-                            == em.lower()[: len(event.widget.get().lower())]
-                        ):
-                            event.widget.current(files.index(em))
-                            break
-                event.widget.icursor(index=idx)
-                del idx, gt
-        except Exception as e:
-            messagebox.showwarning("TreeViewGui", f"{e}", parent=root)
-
+    @excpcls(2, DEFAULTFILE)
     class MyDialog(simpledialog.Dialog):
         def body(self, master):
             self.title("Choose File")
@@ -3398,7 +3372,7 @@ def askfile(root):
             self.e1 = ttk.Combobox(master)
             self.e1["values"] = files
             self.e1.grid(row=0, column=1)
-            self.e1.bind("<KeyRelease>", tynam)
+            self.e1.bind("<KeyRelease>", partial(TreeViewGui.tynam, files=files))
             return self.e1
 
         def apply(self):
