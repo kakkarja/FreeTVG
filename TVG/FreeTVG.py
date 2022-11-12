@@ -2,24 +2,25 @@
 # Copyright © kakkarja (K A K)
 
 
-import os
-import re
 import ast
 import importlib
-from tkinter import *
-from sys import platform
-from pathlib import Path
-from itertools import islice
-from functools import partial
+import os
+import re
 from datetime import datetime as dt
-from tkinter import ttk, font, simpledialog, messagebox, colorchooser
+from functools import partial
+from itertools import islice
+from pathlib import Path
+from sys import platform
+from tkinter import *
+from tkinter import colorchooser, font, messagebox, simpledialog, ttk
 
 from treeview import TreeView as tv
 from treeview.dbase import Datab as db
-from .RegMail import composemail, wrwords
-from .mdh import convhtml
-from excptr import excp, excpcls, DIRPATH, DEFAULTDIR, DEFAULTFILE
 
+from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
+
+from .mdh import convhtml
+from .RegMail import composemail, wrwords
 
 __all__ = ["main"]
 
@@ -33,7 +34,7 @@ DEFAULTFILE = os.path.join(DEFAULTDIR, Path(DEFAULTFILE).name)
 match _addon := importlib.util.find_spec("addon_tvg"):
     case _addon if _addon is not None and _addon.name == "addon_tvg":
         print("Add-On for TVG is ready!")
-        from addon_tvg import SumAll, Charts, EvalExp
+        from addon_tvg import Charts, EvalExp, SumAll
     case _:
         print("Add-On for TVG is missing!")
 
@@ -1058,45 +1059,47 @@ class TreeViewGui:
         self.listb.yview_moveto(str(a))
         del a
 
+    def _prettyv(self, tx):
+        """Wrapping mode view purpose"""
+
+        nf = str(self.text.cget("font"))
+        try:
+            text_font = font.Font(self.root, font=nf, name=nf, exists=True)
+        except:
+            text_font = font.Font(self.root, font=nf, name=nf, exists=False)
+        g = re.compile(r"\s+")
+        em = text_font.measure(" ")
+        for _, v in tx:
+            gr = g.match(v)
+            if gr and gr.span()[1] > 1:
+                if str(gr.span()[1]) not in self.text.tag_names():
+                    bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
+                    self.text.tag_configure(
+                        f"{gr.span()[1]}",
+                        lmargin1=em,
+                        lmargin2=em + bullet_width,
+                    )
+                self.text.insert(END, v, f"{gr.span()[1]}")
+            else:
+                self.text.insert(END, v)
+        del tx, nf, text_font, g, em, gr
+
     def view(self, event=None):
         """Viewing engine for most module fuction"""
 
-        try:
-            if self.checkfile() and self.nonetype():
-                self.text.config(state="normal")
-                self.text.delete("1.0", END)
-                self.listb.delete(0, END)
-                nf = str(self.text.cget("font"))
-                try:
-                    text_font = font.Font(self.root, font=nf, name=nf, exists=True)
-                except:
-                    text_font = font.Font(self.root, font=nf, name=nf, exists=False)
-                g = re.compile(r"\s+")
-                em = text_font.measure(" ")
-                with tv(self.filename) as tvg:
-                    for r in tvg.getdata():
-                        gr = g.match(r[1])
-                        if gr and gr.span()[1] > 1:
-                            if str(gr.span()[1]) not in self.text.tag_names():
-                                bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
-                                self.text.tag_configure(
-                                    f"{gr.span()[1]}",
-                                    lmargin1=em,
-                                    lmargin2=em + bullet_width,
-                                )
-                            self.text.insert(END, r[1], f"{gr.span()[1]}")
-                        else:
-                            self.text.insert(END, r[1])
-                    for k, v in tvg.insighttree():
-                        self.listb.insert(END, f"{k}: {v[0]}")
-                self.text.edit_reset()
-                self.text.config(state="disable")
-                self.text.yview_moveto(1.0)
-                self.listb.yview_moveto(1.0)
-                del tvg, g, em, gr, text_font
-        except Exception as e:
-            self.text.insert(END, e)
+        if self.checkfile() and self.nonetype():
+            self.text.config(state="normal")
+            self.text.delete("1.0", END)
+            self.listb.delete(0, END)
+            with tv(self.filename) as tvg:
+                self._prettyv(tvg.getdata())
+                for k, v in tvg.insighttree():
+                    self.listb.insert(END, f"{k}: {v[0]}")
+            self.text.edit_reset()
             self.text.config(state="disable")
+            self.text.yview_moveto(1.0)
+            self.listb.yview_moveto(1.0)
+            del tvg
 
     def _sumchk(self):
         sumtot = SumAll(self.filename, sig="+")
@@ -1248,69 +1251,66 @@ class TreeViewGui:
                         parent=self.root,
                     )
             else:
-                try:
-                    rw = None
-                    if self.entry3.get():
-                        if self.entry.get() and self.entry.get() not in cek:
-                            if TreeViewGui.MARK:
-                                rw = self.listb.curselection()[0]
-                                appr = messagebox.askyesno(
-                                    "Edit", f"Edit cell {rw}?", parent=self.root
-                                )
-                                if appr:
-                                    with tv(self.filename) as tvg:
-                                        insight = tuple(
-                                            islice(
-                                                tvg.compdatch(True),
-                                                int(rw),
-                                                int(rw) + 1,
-                                            )
-                                        )
-                                        if insight[0][0] != "space":
-                                            tvg.edittree(
-                                                self.entry.get(),
-                                                int(rw),
-                                                self.entry3.get(),
-                                            )
-                                    del tvg, insight
-                                    self.entry.delete(0, END)
-                            else:
+                rw = None
+                if self.entry3.get():
+                    if self.entry.get() and self.entry.get() not in cek:
+                        if TreeViewGui.MARK:
+                            rw = self.listb.curselection()[0]
+                            appr = messagebox.askyesno(
+                                "Edit", f"Edit cell {rw}?", parent=self.root
+                            )
+                            if appr:
                                 with tv(self.filename) as tvg:
-                                    tvg.quickchild(self.entry.get(), self.entry3.get())
-                                self.entry.delete(0, END)
-                                del tvg
-                            self.spaces()
-                    else:
-                        if self.entry.get() and self.entry.get() not in cek:
-                            if TreeViewGui.MARK:
-                                rw = self.listb.curselection()[0]
-                                appr = messagebox.askyesno(
-                                    "Edit", f"Edit cell {rw}?", parent=self.root
-                                )
-                                if appr:
-                                    with tv(self.filename) as tvg:
-                                        insight = tuple(
-                                            islice(
-                                                tvg.compdatch(True),
-                                                int(rw),
-                                                int(rw) + 1,
-                                            )
+                                    insight = tuple(
+                                        islice(
+                                            tvg.compdatch(True),
+                                            int(rw),
+                                            int(rw) + 1,
                                         )
-                                        if insight[0][0] != "space":
-                                            tvg.edittree(self.entry.get(), int(rw))
-                                    del tvg, insight
-                                    self.entry.delete(0, END)
-                            else:
-                                with tv(self.filename) as tvg:
-                                    tvg.addparent(self.entry.get())
-                                del tvg
+                                    )
+                                    if insight[0][0] != "space":
+                                        tvg.edittree(
+                                            self.entry.get(),
+                                            int(rw),
+                                            self.entry3.get(),
+                                        )
+                                del tvg, insight
                                 self.entry.delete(0, END)
-                            self.spaces()
-                    if rw and rw < len(self.listb.get(0, END)) - 1:
-                        self.text.see(f"{int(rw)}.0")
-                        self.listb.see(rw)
-                except Exception as e:
-                    messagebox.showerror("TreeViewGui", f"{e}", parent=self.root)
+                        else:
+                            with tv(self.filename) as tvg:
+                                tvg.quickchild(self.entry.get(), self.entry3.get())
+                            self.entry.delete(0, END)
+                            del tvg
+                        self.spaces()
+                else:
+                    if self.entry.get() and self.entry.get() not in cek:
+                        if TreeViewGui.MARK:
+                            rw = self.listb.curselection()[0]
+                            appr = messagebox.askyesno(
+                                "Edit", f"Edit cell {rw}?", parent=self.root
+                            )
+                            if appr:
+                                with tv(self.filename) as tvg:
+                                    insight = tuple(
+                                        islice(
+                                            tvg.compdatch(True),
+                                            int(rw),
+                                            int(rw) + 1,
+                                        )
+                                    )
+                                    if insight[0][0] != "space":
+                                        tvg.edittree(self.entry.get(), int(rw))
+                                del tvg, insight
+                                self.entry.delete(0, END)
+                        else:
+                            with tv(self.filename) as tvg:
+                                tvg.addparent(self.entry.get())
+                            del tvg
+                            self.entry.delete(0, END)
+                        self.spaces()
+                if rw and rw < len(self.listb.get(0, END)) - 1:
+                    self.text.see(f"{int(rw)}.0")
+                    self.listb.see(rw)
                 del rw
         del cek
 
@@ -1324,52 +1324,46 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            try:
-                if self.checkfile() and self.nonetype():
-                    if self.listb.curselection():
-                        TreeViewGui.MODE = True
-                        rw = int(self.listb.curselection()[0])
-                        with tv(self.filename) as tvg:
-                            if rw != 0:
-                                tvg.delrow(rw)
+            if self.checkfile() and self.nonetype():
+                if self.listb.curselection():
+                    TreeViewGui.MODE = True
+                    rw = int(self.listb.curselection()[0])
+                    with tv(self.filename) as tvg:
+                        if rw != 0:
+                            tvg.delrow(rw)
 
-                        del tvg
-                        self.spaces()
-                        if rw > self.listb.size() - 1:
-                            if self.listb.get(rw - 1):
-                                rw = rw - 1
-                            else:
-                                rw = rw - 2
-                        ck = tuple(
-                            [
-                                self.listb.size(),
-                                self.listb.get(rw).split(":")[1].strip(),
-                            ]
-                        )
-
-                        if rw < ck[0]:
-                            if ck[1] != "space" and rw != 0:
-                                self.listb.select_set(rw)
-                                self.listb.see(rw)
-                                self.text.see(f"{(rw)}.0")
-                            else:
-                                self.listb.select_set(rw - 1)
-                                self.listb.see(rw - 1)
-                                self.text.see(f"{(rw-1)}.0")
+                    del tvg
+                    self.spaces()
+                    if rw > self.listb.size() - 1:
+                        if self.listb.get(rw - 1):
+                            rw = rw - 1
                         else:
-                            if ck[0] == 1:
-                                self.listb.select_set(0)
-                            else:
-                                self.listb.select_set(len(ck) - 1)
-                                self.listb.see(len(ck) - 1)
-                                self.text.see(f"{(len(ck)-1)}.0")
-                        del rw, ck
-                        self.infobar()
-            except Exception as e:
-                self.text.config(state="normal")
-                self.text.delete("1.0", END)
-                self.text.insert(END, e)
-                self.text.config(state="disable")
+                            rw = rw - 2
+                    ck = tuple(
+                        [
+                            self.listb.size(),
+                            self.listb.get(rw).split(":")[1].strip(),
+                        ]
+                    )
+
+                    if rw < ck[0]:
+                        if ck[1] != "space" and rw != 0:
+                            self.listb.select_set(rw)
+                            self.listb.see(rw)
+                            self.text.see(f"{(rw)}.0")
+                        else:
+                            self.listb.select_set(rw - 1)
+                            self.listb.see(rw - 1)
+                            self.text.see(f"{(rw-1)}.0")
+                    else:
+                        if ck[0] == 1:
+                            self.listb.select_set(0)
+                        else:
+                            self.listb.select_set(len(ck) - 1)
+                            self.listb.see(len(ck) - 1)
+                            self.text.see(f"{(len(ck)-1)}.0")
+                    del rw, ck
+                    self.infobar()
 
     def move_lr(self, event=None):
         """Moving a child row to left or right, as to define spaces needed"""
@@ -1551,26 +1545,22 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             dbs = db(self.filename)
-            try:
-                row = simpledialog.askinteger(
+            row = simpledialog.askinteger(
+                "Load Backup",
+                f"There are {dbs.totalrecs()} rows, please choose a row:",
+                parent=self.root,
+            )
+            if row and row <= dbs.totalrecs():
+                with tv(self.filename) as tvg:
+                    tvg.loadbackup(self.filename, row=row - 1, stat=True)
+                del tvg
+                messagebox.showinfo(
                     "Load Backup",
-                    f"There are {dbs.totalrecs()} rows, please choose a row:",
+                    "Load backup is done, chek again!",
                     parent=self.root,
                 )
-                if row and row <= dbs.totalrecs():
-                    with tv(self.filename) as tvg:
-                        tvg.loadbackup(self.filename, row=row - 1, stat=True)
-                    del tvg
-                    messagebox.showinfo(
-                        "Load Backup",
-                        "Load backup is done, chek again!",
-                        parent=self.root,
-                    )
-                    self.spaces()
-                del row
-            except Exception as e:
-                messagebox.showerror("TreeViewGui", e, parent=self.root)
-            del dbs
+                self.spaces()
+            del row, dbs
 
     def copas(self, event=None):
         """Paste a row value to Entry for fixing value"""
@@ -1716,8 +1706,11 @@ class TreeViewGui:
                 def body(self, master):
                     self.title("Choose File")
                     Label(master, text="File: ").grid(row=0, column=0, sticky=E)
-                    self.e1 = ttk.Combobox(master, state="readonly")
+                    self.e1 = ttk.Combobox(master)
                     self.e1["values"] = files
+                    self.e1.bind(
+                        "<KeyRelease>", partial(TreeViewGui.tynam, files=files)
+                    )
                     self.e1.current(0)
                     self.e1.grid(row=0, column=1)
                     return self.e1
@@ -1848,55 +1841,45 @@ class TreeViewGui:
     def saveaspdf(self):
         """Show to browser and directly print as pdf or direct printing"""
 
-        try:
-            if self.checkfile() and self.nonetype():
-                if (a := self.text["font"].find("}")) != -1:
-                    px = (
-                        int(re.search(r"\d+", self.text["font"][a:]).group())
-                        * 1.3333333
+        if self.checkfile() and self.nonetype():
+            if (a := self.text["font"].find("}")) != -1:
+                px = int(re.search(r"\d+", self.text["font"][a:]).group()) * 1.3333333
+            else:
+                px = int(re.search(r"\d+", self.text["font"]).group()) * 1.3333333
+            ck = ["bold", "italic"]
+            sty = ""
+            for i in ck:
+                if i in self.text["font"]:
+                    sty += "".join(f"{i} ")
+            if sty:
+                add = f" {sty}{px:.3f}px "
+            else:
+                add = f" {px:.3f}px "
+            if "}" in self.text["font"]:
+                fon = self.text["font"].partition("}")[0].replace("{", "")
+                fon = f"{add}{fon}"
+            else:
+                fon = self.text["font"].partition(" ")[0]
+                fon = f"{add}{fon}"
+            ask = messagebox.askyesno(
+                "TreeViewGui", "Add checkboxes?", parent=self.root
+            )
+            if f"{self.filename}_hid.json" in os.listdir():
+                if ask:
+                    convhtml(
+                        self.text.get("1.0", END)[:-1],
+                        f"{self.filename}",
+                        fon,
+                        ckb=True,
                     )
                 else:
-                    px = int(re.search(r"\d+", self.text["font"]).group()) * 1.3333333
-                ck = ["bold", "italic"]
-                sty = ""
-                for i in ck:
-                    if i in self.text["font"]:
-                        sty += "".join(f"{i} ")
-                if sty:
-                    add = f" {sty}{px:.3f}px "
+                    convhtml(self.text.get("1.0", END)[:-1], f"{self.filename}", fon)
+            else:
+                if ask:
+                    convhtml(f"{self.filename}.txt", f"{self.filename}", fon, ckb=True)
                 else:
-                    add = f" {px:.3f}px "
-                if "}" in self.text["font"]:
-                    fon = self.text["font"].partition("}")[0].replace("{", "")
-                    fon = f"{add}{fon}"
-                else:
-                    fon = self.text["font"].partition(" ")[0]
-                    fon = f"{add}{fon}"
-                ask = messagebox.askyesno(
-                    "TreeViewGui", "Add checkboxes?", parent=self.root
-                )
-                if f"{self.filename}_hid.json" in os.listdir():
-                    if ask:
-                        convhtml(
-                            self.text.get("1.0", END)[:-1],
-                            f"{self.filename}",
-                            fon,
-                            ckb=True,
-                        )
-                    else:
-                        convhtml(
-                            self.text.get("1.0", END)[:-1], f"{self.filename}", fon
-                        )
-                else:
-                    if ask:
-                        convhtml(
-                            f"{self.filename}.txt", f"{self.filename}", fon, ckb=True
-                        )
-                    else:
-                        convhtml(f"{self.filename}.txt", f"{self.filename}", fon)
-                del px, ck, sty, add, ask, fon
-        except Exception as e:
-            messagebox.showerror("TreeViewGui", f"{e}", parent=self.root)
+                    convhtml(f"{self.filename}.txt", f"{self.filename}", fon)
+            del px, ck, sty, add, ask, fon
 
     def nonetype(self):
         """For checking file is empty or not"""
@@ -1986,90 +1969,45 @@ class TreeViewGui:
         if os.path.exists(f"{self.filename}_hid.json"):
             with open(f"{self.filename}_hid.json") as jfile:
                 rd = dict(json.load(jfile))
-            g = re.compile(r"\s+")
-            nf = str(self.text.cget("font"))
+            rolrd = tuple(tuple(i) for i in tuple(rd.values()) if isinstance(i, list))
+            self.view()
+            showt = self.text.get("1.0", END).split("\n")[:-2]
             if rd["reverse"] is False:
-                self.view()
-                rolrd = [i for i in list(rd.values()) if isinstance(i, list)]
-                showt = self.text.get("1.0", END).split("\n")[:-2]
                 for wow, wrow in rolrd:
                     for i in range(wow, wrow + 1):
                         showt[i] = 0
                 self.text.config(state="normal")
                 self.text.delete("1.0", END)
-                showt = [f"{i}\n" for i in showt if i != 0]
-                try:
-                    text_font = font.Font(self.root, font=nf, name=nf, exists=True)
-                except:
-                    text_font = font.Font(self.root, font=nf, name=nf, exists=False)
-                em = text_font.measure(" ")
-                for i in showt:
-                    gr = g.match(i)
-                    if gr and gr.span()[1] > 1:
-                        if str(gr.span()[1]) not in self.text.tag_names():
-                            bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
-                            self.text.tag_configure(
-                                f"{gr.span()[1]}",
-                                lmargin1=em,
-                                lmargin2=em + bullet_width,
-                            )
-                        self.text.insert(END, i, f"{gr.span()[1]}")
-                    else:
-                        self.text.insert(END, i)
-                    del gr
+                showt = tuple(f"{i}\n" for i in showt if i != 0)
+                self._prettyv(enumerate(showt))
                 self.text.config(state="disable")
-                if showt:
-                    with tv(self.filename) as tvg:
-                        vals = enumerate(
-                            [d[0] for d in tvg.insighthidden(enumerate(showt), False)]
-                        )
-                    self.listb.delete(0, END)
-                    for n, p in vals:
-                        self.listb.insert(END, f"{n}: {p}")
-                    del tvg, vals
-                else:
-                    self.listb.delete(0, END)
-                del rolrd, showt, text_font, em
+                with tv(self.filename) as tvg:
+                    vals = enumerate(
+                        [d[0] for d in tvg.insighthidden(enumerate(showt), False)]
+                    )
+                self.listb.delete(0, END)
+                for n, p in vals:
+                    self.listb.insert(END, f"{n}: {p}")
+                del tvg, vals
             else:
-                self.view()
-                rolrd = [i for i in list(rd.values()) if isinstance(i, list)]
-                showt = self.text.get("1.0", END).split("\n")[:-2]
                 ih = []
                 for wow, wrow in rolrd:
                     for i in range(wow, wrow + 1):
                         ih.append(f"{showt[i]}\n")
+                ih = tuple(ih)
                 self.text.config(state="normal")
                 self.text.delete("1.0", END)
-                try:
-                    text_font = font.Font(self.root, font=nf, name=nf, exists=True)
-                except:
-                    text_font = font.Font(self.root, font=nf, name=nf, exists=False)
-                em = text_font.measure(" ")
-                for i in ih:
-                    gr = g.match(i)
-                    if gr and gr.span()[1] > 1:
-                        if str(gr.span()[1]) not in self.text.tag_names():
-                            bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
-                            self.text.tag_configure(
-                                f"{gr.span()[1]}",
-                                lmargin1=em,
-                                lmargin2=em + bullet_width,
-                            )
-                        self.text.insert(END, i, f"{gr.span()[1]}")
-                    else:
-                        self.text.insert(END, i)
-                    del gr
+                self._prettyv(enumerate(ih))
                 self.text.config(state="disable")
                 with tv(self.filename) as tvg:
                     vals = enumerate(
                         [d[0] for d in tvg.insighthidden(enumerate(ih), False)]
                     )
-                del tvg
                 self.listb.delete(0, END)
                 for n, p in vals:
                     self.listb.insert(END, f"{n}: {p}")
-                del rolrd, showt, text_font, vals, em, ih
-            del rd, g, nf
+                del ih, tvg, vals
+            del rd, rolrd, showt
 
     def hiddenchl(self, event=None, chs: bool = None):
         """Create Hidden position of parent and its childs in json file"""
@@ -2509,25 +2447,22 @@ class TreeViewGui:
     @excp(2, DEFAULTFILE)
     @staticmethod
     def tynam(event, files: list | tuple):
-        try:
+        if event.widget.get():
+            idx = event.widget.index(INSERT)
+            gt = event.widget.get()
+            event.widget.delete(0, END)
+            event.widget.insert(0, gt[:idx])
             if event.widget.get():
-                idx = event.widget.index(INSERT)
-                gt = event.widget.get()
-                event.widget.delete(0, END)
-                event.widget.insert(0, gt[:idx])
-                if event.widget.get():
-                    for em in files:
-                        if (
-                            event.widget.get().lower() in em.lower()
-                            and event.widget.get().lower()[: idx + 1]
-                            == em.lower()[: len(event.widget.get().lower())]
-                        ):
-                            event.widget.current(files.index(em))
-                            break
-                event.widget.icursor(index=idx)
-                del idx, gt
-        except Exception as e:
-            raise e
+                for em in files:
+                    if (
+                        event.widget.get() in em
+                        and event.widget.get()[: idx + 1]
+                        == em[: len(event.widget.get())]
+                    ):
+                        event.widget.current(files.index(em))
+                        break
+            event.widget.icursor(index=idx)
+            del idx, gt
 
     def temp(self, event=None):
         """This is to compliment the editor mode.
@@ -3039,38 +2974,35 @@ class TreeViewGui:
     def send_reg(self, event=None):
         """Compose email for registration"""
 
-        try:
-            body = "".join(
-                [
-                    wrwords(i, 80, 1) + "\n"
-                    for i in self.text.get("1.0", END)[:-1].split("\n")
-                ]
+        body = "".join(
+            [
+                wrwords(i, 80, 1) + "\n"
+                for i in self.text.get("1.0", END)[:-1].split("\n")
+            ]
+        )
+        if body != "\n":
+            ask = messagebox.askyesno(
+                "TreeViewGui",
+                '"yes" to compose email or "no" to copy text.',
+                parent=self.root,
             )
-            if body != "\n":
-                ask = messagebox.askyesno(
-                    "TreeViewGui",
-                    '"yes" to compose email or "no" to copy text.',
-                    parent=self.root,
-                )
-                if ask:
-                    composemail(sub=f"{self.filename}", body=body)
-                else:
-                    self.root.clipboard_clear()
-                    self.root.clipboard_append(
-                        "".join(
-                            [
-                                wrwords(i, 40, 1) + "\n"
-                                for i in self.text.get("1.0", END)[:-1].split("\n")
-                            ]
-                        )
-                    )
-                    messagebox.showinfo("TreeViewGui", "Text copied!", parent=self.root)
+            if ask:
+                composemail(sub=f"{self.filename}", body=body)
             else:
-                messagebox.showinfo(
-                    "TreeViewGui", "Cannot send empty text!", parent=self.root
+                self.root.clipboard_clear()
+                self.root.clipboard_append(
+                    "".join(
+                        [
+                            wrwords(i, 40, 1) + "\n"
+                            for i in self.text.get("1.0", END)[:-1].split("\n")
+                        ]
+                    )
                 )
-        except Exception as e:
-            messagebox.showerror("TreeViewGui", f"{e}", parent=self.root)
+                messagebox.showinfo("TreeViewGui", "Text copied!", parent=self.root)
+        else:
+            messagebox.showinfo(
+                "TreeViewGui", "Cannot send empty text!", parent=self.root
+            )
 
     def gettotsum(self):
         """Get all sums on all parents that have "+" sign in front"""

@@ -135,6 +135,12 @@ main()
   * **Virtual OS Windows in Mac**
     * **Some short-cuts works only with "Control" + "Option" or "Shift" + ...**
 
+## Development Purpose
+
+* **TreeViewGui is using Excptr Module to catch any error exceptions**
+  * **Plese often check the folder "FreeTVG_TRACE" in "HOME" / "USERPROFILE" path directory.**
+  * **Raise issues with copy of it, thank you!**
+
 ## Notice and Apologize
 
 * **Found very little bug in Template**
