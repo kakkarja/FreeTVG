@@ -90,6 +90,14 @@ main()
         1,234,567.89
         ```
 
+* ### **Markdown**
+
+  * **Usage how to use markdown in pdf [fn+f1 or ctrl+f1]**
+    * **Nicely presented in HTML and printed in pdf [Printing function]**
+  * **Special thanks to:**
+    * **[@Python-Markdown](https://github.com/Python-Markdown/markdown)**
+    * **[@facelessuser](https://github.com/facelessuser/pymdown-extensions)**
+
 ## Changes
 
 * **Tutorial TVG.pdf press: <Ctrl+F1> or <fn+F1> in MacOS**
