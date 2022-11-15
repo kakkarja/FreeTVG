@@ -124,6 +124,7 @@ main()
 * **Template has been overhauled for improvement**
   * **Can delete a saved template**
 * **Look-Up now more informative (not in editor mode)**
+* **Add Markdown buttons in Editor mode for convinience**
 
 * ### [treeview](https://github.com/kakkarja/TV)
 
@@ -164,3 +165,9 @@ main()
 ![PieChart](/Pics/piechart.png)
 
 ![ExpressionCalc](/Pics/expressioncalc.png)
+
+## Markdown
+
+![Markdown](/Pics/markdown.png)
+
+![Printing](/Pics/printing.png)

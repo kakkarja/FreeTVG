@@ -407,6 +407,10 @@ class TreeViewGui:
         self.button12.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button12"] = self.button12
 
+        self.frb3 = ttk.Frame(self.root)
+        self.frb3.pack(fill=X)
+        self.frb3.pack_forget()
+
         if self._addon:
             self.button30 = ttk.Button(
                 self.bframe, text="Sum-Up", width=3, command=self.gettotsum
@@ -2583,6 +2587,65 @@ class TreeViewGui:
                             self.bt[i].config(state="normal")
             TreeViewGui.FREEZE = False
 
+    def _mdbuttons(self):
+
+        if not hasattr(self, "mdframe"):
+
+            mdb = {
+                "B": "****",
+                "I": "**",
+                "U": "^^^^",
+                "S": "~~~~",
+                "L": "[]()",
+                "SP": "^^",
+                "SB": "~~",
+                "C": "[x]",
+                "AR": "-->",
+                "AL": "<--",
+                "AT": "<-->",
+                "PM": "+/-",
+                "TM": "(tm)",
+                "CR": "(c)",
+                "R": "(r)",
+            }
+
+            stb = None
+
+            def storbut(event):
+                nonlocal stb
+                stb = event.widget.cget("text")
+
+            def insmd():
+                if stb and stb in mdb:
+                    self.text.insert(INSERT, mdb[stb])
+
+            lmdb = list(mdb)
+            self.tframe.pack_forget()
+            self.fscr.pack_forget()
+
+            self.__setattr__("mdframe", None)
+            self.frb3.pack(fill=X)
+            self.mdframe = Frame(self.frb3)
+            self.mdframe.pack(fill=X, expand=1)
+
+            mdbut = Button(self.mdframe, text=lmdb[0], relief=GROOVE, command=insmd)
+            mdbut.pack(side=LEFT, padx=2, pady=2, fill=X, expand=1)
+            mdbut.bind("<Enter>", storbut)
+            for i in range(1, 15):
+                mdbut = Button(self.mdframe, text=lmdb[i], relief=GROOVE, command=insmd)
+                mdbut.pack(side=LEFT, padx=(0, 2), pady=2, fill=X, expand=1)
+                mdbut.bind("<Enter>", storbut)
+
+            self.tframe.pack(anchor="w", side=TOP, fill="both", expand=1)
+            self.fscr.pack(fill="x")
+            del lmdb
+        else:
+            for i in self.mdframe.winfo_children():
+                i.destroy()
+            self.mdframe.destroy()
+            self.__delattr__("mdframe")
+            self.frb3.pack_forget()
+
     def editor(self):
         """This is direct editor on text window.
         FORMAT:
@@ -2607,6 +2670,7 @@ class TreeViewGui:
                 self.disab(*ckb)
                 self.text.edit_reset()
                 self.text.focus()
+                self._mdbuttons()
                 del ckb
             else:
                 try:
@@ -2773,10 +2837,10 @@ class TreeViewGui:
                         self.spaces()
                         if self.editorsel:
                             self.editorsel = None
-                        self.chktempo()
                 except Exception as a:
-                    self.chktempo()
                     messagebox.showerror("TreeViewGui", f"{a}", parent=self.root)
+                self.chktempo()
+                self._mdbuttons()
             self.store = None
             self.text.edit_reset()
             self.infobar()
