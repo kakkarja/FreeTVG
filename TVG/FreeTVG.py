@@ -588,6 +588,21 @@ class TreeViewGui:
             "HTML View": "Viewing html page that has been created before",
             "parent": "Create parent",
             "child": 'Create child ["Child" for positioning]',
+            "B": "Bold for Markdown",
+            "I": "Italic for Markdown",
+            "U": "Underline for Markdown",
+            "S": "Strikethrough for Markdown",
+            "L": "Link url for Markdown",
+            "SP": "Super-script for Markdown",
+            "SB": "Sub-script for Markdown",
+            "C": "Checked for Markdown",
+            "AR": "Arrow-right for Markdown",
+            "AL": "Arrow-left for Markdown",
+            "AT": "Arrow-right-left for Markdown",
+            "PM": "Plus-Minus for Markdown",
+            "TM": "Trade Mark for Markdown",
+            "CR": "Copy-Right for Markdown",
+            "R": "Right for Markdown",
         }
 
         self.ew = None
@@ -598,12 +613,12 @@ class TreeViewGui:
                 "Del Total": "Delete total base selected parents",
             }
             self.scribe = self.scribe | on
-            self.ew = ["Sum-Up", "Pie-Chart Graph", "Del Total", "child"]
+            self.ew = ["Sum-Up", "Pie-Chart Graph", "Del Total", "child", "R"]
             if os.path.exists(self.glop.absolute().joinpath("sumtot.tvg")):
                 self.sumtot = True
                 os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
         else:
-            self.ew = ["CPP", "Clear hide", "Printing", "child"]
+            self.ew = ["CPP", "Clear hide", "Printing", "child", "R"]
 
     def ldmode(self, event=None):
         """Dark mode for easing the eye"""
@@ -698,20 +713,16 @@ class TreeViewGui:
 
             master = Toplevel(self.root)
             master.overrideredirect(1)
-            ft = font.Font(master, font="verdana")
-            if event.widget["text"] in ["Create file", "Insight", "Insert"]:
+            ft = font.Font(master, font="verdana", weight=font.BOLD)
+            if event.widget["text"] in self.ew:
                 master.geometry(
-                    f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()}+{event.widget.winfo_pointery()+30}"
-                )
-            elif event.widget["text"] in self.ew:
-                master.geometry(
-                    f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-220}+{event.widget.winfo_pointery()+30}"
+                    f"{int(ft.measure(tx)/1.4)}x{15}+{event.widget.winfo_rootx()-int(ft.measure(tx)/2)}+{event.widget.winfo_rooty()+25}"
                 )
             else:
                 master.geometry(
-                    f"{int(ft.measure(tx)/1.6)}x{15}+{event.widget.winfo_pointerx()-80}+{event.widget.winfo_pointery()+30}"
+                    f"{int(ft.measure(tx)/1.4)}x{15}+{event.widget.winfo_rootx()}+{event.widget.winfo_rooty()+25}"
                 )
-            fnt = "verdana 8"
+            fnt = "verdana 8 bold"
             a = Message(
                 master=master,
                 text=tx,
