@@ -2617,7 +2617,10 @@ class TreeViewGui:
 
             def insmd():
                 if stb and stb in mdb:
-                    self.text.insert(INSERT, mdb[stb])
+                    if self.text.get(f"{INSERT} - 1c", INSERT).isspace():
+                        self.text.insert(INSERT, mdb[stb])
+                    else:
+                        self.text.insert(INSERT, f" {mdb[stb]}")
 
             lmdb = list(mdb)
             self.tframe.pack_forget()
@@ -2625,15 +2628,15 @@ class TreeViewGui:
 
             self.__setattr__("mdframe", None)
             self.frb3.pack(fill=X)
-            self.mdframe = Frame(self.frb3)
+            self.mdframe = ttk.Frame(self.frb3)
             self.mdframe.pack(fill=X, expand=1)
 
-            mdbut = Button(self.mdframe, text=lmdb[0], relief=GROOVE, command=insmd)
-            mdbut.pack(side=LEFT, padx=2, pady=2, fill=X, expand=1)
+            mdbut = ttk.Button(self.mdframe, text=lmdb[0], width=1, command=insmd)
+            mdbut.pack(side=LEFT, padx=2, pady=(0, 2), fill=X, expand=1)
             mdbut.bind("<Enter>", storbut)
             for i in range(1, 15):
-                mdbut = Button(self.mdframe, text=lmdb[i], relief=GROOVE, command=insmd)
-                mdbut.pack(side=LEFT, padx=(0, 2), pady=2, fill=X, expand=1)
+                mdbut = ttk.Button(self.mdframe, text=lmdb[i], width=1, command=insmd)
+                mdbut.pack(side=LEFT, padx=(0, 2), pady=(0, 2), fill=X, expand=1)
                 mdbut.bind("<Enter>", storbut)
 
             self.tframe.pack(anchor="w", side=TOP, fill="both", expand=1)
