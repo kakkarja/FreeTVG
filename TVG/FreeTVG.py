@@ -610,7 +610,7 @@ class TreeViewGui:
             on = {
                 "Sum-Up": "Summing all add-on",
                 "Pie-Chart Graph": "Graph base on all sums",
-                "Del Total": "Delete total base selected parents",
+                "Del Total": "Delete all totals",
             }
             self.scribe = self.scribe | on
             self.ew = ["Sum-Up", "Pie-Chart Graph", "Del Total", "child", "R"]
@@ -714,15 +714,24 @@ class TreeViewGui:
             master = Toplevel(self.root)
             master.overrideredirect(1)
             ft = font.Font(master, font="verdana", weight=font.BOLD)
+
+            if self.plat.startswith("win"):
+                msr = int(ft.measure(tx)/2)
+                spc = int(ft.measure(tx)/2.6)
+                fnt = "verdana 7 bold"
+            else:
+                msr = int(ft.measure(tx)/1.4)
+                spc = int(ft.measure(tx)/2)
+                fnt = "verdana 8 bold"
+
             if event.widget["text"] in self.ew:
                 master.geometry(
-                    f"{int(ft.measure(tx)/1.4)}x{15}+{event.widget.winfo_rootx()-int(ft.measure(tx)/2)}+{event.widget.winfo_rooty()+25}"
+                    f"{msr}x{15}+{event.widget.winfo_rootx()-spc}+{event.widget.winfo_rooty()+25}"
                 )
             else:
                 master.geometry(
-                    f"{int(ft.measure(tx)/1.4)}x{15}+{event.widget.winfo_rootx()}+{event.widget.winfo_rooty()+25}"
+                    f"{msr}x{15}+{event.widget.winfo_rootx()}+{event.widget.winfo_rooty()+25}"
                 )
-            fnt = "verdana 8 bold"
             a = Message(
                 master=master,
                 text=tx,
@@ -733,7 +742,7 @@ class TreeViewGui:
                 fg="black",
             )
             a.pack(fill="both", expand=1)
-            del ft, tx
+            del ft, tx, msr, spc, fnt
             self.ai = self.root.after(3000, exit)
             self.tpl = master
 
