@@ -716,12 +716,12 @@ class TreeViewGui:
             ft = font.Font(master, font="verdana", weight=font.BOLD)
 
             if self.plat.startswith("win"):
-                msr = int(ft.measure(tx)/2)
-                spc = int(ft.measure(tx)/2.6)
+                msr = int(ft.measure(tx) / 2)
+                spc = int(ft.measure(tx) / 2.6)
                 fnt = "verdana 7 bold"
             else:
-                msr = int(ft.measure(tx)/1.4)
-                spc = int(ft.measure(tx)/2)
+                msr = int(ft.measure(tx) / 1.4)
+                spc = int(ft.measure(tx) / 2)
                 fnt = "verdana 8 bold"
 
             if event.widget["text"] in self.ew:
@@ -732,6 +732,7 @@ class TreeViewGui:
                 master.geometry(
                     f"{msr}x{15}+{event.widget.winfo_rootx()}+{event.widget.winfo_rooty()+25}"
                 )
+
             a = Message(
                 master=master,
                 text=tx,
@@ -2270,6 +2271,10 @@ class TreeViewGui:
                             while sn <= num:
                                 dat = self.text.get(f"{sn}.0", f"{sn+1}.0")
                                 if sw in dat:
+                                    dat = self.text.get(
+                                        self.text.search(sw, f"{sn}.0", f"{sn+1}.0"),
+                                        f"{sn+1}.0",
+                                    )
                                     self.text.see(f"{sn}.0")
                                     self.listb.see(sn)
                                     self.listb.selection_clear(0, END)
