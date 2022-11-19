@@ -59,8 +59,9 @@ class TreeViewGui:
         self.glop = Path(os.getcwd())
         self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
         self.root.protocol("WM_DELETE_WINDOW", self.tvgexit)
-        self.wwidth = 835
+        self.wwidth = 850 if self._addon and self.plat.startswith("win") else 835
         self.wheight = 610
+        self.root.minsize(self.wwidth, self.wheight)
         self.pwidth = int(self.root.winfo_screenwidth() / 2 - self.wwidth / 2)
         self.pheight = int(self.root.winfo_screenheight() / 3 - self.wheight / 3)
         self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
@@ -428,7 +429,10 @@ class TreeViewGui:
             self.button32.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
             self.bt["button32"] = self.button32
 
-        self.stl.configure("TButton", font="verdana 8 bold")
+        self.stl.configure(
+            "TButton",
+            font="verdana 7 bold" if self.plat.startswith("win") else "verdana 8 bold",
+        )
 
         # 5th frame.
         # Frame for text, listbox and scrollbars.
