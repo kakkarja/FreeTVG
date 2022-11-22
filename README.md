@@ -39,9 +39,9 @@ main()
 
 * ### **Add-On for TVG**
 
-    ```Python
-    pip3 install -U addon-tvg-karjakak
-    ```
+  ```Terminal
+  pip3 install -U addon-tvg-karjakak
+  ```
 
   * **Add extra 3 Functions:**
     * **Sum-Up**
@@ -150,11 +150,20 @@ main()
   * **Plese often check the folder "FreeTVG_TRACE" in "HOME" / "USERPROFILE" path directory.**
   * **Raise issues with copy of it, thank you!**
 
-## Notice and Apologize
+## Latest Notice
 
 * **Found very little bug in Template**
   * **Has been fixed in 2.8.18**
-  * **Sorry for the inconvenience 🙏**
+* **When send to email**
+  * **Markdown escape "\" will be deleted when send with default email ([F4/Ctrl+F4] send mail function)**
+  * **Email will be copied to default email app**
+* **Theme set globally according to system default theme**
+  * **No longer active through function button (previously F3/Ctrl+F3 button)**
+* **Send to email assign to F3/Ctrl+F3 button**
+* **Express Calc assign to F4/Ctrl+F4 button and no longer F5/Ctrl+F5**
+* **Some bugs fixed**
+  * **Editor on raise error, no longer shut the markdown buttons**
+  * **After pressing markdown button, the focus back to text editor**
 
 ![TVG](/Pics/TVG.png)
 

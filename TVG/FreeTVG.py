@@ -19,8 +19,9 @@ from treeview.dbase import Datab as db
 
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
 
-from .mdh import convhtml
-from .RegMail import composemail, wrwords
+from .utility.mdh import convhtml
+from .utility.RegMail import composemail, wrwords
+from .utility.term import ctlight
 
 __all__ = ["main"]
 
@@ -125,16 +126,14 @@ class TreeViewGui:
             self.root.bind_all("<Control-Key-F1>", self.fcsent)
             self.root.bind_all("<Control-Key-F2>", self.fcsent)
             self.root.bind_all("<Control-Key-F3>", self.fcsent)
-            self.root.bind_all("<Control-Key-F4>", self.fcsent)
             if self._addon:
-                self.root.bind_all("<Control-Key-F5>", self.exprsum)
+                self.root.bind_all("<Control-Key-F4>", self.exprsum)
         else:
             self.root.bind_all("<Key-F1>", self.fcsent)
             self.root.bind_all("<Key-F2>", self.fcsent)
             self.root.bind_all("<Key-F3>", self.fcsent)
-            self.root.bind_all("<Key-F4>", self.fcsent)
             if self._addon:
-                self.root.bind_all("<Key-F5>", self.exprsum)
+                self.root.bind_all("<Key-F4>", self.exprsum)
 
         if self._addon:
             self.root.bind_all("<Control-Key-1>", self.fcsent)
@@ -550,12 +549,7 @@ class TreeViewGui:
                 fr.pack_forget()
             del frm
 
-        if os.path.isfile(self.glop.joinpath(self.glop.parent, "sty.tvg")):
-            with open(self.glop.joinpath(self.glop.parent, "sty.tvg")) as ty:
-                rd = ty.read()
-                if rd == "ease":
-                    self.ldmode()
-            del rd
+        self.ldmode()
 
         self.tpl = None
         self.ai = None
@@ -623,15 +617,16 @@ class TreeViewGui:
                 os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
         else:
             self.ew = ["CPP", "Clear hide", "Printing", "child", "R"]
+        self.rsv_frame = None
 
-    def ldmode(self, event=None):
+    def ldmode(self):
         """Dark mode for easing the eye"""
 
         oribg = "#dcdad5"
         chbg = "grey30"
         orifg = "black"
         chfg = "white"
-        if self.stl.lookup(".", "background") != chbg:
+        if not ctlight():
             self.stl.configure(
                 ".",
                 background=chbg,
@@ -672,42 +667,21 @@ class TreeViewGui:
                 self.txtcol(
                     path=self.glop.joinpath(self.glop.parent, "theme.tvg"), wr=False
                 )
-            with open(self.glop.joinpath(self.glop.parent, "sty.tvg"), "w") as ty:
-                ty.write("ease")
-            del oribg, chbg, orifg, chfg
-        else:
-            self.stl.configure(
-                ".",
-                background=oribg,
-                foreground=orifg,
-                fieldbackground=oribg,
-                insertcolor=orifg,
-                troughcolor="#bab5ab",
-                arrowcolor=orifg,
-                bordercolor="#9e9a91",
-            )
-            self.stl.map(".", background=[("background", oribg)])
-            self.stl.configure("TEntry", fieldbackground="white")
-            self.stl.map(
-                "TCombobox",
-                foreground=[("focus", "white")],
-                fieldbackground=[
-                    ("focus", "dark blue"),
-                    ("readonly", oribg),
-                    ("disabled", "white"),
-                ],
-                background=[("active", "#eeebe7")],
-            )
-            self.stl.map("Horizontal.TScrollbar", background=[("active", "#eeebe7")])
-            self.stl.map("Vertical.TScrollbar", background=[("active", "#eeebe7")])
-            self.labcor.config(bg="White", fg=orifg)
-            os.remove(self.glop.joinpath(self.glop.parent, "sty.tvg"))
             del oribg, chbg, orifg, chfg
 
     def ttip(self, event=None):
         """Tooltip for TVG buttons"""
 
-        if tx := self.scribe.get(event.widget["text"], None):
+        ckframe = (
+            ".!frame.!frame",
+            ".!frame2",
+            ".!frame3",
+            ".!frame4",
+            self.rsv_frame,
+        )
+        if event.widget.winfo_parent() in ckframe and (
+            tx := self.scribe.get(event.widget["text"], None)
+        ):
 
             def exit():
                 self.root.update()
@@ -1003,11 +977,9 @@ class TreeViewGui:
             elif event.keysym == "F2":
                 self.hidbs()
             elif event.keysym == "F3":
-                self.ldmode()
+                self.send_reg()
             elif event.keysym == "F1":
                 self.tutorial()
-            elif event.keysym == "F4":
-                self.send_reg()
         else:
             if (
                 str(self.bt["button17"].cget("state")) == "normal"
@@ -1573,22 +1545,25 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            dbs = db(self.filename)
-            row = simpledialog.askinteger(
-                "Load Backup",
-                f"There are {dbs.totalrecs()} rows, please choose a row:",
-                parent=self.root,
-            )
-            if row and row <= dbs.totalrecs():
-                with tv(self.filename) as tvg:
-                    tvg.loadbackup(self.filename, row=row - 1, stat=True)
-                del tvg
-                messagebox.showinfo(
+            try:
+                dbs = db(self.filename)
+                row = simpledialog.askinteger(
                     "Load Backup",
-                    "Load backup is done, chek again!",
+                    f"There are {dbs.totalrecs()} rows, please choose a row:",
                     parent=self.root,
                 )
-                self.spaces()
+                if row and row <= dbs.totalrecs():
+                    with tv(self.filename) as tvg:
+                        tvg.loadbackup(self.filename, row=row - 1, stat=True)
+                    del tvg
+                    messagebox.showinfo(
+                        "Load Backup",
+                        "Load backup is done, chek again!",
+                        parent=self.root,
+                    )
+                    self.spaces()
+            except Exception as e:
+                messagebox.showwarning("TreeViewGui", e, parent=self.root)
             del row, dbs
 
     def copas(self, event=None):
@@ -2650,6 +2625,7 @@ class TreeViewGui:
                         self.text.insert(INSERT, mdb[stb])
                     else:
                         self.text.insert(INSERT, f" {mdb[stb]}")
+                    self.text.focus()
 
             lmdb = list(mdb)
             self.tframe.pack_forget()
@@ -2663,6 +2639,7 @@ class TreeViewGui:
             mdbut = ttk.Button(self.mdframe, text=lmdb[0], width=1, command=insmd)
             mdbut.pack(side=LEFT, padx=2, pady=(0, 2), fill=X, expand=1)
             mdbut.bind("<Enter>", storbut)
+            self.rsv_frame = mdbut.winfo_parent()
             for i in range(1, 15):
                 mdbut = ttk.Button(self.mdframe, text=lmdb[i], width=1, command=insmd)
                 mdbut.pack(side=LEFT, padx=(0, 2), pady=(0, 2), fill=X, expand=1)
@@ -2871,8 +2848,9 @@ class TreeViewGui:
                             self.editorsel = None
                 except Exception as a:
                     messagebox.showerror("TreeViewGui", f"{a}", parent=self.root)
-                self.chktempo()
-                self._mdbuttons()
+                if self.text.cget("state") == DISABLED:
+                    self.chktempo()
+                    self._mdbuttons()
             self.store = None
             self.text.edit_reset()
             self.infobar()
