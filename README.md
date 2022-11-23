@@ -164,6 +164,15 @@ main()
 * **Some bugs fixed**
   * **Editor on raise error, no longer shut the markdown buttons**
   * **After pressing markdown button, the focus back to text editor**
+* **You can force dark mode in daylight global setting and vice-versa**
+
+  ```Terminal
+  # Will change the light theme to dark
+  > tvg dark
+
+  # Will change the dark theme to light
+  > tvg light
+  ```
 
 ![TVG](/Pics/TVG.png)
 

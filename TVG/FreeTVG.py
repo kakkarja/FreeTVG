@@ -6,6 +6,7 @@ import ast
 import importlib
 import os
 import re
+import sys
 from datetime import datetime as dt
 from functools import partial
 from itertools import islice
@@ -39,6 +40,8 @@ match _addon := importlib.util.find_spec("addon_tvg"):
     case _:
         print("Add-On for TVG is missing!")
 
+THEME_MODE = ctlight()
+
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class TreeViewGui:
@@ -54,6 +57,7 @@ class TreeViewGui:
 
     def __init__(self, root, filename):
         self._addon = _addon
+        self.tmode = THEME_MODE
         self.filename = filename
         self.root = root
         self.plat = platform
@@ -626,7 +630,7 @@ class TreeViewGui:
         chbg = "grey30"
         orifg = "black"
         chfg = "white"
-        if not ctlight():
+        if self.tmode == "dark" or not self.tmode:
             self.stl.configure(
                 ".",
                 background=chbg,
@@ -667,6 +671,32 @@ class TreeViewGui:
                 self.txtcol(
                     path=self.glop.joinpath(self.glop.parent, "theme.tvg"), wr=False
                 )
+            del oribg, chbg, orifg, chfg
+        elif self.tmode == "light":
+            self.stl.configure(
+                ".",
+                background="#eeebe7",
+                foreground=orifg,
+                fieldbackground=oribg,
+                insertcolor=orifg,
+                troughcolor="#bab5ab",
+                arrowcolor=orifg,
+                bordercolor="#9e9a91",
+            )
+            self.stl.configure("TEntry", fieldbackground="white")
+            self.stl.map(
+                "TCombobox",
+                foreground=[("focus", "black")],
+                fieldbackground=[
+                    ("focus", "white"),
+                    ("readonly", oribg),
+                    ("disabled", oribg),
+                ],
+                background=[("active", "#eeebe7")],
+            )
+            self.stl.map("Horizontal.TScrollbar", background=[("active", "#eeebe7")])
+            self.stl.map("Vertical.TScrollbar", background=[("active", "#eeebe7")])
+            self.labcor.config(bg="White", fg=orifg)
             del oribg, chbg, orifg, chfg
 
     def ttip(self, event=None):
@@ -751,7 +781,9 @@ class TreeViewGui:
             self.stl.configure("TButton", font="verdana 8 bold")
             os.remove(pth)
         self.tframe.pack(anchor="w", side=TOP, fill="both", expand=1)
+        self.tframe.update()
         self.fscr.pack(fill="x")
+        self.fscr.update()
         del frm, pth
 
     def inenter(self, event):
@@ -2646,7 +2678,9 @@ class TreeViewGui:
                 mdbut.bind("<Enter>", storbut)
 
             self.tframe.pack(anchor="w", side=TOP, fill="both", expand=1)
+            self.tframe.update()
             self.fscr.pack(fill="x")
+            self.fscr.update()
             del lmdb
         else:
             for i in self.mdframe.winfo_children():
@@ -2993,6 +3027,7 @@ class TreeViewGui:
         self.listb.bind("<Up>", self.mscrl)
         self.listb.bind("<Down>", self.mscrl)
         self.listb.bind("<FocusIn>", self.flb)
+        self.listb.update()
         del fon
 
     def ft(self, event=None, path=None):
@@ -3410,6 +3445,21 @@ def findpath():
 @excp(m=2, filenm=DEFAULTFILE)
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
+
+    match ment := len(sys.argv):
+        case ment if ment == 2:
+            global THEME_MODE
+            match mode := sys.argv[1]:
+                case mode if mode.lower() == "dark":
+                    if THEME_MODE is True:
+                        THEME_MODE = "dark"
+                case mode if mode.lower() == "light":
+                    if THEME_MODE is False:
+                        THEME_MODE = "light"
+                case _:
+                    pass
+        case _:
+            pass
 
     global _addon
     if _addon and _addon.name == "addon_tvg":
