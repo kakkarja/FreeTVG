@@ -28,7 +28,6 @@ def ctlight():
             text=True,
         )
 
-    print(thm.stdout)
     match thm := thm.stdout:
         case thm if "Dark" in thm:
             return False
