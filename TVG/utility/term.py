@@ -11,11 +11,14 @@ def ctlight():
 
     thm = None
     if plat.startswith("win"):
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         thm = subprocess.run(
             [
                 "powershell.exe",
                 '(Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize").SystemUsesLightTheme',
             ],
+            startupinfo=startupinfo,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
