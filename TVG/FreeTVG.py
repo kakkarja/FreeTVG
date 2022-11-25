@@ -2653,11 +2653,28 @@ class TreeViewGui:
 
             def insmd():
                 if stb and stb in mdb:
-                    if self.text.get(f"{INSERT} - 1c", INSERT).isspace():
-                        self.text.insert(INSERT, mdb[stb])
-                    else:
-                        self.text.insert(INSERT, f" {mdb[stb]}")
+                    mk = None
+                    match self.text.tag_ranges("sel"):
+                        case tsel if tsel:
+                            if stb in ("B", "I", "U", "S", "L", "SP", "SB"):
+                                match len(mk := mdb[stb]):
+                                    case 2:
+                                        self.text.insert(SEL_FIRST, mk[:1])
+                                        self.text.insert(SEL_LAST, mk[:1])
+                                    case 4:
+                                        if "[" in mk:
+                                            self.text.insert(SEL_FIRST, mk[:1])
+                                            self.text.insert(SEL_LAST, mk[1:])
+                                        else:
+                                            self.text.insert(SEL_FIRST, mk[:2])
+                                            self.text.insert(SEL_LAST, mk[:2])
+                    if mk is None:
+                        if self.text.get(f"{INSERT} - 1c", INSERT).isspace():
+                            self.text.insert(INSERT, mdb[stb])
+                        else:
+                            self.text.insert(INSERT, f" {mdb[stb]}")
                     self.text.focus()
+                    del mk
 
             lmdb = list(mdb)
             self.tframe.pack_forget()
@@ -2685,6 +2702,7 @@ class TreeViewGui:
         else:
             for i in self.mdframe.winfo_children():
                 i.destroy()
+                del i
             self.mdframe.destroy()
             self.__delattr__("mdframe")
             self.frb3.pack_forget()
