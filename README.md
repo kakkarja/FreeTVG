@@ -178,6 +178,7 @@ main()
   * **When dragging curssor with mouse/trackpad on text**
     * **Markdown will wrapped the text when insert**
     * **Only for B, I, U, S, L, SP, and SB (Bold, Italic, Underline, Strikethrough, Link hypertext website, Superscript, and Subscript)**
+  * **Inserting markdown will wrapping selection text**
 
 ![TVG](/Pics/TVG.png)
 

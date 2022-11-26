@@ -2647,10 +2647,12 @@ class TreeViewGui:
 
             stb = None
 
+            @excp(2, DEFAULTFILE)
             def storbut(event):
                 nonlocal stb
                 stb = event.widget.cget("text")
 
+            @excp(2, DEFAULTFILE)
             def insmd():
                 if stb and stb in mdb:
                     mk = None
@@ -2668,6 +2670,12 @@ class TreeViewGui:
                                         else:
                                             self.text.insert(SEL_FIRST, mk[:2])
                                             self.text.insert(SEL_LAST, mk[:2])
+                                if idx := self.text.search(" ", SEL_LAST, END):
+                                    self.text.mark_set("insert", idx)
+                                else:
+                                    self.text.mark_set("insert", END)
+                                self.text.tag_remove("sel", SEL_FIRST, SEL_LAST)
+                                del idx
                     if mk is None:
                         if self.text.get(f"{INSERT} - 1c", INSERT).isspace():
                             self.text.insert(INSERT, mdb[stb])
