@@ -34,7 +34,9 @@ DEFAULTFILE = os.path.join(DEFAULTDIR, Path(DEFAULTFILE).name)
 
 
 match _addon := importlib.util.find_spec("addon_tvg"):
-    case _addon if _addon is not None and _addon.name == "addon_tvg":
+    case _addon if all(
+        [_addon is not None, _addon.loader is not None, _addon.name == "addon_tvg"]
+    ):
         print("Add-On for TVG is ready!")
         from addon_tvg import Charts, EvalExp, SumAll
     case _:
