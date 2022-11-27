@@ -179,6 +179,26 @@ main()
     * **Markdown will wrapped the text when insert**
     * **Only for B, I, U, S, L, SP, and SB (Bold, Italic, Underline, Strikethrough, Link hypertext website, Superscript, and Subscript)**
   * **Inserting markdown will wrapping selection text**
+* **In Editor**
+  * **Function for convert has been deleted**
+    * **There only one editor mode, which using the specific format**
+
+      ```Text
+      # Editing in Editor mode wih specific format
+      # "p" for parent, "c<number>" for child, and "s" for space
+
+      p:Parent input
+      c1:Child input and <number> can up to 50
+      s:
+
+      # Result:
+
+      Parent input:
+          -Child input and <number> can up to 50
+
+      ```
+
+    * **For add-on TVG has another format please click -> [NEW](https://github.com/kakkarja/FreeTVG#new)**
 
 ![TVG](/Pics/TVG.png)
 

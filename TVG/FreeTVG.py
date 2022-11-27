@@ -828,48 +828,6 @@ class TreeViewGui:
         else:
             self.text.config(wrap=NONE)
 
-    def converting(self, event=None):
-        """Convert any text that is paste or written in text window.
-        # Example format:
-        #
-        #      Testing => to parent
-        #      This is the format that will be converted appropriately. With
-        #      no spaces after '\\n'. And the period is needed for child. => to child1 [2 child]
-        #      Making task list with "." as priority, "!" as urgent, and "?" tentative
-        #
-        """
-
-        if self.text.get("1.0", "1.0 lineend")[:-1]:
-            gt = self.text.get("1.0", END)[:-1]
-            x = re.compile(r".*?[\.|\!|\?]")
-            keys = tuple(k for k in gt.split("\n") if k and k[-1].isalpha())
-            values = tuple(
-                tuple(w.removeprefix(" ") for w in x.findall(v))
-                for v in gt.split("\n")
-                if v and v[-1] in ".!?"
-            )
-            conv = dict(zip(keys, values))
-            if conv and len(keys) == len(values):
-                ckp = None
-                with tv(self.filename) as tvg:
-                    ckp = self.checkfile()
-                    for i in conv:
-                        if ckp:
-                            tvg.addparent(i)
-                        for j in conv[i]:
-                            if j:
-                                tvg.quickchild(j, "child1")
-                del tvg, ckp
-                self.text.config(state=DISABLED)
-                self.disab(dis=False)
-                TreeViewGui.FREEZE = False
-                self.spaces()
-            else:
-                messagebox.showinfo(
-                    "TreeViewGui", "Unable to convert!", parent=self.root
-                )
-            del gt, keys, x, values, conv
-
     def infobar(self, event=None):
         """Info Bar telling the selected rows in listbox.
         If nothing, it will display today's date.
@@ -2192,6 +2150,7 @@ class TreeViewGui:
             ):
                 if self.text.get("1.0", END)[:-1]:
 
+                    @excp(2, DEFAULTFILE)
                     def searchw(words: str):
                         self.text.tag_config("hw", underline=1)
                         idx = self.text.search(words, "1.0", END, nocase=1)
@@ -2306,6 +2265,9 @@ class TreeViewGui:
                                         break
                                 else:
                                     sn += 1
+                            else:
+                                self.text.yview_moveto(1.0)
+                                self.listb.yview_moveto(1.0)
                         del dat, num, sn, sw
                     self.infobar()
 
@@ -2675,7 +2637,7 @@ class TreeViewGui:
                                 if idx := self.text.search(" ", SEL_LAST, END):
                                     self.text.mark_set("insert", idx)
                                 else:
-                                    self.text.mark_set("insert", END)
+                                    self.text.mark_set("insert", f"{SEL_LAST} lineend")
                                 self.text.tag_remove("sel", SEL_FIRST, SEL_LAST)
                                 del idx
                     if mk is None:
@@ -2746,129 +2708,16 @@ class TreeViewGui:
             else:
                 try:
                     if self.text.get("1.0", END)[:-1]:
-                        ask = messagebox.askyesno(
-                            "TreeViewGui",
-                            "Do you want to convert[y] or Edit[n]?",
-                            parent=self.root,
-                        )
-                        if ask:
-                            self.converting()
-                        else:
-                            self.store = self.text.get("1.0", END)
-                            if self.checkfile() and self.nonetype():
-                                if self.editorsel:
-                                    stor = self.editorsel
-                                    ed = tuple(
-                                        i for i in self.store[:-1].split("\n") if i
-                                    )
-                                    ckc = {f"c{i}": f"child{i}" for i in range(1, 51)}
-                                    et = stor[0]
-                                    p2 = {}
-                                    p1 = None
-                                    p3 = None
-                                    for i in ed:
-                                        et += 1
-                                        if "s:" == i.lower()[:2]:
-                                            p2[et] = ("space", "\n")
-                                        elif "p:" == i.lower()[:2]:
-                                            if i.partition(":")[
-                                                2
-                                            ].isspace() or not bool(
-                                                i.partition(":")[2]
-                                            ):
-                                                raise Exception(
-                                                    "Parent cannot be empty!"
-                                                )
-                                            else:
-                                                p2[et] = (
-                                                    "parent",
-                                                    i[2:].removeprefix(" "),
-                                                )
-                                        elif i.lower().partition(":")[0] in list(ckc):
-                                            if i.partition(":")[2].isspace():
-                                                p2[et] = (
-                                                    ckc[i.partition(":")[0].lower()],
-                                                    i.partition(":")[2],
-                                                )
-                                            elif bool(i.partition(":")[2]):
-                                                p2[et] = (
-                                                    ckc[i.partition(":")[0].lower()],
-                                                    i.partition(":")[2].removeprefix(
-                                                        " "
-                                                    ),
-                                                )
-                                    if len(ed) != len(p2):
-                                        raise Exception("Not Editable!")
-                                    with tv(self.filename) as tvg:
-                                        p1 = islice(tvg.insighttree(), 0, stor[0])
-                                        if stor[1] < tvg.getdatanum() - 1:
-                                            p3 = islice(
-                                                tvg.insighttree(),
-                                                stor[1],
-                                                tvg.getdatanum(),
-                                            )
-                                        if p3:
-                                            p3 = tuple(v for v in dict(p3).values())
-                                            p3 = {
-                                                et + j + 1: p3[j]
-                                                for j in range(len(p3))
-                                            }
-                                            combi = iter((dict(p1) | p2 | p3).values())
-                                        else:
-                                            combi = iter((dict(p1) | p2).values())
-                                        tvg.fileread(combi)
-                                    del stor, tvg, p1, ed, ckc, et, p2, combi, p3
-                                else:
-                                    et = self.listb.size()
-                                    ed = tuple(
-                                        i for i in self.store[:-1].split("\n") if i
-                                    )
-                                    ckc = {f"c{i}": f"child{i}" for i in range(1, 51)}
-                                    p2 = {}
-                                    for i in ed:
-                                        et += 1
-                                        if "s:" == i.lower()[:2]:
-                                            p2[et] = ("space", "\n")
-                                        elif "p:" == i.lower()[:2]:
-                                            if i.partition(":")[
-                                                2
-                                            ].isspace() or not bool(
-                                                i.partition(":")[2]
-                                            ):
-                                                raise Exception(
-                                                    "Parent cannot be empty!"
-                                                )
-                                            else:
-                                                p2[et] = (
-                                                    "parent",
-                                                    i[2:].removeprefix(" "),
-                                                )
-                                        elif i.lower().partition(":")[0] in list(ckc):
-                                            if i.partition(":")[2].isspace():
-                                                p2[et] = (
-                                                    ckc[i.partition(":")[0].lower()],
-                                                    i.partition(":")[2],
-                                                )
-                                            elif bool(i.partition(":")[2]):
-                                                p2[et] = (
-                                                    ckc[i.partition(":")[0].lower()],
-                                                    i.partition(":")[2].removeprefix(
-                                                        " "
-                                                    ),
-                                                )
-                                    if len(ed) != len(p2):
-                                        raise Exception("Not Editable!")
-                                    with tv(self.filename) as tvg:
-                                        combi = iter(
-                                            (dict(tvg.insighttree()) | p2).values()
-                                        )
-                                        tvg.fileread(combi)
-                                    del tvg, et, ed, ckc, p2, combi
-                            else:
+                        self.store = self.text.get("1.0", END)
+                        if self.checkfile() and self.nonetype():
+                            if self.editorsel:
+                                stor = self.editorsel
                                 ed = tuple(i for i in self.store[:-1].split("\n") if i)
-                                et = -1
                                 ckc = {f"c{i}": f"child{i}" for i in range(1, 51)}
+                                et = stor[0]
                                 p2 = {}
+                                p1 = None
+                                p3 = None
                                 for i in ed:
                                     et += 1
                                     if "s:" == i.lower()[:2]:
@@ -2879,7 +2728,10 @@ class TreeViewGui:
                                         ):
                                             raise Exception("Parent cannot be empty!")
                                         else:
-                                            p2[et] = ("parent", i[2:].removeprefix(" "))
+                                            p2[et] = (
+                                                "parent",
+                                                i[2:].removeprefix(" "),
+                                            )
                                     elif i.lower().partition(":")[0] in list(ckc):
                                         if i.partition(":")[2].isspace():
                                             p2[et] = (
@@ -2894,14 +2746,97 @@ class TreeViewGui:
                                 if len(ed) != len(p2):
                                     raise Exception("Not Editable!")
                                 with tv(self.filename) as tvg:
-                                    tvg.fileread(iter(p2.values()))
-                                del tvg, ed, et, ckc, p2
-                            self.text.config(state=DISABLED)
-                            self.disab(dis=False)
-                            self.spaces()
-                            if self.editorsel:
-                                self.text.see(f"{self.editorsel[0]}.0")
-                                self.editorsel = None
+                                    p1 = islice(tvg.insighttree(), 0, stor[0])
+                                    if stor[1] < tvg.getdatanum() - 1:
+                                        p3 = islice(
+                                            tvg.insighttree(),
+                                            stor[1],
+                                            tvg.getdatanum(),
+                                        )
+                                    if p3:
+                                        p3 = tuple(v for v in dict(p3).values())
+                                        p3 = {et + j + 1: p3[j] for j in range(len(p3))}
+                                        combi = iter((dict(p1) | p2 | p3).values())
+                                    else:
+                                        combi = iter((dict(p1) | p2).values())
+                                    tvg.fileread(combi)
+                                del stor, tvg, p1, ed, ckc, et, p2, combi, p3
+                            else:
+                                et = self.listb.size()
+                                ed = tuple(i for i in self.store[:-1].split("\n") if i)
+                                ckc = {f"c{i}": f"child{i}" for i in range(1, 51)}
+                                p2 = {}
+                                for i in ed:
+                                    et += 1
+                                    if "s:" == i.lower()[:2]:
+                                        p2[et] = ("space", "\n")
+                                    elif "p:" == i.lower()[:2]:
+                                        if i.partition(":")[2].isspace() or not bool(
+                                            i.partition(":")[2]
+                                        ):
+                                            raise Exception("Parent cannot be empty!")
+                                        else:
+                                            p2[et] = (
+                                                "parent",
+                                                i[2:].removeprefix(" "),
+                                            )
+                                    elif i.lower().partition(":")[0] in list(ckc):
+                                        if i.partition(":")[2].isspace():
+                                            p2[et] = (
+                                                ckc[i.partition(":")[0].lower()],
+                                                i.partition(":")[2],
+                                            )
+                                        elif bool(i.partition(":")[2]):
+                                            p2[et] = (
+                                                ckc[i.partition(":")[0].lower()],
+                                                i.partition(":")[2].removeprefix(" "),
+                                            )
+                                if len(ed) != len(p2):
+                                    raise Exception("Not Editable!")
+                                with tv(self.filename) as tvg:
+                                    combi = iter(
+                                        (dict(tvg.insighttree()) | p2).values()
+                                    )
+                                    tvg.fileread(combi)
+                                del tvg, et, ed, ckc, p2, combi
+                        else:
+                            ed = tuple(i for i in self.store[:-1].split("\n") if i)
+                            et = -1
+                            ckc = {f"c{i}": f"child{i}" for i in range(1, 51)}
+                            p2 = {}
+                            for i in ed:
+                                et += 1
+                                if "s:" == i.lower()[:2]:
+                                    p2[et] = ("space", "\n")
+                                elif "p:" == i.lower()[:2]:
+                                    if i.partition(":")[2].isspace() or not bool(
+                                        i.partition(":")[2]
+                                    ):
+                                        raise Exception("Parent cannot be empty!")
+                                    else:
+                                        p2[et] = ("parent", i[2:].removeprefix(" "))
+                                elif i.lower().partition(":")[0] in list(ckc):
+                                    if i.partition(":")[2].isspace():
+                                        p2[et] = (
+                                            ckc[i.partition(":")[0].lower()],
+                                            i.partition(":")[2],
+                                        )
+                                    elif bool(i.partition(":")[2]):
+                                        p2[et] = (
+                                            ckc[i.partition(":")[0].lower()],
+                                            i.partition(":")[2].removeprefix(" "),
+                                        )
+                            if len(ed) != len(p2):
+                                raise Exception("Not Editable!")
+                            with tv(self.filename) as tvg:
+                                tvg.fileread(iter(p2.values()))
+                            del tvg, ed, et, ckc, p2
+                        self.text.config(state=DISABLED)
+                        self.disab(dis=False)
+                        self.spaces()
+                        if self.editorsel:
+                            self.text.see(f"{self.editorsel[0]}.0")
+                            self.editorsel = None
                     else:
                         self.text.config(state=DISABLED)
                         self.disab(dis=False)
@@ -3267,6 +3202,7 @@ class TreeViewGui:
 
             err = None
 
+            @excp(2, DEFAULTFILE)
             def calc(event=None):
                 nonlocal err
                 try:
@@ -3284,6 +3220,7 @@ class TreeViewGui:
                         err = 1
                     messagebox.showerror("Error Message", e)
 
+            @excp(2, DEFAULTFILE)
             def utilins(lab: str):
                 gtx = (
                     self.text.get(
@@ -3327,6 +3264,7 @@ class TreeViewGui:
                                 f" {lab}",
                             )
 
+            @excp(2, DEFAULTFILE)
             def updatelab():
                 try:
                     ms = None
@@ -3340,6 +3278,7 @@ class TreeViewGui:
                 finally:
                     del ms, gw
 
+            @excp(2, DEFAULTFILE)
             def insert():
                 if isinstance(lab["text"], int | float):
                     updatelab()
