@@ -98,6 +98,26 @@ main()
     * **[@Python-Markdown](https://github.com/Python-Markdown/markdown)**
     * **[@facelessuser](https://github.com/facelessuser/pymdown-extensions)**
 
+* ### **Folding**
+
+  * **Now user can hide childs with folding functions**
+    * **Cand hide all childs or selected childs**
+    * **Even when childs are hidden, the other functions still working, unlike in "Hidden mode"**
+  * **3 buttons added to TVG**
+    * **Fold Childs**
+      * **Will fold all childs**
+    * **Fold selected**
+      * **Will fold selected childs**
+      * **Use "Shift" button to select massively, and "Option" button to select differently or unselect**
+    * **Unfold**
+      * **To unhide all**
+  * **TAKE NOTICE:**
+    * **Fold selection will retain when changing file, but not for fold all childs**
+    * **Once Unfold, the retain selection will be erased as well**
+  * **The difference between Fold and Hidden mode**
+    * **Fold only hide childs and Hidden mode, hide parents and their childs**
+    * **In fold all other functions working properly and in Hidden mode, all other functions are freeze**
+
 ## Changes
 
 * **Tutorial TVG.pdf press: <Ctrl+F1> or <fn+F1> in MacOS**
@@ -179,6 +199,7 @@ main()
     * **Markdown will wrapped the text when insert**
     * **Only for B, I, U, S, L, SP, and SB (Bold, Italic, Underline, Strikethrough, Link hypertext website, Superscript, and Subscript)**
   * **Inserting markdown will wrapping selection text**
+
 * **In Editor**
   * **Function for convert has been deleted**
     * **There only one editor mode, which using the specific format**
@@ -199,6 +220,15 @@ main()
       ```
 
     * **For add-on TVG has another format please click -> [NEW](https://github.com/kakkarja/FreeTVG#new)**
+* **To get the new functions "Fold"**
+
+  ```Terminal
+  # pre-release
+
+  pip install FreeTVG-karjakak==3.0.0rc1
+  ```
+  
+* **Printing will fill the background and foreground according to the text editor background and foreground**
 
 ![TVG](/Pics/TVG.png)
 

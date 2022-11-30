@@ -128,6 +128,9 @@ class TreeViewGui:
         self.root.bind_all("<Control-Key-g>", self.fcsent)
         self.root.bind_all("<Control-Key-question>", self.fcsent)
         self.root.bind_all("<Shift-Return>", self.inenter)
+        self.root.bind_all("<Control-Shift-F>", self.fcsent)
+        self.root.bind_all("<Control-Shift-S>", self.fcsent)
+        self.root.bind_all("<Control-Shift-U>", self.fcsent)
 
         if self.plat.startswith("win"):
             self.root.bind_all("<Control-Key-F1>", self.fcsent)
@@ -289,43 +292,48 @@ class TreeViewGui:
         self.bframe = ttk.Frame(self.root)
         self.bframe.pack(side=TOP, fill="x")
         self.button5 = ttk.Button(
-            self.bframe, text="Insert", width=3, command=self.insertwords
+            self.bframe, text="Insert", width=1, command=self.insertwords
         )
         self.button5.pack(side=LEFT, pady=(2, 3), padx=(1, 1), fill="x", expand=1)
         self.button5.propagate(0)
         self.bt["button5"] = self.button5
         self.button6 = ttk.Button(
-            self.bframe, text="Write", width=3, command=self.writefile
+            self.bframe, text="Write", width=1, command=self.writefile
         )
         self.button6.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button6"] = self.button6
         self.button9 = ttk.Button(
-            self.bframe, text="Delete", width=3, command=self.deleterow
+            self.bframe, text="Delete", width=1, command=self.deleterow
         )
         self.button9.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button9"] = self.button9
         self.button7 = ttk.Button(
-            self.bframe, text="BackUp", width=3, command=self.backup
+            self.bframe, text="BackUp", width=1, command=self.backup
         )
         self.button7.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button7"] = self.button7
         self.button8 = ttk.Button(
-            self.bframe, text="Load", width=3, command=self.loadbkp
+            self.bframe, text="Load", width=1, command=self.loadbkp
         )
         self.button8.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button8"] = self.button8
         self.button3 = ttk.Button(
-            self.bframe, text="Move Child", width=3, command=self.move_lr
+            self.bframe, text="Move Child", width=1, command=self.move_lr
         )
         self.button3.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button3"] = self.button3
         self.button16 = ttk.Button(
-            self.bframe, text="Change File", width=3, command=self.chgfile
+            self.bframe, text="Change File", width=1, command=self.chgfile
         )
         self.button16.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button16"] = self.button16
+        self.button33 = ttk.Button(
+            self.bframe, text="Fold Childs", width=1, command=self.fold_childs
+        )
+        self.button33.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
+        self.bt["button33"] = self.button33
         self.button17 = ttk.Button(
-            self.bframe, text="CPP", width=3, command=self.cmrows
+            self.bframe, text="CPP", width=1, command=self.cmrows
         )
         self.button17.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button17"] = self.button17
@@ -335,38 +343,43 @@ class TreeViewGui:
         self.frb1 = ttk.Frame(self.root)
         self.frb1.pack(fill=X)
         self.button10 = ttk.Button(
-            self.frb1, text="Insight", width=3, command=self.insight
+            self.frb1, text="Insight", width=1, command=self.insight
         )
         self.button10.pack(side=LEFT, pady=(0, 3), padx=(1, 1), fill="x", expand=1)
         self.bt["button10"] = self.button10
         self.button13 = ttk.Button(
-            self.frb1, text="Arrange", width=3, command=self.spaces
+            self.frb1, text="Arrange", width=1, command=self.spaces
         )
         self.button13.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button13"] = self.button13
-        self.button11 = ttk.Button(self.frb1, text="Paste", width=3, command=self.copas)
+        self.button11 = ttk.Button(self.frb1, text="Paste", width=1, command=self.copas)
         self.button11.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button11"] = self.button11
         self.button4 = ttk.Button(
-            self.frb1, text="Checked", width=3, command=self.checked
+            self.frb1, text="Checked", width=1, command=self.checked
         )
         self.button4.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button4"] = self.button4
-        self.button = ttk.Button(self.frb1, text="Up", width=3, command=self.moveup)
+        self.button = ttk.Button(self.frb1, text="Up", width=1, command=self.moveup)
         self.button.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button"] = self.button
         self.button2 = ttk.Button(
-            self.frb1, text="Down", width=3, command=self.movedown
+            self.frb1, text="Down", width=1, command=self.movedown
         )
         self.button2.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button2"] = self.button2
         self.button14 = ttk.Button(
-            self.frb1, text="Hide Parent", width=3, command=self.hiddenchl
+            self.frb1, text="Hide Parent", width=1, command=self.hiddenchl
         )
         self.button14.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button14"] = self.button14
+        self.button34 = ttk.Button(
+            self.frb1, text="Fold selected", width=1, command=self.fold_selected
+        )
+        self.button34.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
+        self.bt["button34"] = self.button34
         self.button15 = ttk.Button(
-            self.frb1, text="Clear hide", width=3, command=self.delhid
+            self.frb1, text="Clear hide", width=1, command=self.delhid
         )
         self.button15.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
         self.bt["button15"] = self.button15
@@ -376,40 +389,45 @@ class TreeViewGui:
         self.frb2 = ttk.Frame(self.root)
         self.frb2.pack(fill=X)
         self.button23 = ttk.Button(
-            self.frb2, text="Create file", width=3, command=self.createf
+            self.frb2, text="Create file", width=1, command=self.createf
         )
         self.button23.pack(side=LEFT, pady=(0, 2), padx=(1, 1), fill="x", expand=1)
         self.bt["button23"] = self.button23
         self.button24 = ttk.Button(
-            self.frb2, text="Editor", width=3, command=self.editor
+            self.frb2, text="Editor", width=1, command=self.editor
         )
         self.button24.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button24"] = self.button24
         self.button25 = ttk.Button(
-            self.frb2, text="Un/Wrap", width=3, command=self.wrapped
+            self.frb2, text="Un/Wrap", width=1, command=self.wrapped
         )
         self.button25.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button25"] = self.button25
-        self.button27 = ttk.Button(self.frb2, text="Ex", width=3, command=self.editex)
+        self.button27 = ttk.Button(self.frb2, text="Ex", width=1, command=self.editex)
         self.button27.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button27"] = self.button27
         self.button28 = ttk.Button(
-            self.frb2, text="Template", width=3, command=self.temp
+            self.frb2, text="Template", width=1, command=self.temp
         )
         self.button28.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button28"] = self.button28
         self.button20 = ttk.Button(
-            self.frb2, text="Date-Time", width=3, command=self.dattim
+            self.frb2, text="Date-Time", width=1, command=self.dattim
         )
         self.button20.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button20"] = self.button20
         self.button19 = ttk.Button(
-            self.frb2, text="Look Up", width=3, command=self.lookup
+            self.frb2, text="Look Up", width=1, command=self.lookup
         )
         self.button19.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button19"] = self.button19
+        self.button35 = ttk.Button(
+            self.frb2, text="Unfold", width=1, command=self.unfolding
+        )
+        self.button35.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
+        self.bt["button35"] = self.button35
         self.button12 = ttk.Button(
-            self.frb2, text="Printing", width=3, command=self.saveaspdf
+            self.frb2, text="Printing", width=1, command=self.saveaspdf
         )
         self.button12.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
         self.bt["button12"] = self.button12
@@ -420,17 +438,17 @@ class TreeViewGui:
 
         if self._addon:
             self.button30 = ttk.Button(
-                self.bframe, text="Sum-Up", width=3, command=self.gettotsum
+                self.bframe, text="Sum-Up", width=1, command=self.gettotsum
             )
             self.button30.pack(side=LEFT, pady=(2, 3), padx=(0, 1), fill="x", expand=1)
             self.bt["button30"] = self.button30
             self.button31 = ttk.Button(
-                self.frb1, text="Pie-Chart Graph", width=3, command=self.createpg
+                self.frb1, text="Pie-Chart", width=1, command=self.createpg
             )
             self.button31.pack(side=LEFT, pady=(0, 3), padx=(0, 1), fill="x", expand=1)
             self.bt["button31"] = self.button31
             self.button32 = ttk.Button(
-                self.frb2, text="Del Total", width=3, command=self.deltots
+                self.frb2, text="Del Total", width=1, command=self.deltots
             )
             self.button32.pack(side=LEFT, pady=(0, 2), padx=(0, 1), fill="x", expand=1)
             self.bt["button32"] = self.button32
@@ -556,6 +574,9 @@ class TreeViewGui:
                 fr.pack_forget()
             del frm
 
+        if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
+            self.fold = True
+
         self.ldmode()
 
         self.tpl = None
@@ -608,17 +629,20 @@ class TreeViewGui:
             "TM": "Trade Mark for Markdown",
             "CR": "Copy-Right for Markdown",
             "R": "Right for Markdown",
+            "Fold Childs": "Folding all childs",
+            "Fold selected": "Folding selected rows",
+            "Unfold": "Unfolding selected or all childs",
         }
 
         self.ew = None
         if self._addon:
             on = {
                 "Sum-Up": "Summing all add-on",
-                "Pie-Chart Graph": "Graph base on all sums",
+                "Pie-Chart": "Graph base on all sums",
                 "Del Total": "Delete all totals",
             }
             self.scribe = self.scribe | on
-            self.ew = ["Sum-Up", "Pie-Chart Graph", "Del Total", "child", "R"]
+            self.ew = list(on) + ["child", "R"]
             if os.path.exists(self.glop.absolute().joinpath("sumtot.tvg")):
                 self.sumtot = True
                 os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
@@ -973,6 +997,12 @@ class TreeViewGui:
                 self.send_reg()
             elif event.keysym == "F1":
                 self.tutorial()
+            elif event.keysym == "F":
+                self.fold_childs()
+            elif event.keysym == "U":
+                self.unfolding()
+            elif event.keysym == "S":
+                self.fold_selected()
         else:
             if (
                 str(self.bt["button17"].cget("state")) == "normal"
@@ -989,6 +1019,11 @@ class TreeViewGui:
                 and event.keysym == "7"
             ):
                 self.editor()
+            elif (
+                str(self.bt["button34"].cget("state")) == "normal"
+                and event.keysym == "S"
+            ):
+                self.fold_selected()
         del fcom
 
     def radiobut(self, event=None):
@@ -1053,6 +1088,18 @@ class TreeViewGui:
         self.listb.yview_moveto(str(a))
         del a
 
+    def _indconv(self, n: int):
+        return str(float(n)), str(float(n + 1))
+
+    def _ckfoldtvg(self):
+        pth = self.glop.absolute().joinpath("fold.tvg")
+        if os.path.exists(pth):
+            with open(pth, "rb") as cur:
+                gt = ast.literal_eval(cur.read().decode())
+            return gt
+        else:
+            return None
+
     def _prettyv(self, tx):
         """Wrapping mode view purpose"""
 
@@ -1063,20 +1110,31 @@ class TreeViewGui:
             text_font = font.Font(self.root, font=nf, name=nf, exists=False)
         g = re.compile(r"\s+")
         em = text_font.measure(" ")
-        for _, v in tx:
+        gt = self._ckfoldtvg()
+        for n, v in tx:
             gr = g.match(v)
             if gr and gr.span()[1] > 1:
                 if str(gr.span()[1]) not in self.text.tag_names():
                     bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
                     self.text.tag_configure(
-                        f"{gr.span()[1]}",
-                        lmargin1=em,
-                        lmargin2=em + bullet_width,
+                        f"{gr.span()[1]}", lmargin1=em, lmargin2=em + bullet_width
                     )
                 self.text.insert(END, v, f"{gr.span()[1]}")
+                if hasattr(self, "fold"):
+                    gr = self._indconv(n + 1)
+                    if gt:
+                        if n in gt:
+                            self.text.tag_add(gr[0], *gr)
+                            self.text.tag_config(gr[0], elide=self.fold)
+                        else:
+                            self.text.tag_add(gr[0], *gr)
+                            self.text.tag_config(gr[0], elide=False)
+                    else:
+                        self.text.tag_add(gr[0], *gr)
+                        self.text.tag_config(gr[0], elide=self.fold)
             else:
                 self.text.insert(END, v)
-        del tx, nf, text_font, g, em, gr
+        del tx, nf, text_font, g, em, gt, gr
 
     def view(self, event=None):
         """Viewing engine for most module fuction"""
@@ -1142,6 +1200,7 @@ class TreeViewGui:
                 os.chdir(self.glop.joinpath(self.glop.parent, fi))
                 self.filename = fi.rpartition("_")[0]
                 self.glop = Path(self.glop.joinpath(self.glop.parent, fi))
+                self._chkfoldatt()
                 self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                 if os.path.exists(self.glop.joinpath(f"{self.filename}.txt")):
                     if not os.path.exists(
@@ -1835,6 +1894,29 @@ class TreeViewGui:
                         self.listb.selection_clear(0, END)
                         self.infobar()
 
+    def _utilspdf(self):
+
+        try:
+            gttx = []
+            line = None
+            cg = None
+            if hasattr(self, "fold"):
+                for i in range(1, self.listb.size() + 1):
+                    line = self.text.get(f"{float(i)}", f"{float(i)} lineend")
+                    if line:
+                        if not line[0].isspace():
+                            gttx.append(line + "\n")
+                        else:
+                            if not int(
+                                cg := self.text.tag_cget(f"{float(i)}", "elide")
+                            ):
+                                gttx.append(line + "\n")
+                return "".join(gttx)
+            else:
+                return self.text.get("1.0", END)[:-1]
+        finally:
+            del gttx, line, cg
+
     def saveaspdf(self):
         """Show to browser and directly print as pdf or direct printing"""
 
@@ -1861,21 +1943,23 @@ class TreeViewGui:
             ask = messagebox.askyesno(
                 "TreeViewGui", "Add checkboxes?", parent=self.root
             )
-            if f"{self.filename}_hid.json" in os.listdir():
-                if ask:
-                    convhtml(
-                        self.text.get("1.0", END)[:-1],
-                        f"{self.filename}",
-                        fon,
-                        ckb=True,
-                    )
-                else:
-                    convhtml(self.text.get("1.0", END)[:-1], f"{self.filename}", fon)
+            if ask:
+                convhtml(
+                    self._utilspdf(),
+                    self.filename,
+                    fon,
+                    self.text.cget("background")[1:],
+                    self.text.cget("foreground"),
+                    ckb=True,
+                )
             else:
-                if ask:
-                    convhtml(f"{self.filename}.txt", f"{self.filename}", fon, ckb=True)
-                else:
-                    convhtml(f"{self.filename}.txt", f"{self.filename}", fon)
+                convhtml(
+                    self._utilspdf(),
+                    self.filename,
+                    fon,
+                    self.text.cget("background")[1:],
+                    self.text.cget("foreground"),
+                )
             del px, ck, sty, add, ask, fon
 
     def nonetype(self):
@@ -2011,83 +2095,90 @@ class TreeViewGui:
 
         import json
 
-        if self.checkfile() and self.nonetype():
-            if not os.path.exists(f"{self.filename}_hid.json"):
-                if self.listb.cget("selectmode") == "browse":
-                    self.info.set("Hidden Mode")
-                    self.disab("listb", "button14", "text")
-                    self.listb.config(selectmode=MULTIPLE)
-                else:
-                    if self.listb.curselection():
-                        ask = (
-                            messagebox.askyesno(
-                                "TreeViewGui",
-                                '"Yes" to hide selected, "No" reverse hide instead!',
-                                parent=self.root,
+        if hasattr(self, "fold"):
+            messagebox.showinfo("TreeViewGui", "Please unfolding first!")
+        else:
+            if self.checkfile() and self.nonetype():
+                if not os.path.exists(f"{self.filename}_hid.json"):
+                    if self.listb.cget("selectmode") == "browse":
+                        self.info.set("Hidden Mode")
+                        self.disab("listb", "button14", "text")
+                        self.listb.config(selectmode=MULTIPLE)
+                    else:
+                        if self.listb.curselection():
+                            ask = (
+                                messagebox.askyesno(
+                                    "TreeViewGui",
+                                    '"Yes" to hide selected, "No" reverse hide instead!',
+                                    parent=self.root,
+                                )
+                                if chs is None
+                                else chs
                             )
-                            if chs is None
-                            else chs
-                        )
-                        allrows = [int(i) for i in self.listb.curselection()]
-                        rows = {
-                            n: pc.split(":")[1].strip()
-                            for n, pc in enumerate(self.listb.get(0, END))
-                        }
-                        hd = {}
-                        num = 0
-                        for row in allrows:
-                            num += 1
-                            if row in rows:
-                                if row < len(rows) - 1:
-                                    if (
-                                        rows[row] == "parent"
-                                        and "child" in rows[row + 1]
-                                    ):
-                                        srow = row + 1
-                                        while True:
-                                            if srow < len(rows):
-                                                if rows[srow] == "space":
+                            allrows = [int(i) for i in self.listb.curselection()]
+                            rows = {
+                                n: pc.split(":")[1].strip()
+                                for n, pc in enumerate(self.listb.get(0, END))
+                            }
+                            hd = {}
+                            num = 0
+                            for row in allrows:
+                                num += 1
+                                if row in rows:
+                                    if row < len(rows) - 1:
+                                        if (
+                                            rows[row] == "parent"
+                                            and "child" in rows[row + 1]
+                                        ):
+                                            srow = row + 1
+                                            while True:
+                                                if srow < len(rows):
+                                                    if rows[srow] == "space":
+                                                        break
+                                                    srow += 1
+                                                else:
+                                                    srow -= 1
                                                     break
-                                                srow += 1
-                                            else:
-                                                srow -= 1
-                                                break
-                                        hd[num] = (row, srow)
+                                            hd[num] = (row, srow)
+                                        else:
+                                            if rows[row] == "parent":
+                                                hd[num] = (row, row + 1)
                                     else:
                                         if rows[row] == "parent":
-                                            hd[num] = (row, row + 1)
+                                            hd[num] = (row, row)
+                            if hd:
+                                if ask:
+                                    rev = {"reverse": False}
+                                    with open(
+                                        f"{self.filename}_hid.json", "w"
+                                    ) as jfile:
+                                        json.dump(hd | rev, jfile)
+                                    self.hidform()
                                 else:
-                                    if rows[row] == "parent":
-                                        hd[num] = (row, row)
-                        if hd:
-                            if ask:
-                                rev = {"reverse": False}
-                                with open(f"{self.filename}_hid.json", "w") as jfile:
-                                    json.dump(hd | rev, jfile)
-                                self.hidform()
+                                    rev = {"reverse": True}
+                                    with open(
+                                        f"{self.filename}_hid.json", "w"
+                                    ) as jfile:
+                                        json.dump(hd | rev, jfile)
+                                    self.hidform()
+                                del ask, rev
                             else:
-                                rev = {"reverse": True}
-                                with open(f"{self.filename}_hid.json", "w") as jfile:
-                                    json.dump(hd | rev, jfile)
-                                self.hidform()
-                            del ask, rev
-                        else:
-                            self.listb.selection_clear(0, END)
-                            messagebox.showinfo(
-                                "TreeViewGui",
-                                "Please choose Parent only!",
-                                parent=self.root,
-                            )
-                        del allrows, rows, hd, num
-                    self.disab(dis=False)
-                    self.listb.config(selectmode=BROWSE)
-                    self.infobar()
-            else:
-                messagebox.showinfo(
-                    "TreeViewGui",
-                    "Hidden parent is recorded, please clear all first!",
-                    parent=self.root,
-                )
+                                self.listb.selection_clear(0, END)
+                                messagebox.showinfo(
+                                    "TreeViewGui",
+                                    "Please choose Parent only!",
+                                    parent=self.root,
+                                )
+                            del allrows, rows, hd, num
+                        self.disab(dis=False)
+                        self.listb.config(selectmode=BROWSE)
+                        self.infobar()
+                else:
+                    messagebox.showinfo(
+                        "TreeViewGui",
+                        "Hidden parent is recorded, please clear all first!",
+                        parent=self.root,
+                    )
 
     def delhid(self, event=None):
         """Deleting accordingly each position in json file, or can delete the file"""
@@ -2323,6 +2414,7 @@ class TreeViewGui:
                 self.glop.parent.joinpath(mkd).mkdir()
                 os.chdir(self.glop.parent.joinpath(mkd))
                 self.glop = self.glop.parent.joinpath(mkd)
+                self._ckfoldtvg()
                 self.filename = fl.title()
                 self.root.title(f"{self.glop.absolute().joinpath(self.filename)}.txt")
                 self.text.config(state=NORMAL)
@@ -2697,7 +2789,6 @@ class TreeViewGui:
                     "button24",
                     "button28",
                     "button20",
-                    "button29",
                     "button19",
                     "text",
                 ]
@@ -2925,6 +3016,13 @@ class TreeViewGui:
                 thm.write(color)
         del color, rgb, path, wr
 
+    def _deltags(self):
+        for i in self.text.tag_names():
+            for x in self.text.tag_ranges(i):
+                if self.text.index(x) in (tnt := self.text.tag_nextrange(i, x, END)):
+                    self.text.tag_remove(i, *tnt)
+        self.text.tag_delete(*self.text.tag_names())
+
     def clb(self, event, wr=True):
         """Setting font for text and listbox"""
 
@@ -2952,9 +3050,7 @@ class TreeViewGui:
                 else:
                     f = event[: (f.span()[0])] + "40" + event[(f.span()[1]) :]
 
-        for i in self.text.tag_names():
-            self.text.tag_remove(i, "1.0", END)
-        self.text.tag_delete(*self.text.tag_names())
+        self._deltags()
         self.text["font"] = f
         if wr:
             if fl != self.listb["font"]:
@@ -3087,24 +3183,31 @@ class TreeViewGui:
                 case False if hasattr(self, "sumtot"):
                     match os.path.exists(f"{self.filename}_hid.json"):
                         case False:
-                            idx = sa.getidx(False)
-                            tot = sa.lumpsum()
-                            for i in idx:
-                                self.listb.select_set(i)
-                            self.hiddenchl(chs=False)
-                            self.text.config(state=NORMAL)
-                            if (
-                                self.text.get(f"{END} - 2 lines", END)
-                                .strip()
-                                .startswith("-TOTAL")
-                            ):
-                                self.text.insert(END, f"\nTOTAL SUMS = {tot}")
+                            if not hasattr(self, "fold"):
+                                idx = sa.getidx(False)
+                                tot = sa.lumpsum()
+                                for i in idx:
+                                    self.listb.select_set(i)
+                                self.hiddenchl(chs=False)
+                                self.text.config(state=NORMAL)
+                                if (
+                                    self.text.get(f"{END} - 2 lines", END)
+                                    .strip()
+                                    .startswith("-TOTAL")
+                                ):
+                                    self.text.insert(END, f"\nTOTAL SUMS = {tot}")
+                                else:
+                                    self.text.insert(END, f"TOTAL SUMS = {tot}")
+                                self.text.config(state=DISABLED)
+                                del idx, tot
                             else:
-                                self.text.insert(END, f"TOTAL SUMS = {tot}")
-                            self.text.config(state=DISABLED)
-                            del idx, tot
+                                messagebox.showwarning(
+                                    "TreeViewGui",
+                                    "Please unfolding first!",
+                                    parent=self.root,
+                                )
                         case True:
-                            messagebox.showinfo(
+                            messagebox.showwarning(
                                 "TreeViewGui",
                                 "Hidden parent is recorded, please clear all first!",
                                 parent=self.root,
@@ -3362,6 +3465,55 @@ class TreeViewGui:
                 messagebox.showinfo(
                     "TreeViewGui", "Only work for Editor mode", parent=self.root
                 )
+
+    def _chkfoldatt(self):
+        if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
+            if not hasattr(self, "fold"):
+                self.__setattr__("fold", True)
+        else:
+            if hasattr(self, "fold"):
+                self.__delattr__("fold")
+
+    def fold_childs(self):
+        """Folding all childs"""
+
+        self.hidcheck()
+        if self.unlock:
+            if not hasattr(self, "fold"):
+                self.__setattr__("fold", True)
+            self.view()
+
+    def fold_selected(self):
+        """Folding selected"""
+
+        self.hidcheck()
+        if self.unlock:
+            if self.listb.cget("selectmode") == BROWSE:
+                self.listb.config(selectmode=EXTENDED)
+                self.disab("button34", "listb")
+                if not hasattr(self, "fold"):
+                    self.__setattr__("fold", True)
+            else:
+                if self.listb.curselection():
+                    with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
+                        cur.write(str(self.listb.curselection()).encode())
+                    self.view()
+                self.disab(dis=False)
+                self.listb.config(selectmode=BROWSE)
+
+    def unfolding(self):
+        """Unfolding selected and childs"""
+
+        self.hidcheck()
+        if self.unlock:
+            if hasattr(self, "fold"):
+                self.__delattr__("fold")
+
+            if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
+                os.remove(self.glop.absolute().joinpath("fold.tvg"))
+
+            self._deltags()
+            self.view()
 
 
 @excp(m=2, filenm=DEFAULTFILE)

@@ -25,17 +25,22 @@ extensions = [
 extension_configs = {"pymdownx.keys": {"strict": True}}
 
 
-def convhtml(text: str, filename: str, font: str, ckb: bool = False):
+def convhtml(
+    text: str,
+    filename: str,
+    font: str,
+    bg: str = None,
+    fg: str = None,
+    ckb: bool = False,
+):
     # Converting your TVG to html and printable directly from browser.
 
     try:
-        if os.path.isfile(text):
-            with open(text) as rdf:
-                gettext = rdf.readlines()
-        else:
-            gettext = text.split("\n")
-
+        gettext = text.split("\n")
         tohtml = []
+        background = bg if bg else "gold"
+        foreground = fg if fg else "black"
+
         for i in gettext:
             if i != "\n":
                 sp = re.match(r"\s+", i)
@@ -58,8 +63,10 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
         )
         setfont = (
             "body { "
-            + f"""background-color: gold;
-  font:{font};"""
+            + f"""font: {font};
+            background-color: #{background};
+            color: {foreground};
+            """
             + " }"
         )
         checkbut = """.task-list-item {
@@ -134,5 +141,22 @@ def convhtml(text: str, filename: str, font: str, ckb: bool = False):
             os.startfile(f"{filename}.html")
         else:
             os.system(f'open "{filename}.html"')
+        del (
+            text,
+            filename,
+            font,
+            bg,
+            fg,
+            gettext,
+            tohtml,
+            background,
+            foreground,
+            chg,
+            setfont,
+            checkbut,
+            cssstyle,
+            printed,
+            nxt,
+        )
     except Exception as e:
         raise e
