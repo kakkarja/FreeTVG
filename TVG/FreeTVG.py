@@ -618,6 +618,8 @@ class TreeViewGui:
             "I": "Italic for Markdown",
             "U": "Underline for Markdown",
             "S": "Strikethrough for Markdown",
+            "M": "Marking highlight for markdown",
+            "SA": "Special attribute for markdown",
             "L": "Link url for Markdown",
             "SP": "Super-script for Markdown",
             "SB": "Sub-script for Markdown",
@@ -702,22 +704,21 @@ class TreeViewGui:
         elif self.tmode == "light":
             self.stl.configure(
                 ".",
-                background="#eeebe7",
+                background=oribg,
                 foreground=orifg,
                 fieldbackground=oribg,
                 insertcolor=orifg,
-                troughcolor="#bab5ab",
+                troughcolor=oribg,
                 arrowcolor=orifg,
-                bordercolor="#9e9a91",
+                bordercolor=oribg,
             )
             self.stl.configure("TEntry", fieldbackground="white")
             self.stl.map(
                 "TCombobox",
-                foreground=[("focus", "black")],
                 fieldbackground=[
-                    ("focus", "white"),
+                    ("focus", "dark blue"),
                     ("readonly", oribg),
-                    ("disabled", oribg),
+                    ("disabled", "white"),
                 ],
                 background=[("active", "#eeebe7")],
             )
@@ -2689,6 +2690,8 @@ class TreeViewGui:
                 "I": "**",
                 "U": "^^^^",
                 "S": "~~~~",
+                "M": "====",
+                "SA": "++++",
                 "L": "[]()",
                 "SP": "^^",
                 "SB": "~~",
@@ -2715,7 +2718,7 @@ class TreeViewGui:
                     mk = None
                     match self.text.tag_ranges("sel"):
                         case tsel if tsel:
-                            if stb in ("B", "I", "U", "S", "L", "SP", "SB"):
+                            if stb in ("B", "I", "U", "S", "M", "SA", "L", "SP", "SB"):
                                 match len(mk := mdb[stb]):
                                     case 2:
                                         self.text.insert(SEL_FIRST, mk[:1])
@@ -2754,7 +2757,7 @@ class TreeViewGui:
             mdbut.pack(side=LEFT, padx=2, pady=(0, 2), fill=X, expand=1)
             mdbut.bind("<Enter>", storbut)
             self.rsv_frame = mdbut.winfo_parent()
-            for i in range(1, 15):
+            for i in range(1, 17):
                 mdbut = ttk.Button(self.mdframe, text=lmdb[i], width=1, command=insmd)
                 mdbut.pack(side=LEFT, padx=(0, 2), pady=(0, 2), fill=X, expand=1)
                 mdbut.bind("<Enter>", storbut)

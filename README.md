@@ -198,6 +198,7 @@ main()
   * **When dragging curssor with mouse/trackpad on text**
     * **Markdown will wrapped the text when insert**
     * **Only for B, I, U, S, L, SP, and SB (Bold, Italic, Underline, Strikethrough, Link hypertext website, Superscript, and Subscript)**
+      * **Add two more buttons M and SA (Marking highlight and Special Attribute)**
   * **Inserting markdown will wrapping selection text**
 
 * **In Editor**
@@ -225,10 +226,11 @@ main()
   ```Terminal
   # pre-release
 
-  pip install FreeTVG-karjakak==3.0.0rc1
+  pip install FreeTVG-karjakak==3.0.0rc2
   ```
   
 * **Printing will fill the background and foreground according to the text editor background and foreground**
+* **Fix little in light mode theme**
 
 ![TVG](/Pics/TVG.png)
 
