@@ -175,7 +175,7 @@ main()
 * **Found very little bug in Template**
   * **Has been fixed in 2.8.18**
 * **When send to email**
-  * **Markdown escape "\" will be deleted when send with default email ([F4/Ctrl+F4] send mail function)**
+  * **Markdown escape "\\" will be deleted when send with default email ([F4/Ctrl+F4] send mail function)**
   * **Email will be copied to default email app**
 * **Theme set globally according to system default theme**
   * **No longer active through function button (previously F3/Ctrl+F3 button)**
