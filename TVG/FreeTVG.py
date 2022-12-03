@@ -1878,22 +1878,25 @@ class TreeViewGui:
             gttx = []
             line = None
             cg = None
+            eldat = self._ckfoldtvg()
             if hasattr(self, "fold"):
                 for i in range(1, self.listb.size() + 1):
                     line = self.text.get(f"{float(i)}", f"{float(i)} lineend")
                     if line:
-                        if not line[0].isspace():
-                            gttx.append(line + "\n")
-                        else:
-                            if not int(
-                                cg := self.text.tag_cget(f"{float(i)}", "elide")
-                            ):
-                                gttx.append(line + "\n")
+                        match eldat:
+                            case eldat if eldat:
+                                if not line[0].isspace():
+                                    gttx.append(line + "\n")
+                                elif i - 1 not in eldat:
+                                    gttx.append(line + "\n")
+                            case _:
+                                if not line[0].isspace():
+                                    gttx.append(line + "\n")
                 return "".join(gttx)
             else:
                 return self.text.get("1.0", END)[:-1]
         finally:
-            del gttx, line, cg
+            del gttx, line, cg, eldat
 
     def saveaspdf(self):
         """Show to browser and directly print as pdf or direct printing"""
@@ -3474,9 +3477,6 @@ class TreeViewGui:
                             self.text.tag_add(idx[0], *idx)
                             self.text.tag_config(idx[0], elide=self.fold)
                             seen = n
-                        else:
-                            self.text.tag_add(idx[0], *idx)
-                            self.text.tag_config(idx[0], elide=False)
                     else:
                         self.text.tag_add(idx[0], *idx)
                         self.text.tag_config(idx[0], elide=self.fold)
