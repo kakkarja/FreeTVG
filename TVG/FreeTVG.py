@@ -1089,18 +1089,6 @@ class TreeViewGui:
         self.listb.yview_moveto(str(a))
         del a
 
-    def _indconv(self, n: int):
-        return str(float(n)), str(float(n + 1))
-
-    def _ckfoldtvg(self):
-        pth = self.glop.absolute().joinpath("fold.tvg")
-        if os.path.exists(pth):
-            with open(pth, "rb") as cur:
-                gt = ast.literal_eval(cur.read().decode())
-            return gt
-        else:
-            return None
-
     def _prettyv(self, tx):
         """Wrapping mode view purpose"""
 
@@ -1111,8 +1099,7 @@ class TreeViewGui:
             text_font = font.Font(self.root, font=nf, name=nf, exists=False)
         g = re.compile(r"\s+")
         em = text_font.measure(" ")
-        gt = self._ckfoldtvg()
-        for n, v in tx:
+        for _, v in tx:
             gr = g.match(v)
             if gr and gr.span()[1] > 1:
                 if str(gr.span()[1]) not in self.text.tag_names():
@@ -1121,21 +1108,10 @@ class TreeViewGui:
                         f"{gr.span()[1]}", lmargin1=em, lmargin2=em + bullet_width
                     )
                 self.text.insert(END, v, f"{gr.span()[1]}")
-                if hasattr(self, "fold"):
-                    gr = self._indconv(n + 1)
-                    if gt:
-                        if n in gt:
-                            self.text.tag_add(gr[0], *gr)
-                            self.text.tag_config(gr[0], elide=self.fold)
-                        else:
-                            self.text.tag_add(gr[0], *gr)
-                            self.text.tag_config(gr[0], elide=False)
-                    else:
-                        self.text.tag_add(gr[0], *gr)
-                        self.text.tag_config(gr[0], elide=self.fold)
             else:
                 self.text.insert(END, v)
-        del tx, nf, text_font, g, em, gt, gr
+            del gr
+        del tx, nf, text_font, g, em
 
     def view(self, event=None):
         """Viewing engine for most module fuction"""
@@ -1153,6 +1129,8 @@ class TreeViewGui:
             self.text.yview_moveto(1.0)
             self.listb.yview_moveto(1.0)
             del tvg
+            if hasattr(self, "fold"):
+                self.root.after(50, self.foldfun)
 
     def _sumchk(self):
         sumtot = SumAll(self.filename, sig="+")
@@ -3469,6 +3447,43 @@ class TreeViewGui:
                     "TreeViewGui", "Only work for Editor mode", parent=self.root
                 )
 
+    def _indconv(self, n: int):
+        return f"{float(n)}", f"{float(n + 1)}"
+
+    def _ckfoldtvg(self):
+        pth = self.glop.absolute().joinpath("fold.tvg")
+        if os.path.exists(pth):
+            with open(pth, "rb") as cur:
+                gt = ast.literal_eval(cur.read().decode())
+            return gt
+        else:
+            return None
+
+    def foldfun(self):
+        """For folding childs"""
+
+        if hasattr(self, "fold"):
+            gt = self._ckfoldtvg()
+            for n in range(1, self.listb.size() + 1):
+                idx = self._indconv(n)
+                if (
+                    tx := self.text.get(idx[0], f"{idx[0]} lineend + 1c")
+                ) != "\n" and tx[0].isspace():
+                    if gt:
+                        if n - 1 in gt:
+                            self.text.tag_add(idx[0], *idx)
+                            self.text.tag_config(idx[0], elide=self.fold)
+                        else:
+                            self.text.tag_add(idx[0], *idx)
+                            self.text.tag_config(idx[0], elide=False)
+                    else:
+                        self.text.tag_add(idx[0], *idx)
+                        self.text.tag_config(idx[0], elide=self.fold)
+                del idx, tx
+            del gt
+            self.text.yview_moveto(1.0)
+            self.listb.yview_moveto(1.0)
+
     def _chkfoldatt(self):
         if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
             if not hasattr(self, "fold"):
@@ -3484,7 +3499,7 @@ class TreeViewGui:
         if self.unlock:
             if not hasattr(self, "fold"):
                 self.__setattr__("fold", True)
-            self.view()
+            self.foldfun()
 
     def fold_selected(self):
         """Folding selected"""
@@ -3500,8 +3515,9 @@ class TreeViewGui:
                 if self.listb.curselection():
                     with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
                         cur.write(str(self.listb.curselection()).encode())
-                    self.view()
+                    self.foldfun()
                 self.disab(dis=False)
+                self.listb.selection_clear(0, END)
                 self.listb.config(selectmode=BROWSE)
 
     def unfolding(self):

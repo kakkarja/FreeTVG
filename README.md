@@ -231,6 +231,10 @@ main()
   
 * **Printing will fill the background and foreground according to the text editor background and foreground**
 * **Fix little in light mode theme**
+* **Enhancing Fold**
+  * **Making fold running faster in huge records**
+  * **TAKE NOTE:**
+    * **Changing file while app running, may slow down fold (only for huge records)**
 
 ![TVG](/Pics/TVG.png)
 
