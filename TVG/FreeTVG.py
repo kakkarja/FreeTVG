@@ -1092,6 +1092,7 @@ class TreeViewGui:
     def _prettyv(self, tx):
         """Wrapping mode view purpose"""
 
+        self._deltags()
         nf = str(self.text.cget("font"))
         try:
             text_font = font.Font(self.root, font=nf, name=nf, exists=True)
@@ -1102,11 +1103,10 @@ class TreeViewGui:
         for _, v in tx:
             gr = g.match(v)
             if gr and gr.span()[1] > 1:
-                if str(gr.span()[1]) not in self.text.tag_names():
-                    bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
-                    self.text.tag_configure(
-                        f"{gr.span()[1]}", lmargin1=em, lmargin2=em + bullet_width
-                    )
+                bullet_width = text_font.measure(f'{gr.span()[1]*" "}-')
+                self.text.tag_configure(
+                    f"{gr.span()[1]}", lmargin1=em, lmargin2=em + bullet_width
+                )
                 self.text.insert(END, v, f"{gr.span()[1]}")
             else:
                 self.text.insert(END, v)
@@ -1129,8 +1129,7 @@ class TreeViewGui:
             self.text.yview_moveto(1.0)
             self.listb.yview_moveto(1.0)
             del tvg
-            if hasattr(self, "fold"):
-                self.root.after(50, self.foldfun)
+            self.foldfun()
 
     def _sumchk(self):
         sumtot = SumAll(self.filename, sig="+")
@@ -3464,6 +3463,7 @@ class TreeViewGui:
 
         if hasattr(self, "fold"):
             gt = self._ckfoldtvg()
+            seen = None
             for n in range(1, self.listb.size() + 1):
                 idx = self._indconv(n)
                 if (
@@ -3473,16 +3473,22 @@ class TreeViewGui:
                         if n - 1 in gt:
                             self.text.tag_add(idx[0], *idx)
                             self.text.tag_config(idx[0], elide=self.fold)
+                            seen = n
                         else:
                             self.text.tag_add(idx[0], *idx)
                             self.text.tag_config(idx[0], elide=False)
                     else:
                         self.text.tag_add(idx[0], *idx)
                         self.text.tag_config(idx[0], elide=self.fold)
+
                 del idx, tx
-            del gt
-            self.text.yview_moveto(1.0)
-            self.listb.yview_moveto(1.0)
+            if seen:
+                self.listb.see(seen - 1)
+                self.text.see(f"{seen}.0")
+            else:
+                self.text.yview_moveto(1.0)
+                self.listb.yview_moveto(1.0)
+            del gt, seen
 
     def _chkfoldatt(self):
         if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
@@ -3531,7 +3537,6 @@ class TreeViewGui:
             if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
                 os.remove(self.glop.absolute().joinpath("fold.tvg"))
 
-            self._deltags()
             self.view()
 
 
@@ -3582,21 +3587,27 @@ def findpath():
 
 
 @excp(m=2, filenm=DEFAULTFILE)
+def _modetheme(mode: str):
+    global THEME_MODE
+
+    match mode := mode:
+        case mode if mode.lower() == "dark":
+            if THEME_MODE is True:
+                THEME_MODE = "dark"
+        case mode if mode.lower() == "light":
+            if THEME_MODE is False:
+                THEME_MODE = "light"
+        case _:
+            pass
+
+
+@excp(m=2, filenm=DEFAULTFILE)
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
 
     match ment := len(sys.argv):
         case ment if ment == 2:
-            global THEME_MODE
-            match mode := sys.argv[1]:
-                case mode if mode.lower() == "dark":
-                    if THEME_MODE is True:
-                        THEME_MODE = "dark"
-                case mode if mode.lower() == "light":
-                    if THEME_MODE is False:
-                        THEME_MODE = "light"
-                case _:
-                    pass
+            _modetheme(sys.argv[1])
         case _:
             pass
 

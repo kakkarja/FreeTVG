@@ -220,21 +220,12 @@ main()
 
       ```
 
-    * **For add-on TVG has another format please click -> [NEW](https://github.com/kakkarja/FreeTVG#new)**
-* **To get the new functions "Fold"**
-
-  ```Terminal
-  # pre-release
-
-  pip install FreeTVG-karjakak==3.0.0rc2
-  ```
-  
+    * **For add-on TVG has another format please click -> [NEW](https://github.com/kakkarja/FreeTVG#new)**  
 * **Printing will fill the background and foreground according to the text editor background and foreground**
 * **Fix little in light mode theme**
 * **Enhancing Fold**
   * **Making fold running faster in huge records**
-  * **TAKE NOTE:**
-    * **Changing file while app running, may slow down fold (only for huge records)**
+* **Fold is already release just** ```pip install -U FreeTVG-karjkak```
 
 ![TVG](/Pics/TVG.png)
 
