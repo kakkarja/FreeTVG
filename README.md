@@ -225,7 +225,9 @@ main()
 * **Fix little in light mode theme**
 * **Enhancing Fold**
   * **Making fold running faster in huge records**
-* **Fold is already release just** ```pip install -U FreeTVG-karjkak```
+* **Fold is already release just**
+
+  ```pip3 install -U FreeTVG-karjkak```
 
 ![TVG](/Pics/TVG.png)
 
