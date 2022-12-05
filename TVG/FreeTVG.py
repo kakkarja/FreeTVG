@@ -1881,17 +1881,21 @@ class TreeViewGui:
             eldat = self._ckfoldtvg()
             if hasattr(self, "fold"):
                 for i in range(1, self.listb.size() + 1):
-                    line = self.text.get(f"{float(i)}", f"{float(i)} lineend")
+                    line = self.text.get(f"{float(i)}", f"{float(i)} lineend + 1c")
                     if line:
                         match eldat:
                             case eldat if eldat:
                                 if not line[0].isspace():
-                                    gttx.append(line + "\n")
+                                    gttx.append(line)
                                 elif i - 1 not in eldat:
-                                    gttx.append(line + "\n")
+                                    gttx.append(line)
+                                elif line == "\n":
+                                    gttx.append(line)
                             case _:
                                 if not line[0].isspace():
-                                    gttx.append(line + "\n")
+                                    gttx.append(line)
+                                elif line == "\n":
+                                    gttx.append(line)
                 return "".join(gttx)
             else:
                 return self.text.get("1.0", END)[:-1]
@@ -3127,10 +3131,7 @@ class TreeViewGui:
         """Compose email for registration"""
 
         body = "".join(
-            [
-                wrwords(i, 80, 1) + "\n"
-                for i in self.text.get("1.0", END)[:-1].split("\n")
-            ]
+            [wrwords(i, 80, 1) + "\n" for i in self._utilspdf().splitlines()]
         )
         if body != "\n":
             ask = messagebox.askyesno(
@@ -3146,7 +3147,7 @@ class TreeViewGui:
                     "".join(
                         [
                             wrwords(i, 40, 1) + "\n"
-                            for i in self.text.get("1.0", END)[:-1].split("\n")
+                            for i in self._utilspdf().splitlines()
                         ]
                     )
                 )

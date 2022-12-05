@@ -175,7 +175,8 @@ main()
 * **Found very little bug in Template**
   * **Has been fixed in 2.8.18**
 * **When send to email**
-  * **Markdown escape "\\" will be deleted when send with default email ([F4/Ctrl+F4] send mail function)**
+  * **For MacOs X**
+    * **Markdown escape "\\" will <ins>not</ins> be ~~deleted~~ when send with default email ([F4/Ctrl+F4] send mail function)**
   * **Email will be copied to default email app**
 * **Theme set globally according to system default theme**
   * **No longer active through function button (previously F3/Ctrl+F3 button)**
@@ -227,7 +228,15 @@ main()
   * **Making fold running faster in huge records**
 * **Fold is already release just**
 
-  ```pip3 install -U FreeTVG-karjkak```
+  ```Terminal
+  pip3 install -U FreeTVG-karjkak
+  ```
+
+* **Send email (fn+F3 / Ctrl+F3)**
+  * **For MacOs X**
+    * **Enhance the text by converting emojies to text description**
+    * **Using dependency: demoji**
+      * **[@bsolomon1124](https://pypi.org/project/demoji/)**
 
 ![TVG](/Pics/TVG.png)
 
