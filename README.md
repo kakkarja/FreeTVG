@@ -29,7 +29,7 @@
 * **[Picture Markdown](#markdown-1)**
 
 </details>
-</h3>
+
 
 ---
 
@@ -284,6 +284,9 @@ main()
     * **Enhance the text by converting emojies to text description**
     * **Using dependency: demoji**
       * **[@bsolomon1124](https://pypi.org/project/demoji/)**
+* **Printing**
+  * **Printing have no more option for ~~check-box~~**
+    * **Since markdown has involved for checked-box, ~~check-box~~ option become obsolete**
 
 [⬆️](#freetvg-tree-view-gui)
 

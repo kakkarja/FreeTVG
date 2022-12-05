@@ -1925,27 +1925,15 @@ class TreeViewGui:
             else:
                 fon = self.text["font"].partition(" ")[0]
                 fon = f"{add}{fon}"
-            ask = messagebox.askyesno(
-                "TreeViewGui", "Add checkboxes?", parent=self.root
+
+            convhtml(
+                self._utilspdf(),
+                self.filename,
+                fon,
+                self.text.cget("background")[1:],
+                self.text.cget("foreground"),
             )
-            if ask:
-                convhtml(
-                    self._utilspdf(),
-                    self.filename,
-                    fon,
-                    self.text.cget("background")[1:],
-                    self.text.cget("foreground"),
-                    ckb=True,
-                )
-            else:
-                convhtml(
-                    self._utilspdf(),
-                    self.filename,
-                    fon,
-                    self.text.cget("background")[1:],
-                    self.text.cget("foreground"),
-                )
-            del px, ck, sty, add, ask, fon
+            del px, ck, sty, add, fon
 
     def nonetype(self):
         """For checking file is empty or not"""

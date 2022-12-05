@@ -25,14 +25,7 @@ extensions = [
 extension_configs = {"pymdownx.keys": {"strict": True}}
 
 
-def convhtml(
-    text: str,
-    filename: str,
-    font: str,
-    bg: str = None,
-    fg: str = None,
-    ckb: bool = False,
-):
+def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None):
     # Converting your TVG to html and printable directly from browser.
 
     try:
@@ -69,17 +62,21 @@ def convhtml(
             """
             + " }"
         )
-        checkbut = """.task-list-item {
-  list-style-type: none !important;
-}
-.task-list-item input[type="checkbox"] {
-  margin: 0 4px 0.25em -20px;
-  vertical-align: middle;
-}
-.strikethrough:checked + span {
-  text-decoration: line-through;
-}
-"""
+
+        kbd = """kbd {
+            border-radius: 3px;
+            border: 1px solid #b4b4b4;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+            color: #333;
+            display: inline-block;
+            font-size: .85em;
+            font-weight: 700;
+            line-height: 1;
+            padding: 2px 4px;
+            white-space: nowrap;
+        }    
+        """
+
         cssstyle = f"""<!DOCTYPE html>
 <html>
 <button class="button"  onclick="javascript:window.print();">Print</button>
@@ -93,6 +90,7 @@ def convhtml(
 </header>
 <style>
 {setfont}
+{kbd}
 """
         printed = """@media print {
 .button { display: none }
@@ -104,37 +102,8 @@ def convhtml(
 </body>
 </html>
 """
-        if ckb:
-            cssstyle = cssstyle + checkbut + printed + nxt
-            cs = cssstyle.split("\n")
-            fcs = []
-            for i in cs:
-                if "<li>" in i and len(i) > 5:
-                    fx = (
-                        i[:4]
-                        + "\n<p>\n<span>"
-                        + i[4:-5]
-                        + "</span>\n</p>\n"
-                        + i[-5:]
-                        + "\n"
-                    )
-                    fcs.append(fx)
-                elif "<p>" in i:
-                    fx = i[:3] + "\n<span>" + i[3:-4] + "</span>\n" + i[-4:] + "\n"
-                    fcs.append(fx)
-                else:
-                    fcs.append(f"{i}\n")
-            del cs
-            cssstyle = "".join(fcs)
-            cssstyle = cssstyle.replace("<ul>", '<ul class="task-list">')
-            cssstyle = cssstyle.replace("<li>", '<li class="task-list-item">')
-            cssstyle = cssstyle.replace(
-                "<p>", '<p><input type="checkbox" class="strikethrough" name="ck"/>'
-            )
-            cssstyle = cssstyle.replace("<span>", '<span for="ck">')
-            del fcs
-        else:
-            cssstyle = cssstyle + printed + nxt
+
+        cssstyle = cssstyle + printed + nxt
         with open(f"{filename}.html", "w") as whtm:
             whtm.write(cssstyle)
         if platform.startswith("win"):
@@ -153,7 +122,6 @@ def convhtml(
             foreground,
             chg,
             setfont,
-            checkbut,
             cssstyle,
             printed,
             nxt,
