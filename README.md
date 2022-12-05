@@ -4,6 +4,31 @@
 
 ### **Visit [TVG](https://treeviewgui.work) for tutorials and support**
 
+---
+
+<details>
+  <summary>
+    <font size=3>
+      <strong>Jump-Start to:</strong>
+    </font>
+  </summary>
+(click to see contents)
+
+* **[Install](#installation)**
+* **[Usage](#usage)**
+* **[NEW](#new)**
+  * **[Add-On for TVG](#add-on-for-tvg)**
+  * **[Markdown](#markdown)**
+  * **[Folding](#folding)**
+* **[Changes](#changes)**
+* **[Unresolved Issues](#unresolve-issues)**
+* **[Development Purpose](#development-purpose)**
+* **[Latest Notice](#latest-notice)**
+
+</details>
+
+---
+
 ## Installation
 
 ```pip3 install -U FreeTVG-karjakak```
