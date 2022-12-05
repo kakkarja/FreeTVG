@@ -37,7 +37,7 @@
 
 ```pip3 install -U FreeTVG-karjakak```
 
-[⬆️](#visit-tvg-for-tutorials-and-support)
+[⬆️](#freetvg-tree-view-gui)
 
 ## Usage
 
@@ -66,11 +66,11 @@ main()
 % TVG
 ```
 
-[⬆️](#installation)
+[⬆️](#freetvg-tree-view-gui)
 
 ## NEW
 
-[⬆️](#usage)
+[⬆️](#freetvg-tree-view-gui)
 
 * ### **Add-On for TVG**
 
@@ -125,7 +125,7 @@ main()
         1,234,567.89
         ```
 
-[⬆️](#new)
+[⬆️](#freetvg-tree-view-gui)
 
 * ### **Markdown**
 
@@ -135,7 +135,7 @@ main()
     * **[@Python-Markdown](https://github.com/Python-Markdown/markdown)**
     * **[@facelessuser](https://github.com/facelessuser/pymdown-extensions)**
 
-[⬆️](#add-on-for-tvg)
+[⬆️](#freetvg-tree-view-gui)
 
 * ### **Folding**
 
@@ -157,7 +157,7 @@ main()
     * **Fold only hide childs and Hidden mode, hide parents and their childs**
     * **In fold all other functions working properly and in Hidden mode, all other functions are freeze**
 
-[⬆️](#markdown)
+[⬆️](#freetvg-tree-view-gui)
 
 ## Changes
 
@@ -193,7 +193,7 @@ main()
   * **TVG has been partly overhaul for adapting the new engine.**
   * **More robust and faster.**
 
-[⬆️](#folding)
+[⬆️](#freetvg-tree-view-gui)
 
 ## Unresolve Issues
 
@@ -207,7 +207,7 @@ main()
   * **Virtual OS Windows in Mac**
     * **Some short-cuts works only with "Control" + "Option" or "Shift" + ...**
 
-[⬆️](#changes)
+[⬆️](#freetvg-tree-view-gui)
 
 ## Development Purpose
 
@@ -215,7 +215,7 @@ main()
   * **Plese often check the folder "FreeTVG_TRACE" in "HOME" / "USERPROFILE" path directory.**
   * **Raise issues with copy of it, thank you!**
 
-[⬆️](#unresolve-issues)
+[⬆️](#freetvg-tree-view-gui)
 
 ## Latest Notice
 
@@ -285,13 +285,13 @@ main()
     * **Using dependency: demoji**
       * **[@bsolomon1124](https://pypi.org/project/demoji/)**
 
-[⬆️](#development-purpose)
+[⬆️](#freetvg-tree-view-gui)
 
 ## TVG
 
 ![TVG](/Pics/TVG.png)
 
-[⬆️](#latest-notice)
+[⬆️](#freetvg-tree-view-gui)
 
 ## With Add-On FreeTVG
 
@@ -301,7 +301,7 @@ main()
 
 ![ExpressionCalc](/Pics/expressioncalc.png)
 
-[⬆️](#tvg)
+[⬆️](#freetvg-tree-view-gui)
 
 ## Markdown
 
@@ -309,4 +309,4 @@ main()
 
 ![Printing](/Pics/printing.png)
 
-[⬆️](#markdown-1)
+[⬆️](#freetvg-tree-view-gui)
