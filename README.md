@@ -8,7 +8,7 @@
 
 <details>
   <summary>
-    <font size=3 id="jump">
+    <font size=3>
       <strong>Jump-Start to:</strong>
     </font>
   </summary>
@@ -29,6 +29,7 @@
 * **[Picture Markdown](#markdown-1)**
 
 </details>
+</h3>
 
 ---
 
@@ -36,7 +37,7 @@
 
 ```pip3 install -U FreeTVG-karjakak```
 
-[⬆️](#jump)
+[⬆️](#visit-tvg-for-tutorials-and-support)
 
 ## Usage
 
@@ -65,9 +66,11 @@ main()
 % TVG
 ```
 
-[⬆️](#jump)
+[⬆️](#installation)
 
 ## NEW
+
+[⬆️](#usage)
 
 * ### **Add-On for TVG**
 
@@ -122,7 +125,7 @@ main()
         1,234,567.89
         ```
 
-[⬆️](#jump)
+[⬆️](#new)
 
 * ### **Markdown**
 
@@ -132,7 +135,7 @@ main()
     * **[@Python-Markdown](https://github.com/Python-Markdown/markdown)**
     * **[@facelessuser](https://github.com/facelessuser/pymdown-extensions)**
 
-[⬆️](#jump)
+[⬆️](#add-on-for-tvg)
 
 * ### **Folding**
 
@@ -154,7 +157,7 @@ main()
     * **Fold only hide childs and Hidden mode, hide parents and their childs**
     * **In fold all other functions working properly and in Hidden mode, all other functions are freeze**
 
-[⬆️](#jump)
+[⬆️](#markdown)
 
 ## Changes
 
@@ -190,7 +193,7 @@ main()
   * **TVG has been partly overhaul for adapting the new engine.**
   * **More robust and faster.**
 
-[⬆️](#jump)
+[⬆️](#folding)
 
 ## Unresolve Issues
 
@@ -204,7 +207,7 @@ main()
   * **Virtual OS Windows in Mac**
     * **Some short-cuts works only with "Control" + "Option" or "Shift" + ...**
 
-[⬆️](#jump)
+[⬆️](#changes)
 
 ## Development Purpose
 
@@ -212,7 +215,7 @@ main()
   * **Plese often check the folder "FreeTVG_TRACE" in "HOME" / "USERPROFILE" path directory.**
   * **Raise issues with copy of it, thank you!**
 
-[⬆️](#jump)
+[⬆️](#unresolve-issues)
 
 ## Latest Notice
 
@@ -282,13 +285,13 @@ main()
     * **Using dependency: demoji**
       * **[@bsolomon1124](https://pypi.org/project/demoji/)**
 
-[⬆️](#jump)
+[⬆️](#development-purpose)
 
 ## TVG
 
 ![TVG](/Pics/TVG.png)
 
-[⬆️](#jump)
+[⬆️](#latest-notice)
 
 ## With Add-On FreeTVG
 
@@ -298,7 +301,7 @@ main()
 
 ![ExpressionCalc](/Pics/expressioncalc.png)
 
-[⬆️](#jump)
+[⬆️](#tvg)
 
 ## Markdown
 
@@ -306,4 +309,4 @@ main()
 
 ![Printing](/Pics/printing.png)
 
-[⬆️](#jump)
+[⬆️](#markdown-1)
