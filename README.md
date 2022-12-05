@@ -24,6 +24,9 @@
 * **[Unresolved Issues](#unresolve-issues)**
 * **[Development Purpose](#development-purpose)**
 * **[Latest Notice](#latest-notice)**
+* **[Picture TVG](#tvg)**
+* **[Picture with Add-On TVG](#with-add-on-freetvg)**
+* **[Picture Markdown](#markdown-1)**
 
 </details>
 
@@ -262,6 +265,8 @@ main()
     * **Enhance the text by converting emojies to text description**
     * **Using dependency: demoji**
       * **[@bsolomon1124](https://pypi.org/project/demoji/)**
+
+## TVG
 
 ![TVG](/Pics/TVG.png)
 
