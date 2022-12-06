@@ -30,7 +30,6 @@
 
 </details>
 
-
 ---
 
 ## Installation
@@ -287,6 +286,8 @@ main()
 * **Printing**
   * **Printing have no more option for ~~check-box~~**
     * **Since markdown has involved for checked-box, ~~check-box~~ option become obsolete**
+* **Markdown has short-cut**
+  * **Check it out in tutorial press `Ctrl+F1 / fn+F1`**
 
 [⬆️](#freetvg-tree-view-gui)
 

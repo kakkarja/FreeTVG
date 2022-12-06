@@ -2656,25 +2656,25 @@ class TreeViewGui:
     def _mdbuttons(self):
 
         if not hasattr(self, "mdframe"):
-
-            mdb = {
-                "B": "****",
-                "I": "**",
-                "U": "^^^^",
-                "S": "~~~~",
-                "M": "====",
-                "SA": "++++",
-                "L": "[]()",
-                "SP": "^^",
-                "SB": "~~",
-                "C": "[x]",
-                "AR": "-->",
-                "AL": "<--",
-                "AT": "<-->",
-                "PM": "+/-",
-                "TM": "(tm)",
-                "CR": "(c)",
-                "R": "(r)",
+            self.__setattr__("mdb", None)
+            self.mdb = {
+                "B": ("<Control-Shift-!>", "****"),
+                "I": ("<Control-Shift-@>", "**"),
+                "U": ("<Control-Shift-#>", "^^^^"),
+                "S": ("<Control-Shift-$>", "~~~~"),
+                "M": ("<Control-Shift-%>", "===="),
+                "SA": ("<Control-Shift-^>", "++++"),
+                "L": ("<Control-Shift-&>", "[]()"),
+                "SP": ("<Control-Shift-*>", "^^"),
+                "SB": ("<Control-Shift-(>", "~~"),
+                "C": ("<Control-Shift-)>", "[x]"),
+                "AR": ("<Control-Shift-Q>", "-->"),
+                "AL": ("<Control-Shift-W>", "<--"),
+                "AT": ("<Control-Shift-E>", "<-->"),
+                "PM": ("<Control-Shift-R>", "+/-"),
+                "TM": ("<Control-Shift-T>", "(tm)"),
+                "CR": ("<Control-Shift-Y>", "(c)"),
+                "R": ("<Control-Shift-I>", "(r)"),
             }
 
             stb = None
@@ -2686,12 +2686,12 @@ class TreeViewGui:
 
             @excp(2, DEFAULTFILE)
             def insmd():
-                if stb and stb in mdb:
+                if stb and stb in self.mdb:
                     mk = None
                     match self.text.tag_ranges("sel"):
                         case tsel if tsel:
                             if stb in ("B", "I", "U", "S", "M", "SA", "L", "SP", "SB"):
-                                match len(mk := mdb[stb]):
+                                match len(mk := self.mdb[stb][1]):
                                     case 2:
                                         self.text.insert(SEL_FIRST, mk[:1])
                                         self.text.insert(SEL_LAST, mk[:1])
@@ -2710,13 +2710,36 @@ class TreeViewGui:
                                 del idx
                     if mk is None:
                         if self.text.get(f"{INSERT} - 1c", INSERT).isspace():
-                            self.text.insert(INSERT, mdb[stb])
+                            self.text.insert(INSERT, self.mdb[stb][1])
                         else:
-                            self.text.insert(INSERT, f" {mdb[stb]}")
+                            self.text.insert(INSERT, f" {self.mdb[stb][1]}")
                     self.text.focus()
                     del mk
 
-            lmdb = list(mdb)
+            def shortcut(event):
+                nonlocal stb
+
+                ksm = tuple("QWERTYI")
+                ksm = (
+                    "exclam",
+                    "at",
+                    "numbersign",
+                    "dollar",
+                    "percent",
+                    "asciicircum",
+                    "ampersand",
+                    "asterisk",
+                    "parenleft",
+                    "parenright",
+                ) + ksm
+                for k, v in zip(ksm, self.mdb.keys()):
+                    if event.keysym == k:
+                        stb = v
+                        insmd()
+                        break
+                del ksm
+
+            lmdb = list(self.mdb)
             self.tframe.pack_forget()
             self.fscr.pack_forget()
 
@@ -2728,11 +2751,13 @@ class TreeViewGui:
             mdbut = ttk.Button(self.mdframe, text=lmdb[0], width=1, command=insmd)
             mdbut.pack(side=LEFT, padx=2, pady=(0, 2), fill=X, expand=1)
             mdbut.bind("<Enter>", storbut)
+            mdbut.bind_all(self.mdb[lmdb[0]][0], shortcut)
             self.rsv_frame = mdbut.winfo_parent()
             for i in range(1, 17):
                 mdbut = ttk.Button(self.mdframe, text=lmdb[i], width=1, command=insmd)
                 mdbut.pack(side=LEFT, padx=(0, 2), pady=(0, 2), fill=X, expand=1)
                 mdbut.bind("<Enter>", storbut)
+                mdbut.bind_all(self.mdb[lmdb[i]][0], shortcut)
 
             self.tframe.pack(anchor="w", side=TOP, fill="both", expand=1)
             self.tframe.update()
@@ -2741,10 +2766,12 @@ class TreeViewGui:
             del lmdb
         else:
             for i in self.mdframe.winfo_children():
+                i.unbind_all(self.mdb[i.cget("text")][0])
                 i.destroy()
                 del i
             self.mdframe.destroy()
             self.rsv_frame = None
+            self.__delattr__("mdb")
             self.__delattr__("mdframe")
             self.frb3.pack_forget()
 
@@ -3186,9 +3213,16 @@ class TreeViewGui:
                                 parent=self.root,
                             )
                 case True:
-                    self.__setattr__("sumtot", True)
-                    sa.sumway()
-                    self.spaces()
+                    if not hasattr(self, "fold"):
+                        self.__setattr__("sumtot", True)
+                        sa.sumway()
+                        self.spaces()
+                    else:
+                        messagebox.showwarning(
+                            "TreeViewGui",
+                            "Please unfolding first!",
+                            parent=self.root,
+                        )
                 case False:
                     messagebox.showinfo(
                         "TreeViewGui", "No data to sums!", parent=self.root
@@ -3244,14 +3278,21 @@ class TreeViewGui:
         """Deleting all Totals"""
 
         if self.checkfile() and self.nonetype():
-            with SumAll(self.filename, sig="+") as sal:
-                if hasattr(self, "sumtot") and self.sumtot:
-                    self.__delattr__("sumtot")
-                    sal.del_total()
-                else:
-                    messagebox.showinfo(
-                        "TreeViewGui", "Nothing to delete!", parent=self.root
-                    )
+            if not hasattr(self, "fold"):
+                with SumAll(self.filename, sig="+") as sal:
+                    if hasattr(self, "sumtot") and self.sumtot:
+                        self.__delattr__("sumtot")
+                        sal.del_total()
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui", "Nothing to delete!", parent=self.root
+                        )
+            else:
+                messagebox.showwarning(
+                    "TreeViewGui",
+                    "Please unfolding first!",
+                    parent=self.root,
+                )
             del sal
             self.spaces()
 
