@@ -2744,6 +2744,7 @@ class TreeViewGui:
                 i.destroy()
                 del i
             self.mdframe.destroy()
+            self.rsv_frame = None
             self.__delattr__("mdframe")
             self.frb3.pack_forget()
 

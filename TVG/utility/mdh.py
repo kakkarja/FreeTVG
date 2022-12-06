@@ -22,7 +22,12 @@ extensions = [
     "pymdownx.keys",
 ]
 
-extension_configs = {"pymdownx.keys": {"strict": True}}
+extension_configs = {
+    "pymdownx.keys": {"strict": True},
+    "pymdownx.tasklist": {
+        "clickable_checkbox": True,
+    },
+}
 
 
 def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None):
@@ -57,25 +62,38 @@ def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None
         setfont = (
             "body { "
             + f"""font: {font};
-            background-color: #{background};
-            color: {foreground};
-            """
-            + " }"
+background-color: #{background};
+color: {foreground};
+"""
+            + "}"
         )
 
-        kbd = """kbd {
-            border-radius: 3px;
-            border: 1px solid #b4b4b4;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
-            color: #333;
-            display: inline-block;
-            font-size: .85em;
-            font-weight: 700;
-            line-height: 1;
-            padding: 2px 4px;
-            white-space: nowrap;
-        }    
-        """
+        kbd = """kbd { border-radius: 3px;
+border: 1px solid #b4b4b4;
+box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+color: #333;
+display: inline-block;
+font-size: .85em;
+font-weight: 700;
+line-height: 1;
+padding: 2px 4px;
+white-space: nowrap;
+}    
+"""
+
+        tasklist = """.task-list-item {
+list-style-type: none !important;
+}
+
+.task-list-item input[type="checkbox"] {
+    margin: 0 4px 0.25em -20px;
+    vertical-align: middle;
+}
+
+.strikethrough:checked + span {
+    text-decoration: line-through;
+}
+"""
 
         cssstyle = f"""<!DOCTYPE html>
 <html>
@@ -91,6 +109,7 @@ def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None
 <style>
 {setfont}
 {kbd}
+{tasklist}
 """
         printed = """@media print {
 .button { display: none }
@@ -104,6 +123,47 @@ def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None
 """
 
         cssstyle = cssstyle + printed + nxt
+        fcs = []
+        if 'input type="checkbox"' in cssstyle:
+            for i in cssstyle.split("\n"):
+                if '<p><input type="checkbox"/>' in i:
+                    g = '<p><input type="checkbox"/>'
+                    fx = (
+                        i[: len(g)]
+                        + "<span>"
+                        + i[len(g) : -4]
+                        + "</span>"
+                        + i[-4:]
+                        + "\n"
+                    )
+                    fx = fx.replace(
+                        g + "<span>",
+                        '<p><input type="checkbox" class="strikethrough" name="ck"/><span for="ck">',
+                    )
+                    fcs.append(fx)
+                    del g, fx
+                elif '<p><input type="checkbox" checked/>' in i:
+                    g = '<p><input type="checkbox" checked/>'
+                    fx = (
+                        i[: len(g)]
+                        + "<span>"
+                        + i[len(g) : -4]
+                        + "</span>"
+                        + i[-4:]
+                        + "\n"
+                    )
+                    fx = fx.replace(
+                        g + "<span>",
+                        '<p><input type="checkbox" class="strikethrough" name="ck" checked/><span for="ck">',
+                    )
+                    fcs.append(fx)
+                    del g, fx
+                else:
+                    fcs.append(f"{i}\n")
+
+        if fcs:
+            cssstyle = "".join(fcs)
+        del fcs
         with open(f"{filename}.html", "w") as whtm:
             whtm.write(cssstyle)
         if platform.startswith("win"):
