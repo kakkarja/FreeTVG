@@ -38,6 +38,7 @@ def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None
         tohtml = []
         background = bg if bg else "gold"
         foreground = fg if fg else "black"
+        kbfg = "333" if foreground == "black" else "eee"
 
         for i in gettext:
             if i != "\n":
@@ -68,18 +69,19 @@ color: {foreground};
             + "}"
         )
 
-        kbd = """kbd { border-radius: 3px;
-border: 1px solid #b4b4b4;
+        kbd = (
+            """kbd { border-radius: 3px;"""
+            + f"""border: 1px solid #b4b4b4;
 box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
-color: #333;
+color: #{kbfg};
 display: inline-block;
 font-size: .85em;
 font-weight: 700;
 line-height: 1;
 padding: 2px 4px;
-white-space: nowrap;
-}    
-"""
+white-space: nowrap;"""
+            + "}"
+        )
 
         tasklist = """.task-list-item {
 list-style-type: none !important;
@@ -180,6 +182,7 @@ list-style-type: none !important;
             tohtml,
             background,
             foreground,
+            kbfg,
             chg,
             setfont,
             cssstyle,

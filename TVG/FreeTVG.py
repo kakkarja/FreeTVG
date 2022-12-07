@@ -2716,6 +2716,7 @@ class TreeViewGui:
                     self.text.focus()
                     del mk
 
+            @excp(2, DEFAULTFILE)
             def shortcut(event):
                 nonlocal stb
 
