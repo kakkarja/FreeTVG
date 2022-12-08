@@ -288,6 +288,8 @@ main()
     * **Since markdown has involved for checked-box, ~~check-box~~ option become obsolete**
 * **Markdown has short-cut**
   * **Check it out in tutorial press `Ctrl+F1 / fn+F1`**
+* **Filename enhancement**
+  * **Abbriviation in uppercase will be kept unchange otherwise all will be title**
 
 [⬆️](#freetvg-tree-view-gui)
 

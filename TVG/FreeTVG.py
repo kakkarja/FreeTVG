@@ -7,6 +7,7 @@ import importlib
 import os
 import re
 import sys
+import string
 from datetime import datetime as dt
 from functools import partial
 from itertools import islice
@@ -1651,15 +1652,13 @@ class TreeViewGui:
                         "TreeViewGui", "New file name:", parent=self.root
                     )
                     if askname:
-                        if not os.path.isdir(
-                            self.glop.joinpath(
-                                self.glop.parent, f"{askname.title()}_tvg"
-                            )
+                        if not os.path.exists(
+                            self.glop.parent.joinpath(f"{askname}_tvg")
                         ):
                             tak = self.fildat(self.text.get("1.0", END)[:-1])
                             os.remove(f"{self.filename}_hid.json")
                             self.createf(askname)
-                            with tv(f"{askname.title()}") as tvg:
+                            with tv(self.filename) as tvg:
                                 tvg.fileread(tvg.insighthidden(tak, False))
                             self.addonchk(False)
                             del tak, tvg
@@ -2380,15 +2379,14 @@ class TreeViewGui:
             else name
         )
         if fl:
-            mkd = f"{fl.title()}_tvg"
-            files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
-            if mkd not in files:
+            mkd = self.glop.parent.joinpath(f"{titlemode(fl)}_tvg")
+            if not os.path.exists(mkd):
                 self.addonchk()
-                self.glop.parent.joinpath(mkd).mkdir()
-                os.chdir(self.glop.parent.joinpath(mkd))
-                self.glop = self.glop.parent.joinpath(mkd)
+                mkd.mkdir()
+                os.chdir(mkd)
+                self.glop = mkd
                 self._ckfoldtvg()
-                self.filename = fl.title()
+                self.filename = self.glop.name.rpartition("_")[0]
                 self.root.title(f"{self.glop.absolute().joinpath(self.filename)}.txt")
                 self.text.config(state=NORMAL)
                 self.text.delete("1.0", END)
@@ -2401,10 +2399,10 @@ class TreeViewGui:
             else:
                 messagebox.showinfo(
                     "TreeViewGui",
-                    f"The file {mkd}/{fl.title()}.txt is already exist!",
+                    f"The file {mkd}/{titlemode(fl)}.txt is already exist!",
                     parent=self.root,
                 )
-            del mkd, files
+            del mkd
         else:
             messagebox.showinfo("TreeViewGui", "Nothing created yet!", parent=self.root)
         del fl, name
@@ -3634,6 +3632,25 @@ def _modetheme(mode: str):
 
 
 @excp(m=2, filenm=DEFAULTFILE)
+def titlemode(sent: str):
+    try:
+        cks = string.printable.partition("!")[0] + "_ "
+        j = []
+        for st in set(sent):
+            if st not in cks:
+                return f"Temporer{int(dt.timestamp(dt.today()))}"
+
+        for st in sent.replace("_", " ").split(" "):
+            if st.isupper():
+                j.append(st)
+            else:
+                j.append(st.title())
+        return " ".join(j)
+    finally:
+        del cks, j
+
+
+@excp(m=2, filenm=DEFAULTFILE)
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
 
@@ -3665,13 +3682,10 @@ def main():
     else:
         filename = askfile(root)
     if filename:
-        filename = filename.title()
         if not os.path.exists(f"{filename}_tvg"):
-            try:
-                os.mkdir(f"{filename}_tvg")
-                os.chdir(f"{filename}_tvg")
-            except:
-                os.chdir(f"{filename}_tvg")
+            filename = titlemode(filename)
+            os.mkdir(f"{filename}_tvg")
+            os.chdir(f"{filename}_tvg")
         else:
             os.chdir(f"{filename}_tvg")
         begin = TreeViewGui(root=root, filename=filename)
