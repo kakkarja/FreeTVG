@@ -290,6 +290,11 @@ main()
   * **Check it out in tutorial press `Ctrl+F1 / fn+F1`**
 * **Filename enhancement**
   * **Abbriviation in uppercase will be kept unchange otherwise all will be title**
+* **Fold selected enhancement**
+  * **Will reload previous selections**
+  * **Can click / "ctrl + s" insight for identifying what to select**
+  * **TAKE NOTICE:**
+    * **If click Unfold, record of previous selections will be deleted**
 
 [⬆️](#freetvg-tree-view-gui)
 

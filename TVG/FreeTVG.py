@@ -1021,11 +1021,12 @@ class TreeViewGui:
                 and event.keysym == "7"
             ):
                 self.editor()
-            elif (
-                str(self.bt["button34"].cget("state")) == "normal"
-                and event.keysym == "S"
-            ):
-                self.fold_selected()
+            elif str(self.bt["button34"].cget("state")) == "normal":
+                if event.keysym == "S":
+                    self.fold_selected()
+                elif event.keysym == "s":
+                    self.insight()
+
         del fcom
 
     def radiobut(self, event=None):
@@ -1980,7 +1981,7 @@ class TreeViewGui:
                 del tvg, writer, data
                 self.view()
             else:
-                if self.listb.get(0, END):
+                if self.listb.size():
                     self.listb.delete(0, END)
             if str(self.root.focus_get()) != ".":
                 self.root.focus()
@@ -2766,6 +2767,7 @@ class TreeViewGui:
         else:
             for i in self.mdframe.winfo_children():
                 i.unbind_all(self.mdb[i.cget("text")][0])
+                i.unbind("<Enter>")
                 i.destroy()
                 del i
             self.mdframe.destroy()
@@ -3535,7 +3537,13 @@ class TreeViewGui:
         if self.unlock:
             if not hasattr(self, "fold"):
                 self.__setattr__("fold", True)
-            self.foldfun()
+            self.view()
+            self.infobar()
+
+    def _load_selection(self):
+        if sels := self._ckfoldtvg():
+            for sel in sels:
+                self.listb.select_set(sel)
 
     def fold_selected(self):
         """Folding selected"""
@@ -3544,14 +3552,16 @@ class TreeViewGui:
         if self.unlock:
             if self.listb.cget("selectmode") == BROWSE:
                 self.listb.config(selectmode=EXTENDED)
-                self.disab("button34", "listb")
+                self.disab("button34", "button10", "listb")
+                self._load_selection()
                 if not hasattr(self, "fold"):
                     self.__setattr__("fold", True)
             else:
                 if self.listb.curselection():
                     with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
                         cur.write(str(self.listb.curselection()).encode())
-                    self.foldfun()
+                    self.view()
+                    self.infobar()
                 self.disab(dis=False)
                 self.listb.selection_clear(0, END)
                 self.listb.config(selectmode=BROWSE)
@@ -3568,6 +3578,7 @@ class TreeViewGui:
                 os.remove(self.glop.absolute().joinpath("fold.tvg"))
 
             self.view()
+            self.infobar()
 
 
 @excp(m=2, filenm=DEFAULTFILE)
