@@ -3537,13 +3537,19 @@ class TreeViewGui:
         if self.unlock:
             if not hasattr(self, "fold"):
                 self.__setattr__("fold", True)
-            self.view()
-            self.infobar()
+                self.view()
+                self.infobar()
 
     def _load_selection(self):
         if sels := self._ckfoldtvg():
             for sel in sels:
                 self.listb.select_set(sel)
+
+    def _deldatt(self):
+        if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
+            os.remove(self.glop.absolute().joinpath("fold.tvg"))
+            self.view()
+            self.infobar()
 
     def fold_selected(self):
         """Folding selected"""
@@ -3562,6 +3568,9 @@ class TreeViewGui:
                         cur.write(str(self.listb.curselection()).encode())
                     self.view()
                     self.infobar()
+                else:
+                    self.__delattr__("fold")
+                    self._deldatt()
                 self.disab(dis=False)
                 self.listb.selection_clear(0, END)
                 self.listb.config(selectmode=BROWSE)
@@ -3573,12 +3582,8 @@ class TreeViewGui:
         if self.unlock:
             if hasattr(self, "fold"):
                 self.__delattr__("fold")
-
-            if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
-                os.remove(self.glop.absolute().joinpath("fold.tvg"))
-
-            self.view()
-            self.infobar()
+                self.view()
+                self.infobar()
 
 
 @excp(m=2, filenm=DEFAULTFILE)

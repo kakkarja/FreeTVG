@@ -146,12 +146,12 @@ main()
       * **Will fold all childs**
     * **Fold selected**
       * **Will fold selected childs**
-      * **Use "Shift" button to select massively, and "Option" button to select differently or unselect**
+      * **Use "Shift" button to select massively, and ~~"Option"~~ "Control" button to select differently or unselect**
     * **Unfold**
       * **To unhide all**
   * **TAKE NOTICE:**
     * **Fold selection will retain when changing file, but not for fold all childs**
-    * **Once Unfold, the retain selection will be erased as well**
+    * **~~Once Unfold, the retain selection will not be erased~~**
   * **The difference between Fold and Hidden mode**
     * **Fold only hide childs and Hidden mode, hide parents and their childs**
     * **In fold all other functions working properly and in Hidden mode, all other functions are freeze**
@@ -292,9 +292,13 @@ main()
   * **Abbriviation in uppercase will be kept unchange otherwise all will be title**
 * **Fold selected enhancement**
   * **Will reload previous selections**
-  * **Can click / "ctrl + s" insight for identifying what to select**
-  * **TAKE NOTICE:**
-    * **If click Unfold, record of previous selections will be deleted**
+  * **Can click / "ctrl + s" Insight for identifying what to select**
+  * **Use Shift-key for massive selection and Ctrl-key for select or unselect individually**
+* **Fold enhancement**
+  * **Unfolding no longer delete retain selected childs**
+    * **If you press "Fold Childs" the retain ones will be folded again**
+  * **Fold selected will delete the retain selected if selections is none**
+  * **Fold Childs will fold all childs, if there is no retain selected**
 
 [⬆️](#freetvg-tree-view-gui)
 
