@@ -653,6 +653,18 @@ class TreeViewGui:
             self.ew = ["CPP", "Clear hide", "Printing", "child", "R"]
         self.rsv_frame = None
 
+        self.root.tk.call(
+            "tk",
+            "fontchooser",
+            "configure",
+            "-font",
+            self.text["font"],
+            "-command",
+            self.root.register(self.clb),
+            "-parent",
+            self.root,
+        )
+
     def ldmode(self):
         """Dark mode for easing the eye"""
 
@@ -1265,6 +1277,7 @@ class TreeViewGui:
                     self.result = self.e1.get()
 
             d = MyDialog(self.root)
+            self.root.update()
             self.lock = False
             if d.result:
                 chosen(d.result)
@@ -1696,8 +1709,8 @@ class TreeViewGui:
                     del askname
                 else:
                     if os.path.exists(
-                        self.glop.joinpath(
-                            self.glop.parent, flname, f'{flname.rpartition("_")[0]}.txt'
+                        self.glop.parent.joinpath(
+                            flname, f'{flname.rpartition("_")[0]}.txt'
                         )
                     ):
                         if not os.path.exists(
@@ -1710,9 +1723,7 @@ class TreeViewGui:
                             os.remove(f"{self.filename}_hid.json")
                             self.addonchk()
                             self.filename = flname.rpartition("_")[0]
-                            self.glop = Path(
-                                self.glop.joinpath(self.glop.parent, flname)
-                            )
+                            self.glop = self.glop.parent.joinpath(flname)
                             os.chdir(self.glop)
                             self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                             with tv(self.filename) as tvg:
@@ -1737,7 +1748,7 @@ class TreeViewGui:
                         os.remove(f"{self.filename}_hid.json")
                         self.addonchk()
                         self.filename = flname.rpartition("_")[0]
-                        self.glop = Path(self.glop.joinpath(self.glop.parent, flname))
+                        self.glop = self.glop.parent.joinpath(flname)
                         os.chdir(self.glop)
                         self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                         with tv(self.filename) as tvg:
@@ -1771,6 +1782,7 @@ class TreeViewGui:
                     self.result = self.e1.get()
 
             d = MyDialog(self.root)
+            self.root.update()
             self.lock = False
             if d.result:
                 chosen(d.result)
@@ -2286,6 +2298,7 @@ class TreeViewGui:
                                 self.result = self.e1.get()
 
                         d = MyDialog(self.root)
+                        self.root.update()
                         self.lock = False
                         if d.result:
                             searchw(d.result)
@@ -2599,6 +2612,7 @@ class TreeViewGui:
                                 self.result = self.e1.get()
 
                         d = MyDialog(self.root)
+                        self.root.update()
                         self.lock = False
                         if d.result:
                             path = os.path.join(self.glop.parent, "Templates", d.result)
@@ -3098,15 +3112,6 @@ class TreeViewGui:
             with open(path) as rd:
                 self.clb(rd.read(), wr=False)
         else:
-            self.root.tk.call(
-                "tk",
-                "fontchooser",
-                "configure",
-                "-font",
-                self.text["font"],
-                "-command",
-                self.root.register(self.clb),
-            )
             self.root.tk.call("tk", "fontchooser", "show")
         del path
 
@@ -3469,6 +3474,7 @@ class TreeViewGui:
             self.__setattr__("toptempo", mas)
             self.__setattr__("labcop", None)
             d = MyDialog(mas)
+            self.root.update()
             self.unlock = True
             if hasattr(self, "toptempo"):
                 mas.destroy()
@@ -3615,6 +3621,7 @@ def askfile(root):
             self.result = self.e1.get()
 
     d = MyDialog(root)
+    root.update()
     if d.result:
         return d.result
     else:

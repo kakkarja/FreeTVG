@@ -306,6 +306,13 @@ main()
   * **Fold Childs will fold all childs, if there is no retain selected**
 * **[New unresolve issues](#unresolve-issues)**
   * **Refactoring, and bugs fixed or resolved**
+* **EXPLAINATION:**
+  * **If user want to keep the selected fold and using hidden mode**
+    * **Just unfold and use hidden mode**
+    * **While in hidden mode, user could not use the fold function**
+    * **If hidden mode is cleared, just press fold childs again and the retain ones will folded back again**
+  * **For CPP function \[very powerful function for manipulating text content\]**
+    * **In Hidden mode, you can select CPP to copied the text content and copied to new file or existing file**
 
 [⬆️](#freetvg-tree-view-gui)
 
