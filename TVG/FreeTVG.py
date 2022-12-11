@@ -886,6 +886,25 @@ class TreeViewGui:
         else:
             return False
 
+    def nonetype(self):
+        """For checking file is empty or not"""
+
+        if self.checkfile():
+            try:
+                with tv(self.filename) as tvg:
+                    if next(tvg.getdata()):
+                        return True
+            except:
+                self.text.config(state="normal")
+                self.text.delete("1.0", END)
+                self.text.config(state="disabled")
+                self.listb.delete(0, END)
+                return False
+            finally:
+                del tvg
+        else:
+            return False
+
     def mscrt(self, event=None):
         """Mouse scroll on text window, will sync with list box on the right"""
 
@@ -1118,7 +1137,7 @@ class TreeViewGui:
     def view(self, event=None):
         """Viewing engine for most module fuction"""
 
-        if self.checkfile() and self.nonetype():
+        if self.nonetype():
             self.text.config(state="normal")
             self.text.delete("1.0", END)
             self.listb.delete(0, END)
@@ -1147,7 +1166,7 @@ class TreeViewGui:
         """Checking on addon for sumtot attribute purpose"""
 
         if self._addon:
-            if self.checkfile():
+            if self.nonetype():
                 if sta:
                     if hasattr(self, "sumtot"):
                         with open(
@@ -1357,7 +1376,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 if self.listb.curselection():
                     TreeViewGui.MODE = True
                     rw = int(self.listb.curselection()[0])
@@ -1430,7 +1449,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 self.text.config(state="normal")
                 self.text.delete("1.0", END)
                 with tv(self.filename) as tvg:
@@ -1445,7 +1464,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 if self.listb.curselection():
                     rw = int(self.listb.curselection()[0])
                     insight = self.listb.get(rw).split(":")[1].strip()
@@ -1474,7 +1493,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 if self.listb.curselection():
                     rw = int(self.listb.curselection()[0])
                     ck = self.listb.get(rw).split(":")[1].strip()
@@ -1511,7 +1530,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 cek = ["parent", "child"]
                 if self.entry.get() and self.entry.get() not in cek:
                     if TreeViewGui.MARK:
@@ -1566,7 +1585,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 with tv(self.filename) as tvg:
                     tvg.backuptv()
                 del tvg
@@ -1577,7 +1596,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            try:
+            if os.path.exists(f"{self.filename}.json"):
                 dbs = db(self.filename)
                 row = simpledialog.askinteger(
                     "Load Backup",
@@ -1594,9 +1613,8 @@ class TreeViewGui:
                         parent=self.root,
                     )
                     self.spaces()
-            except Exception as e:
-                messagebox.showwarning("TreeViewGui", e, parent=self.root)
-            del row, dbs
+
+                del row, dbs
 
     def copas(self, event=None):
         """Paste a row value to Entry for fixing value"""
@@ -1762,7 +1780,7 @@ class TreeViewGui:
         else:
             self.hidcheck()
             if self.unlock:
-                if self.checkfile() and self.nonetype():
+                if self.nonetype():
                     if self.text.get("1.0", "1.0 lineend")[:-1]:
                         if self.listb.cget("selectmode") == "browse":
                             self.disab("listb", "button17", "text")
@@ -1905,7 +1923,7 @@ class TreeViewGui:
     def saveaspdf(self):
         """Show to browser and directly print as pdf or direct printing"""
 
-        if self.checkfile() and self.nonetype():
+        if self.nonetype():
             if (a := self.text["font"].find("}")) != -1:
                 px = int(re.search(r"\d+", self.text["font"][a:]).group()) * 1.3333333
             else:
@@ -1935,22 +1953,6 @@ class TreeViewGui:
             )
             del px, ck, sty, add, fon
 
-    def nonetype(self):
-        """For checking file is empty or not"""
-
-        try:
-            with tv(self.filename) as tvg:
-                if next(tvg.getdata()):
-                    return True
-        except:
-            self.text.config(state="normal")
-            self.text.delete("1.0", END)
-            self.text.config(state="disabled")
-            self.listb.delete(0, END)
-            return False
-        finally:
-            del tvg
-
     def spaces(self):
         """Mostly used by other functions to clear an obselete spaces.
         To appropriate the display better.
@@ -1958,7 +1960,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 if TreeViewGui.MARK and TreeViewGui.MODE is False:
                     TreeViewGui.MARK = False
                 else:
@@ -2071,7 +2073,7 @@ class TreeViewGui:
         if hasattr(self, "fold"):
             messagebox.showinfo("TreeViewGui", "Please unfolding first!")
         else:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 if not os.path.exists(f"{self.filename}_hid.json"):
                     if self.listb.cget("selectmode") == "browse":
                         self.info.set("Hidden Mode")
@@ -2158,7 +2160,7 @@ class TreeViewGui:
 
         import json
 
-        if f"{self.filename}_hid.json" in os.listdir():
+        if os.path.exists(f"{self.filename}_hid.json"):
             with open(f"{self.filename}_hid.json") as jfile:
                 rd = dict(json.load(jfile))
             if rd["reverse"] is False:
@@ -2177,7 +2179,7 @@ class TreeViewGui:
                             with open(f"{self.filename}_hid.json", "w") as jfile:
                                 json.dump(rd | rev, jfile)
                             self.hidform()
-                            del rev
+                            del rev, rd
                         else:
                             os.remove(f"{self.filename}_hid.json")
                             self.spaces()
@@ -2194,7 +2196,7 @@ class TreeViewGui:
                         f"{self.filename}_hid.json has been deleted!",
                         parent=self.root,
                     )
-                del rd, ans
+                del ans
             else:
                 os.remove(f"{self.filename}_hid.json")
                 self.spaces()
@@ -2213,7 +2215,7 @@ class TreeViewGui:
                 str(self.text.cget("state")) == "normal"
                 and str(self.bt["button24"].cget("state")) == "normal"
             ):
-                if self.text.get("1.0", END)[:-1]:
+                if self.text.count("1.0", END, "chars")[0] > 1:
 
                     @excp(2, DEFAULTFILE)
                     def searchw(words: str):
@@ -2289,7 +2291,7 @@ class TreeViewGui:
                             searchw(d.result)
                         del d.result
             else:
-                if self.checkfile() and self.nonetype():
+                if self.nonetype():
                     if self.entry.get():
                         num = self.listb.size()
                         sn = 1
@@ -2416,7 +2418,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.checkfile() and self.nonetype():
+            if self.nonetype():
                 ask = messagebox.askyesno(
                     "TreeViewGui",
                     '"Yes" Edit whole file, or "No" Edit selected parent only?',
@@ -2436,27 +2438,21 @@ class TreeViewGui:
                     self.text.see(self.text.index(INSERT))
                     os.remove(f"{self.filename}.txt")
                 else:
-                    if self.listb.curselection():
-                        stor = int(self.listb.curselection()[0])
+                    if (
+                        stor := self.listb.curselection()
+                    ) and "parent" in self.listb.get(stor := stor[0]):
                         self.editor()
                         with tv(self.filename) as tvg:
                             num = stor
                             for p, d in islice(
                                 tvg.compdatch(True), stor, tvg.getdatanum()
                             ):
-                                if num == stor and p != "parent":
-                                    messagebox.showinfo(
-                                        "TreeViewGui",
-                                        "Please select a parent row only!",
-                                        parent=self.root,
-                                    )
-                                    break
                                 if p == "parent":
                                     self.text.insert(END, f"p:{d[:-2]}\n")
                                 elif p.partition("child")[1]:
                                     self.text.insert(END, f"c{p[5:]}:{d[1:]}")
                                 else:
-                                    if p == "space" or p == "parent":
+                                    if p == "space":
                                         break
                                 num += 1
                         self.editorsel = (stor, num)
@@ -2469,7 +2465,7 @@ class TreeViewGui:
                             parent=self.root,
                         )
                 del ask
-        self.text.focus()
+                self.text.focus()
 
     def tempsave(self):
         """Saving template"""
@@ -2803,9 +2799,9 @@ class TreeViewGui:
                 del ckb
             else:
                 try:
-                    if self.text.get("1.0", END)[:-1]:
+                    if self.text.count("1.0", END, "chars")[0] > 1:
                         self.store = self.text.get("1.0", END)
-                        if self.checkfile() and self.nonetype():
+                        if self.nonetype():
                             if self.editorsel:
                                 stor = self.editorsel
                                 ed = tuple(i for i in self.store[:-1].split("\n") if i)
@@ -2927,6 +2923,7 @@ class TreeViewGui:
                             with tv(self.filename) as tvg:
                                 tvg.fileread(iter(p2.values()))
                             del tvg, ed, et, ckc, p2
+                        self.store = None
                         self.text.config(state=DISABLED)
                         self.disab(dis=False)
                         self.spaces()
@@ -2985,7 +2982,7 @@ class TreeViewGui:
                             geo.write(str({"geo": TreeViewGui.GEO}).encode())
                     del ask
                 self.addonchk()
-            self.root.destroy()
+            self.root.quit()
         else:
             messagebox.showerror(
                 "TreeViewGui", "Do not exit before a function end!!!", parent=self.root
@@ -3147,37 +3144,38 @@ class TreeViewGui:
     def send_reg(self, event=None):
         """Compose email for registration"""
 
-        body = "".join(
-            [wrwords(i, 80, 1) + "\n" for i in self._utilspdf().splitlines()]
-        )
-        if body != "\n":
-            ask = messagebox.askyesno(
-                "TreeViewGui",
-                '"yes" to compose email or "no" to copy text.',
-                parent=self.root,
+        if self.nonetype():
+            body = "".join(
+                [wrwords(i, 80, 1) + "\n" for i in self._utilspdf().splitlines()]
             )
-            if ask:
-                composemail(sub=f"{self.filename}", body=body)
-            else:
-                self.root.clipboard_clear()
-                self.root.clipboard_append(
-                    "".join(
-                        [
-                            wrwords(i, 40, 1) + "\n"
-                            for i in self._utilspdf().splitlines()
-                        ]
-                    )
+            if body != "\n":
+                ask = messagebox.askyesno(
+                    "TreeViewGui",
+                    '"yes" to compose email or "no" to copy text.',
+                    parent=self.root,
                 )
-                messagebox.showinfo("TreeViewGui", "Text copied!", parent=self.root)
-        else:
-            messagebox.showinfo(
-                "TreeViewGui", "Cannot send empty text!", parent=self.root
-            )
+                if ask:
+                    composemail(sub=f"{self.filename}", body=body)
+                else:
+                    self.root.clipboard_clear()
+                    self.root.clipboard_append(
+                        "".join(
+                            [
+                                wrwords(i, 40, 1) + "\n"
+                                for i in self._utilspdf().splitlines()
+                            ]
+                        )
+                    )
+                    messagebox.showinfo("TreeViewGui", "Text copied!", parent=self.root)
+            else:
+                messagebox.showinfo(
+                    "TreeViewGui", "Cannot send empty text!", parent=self.root
+                )
 
     def gettotsum(self):
         """Get all sums on all parents that have "+" sign in front"""
 
-        if self.checkfile() and self.nonetype():
+        if self.nonetype():
             sa = SumAll(self.filename, sig="+")
             self.listb.config(selectmode=MULTIPLE)
             match len(sa) > 0:
@@ -3253,7 +3251,7 @@ class TreeViewGui:
     def createpg(self):
         """Creating graph for all summable data"""
 
-        if self.checkfile() and self.nonetype():
+        if self.nonetype():
             with SumAll(self.filename, sig="+") as sal:
                 try:
                     pc = tp = gr = None
@@ -3278,24 +3276,26 @@ class TreeViewGui:
     def deltots(self):
         """Deleting all Totals"""
 
-        if self.checkfile() and self.nonetype():
-            if not hasattr(self, "fold"):
-                with SumAll(self.filename, sig="+") as sal:
-                    if hasattr(self, "sumtot") and self.sumtot:
-                        self.__delattr__("sumtot")
-                        sal.del_total()
-                    else:
-                        messagebox.showinfo(
-                            "TreeViewGui", "Nothing to delete!", parent=self.root
-                        )
-            else:
-                messagebox.showwarning(
-                    "TreeViewGui",
-                    "Please unfolding first!",
-                    parent=self.root,
-                )
-            del sal
-            self.spaces()
+        self.hidcheck()
+        if self.unlock:
+            if self.nonetype():
+                if not hasattr(self, "fold"):
+                    with SumAll(self.filename, sig="+") as sal:
+                        if hasattr(self, "sumtot") and self.sumtot:
+                            self.__delattr__("sumtot")
+                            sal.del_total()
+                        else:
+                            messagebox.showinfo(
+                                "TreeViewGui", "Nothing to delete!", parent=self.root
+                            )
+                else:
+                    messagebox.showwarning(
+                        "TreeViewGui",
+                        "Please unfolding first!",
+                        parent=self.root,
+                    )
+                del sal
+                self.spaces()
 
     def _ckwrds(self, wrd: str):
 
@@ -3535,10 +3535,11 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if not hasattr(self, "fold"):
-                self.__setattr__("fold", True)
-                self.view()
-                self.infobar()
+            if self.nonetype():
+                if not hasattr(self, "fold"):
+                    self.__setattr__("fold", True)
+                    self.view()
+                    self.infobar()
 
     def _load_selection(self):
         if sels := self._ckfoldtvg():
@@ -3556,34 +3557,38 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.listb.cget("selectmode") == BROWSE:
-                self.listb.config(selectmode=EXTENDED)
-                self.disab("button34", "button10", "listb")
-                self._load_selection()
-                if not hasattr(self, "fold"):
-                    self.__setattr__("fold", True)
-            else:
-                if self.listb.curselection():
-                    with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
-                        cur.write(str(self.listb.curselection()).encode())
-                    self.view()
-                    self.infobar()
+            if self.nonetype():
+                if self.listb.cget("selectmode") == BROWSE:
+                    self.listb.config(selectmode=EXTENDED)
+                    self.disab("button34", "button10", "listb")
+                    self._load_selection()
+                    if not hasattr(self, "fold"):
+                        self.__setattr__("fold", True)
                 else:
-                    self.__delattr__("fold")
-                    self._deldatt()
-                self.disab(dis=False)
-                self.listb.selection_clear(0, END)
-                self.listb.config(selectmode=BROWSE)
+                    if self.listb.curselection():
+                        with open(
+                            self.glop.absolute().joinpath("fold.tvg"), "wb"
+                        ) as cur:
+                            cur.write(str(self.listb.curselection()).encode())
+                        self.view()
+                        self.infobar()
+                    else:
+                        self.__delattr__("fold")
+                        self._deldatt()
+                    self.disab(dis=False)
+                    self.listb.selection_clear(0, END)
+                    self.listb.config(selectmode=BROWSE)
 
     def unfolding(self):
         """Unfolding selected and childs"""
 
         self.hidcheck()
         if self.unlock:
-            if hasattr(self, "fold"):
-                self.__delattr__("fold")
-                self.view()
-                self.infobar()
+            if self.nonetype():
+                if hasattr(self, "fold"):
+                    self.__delattr__("fold")
+                    self.view()
+                    self.infobar()
 
 
 @excp(m=2, filenm=DEFAULTFILE)
@@ -3685,6 +3690,10 @@ def main():
     findpath()
     root = Tk()
     root.withdraw()
+    # case fontchooser dialog still reacted toward the application sudden exit and cause it to show
+    # when application started.
+    if root.tk.call("tk", "fontchooser", "configure", "-visible"):
+        root.tk.call("tk", "fontchooser", "hide")
     if os.path.exists("lastopen.tvg"):
         root.update()
         ask = messagebox.askyesno("TreeViewGui", "Want to open previous file?")

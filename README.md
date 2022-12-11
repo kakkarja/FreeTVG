@@ -205,6 +205,11 @@ main()
 * **Short-Cut Issues**
   * **Virtual OS Windows in Mac**
     * **Some short-cuts works only with "Control" + "Option" or "Shift" + ...**
+* **Tk fontchooser**
+  * **When dialog in focus too long**
+    * **When application is quit and restarted again, it will persistently reappear at start**
+    * **Resolution walk-around:**
+      * **Will check the dialog visibility at beginning of starting application, and if is true, will hide it at once**
 
 [⬆️](#freetvg-tree-view-gui)
 
@@ -267,7 +272,7 @@ main()
 
       ```
 
-    * **For add-on TVG has another format please click -> [NEW](https://github.com/kakkarja/FreeTVG#new)**  
+    * **For add-on TVG has another format please click -> [NEW](#new)**  
 * **Printing will fill the background and foreground according to the text editor background and foreground**
 * **Fix little in light mode theme**
 * **Enhancing Fold**
@@ -299,6 +304,8 @@ main()
     * **If you press "Fold Childs" the retain ones will be folded again**
   * **Fold selected will delete the retain selected if selections is none**
   * **Fold Childs will fold all childs, if there is no retain selected**
+* **[New unresolve issues](#unresolve-issues)**
+  * **Refactoring, and bugs fixed or resolved**
 
 [⬆️](#freetvg-tree-view-gui)
 
