@@ -304,28 +304,61 @@ main()
   * **Fold Childs will fold all childs, if there is no retain selected**
 * **[New unresolve issues](#unresolve-issues)**
   * **Refactoring, and bugs fixed or resolved**
-* **EXPLAINATION:**
+* **EXPLANATION:**
   * **If user want to keep the selected fold and using hidden mode**
     * **Just unfold and use hidden mode**
     * **While in hidden mode, user could not use the fold function**
     * **If hidden mode is cleared, just press fold childs again and the retain ones will folded back again**
   * **For CPP function \[very powerful function for manipulating text content\]**
     * **In Hidden mode, you can select CPP to copied the text content and copied to new file or existing file**
-    * **CPP selection has been hacked for it's selection mode**
-      * **By default is extended mode selection that works like charm, same as selection mode for Fold selected**
-      * **However, if you find it confusing when you wanted choose the cells for manipulation, you can hacked the configuration to multiple mode**
-        * **Multiple mode will choose the cells one by one selectively**
+* **In CPP function**
+  * **CPP selection has been hacked for it's selection mode**
+    * **By default is extended mode selection that works like charm, same as selection mode for Fold selected**
+    * **However, if you find it confusing when you wanted choose the cells for manipulation, you can hacked the configuration to multiple mode**
+      * **Multiple mode will choose the cells one by one selectively**
 
-          ```Terminal
-          # Will change to multiple selection for CPP function
-          > tvg multiple
-          
-          # Combination for theme mode and selection mode
-          >tvg dark multiple
-          
-          # or
-          >tvg multiple light
-          ```
+        ```Terminal
+        # Will change to multiple selection for CPP function
+        > tvg multiple
+        
+        # Combination for theme mode and selection mode
+        >tvg dark multiple
+        
+        # or
+        >tvg multiple light
+        ```
+
+* **The algorithm of CPP has been improved**
+  * **Now selections that is not in order can be copied and moved to chosen selected line number**
+
+    >---
+    >
+    > ### **🤔 ALGORITHM EXPLANATION 💡**
+    >
+    >---
+    > **\# in moving mode (also works for copying)**
+    >
+    > **<ins>used to be in order only</ins>**
+    >
+    > **selections in order -> [1,2,3,4] (ascending only)**
+    >
+    > **chosen line 8**
+    >
+    > **Result:**
+    >
+    > **..,7,1,2,3,4,8,..**
+    >
+    > **\# in copying mode (also works for moving)**
+    >
+    > **<ins>Now also can be unordered</ins>**
+    >
+    > **selections unordered -> [1,3,5,7] (ascending only)**
+    >
+    > **chosen line 8**
+    >
+    > **Result:**
+    >
+    > **0,1,2,3,4,5,6,7,1,3,5,7,8,..**
 
 [⬆️](#freetvg-tree-view-gui)
 

@@ -1813,24 +1813,27 @@ class TreeViewGui:
                                 )
                                 if deci:
                                     with tv(self.filename) as tvg:
-                                        data = list(
-                                            islice(tvg.getdata(), gcs[0], gcs[-1] + 1)
-                                        )
+                                        data = []
+                                        for i in range(len(gcs)):
+                                            for _, d in islice(
+                                                tvg.getdata(), gcs[i], gcs[i] + 1
+                                            ):
+                                                data.append(d)
                                         writer = tvg.satofi()
                                         if ask < tvg.getdatanum() - 1:
                                             for n, d in tvg.getdata():
                                                 if n == ask == 0:
-                                                    if not data[0][1][0].isspace():
+                                                    if not data[0][0].isspace():
                                                         for i in data:
-                                                            writer.send(i[1])
+                                                            writer.send(i)
                                                         writer.send(d)
                                                     else:
                                                         writer.send(d)
                                                         for i in data:
-                                                            writer.send(i[1])
+                                                            writer.send(i)
                                                 elif n == ask:
                                                     for i in data:
-                                                        writer.send(i[1])
+                                                        writer.send(i)
                                                     writer.send(d)
                                                 elif n in gcs:
                                                     continue
@@ -1843,30 +1846,33 @@ class TreeViewGui:
                                                 else:
                                                     writer.send(d)
                                             for i in data:
-                                                writer.send(i[1])
+                                                writer.send(i)
                                         writer.close()
                                     del tvg, data, writer
                                     self.spaces()
                                 else:
                                     with tv(self.filename) as tvg:
-                                        data = list(
-                                            islice(tvg.getdata(), gcs[0], gcs[-1] + 1)
-                                        )
+                                        data = []
+                                        for i in range(len(gcs)):
+                                            for _, d in islice(
+                                                tvg.getdata(), gcs[i], gcs[i] + 1
+                                            ):
+                                                data.append(d)
                                         writer = tvg.satofi()
                                         if ask < tvg.getdatanum() - 1:
                                             for n, d in tvg.getdata():
                                                 if n == ask == 0:
-                                                    if not data[0][1][0].isspace():
+                                                    if not data[0][0].isspace():
                                                         for i in data:
-                                                            writer.send(i[1])
+                                                            writer.send(i)
                                                         writer.send(d)
                                                     else:
                                                         writer.send(d)
                                                         for i in data:
-                                                            writer.send(i[1])
+                                                            writer.send(i)
                                                 elif n == ask:
                                                     for i in data:
-                                                        writer.send(i[1])
+                                                        writer.send(i)
                                                     writer.send(d)
                                                 else:
                                                     writer.send(d)
@@ -1874,7 +1880,7 @@ class TreeViewGui:
                                             for n, d in tvg.getdata():
                                                 writer.send(d)
                                             for i in data:
-                                                writer.send(i[1])
+                                                writer.send(i)
                                         writer.close()
                                     del tvg, data, writer
                                     self.spaces()
@@ -3702,9 +3708,10 @@ def main():
     # when application started.
     if root.tk.call("tk", "fontchooser", "configure", "-visible"):
         root.tk.call("tk", "fontchooser", "hide")
-    if os.path.exists("lastopen.tvg"):
         root.update()
+    if os.path.exists("lastopen.tvg"):
         ask = messagebox.askyesno("TreeViewGui", "Want to open previous file?")
+        root.update()
         if ask:
             with open("lastopen.tvg", "rb") as lop:
                 rd = eval(lop.read().decode("utf-8"))
