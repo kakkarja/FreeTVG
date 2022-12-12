@@ -46,6 +46,8 @@ match _addon := importlib.util.find_spec("addon_tvg"):
 
 THEME_MODE = ctlight()
 
+CPP_SELECT_MODE = "extended"
+
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class TreeViewGui:
@@ -62,6 +64,7 @@ class TreeViewGui:
     def __init__(self, root, filename):
         self._addon = _addon
         self.tmode = THEME_MODE
+        self.cpp_select = CPP_SELECT_MODE
         self.filename = filename
         self.root = root
         self.plat = platform
@@ -1663,10 +1666,120 @@ class TreeViewGui:
                 [i for i in dat.split("\n") if i and not i.startswith("TOTAL SUMS =")]
             )
 
+    def _copytofile(self):
+        """Copy parents and childs in hidden modes to another existing file or new file."""
+
+        def chosen(flname):
+            TreeViewGui.FREEZE = False
+            if flname == "New":
+                askname = simpledialog.askstring(
+                    "TreeViewGui", "New file name:", parent=self.root
+                )
+                if askname:
+                    if not os.path.exists(self.glop.parent.joinpath(f"{askname}_tvg")):
+                        tak = self.fildat(self.text.get("1.0", END)[:-1])
+                        os.remove(f"{self.filename}_hid.json")
+                        self.createf(askname)
+                        with tv(self.filename) as tvg:
+                            tvg.fileread(tvg.insighthidden(tak, False))
+                        self.addonchk(False)
+                        del tak, tvg
+                        self.spaces()
+                        self.infobar()
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui",
+                            "Cannot create new file because is already exist!!!",
+                            parent=self.root,
+                        )
+                else:
+                    messagebox.showinfo(
+                        "TreeViewGui", "Copying is aborted!", parent=self.root
+                    )
+                del askname
+            else:
+                if os.path.exists(
+                    self.glop.parent.joinpath(
+                        flname, f'{flname.rpartition("_")[0]}.txt'
+                    )
+                ):
+                    if not os.path.exists(
+                        self.glop.parent.joinpath(
+                            flname,
+                            f'{flname.rpartition("_")[0]}_hid.json',
+                        )
+                    ):
+                        tak = self.fildat(self.text.get("1.0", END)[:-1], False)
+                        os.remove(f"{self.filename}_hid.json")
+                        self.addonchk()
+                        self.filename = flname.rpartition("_")[0]
+                        self.glop = self.glop.parent.joinpath(flname)
+                        os.chdir(self.glop)
+                        self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
+                        with tv(self.filename) as tvg:
+                            tak = tvg.insighthidden(tak, False)
+                            for p, d in tak:
+                                if p == "parent":
+                                    tvg.addparent(d[:-1])
+                                else:
+                                    tvg.quickchild(d[1:], p)
+                        self.addonchk(False)
+                        del tvg, tak
+                        self.spaces()
+                        self.infobar()
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui",
+                            "You cannot copied to hidden mode file!",
+                            parent=self.root,
+                        )
+                else:
+                    tak = self.fildat(self.text.get("1.0", END)[:-1])
+                    os.remove(f"{self.filename}_hid.json")
+                    self.addonchk()
+                    self.filename = flname.rpartition("_")[0]
+                    self.glop = self.glop.parent.joinpath(flname)
+                    os.chdir(self.glop)
+                    self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
+                    with tv(self.filename) as tvg:
+                        tvg.fileread(tvg.insighthidden(tak, False))
+                    del tak, tvg
+                    self.addonchk(False)
+                    self.spaces()
+                    self.infobar()
+            del flname
+
+        TreeViewGui.FREEZE = True
+        self.lock = True
+        files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
+        files.insert(0, "New")
+
+        @excpcls(2, DEFAULTFILE)
+        class MyDialog(simpledialog.Dialog):
+            def body(self, master):
+                self.title("Choose File")
+                Label(master, text="File: ").grid(row=0, column=0, sticky=E)
+                self.e1 = ttk.Combobox(master)
+                self.e1["values"] = files
+                self.e1.bind("<KeyRelease>", partial(TreeViewGui.tynam, files=files))
+                self.e1.current(0)
+                self.e1.grid(row=0, column=1)
+                return self.e1
+
+            def apply(self):
+                self.result = self.e1.get()
+
+        d = MyDialog(self.root)
+        self.root.update()
+        self.lock = False
+        if d.result:
+            chosen(d.result)
+        else:
+            TreeViewGui.FREEZE = False
+        del files, d.result
+
     def cmrows(self):
-        """Copy or move any rows to any point of a row within existing rows.
-        And copy parents and childs in hidden modes to another existing file or new file.
-        """
+        """Copy or move any rows to any point of a row within existing rows."""
 
         askmove = (
             messagebox.askyesno(
@@ -1676,231 +1789,114 @@ class TreeViewGui:
             else None
         )
         if askmove:
-
-            def chosen(flname):
-                TreeViewGui.FREEZE = False
-                if flname == "New":
-                    askname = simpledialog.askstring(
-                        "TreeViewGui", "New file name:", parent=self.root
-                    )
-                    if askname:
-                        if not os.path.exists(
-                            self.glop.parent.joinpath(f"{askname}_tvg")
-                        ):
-                            tak = self.fildat(self.text.get("1.0", END)[:-1])
-                            os.remove(f"{self.filename}_hid.json")
-                            self.createf(askname)
-                            with tv(self.filename) as tvg:
-                                tvg.fileread(tvg.insighthidden(tak, False))
-                            self.addonchk(False)
-                            del tak, tvg
-                            self.spaces()
-                            self.infobar()
-                        else:
-                            messagebox.showinfo(
-                                "TreeViewGui",
-                                "Cannot create new file because is already exist!!!",
-                                parent=self.root,
-                            )
-                    else:
-                        messagebox.showinfo(
-                            "TreeViewGui", "Copying is aborted!", parent=self.root
-                        )
-                    del askname
-                else:
-                    if os.path.exists(
-                        self.glop.parent.joinpath(
-                            flname, f'{flname.rpartition("_")[0]}.txt'
-                        )
-                    ):
-                        if not os.path.exists(
-                            self.glop.parent.joinpath(
-                                flname,
-                                f'{flname.rpartition("_")[0]}_hid.json',
-                            )
-                        ):
-                            tak = self.fildat(self.text.get("1.0", END)[:-1], False)
-                            os.remove(f"{self.filename}_hid.json")
-                            self.addonchk()
-                            self.filename = flname.rpartition("_")[0]
-                            self.glop = self.glop.parent.joinpath(flname)
-                            os.chdir(self.glop)
-                            self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
-                            with tv(self.filename) as tvg:
-                                tak = tvg.insighthidden(tak, False)
-                                for p, d in tak:
-                                    if p == "parent":
-                                        tvg.addparent(d[:-1])
-                                    else:
-                                        tvg.quickchild(d[1:], p)
-                            self.addonchk(False)
-                            del tvg, tak
-                            self.spaces()
-                            self.infobar()
-                        else:
-                            messagebox.showinfo(
-                                "TreeViewGui",
-                                "You cannot copied to hidden mode file!",
-                                parent=self.root,
-                            )
-                    else:
-                        tak = self.fildat(self.text.get("1.0", END)[:-1])
-                        os.remove(f"{self.filename}_hid.json")
-                        self.addonchk()
-                        self.filename = flname.rpartition("_")[0]
-                        self.glop = self.glop.parent.joinpath(flname)
-                        os.chdir(self.glop)
-                        self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
-                        with tv(self.filename) as tvg:
-                            tvg.fileread(tvg.insighthidden(tak, False))
-                        del tak, tvg
-                        self.addonchk(False)
-                        self.spaces()
-                        self.infobar()
-                del flname
-
-            TreeViewGui.FREEZE = True
-            self.lock = True
-            files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
-            files.insert(0, "New")
-
-            @excpcls(2, DEFAULTFILE)
-            class MyDialog(simpledialog.Dialog):
-                def body(self, master):
-                    self.title("Choose File")
-                    Label(master, text="File: ").grid(row=0, column=0, sticky=E)
-                    self.e1 = ttk.Combobox(master)
-                    self.e1["values"] = files
-                    self.e1.bind(
-                        "<KeyRelease>", partial(TreeViewGui.tynam, files=files)
-                    )
-                    self.e1.current(0)
-                    self.e1.grid(row=0, column=1)
-                    return self.e1
-
-                def apply(self):
-                    self.result = self.e1.get()
-
-            d = MyDialog(self.root)
-            self.root.update()
-            self.lock = False
-            if d.result:
-                chosen(d.result)
-            else:
-                TreeViewGui.FREEZE = False
-            del files, d.result
+            self._copytofile()
         else:
             self.hidcheck()
             if self.unlock:
                 if self.nonetype():
-                    if self.text.get("1.0", "1.0 lineend")[:-1]:
-                        if self.listb.cget("selectmode") == "browse":
-                            self.disab("listb", "button17", "text")
-                            self.listb.config(selectmode=EXTENDED)
-                        else:
-                            if self.listb.curselection():
-                                gcs = [int(i) for i in self.listb.curselection()]
-                                ask = simpledialog.askinteger(
+                    if self.listb.cget("selectmode") == "browse":
+                        self.listb.config(selectmode=self.cpp_select)
+                        self.disab("listb", "button17", "text")
+                    else:
+                        if gcs := self.listb.curselection():
+                            gcs = [int(i) for i in gcs]
+                            ask = simpledialog.askinteger(
+                                "TreeViewGui",
+                                f"Move to which row? choose between 0 to {self.listb.size()-1} rows",
+                                parent=self.root,
+                            )
+                            if ask is not None and ask < self.listb.size():
+                                deci = messagebox.askyesno(
                                     "TreeViewGui",
-                                    f"Move to which row? choose between 0 to {self.listb.size()-1} rows",
+                                    '"Yes" to MOVE to, "No" to COPY to',
                                     parent=self.root,
                                 )
-                                if ask is not None and ask < self.listb.size():
-                                    deci = messagebox.askyesno(
-                                        "TreeViewGui",
-                                        '"Yes" to MOVE to, "No" to COPY to',
-                                        parent=self.root,
-                                    )
-                                    if deci:
-                                        with tv(self.filename) as tvg:
-                                            data = list(
-                                                islice(
-                                                    tvg.getdata(), gcs[0], gcs[-1] + 1
-                                                )
-                                            )
-                                            writer = tvg.satofi()
-                                            if ask < tvg.getdatanum() - 1:
-                                                for n, d in tvg.getdata():
-                                                    if n == ask == 0:
-                                                        if not data[0][1][0].isspace():
-                                                            for i in data:
-                                                                writer.send(i[1])
-                                                            writer.send(d)
-                                                        else:
-                                                            writer.send(d)
-                                                            for i in data:
-                                                                writer.send(i[1])
-                                                    elif n == ask:
-                                                        for i in data:
-                                                            writer.send(i[1])
-                                                        writer.send(d)
-                                                    elif n in gcs:
-                                                        continue
-                                                    else:
-                                                        writer.send(d)
-                                            else:
-                                                for n, d in tvg.getdata():
-                                                    if n in gcs:
-                                                        continue
-                                                    else:
-                                                        writer.send(d)
-                                                for i in data:
-                                                    writer.send(i[1])
-                                            writer.close()
-                                        del tvg, data, writer
-                                        self.spaces()
-                                    else:
-                                        with tv(self.filename) as tvg:
-                                            data = list(
-                                                islice(
-                                                    tvg.getdata(), gcs[0], gcs[-1] + 1
-                                                )
-                                            )
-                                            writer = tvg.satofi()
-                                            if ask < tvg.getdatanum() - 1:
-                                                for n, d in tvg.getdata():
-                                                    if n == ask == 0:
-                                                        if not data[0][1][0].isspace():
-                                                            for i in data:
-                                                                writer.send(i[1])
-                                                            writer.send(d)
-                                                        else:
-                                                            writer.send(d)
-                                                            for i in data:
-                                                                writer.send(i[1])
-                                                    elif n == ask:
-                                                        for i in data:
-                                                            writer.send(i[1])
-                                                        writer.send(d)
-                                                    else:
-                                                        writer.send(d)
-                                            else:
-                                                for n, d in tvg.getdata():
-                                                    writer.send(d)
-                                                for i in data:
-                                                    writer.send(i[1])
-                                            writer.close()
-                                        del tvg, data, writer
-                                        self.spaces()
-                                    self.disab(dis=False)
-                                    self.listb.config(selectmode=BROWSE)
-                                    self.text.see(f"{ask}.0")
-                                    self.listb.see(ask)
-                                else:
-                                    self.disab(dis=False)
-                                    self.listb.config(selectmode=BROWSE)
-                                    if ask:
-                                        messagebox.showerror(
-                                            "TreeViewGui",
-                                            f"row {ask} is exceed existing rows",
-                                            parent=self.root,
+                                if deci:
+                                    with tv(self.filename) as tvg:
+                                        data = list(
+                                            islice(tvg.getdata(), gcs[0], gcs[-1] + 1)
                                         )
-                                del gcs, ask
+                                        writer = tvg.satofi()
+                                        if ask < tvg.getdatanum() - 1:
+                                            for n, d in tvg.getdata():
+                                                if n == ask == 0:
+                                                    if not data[0][1][0].isspace():
+                                                        for i in data:
+                                                            writer.send(i[1])
+                                                        writer.send(d)
+                                                    else:
+                                                        writer.send(d)
+                                                        for i in data:
+                                                            writer.send(i[1])
+                                                elif n == ask:
+                                                    for i in data:
+                                                        writer.send(i[1])
+                                                    writer.send(d)
+                                                elif n in gcs:
+                                                    continue
+                                                else:
+                                                    writer.send(d)
+                                        else:
+                                            for n, d in tvg.getdata():
+                                                if n in gcs:
+                                                    continue
+                                                else:
+                                                    writer.send(d)
+                                            for i in data:
+                                                writer.send(i[1])
+                                        writer.close()
+                                    del tvg, data, writer
+                                    self.spaces()
+                                else:
+                                    with tv(self.filename) as tvg:
+                                        data = list(
+                                            islice(tvg.getdata(), gcs[0], gcs[-1] + 1)
+                                        )
+                                        writer = tvg.satofi()
+                                        if ask < tvg.getdatanum() - 1:
+                                            for n, d in tvg.getdata():
+                                                if n == ask == 0:
+                                                    if not data[0][1][0].isspace():
+                                                        for i in data:
+                                                            writer.send(i[1])
+                                                        writer.send(d)
+                                                    else:
+                                                        writer.send(d)
+                                                        for i in data:
+                                                            writer.send(i[1])
+                                                elif n == ask:
+                                                    for i in data:
+                                                        writer.send(i[1])
+                                                    writer.send(d)
+                                                else:
+                                                    writer.send(d)
+                                        else:
+                                            for n, d in tvg.getdata():
+                                                writer.send(d)
+                                            for i in data:
+                                                writer.send(i[1])
+                                        writer.close()
+                                    del tvg, data, writer
+                                    self.spaces()
+                                self.disab(dis=False)
+                                self.listb.config(selectmode=BROWSE)
+                                self.text.see(f"{ask}.0")
+                                self.listb.see(ask)
                             else:
                                 self.disab(dis=False)
                                 self.listb.config(selectmode=BROWSE)
-                        self.listb.selection_clear(0, END)
-                        self.infobar()
+                                if ask:
+                                    messagebox.showerror(
+                                        "TreeViewGui",
+                                        f"row {ask} is exceed existing rows",
+                                        parent=self.root,
+                                    )
+                            del gcs, ask
+                        else:
+                            self.disab(dis=False)
+                            self.listb.config(selectmode=BROWSE)
+                    self.listb.selection_clear(0, END)
+                    self.infobar()
 
     def _utilspdf(self):
 
@@ -3645,8 +3641,8 @@ def findpath():
 
 
 @excp(m=2, filenm=DEFAULTFILE)
-def _modetheme(mode: str):
-    global THEME_MODE
+def _mode(mode: str):
+    global THEME_MODE, CPP_SELECT_MODE
 
     match mode := mode:
         case mode if mode.lower() == "dark":
@@ -3655,6 +3651,8 @@ def _modetheme(mode: str):
         case mode if mode.lower() == "light":
             if THEME_MODE is False:
                 THEME_MODE = "light"
+        case mode if mode.lower() == "multiple":
+            CPP_SELECT_MODE = mode
         case _:
             pass
 
@@ -3684,7 +3682,10 @@ def main():
 
     match ment := len(sys.argv):
         case ment if ment == 2:
-            _modetheme(sys.argv[1])
+            _mode(sys.argv[1])
+        case ment if ment == 3:
+            _mode(sys.argv[1])
+            _mode(sys.argv[2])
         case _:
             pass
 

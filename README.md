@@ -69,8 +69,6 @@ main()
 
 ## NEW
 
-[⬆️](#freetvg-tree-view-gui)
-
 * ### **Add-On for TVG**
 
   ```Terminal
@@ -313,6 +311,21 @@ main()
     * **If hidden mode is cleared, just press fold childs again and the retain ones will folded back again**
   * **For CPP function \[very powerful function for manipulating text content\]**
     * **In Hidden mode, you can select CPP to copied the text content and copied to new file or existing file**
+    * **CPP selection has been hacked for it's selection mode**
+      * **By default is extended mode selection that works like charm, same as selection mode for Fold selected**
+      * **However, if you find it confusing when you wanted choose the cells for manipulation, you can hacked the configuration to multiple mode**
+        * **Multiple mode will choose the cells one by one selectively**
+
+          ```Terminal
+          # Will change to multiple selection for CPP function
+          > tvg multiple
+          
+          # Combination for theme mode and selection mode
+          >tvg dark multiple
+          
+          # or
+          >tvg multiple light
+          ```
 
 [⬆️](#freetvg-tree-view-gui)
 
