@@ -348,8 +348,9 @@ main()
     >
     > **Result:**
     >
-    > **..,7,1,2,3,4,8,..**
+    > * **0,5,6,7,1,2,3,4,8,.. (records stay the same)**
     >
+    >---
     > **\# in copying mode (also works for moving)**
     >
     > **<ins>Now also can be unordered</ins>**
@@ -360,7 +361,9 @@ main()
     >
     > **Result:**
     >
-    > **0,1,2,3,4,5,6,7,1,3,5,7,8,..**
+    > * **0,1,2,3,4,5,6,7,1,3,5,7,8,.. (records are expanding)**
+    >
+    >---
 
 [⬆️](#freetvg-tree-view-gui)
 
@@ -376,6 +379,17 @@ main()
       * **For reference research [Shortcuts in MacOS X](https://support.apple.com/en-us/HT201236)**
     * **Resolution**
       * **Now change to <ins>Cmd+n</ins> for <ins>CPP function</ins> in <ins>MacOS X</ins>**
+
+[⬆️](#freetvg-tree-view-gui)
+
+---
+
+* **Selection preference**
+  * **Configuring selection to "multiple" will also applied to Fold selected function**
+  * **Only for Hidden mode will not change, as it is "multiple" by default**
+    * **No point to change to other selection mode, because the function's selection only choosing parents**
+* **Insight function**
+  * **Now functioning in Hidden mode, and CPP as well**
 
 [⬆️](#freetvg-tree-view-gui)
 

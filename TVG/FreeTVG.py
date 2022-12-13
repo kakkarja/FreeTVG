@@ -1041,16 +1041,16 @@ class TreeViewGui:
             elif event.keysym == "S":
                 self.fold_selected()
         else:
-            if (
-                str(self.bt["button17"].cget("state")) == "normal"
-                and event.keysym == "n"
-            ):
-                self.cmrows()
-            elif (
-                str(self.bt["button14"].cget("state")) == "normal"
-                and event.keysym == "h"
-            ):
-                self.hiddenchl()
+            if str(self.bt["button17"].cget("state")) == "normal":
+                if event.keysym == "n":
+                    self.cmrows()
+                elif event.keysym == "s":
+                    self.insight()
+            elif str(self.bt["button14"].cget("state")) == "normal":
+                if event.keysym == "h":
+                    self.hiddenchl()
+                elif event.keysym == "s":
+                    self.insight()
             elif (
                 str(self.bt["button24"].cget("state")) == "normal"
                 and event.keysym == "7"
@@ -1797,7 +1797,7 @@ class TreeViewGui:
                 if self.nonetype():
                     if self.listb.cget("selectmode") == "browse":
                         self.listb.config(selectmode=self.cpp_select)
-                        self.disab("listb", "button17", "text")
+                        self.disab("listb", "button17", "button10", "text")
                     else:
                         if gcs := self.listb.curselection():
                             gcs = [int(i) for i in gcs]
@@ -2092,7 +2092,7 @@ class TreeViewGui:
                 if not os.path.exists(f"{self.filename}_hid.json"):
                     if self.listb.cget("selectmode") == "browse":
                         self.info.set("Hidden Mode")
-                        self.disab("listb", "button14", "text")
+                        self.disab("listb", "button14", "button10", "text")
                         self.listb.config(selectmode=MULTIPLE)
                     else:
                         if self.listb.curselection():
@@ -3568,8 +3568,8 @@ class TreeViewGui:
         if self.unlock:
             if self.nonetype():
                 if self.listb.cget("selectmode") == BROWSE:
-                    self.listb.config(selectmode=EXTENDED)
-                    self.disab("button34", "button10", "listb")
+                    self.listb.config(selectmode=self.cpp_select)
+                    self.disab("button34", "button10", "listb", "text")
                     self._load_selection()
                     if not hasattr(self, "fold"):
                         self.__setattr__("fold", True)
