@@ -24,6 +24,8 @@
 * **[Unresolved Issues](#unresolve-issues)**
 * **[Development Purpose](#development-purpose)**
 * **[Latest Notice](#latest-notice)**
+* **[Algorithm Explanation](#-algorithm-explanation-)**
+* **[Technical issues](#technical-issues-on-shortcut-buttons)**
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
@@ -359,6 +361,21 @@ main()
     > **Result:**
     >
     > **0,1,2,3,4,5,6,7,1,3,5,7,8,..**
+
+[⬆️](#freetvg-tree-view-gui)
+
+---
+
+* ## **Technical issues on shortcut buttons**
+  
+  * **Due to some similarity of shortcut buttons in TVG with the global one in a OS, therefore the functions may result weirdly**
+  * **Found issues:**
+    * **TVG**
+      * **<ins>Ctrl+n</ins> for <ins>CPP function</ins> in <ins>MacOS X</ins>**
+      * **resulting selections being canceled and only one selected below selections**
+      * **For reference research [Shortcuts in MacOS X](https://support.apple.com/en-us/HT201236)**
+    * **Resolution**
+      * **Now change to <ins>Cmd+n</ins> for <ins>CPP function</ins> in <ins>MacOS X</ins>**
 
 [⬆️](#freetvg-tree-view-gui)
 
