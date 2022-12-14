@@ -390,6 +390,15 @@ main()
     * **No point to change to other selection mode, because the function's selection only choosing parents**
 * **Insight function**
   * **Now functioning in Hidden mode, and CPP as well**
+* **In Hidden Mode**
+  * **No longer 2 options**
+  * **The hidden mode is using reverse option only**
+    * **That mean the selection parents are not hid, and the rest will be hidden.**
+  * **TAKE NOTICE:**
+    * **If this changes bother any user, please stay with the current installed one**
+    * **However any future update changes will no more 2 options as well for Hidden Mode**
+    * **This decision deliberately done because of new functions Fold**
+      * **In fold hiding selections are making more sense**
 
 [⬆️](#freetvg-tree-view-gui)
 

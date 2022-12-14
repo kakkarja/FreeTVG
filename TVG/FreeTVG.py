@@ -4,6 +4,7 @@
 
 import ast
 import importlib
+import json
 import os
 import re
 import sys
@@ -2035,55 +2036,32 @@ class TreeViewGui:
     def hidform(self):
         """To display records and not hidden one from collection position in json file"""
 
-        import json
-
         if os.path.exists(f"{self.filename}_hid.json"):
             with open(f"{self.filename}_hid.json") as jfile:
                 rd = dict(json.load(jfile))
             rolrd = tuple(tuple(i) for i in tuple(rd.values()) if isinstance(i, list))
             self.view()
             showt = self.text.get("1.0", END).split("\n")[:-2]
-            if rd["reverse"] is False:
-                for wow, wrow in rolrd:
-                    for i in range(wow, wrow + 1):
-                        showt[i] = 0
-                self.text.config(state="normal")
-                self.text.delete("1.0", END)
-                showt = tuple(f"{i}\n" for i in showt if i != 0)
-                self._prettyv(enumerate(showt))
-                self.text.config(state="disable")
-                with tv(self.filename) as tvg:
-                    vals = enumerate(
-                        [d[0] for d in tvg.insighthidden(enumerate(showt), False)]
-                    )
-                self.listb.delete(0, END)
-                for n, p in vals:
-                    self.listb.insert(END, f"{n}: {p}")
-                del tvg, vals
-            else:
-                ih = []
-                for wow, wrow in rolrd:
-                    for i in range(wow, wrow + 1):
-                        ih.append(f"{showt[i]}\n")
-                ih = tuple(ih)
-                self.text.config(state="normal")
-                self.text.delete("1.0", END)
-                self._prettyv(enumerate(ih))
-                self.text.config(state="disable")
-                with tv(self.filename) as tvg:
-                    vals = enumerate(
-                        [d[0] for d in tvg.insighthidden(enumerate(ih), False)]
-                    )
-                self.listb.delete(0, END)
-                for n, p in vals:
-                    self.listb.insert(END, f"{n}: {p}")
-                del ih, tvg, vals
-            del rd, rolrd, showt
+            ih = []
+            for wow, wrow in rolrd:
+                for i in range(wow, wrow + 1):
+                    ih.append(f"{showt[i]}\n")
+            ih = tuple(ih)
+            self.text.config(state="normal")
+            self.text.delete("1.0", END)
+            self._prettyv(enumerate(ih))
+            self.text.config(state="disable")
+            with tv(self.filename) as tvg:
+                vals = enumerate(
+                    [d[0] for d in tvg.insighthidden(enumerate(ih), False)]
+                )
+            self.listb.delete(0, END)
+            for n, p in vals:
+                self.listb.insert(END, f"{n}: {p}")
+            del ih, tvg, vals, rd, rolrd, showt
 
-    def hiddenchl(self, event=None, chs: bool = None):
+    def hiddenchl(self, event=None):
         """Create Hidden position of parent and its childs in json file"""
-
-        import json
 
         if hasattr(self, "fold"):
             messagebox.showinfo("TreeViewGui", "Please unfolding first!")
@@ -2096,15 +2074,6 @@ class TreeViewGui:
                         self.listb.config(selectmode=MULTIPLE)
                     else:
                         if self.listb.curselection():
-                            ask = (
-                                messagebox.askyesno(
-                                    "TreeViewGui",
-                                    '"Yes" to hide selected, "No" reverse hide instead!',
-                                    parent=self.root,
-                                )
-                                if chs is None
-                                else chs
-                            )
                             allrows = [int(i) for i in self.listb.curselection()]
                             rows = {
                                 n: pc.split(":")[1].strip()
@@ -2137,21 +2106,9 @@ class TreeViewGui:
                                         if rows[row] == "parent":
                                             hd[num] = (row, row)
                             if hd:
-                                if ask:
-                                    rev = {"reverse": False}
-                                    with open(
-                                        f"{self.filename}_hid.json", "w"
-                                    ) as jfile:
-                                        json.dump(hd | rev, jfile)
-                                    self.hidform()
-                                else:
-                                    rev = {"reverse": True}
-                                    with open(
-                                        f"{self.filename}_hid.json", "w"
-                                    ) as jfile:
-                                        json.dump(hd | rev, jfile)
-                                    self.hidform()
-                                del ask, rev
+                                with open(f"{self.filename}_hid.json", "w") as jfile:
+                                    json.dump(hd, jfile)
+                                self.hidform()
                             else:
                                 self.listb.selection_clear(0, END)
                                 messagebox.showinfo(
@@ -2173,53 +2130,14 @@ class TreeViewGui:
     def delhid(self, event=None):
         """Deleting accordingly each position in json file, or can delete the file"""
 
-        import json
-
         if os.path.exists(f"{self.filename}_hid.json"):
-            with open(f"{self.filename}_hid.json") as jfile:
-                rd = dict(json.load(jfile))
-            if rd["reverse"] is False:
-                rd = [i for i in list(rd.values()) if isinstance(i, list)]
-                ans = messagebox.askyesno(
-                    "TreeViewGui",
-                    'Please choose "Yes" to delete ascending order, or "No" to delete all?',
-                    parent=self.root,
-                )
-                if ans:
-                    if rd:
-                        rd.pop()
-                        if rd:
-                            rd = {k: v for k, v in list(enumerate(rd))}
-                            rev = {"reverse": False}
-                            with open(f"{self.filename}_hid.json", "w") as jfile:
-                                json.dump(rd | rev, jfile)
-                            self.hidform()
-                            del rev, rd
-                        else:
-                            os.remove(f"{self.filename}_hid.json")
-                            self.spaces()
-                            messagebox.showinfo(
-                                "TreeViewGui",
-                                f"{self.filename}_hid.json has been deleted!",
-                                parent=self.root,
-                            )
-                else:
-                    os.remove(f"{self.filename}_hid.json")
-                    self.spaces()
-                    messagebox.showinfo(
-                        "TreeViewGui",
-                        f"{self.filename}_hid.json has been deleted!",
-                        parent=self.root,
-                    )
-                del ans
-            else:
-                os.remove(f"{self.filename}_hid.json")
-                self.spaces()
-                messagebox.showinfo(
-                    "TreeViewGui",
-                    f"{self.filename}_hid.json has been deleted!",
-                    parent=self.root,
-                )
+            os.remove(f"{self.filename}_hid.json")
+            self.spaces()
+            messagebox.showinfo(
+                "TreeViewGui",
+                f"{self.filename}_hid.json has been deleted!",
+                parent=self.root,
+            )
 
     def lookup(self, event=None):
         """To lookup word on row and also on editor mode"""
@@ -3195,7 +3113,7 @@ class TreeViewGui:
                                 tot = sa.lumpsum()
                                 for i in idx:
                                     self.listb.select_set(i)
-                                self.hiddenchl(chs=False)
+                                self.hiddenchl()
                                 self.text.config(state=NORMAL)
                                 if (
                                     self.text.get(f"{END} - 2 lines", END)
