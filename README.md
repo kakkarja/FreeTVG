@@ -399,6 +399,16 @@ main()
     * **However any future update changes will no more 2 options as well for Hidden Mode**
     * **This decision deliberately done because of new functions Fold**
       * **In fold hiding selections are making more sense**
+* **On 2nd thought**
+  * **Is not easy to just hid 1 parent, so there is the configuration for it**
+  * **When starting the app in cmd prompt / terminal type**
+
+    ```Terminal
+    >TVG unreverse
+    ```
+
+  * **Will change the reverse option in Hidden mode**
+    * **The selections will be hidden instead**
 
 [⬆️](#freetvg-tree-view-gui)
 

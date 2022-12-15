@@ -49,6 +49,8 @@ THEME_MODE = ctlight()
 
 CPP_SELECT_MODE = "extended"
 
+HIDDEN_OPT = None
+
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class TreeViewGui:
@@ -66,6 +68,7 @@ class TreeViewGui:
         self._addon = _addon
         self.tmode = THEME_MODE
         self.cpp_select = CPP_SELECT_MODE
+        self.hidopt = HIDDEN_OPT
         self.filename = filename
         self.root = root
         self.plat = platform
@@ -2042,23 +2045,42 @@ class TreeViewGui:
             rolrd = tuple(tuple(i) for i in tuple(rd.values()) if isinstance(i, list))
             self.view()
             showt = self.text.get("1.0", END).split("\n")[:-2]
-            ih = []
-            for wow, wrow in rolrd:
-                for i in range(wow, wrow + 1):
-                    ih.append(f"{showt[i]}\n")
-            ih = tuple(ih)
-            self.text.config(state="normal")
-            self.text.delete("1.0", END)
-            self._prettyv(enumerate(ih))
-            self.text.config(state="disable")
-            with tv(self.filename) as tvg:
-                vals = enumerate(
-                    [d[0] for d in tvg.insighthidden(enumerate(ih), False)]
-                )
-            self.listb.delete(0, END)
-            for n, p in vals:
-                self.listb.insert(END, f"{n}: {p}")
-            del ih, tvg, vals, rd, rolrd, showt
+            if self.hidopt == "unreverse":
+                for wow, wrow in rolrd:
+                    for i in range(wow, wrow + 1):
+                        showt[i] = 0
+                self.text.config(state="normal")
+                self.text.delete("1.0", END)
+                showt = tuple(f"{i}\n" for i in showt if i != 0)
+                self._prettyv(enumerate(showt))
+                self.text.config(state="disable")
+                with tv(self.filename) as tvg:
+                    vals = enumerate(
+                        [d[0] for d in tvg.insighthidden(enumerate(showt), False)]
+                    )
+                self.listb.delete(0, END)
+                for n, p in vals:
+                    self.listb.insert(END, f"{n}: {p}")
+                del tvg, vals
+            else:
+                ih = []
+                for wow, wrow in rolrd:
+                    for i in range(wow, wrow + 1):
+                        ih.append(f"{showt[i]}\n")
+                ih = tuple(ih)
+                self.text.config(state="normal")
+                self.text.delete("1.0", END)
+                self._prettyv(enumerate(ih))
+                self.text.config(state="disable")
+                with tv(self.filename) as tvg:
+                    vals = enumerate(
+                        [d[0] for d in tvg.insighthidden(enumerate(ih), False)]
+                    )
+                self.listb.delete(0, END)
+                for n, p in vals:
+                    self.listb.insert(END, f"{n}: {p}")
+                del ih, tvg, vals
+            del rd, rolrd, showt
 
     def hiddenchl(self, event=None):
         """Create Hidden position of parent and its childs in json file"""
@@ -3567,7 +3589,7 @@ def findpath():
 
 @excp(m=2, filenm=DEFAULTFILE)
 def _mode(mode: str):
-    global THEME_MODE, CPP_SELECT_MODE
+    global THEME_MODE, CPP_SELECT_MODE, HIDDEN_OPT
 
     match mode := mode:
         case mode if mode.lower() == "dark":
@@ -3578,6 +3600,8 @@ def _mode(mode: str):
                 THEME_MODE = "light"
         case mode if mode.lower() == "multiple":
             CPP_SELECT_MODE = mode
+        case mode if mode.lower() == "unreverse":
+            HIDDEN_OPT = mode
         case _:
             pass
 
@@ -3611,6 +3635,10 @@ def main():
         case ment if ment == 3:
             _mode(sys.argv[1])
             _mode(sys.argv[2])
+        case ment if ment == 4:
+            _mode(sys.argv[1])
+            _mode(sys.argv[2])
+            _mode(sys.argv[3])
         case _:
             pass
 
