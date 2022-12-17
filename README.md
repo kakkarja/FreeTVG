@@ -416,6 +416,13 @@ main()
     * **While app still running Press Win [Ctrl + F5] || Mac [fn + F5]**
     * **Exit the app and run again, everyrhing back to default!**
   * **Dependency added tomlkit [@sdispater](https://pypi.org/project/tomlkit/)**
+  * **Add Configuration for wrapping**
+    * **By default words in TVG is unwrapped**
+
+      ```Terminal
+      # Config wrapping
+      > TVG word
+      ```
 
 [⬆️](#freetvg-tree-view-gui)
 

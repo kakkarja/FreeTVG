@@ -52,6 +52,8 @@ SELECT_MODE = "extended"
 
 HIDDEN_OPT = False
 
+WRAPPING = "none"
+
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class TreeViewGui:
@@ -70,6 +72,7 @@ class TreeViewGui:
         self.tmode = THEME_MODE
         self.cpp_select = SELECT_MODE
         self.hidopt = HIDDEN_OPT
+        self.wrapping = WRAPPING
         self.filename = filename
         self.root = root
         self.plat = platform
@@ -486,7 +489,7 @@ class TreeViewGui:
             font=ftt,
             padx=5,
             pady=3,
-            wrap=NONE,
+            wrap=self.wrapping,
             undo=True,
             autoseparators=True,
             maxundo=-1,
@@ -873,7 +876,7 @@ class TreeViewGui:
         """Wrap the records so that all filled the text window"""
         # The scrolling horizontal become inactive.
 
-        if str(self.text.cget("wrap")) == "none":
+        if self.text.cget("wrap") == "none":
             self.text.config(wrap=WORD)
         else:
             self.text.config(wrap=NONE)
@@ -3613,6 +3616,7 @@ def _create_config():
                     "THEME_MODE": THEME_MODE,
                     "SELECT_MODE": SELECT_MODE,
                     "HIDDEN_OPT": HIDDEN_OPT,
+                    "WRAPPING": WRAPPING,
                 }
             },
             fp,
@@ -3624,12 +3628,13 @@ def _load_config():
     """Load configuration"""
 
     if os.path.exists("TVG_config.toml"):
-        global THEME_MODE, SELECT_MODE, HIDDEN_OPT
+        global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING
         with open("TVG_config.toml") as rf:
             cfg = tomlkit.load(rf)
         THEME_MODE = cfg["Configure"]["THEME_MODE"]
         SELECT_MODE = cfg["Configure"]["SELECT_MODE"]
         HIDDEN_OPT = cfg["Configure"]["HIDDEN_OPT"]
+        WRAPPING = cfg["Configure"]["WRAPPING"]
         del cfg
 
 
@@ -3637,7 +3642,7 @@ def _load_config():
 def configuring(args: list):
     """configuring TVG"""
 
-    vals = THEME_MODE, SELECT_MODE, HIDDEN_OPT
+    vals = THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING
     match ment := len(args):
         case ment if ment == 2:
             _mode(args[1])
@@ -3648,16 +3653,21 @@ def configuring(args: list):
             _mode(args[1])
             _mode(args[2])
             _mode(args[3])
+        case ment if ment == 5:
+            _mode(args[1])
+            _mode(args[2])
+            _mode(args[3])
+            _mode(args[4])
         case _:
             pass
-    if vals != (THEME_MODE, SELECT_MODE, HIDDEN_OPT):
+    if vals != (THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING):
         _create_config()
     del args, vals
 
 
 @excp(m=2, filenm=DEFAULTFILE)
 def _mode(mode: str):
-    global THEME_MODE, SELECT_MODE, HIDDEN_OPT
+    global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING
 
     match mode := mode:
         case mode if mode.lower() == "dark":
@@ -3670,6 +3680,8 @@ def _mode(mode: str):
             SELECT_MODE = mode
         case mode if mode.lower() == "unreverse":
             HIDDEN_OPT = mode
+        case mode if mode.lower() == "word":
+            WRAPPING = mode
         case _:
             pass
     del mode
