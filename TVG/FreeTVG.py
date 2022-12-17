@@ -3609,11 +3609,17 @@ def findpath():
 def _create_config():
     """Configuration set according to the user's preference"""
 
+    global THEME_MODE
+
+    deval = [ctlight()]
+
     with open("TVG_config.toml", "w") as fp:
         tomlkit.dump(
             {
                 "Configure": {
-                    "THEME_MODE": THEME_MODE,
+                    "THEME_MODE": (
+                        THEME_MODE := THEME_MODE if THEME_MODE != deval[0] else 0
+                    ),
                     "SELECT_MODE": SELECT_MODE,
                     "HIDDEN_OPT": HIDDEN_OPT,
                     "WRAPPING": WRAPPING,
@@ -3621,6 +3627,7 @@ def _create_config():
             },
             fp,
         )
+    del deval
 
 
 @excp(m=2, filenm=DEFAULTFILE)
@@ -3631,7 +3638,11 @@ def _load_config():
         global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING
         with open("TVG_config.toml") as rf:
             cfg = tomlkit.load(rf)
-        THEME_MODE = cfg["Configure"]["THEME_MODE"]
+        THEME_MODE = (
+            cfg["Configure"]["THEME_MODE"]
+            if cfg["Configure"]["THEME_MODE"] != 0
+            else THEME_MODE
+        )
         SELECT_MODE = cfg["Configure"]["SELECT_MODE"]
         HIDDEN_OPT = cfg["Configure"]["HIDDEN_OPT"]
         WRAPPING = cfg["Configure"]["WRAPPING"]

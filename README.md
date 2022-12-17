@@ -151,7 +151,7 @@ main()
       * **To unhide all**
   * **TAKE NOTICE:**
     * **Fold selection will retain when changing file, but not for fold all childs**
-    * **~~Once Unfold, the retain selection will not be erased~~**
+    * **~~Once Unfold, the retain selection will be erased~~**
   * **The difference between Fold and Hidden mode**
     * **Fold only hide childs and Hidden mode, hide parents and their childs**
     * **In fold all other functions working properly and in Hidden mode, all other functions are freeze**
