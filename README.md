@@ -409,7 +409,14 @@ main()
 
   * **Will change the reverse option in Hidden mode**
     * **The selections will be hidden instead**
-
+* **Configuration**
+  * **Now when user change the configuration of elements in TVG, it will be saved**
+    * **User do not need to reconfigure again when starting the app**
+  * **If want to set back to default setting:**
+    * **While app still running Press Win [Ctrl + F5] || Mac [fn + F5]**
+    * **Exit the app and run again, everyrhing back to default!**
+  * **Dependency added [tomlkit](https://pypi.org/project/tomlkit/)**
+  
 [⬆️](#freetvg-tree-view-gui)
 
 ## TVG

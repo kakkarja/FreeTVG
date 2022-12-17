@@ -9,6 +9,7 @@ import os
 import re
 import sys
 import string
+import tomlkit
 from datetime import datetime as dt
 from functools import partial
 from itertools import islice
@@ -47,9 +48,9 @@ match _addon := importlib.util.find_spec("addon_tvg"):
 
 THEME_MODE = ctlight()
 
-CPP_SELECT_MODE = "extended"
+SELECT_MODE = "extended"
 
-HIDDEN_OPT = None
+HIDDEN_OPT = False
 
 
 @excpcls(m=2, filenm=DEFAULTFILE)
@@ -67,7 +68,7 @@ class TreeViewGui:
     def __init__(self, root, filename):
         self._addon = _addon
         self.tmode = THEME_MODE
-        self.cpp_select = CPP_SELECT_MODE
+        self.cpp_select = SELECT_MODE
         self.hidopt = HIDDEN_OPT
         self.filename = filename
         self.root = root
@@ -145,12 +146,14 @@ class TreeViewGui:
             self.root.bind_all("<Control-Key-F1>", self.fcsent)
             self.root.bind_all("<Control-Key-F2>", self.fcsent)
             self.root.bind_all("<Control-Key-F3>", self.fcsent)
+            self.root.bind_all("<Control-Key-F5>", self.configd)
             if self._addon:
                 self.root.bind_all("<Control-Key-F4>", self.exprsum)
         else:
             self.root.bind_all("<Key-F1>", self.fcsent)
             self.root.bind_all("<Key-F2>", self.fcsent)
             self.root.bind_all("<Key-F3>", self.fcsent)
+            self.root.bind_all("<Key-F5>", self.configd)
             if self._addon:
                 self.root.bind_all("<Key-F4>", self.exprsum)
 
@@ -2054,14 +2057,15 @@ class TreeViewGui:
                 showt = tuple(f"{i}\n" for i in showt if i != 0)
                 self._prettyv(enumerate(showt))
                 self.text.config(state="disable")
-                with tv(self.filename) as tvg:
-                    vals = enumerate(
-                        [d[0] for d in tvg.insighthidden(enumerate(showt), False)]
-                    )
                 self.listb.delete(0, END)
-                for n, p in vals:
-                    self.listb.insert(END, f"{n}: {p}")
-                del tvg, vals
+                if showt:
+                    with tv(self.filename) as tvg:
+                        vals = enumerate(
+                            [d[0] for d in tvg.insighthidden(enumerate(showt), False)]
+                        )
+                    for n, p in vals:
+                        self.listb.insert(END, f"{n}: {p}")
+                    del tvg, vals
             else:
                 ih = []
                 for wow, wrow in rolrd:
@@ -3539,6 +3543,17 @@ class TreeViewGui:
                     self.view()
                     self.infobar()
 
+    def configd(self, event=None):
+        """Deleting configuration file to default"""
+
+        if os.path.exists(self.glop.parent.joinpath("TVG_config.toml")):
+            os.remove(self.glop.parent.joinpath("TVG_config.toml"))
+            messagebox.showinfo(
+                "TreeViewGui",
+                "Configuration has been set to default!",
+                parent=self.root,
+            )
+
 
 @excp(m=2, filenm=DEFAULTFILE)
 def askfile(root):
@@ -3588,8 +3603,61 @@ def findpath():
 
 
 @excp(m=2, filenm=DEFAULTFILE)
+def _create_config():
+    """Configuration set according to the user's preference"""
+
+    with open("TVG_config.toml", "w") as fp:
+        tomlkit.dump(
+            {
+                "Configure": {
+                    "THEME_MODE": THEME_MODE,
+                    "SELECT_MODE": SELECT_MODE,
+                    "HIDDEN_OPT": HIDDEN_OPT,
+                }
+            },
+            fp,
+        )
+
+
+@excp(m=2, filenm=DEFAULTFILE)
+def _load_config():
+    """Load configuration"""
+
+    if os.path.exists("TVG_config.toml"):
+        global THEME_MODE, SELECT_MODE, HIDDEN_OPT
+        with open("TVG_config.toml") as rf:
+            cfg = tomlkit.load(rf)
+        THEME_MODE = cfg["Configure"]["THEME_MODE"]
+        SELECT_MODE = cfg["Configure"]["SELECT_MODE"]
+        HIDDEN_OPT = cfg["Configure"]["HIDDEN_OPT"]
+        del cfg
+
+
+@excp(m=2, filenm=DEFAULTFILE)
+def configuring(args: list):
+    """configuring TVG"""
+
+    vals = THEME_MODE, SELECT_MODE, HIDDEN_OPT
+    match ment := len(args):
+        case ment if ment == 2:
+            _mode(args[1])
+        case ment if ment == 3:
+            _mode(args[1])
+            _mode(args[2])
+        case ment if ment == 4:
+            _mode(args[1])
+            _mode(args[2])
+            _mode(args[3])
+        case _:
+            pass
+    if vals != (THEME_MODE, SELECT_MODE, HIDDEN_OPT):
+        _create_config()
+    del args, vals
+
+
+@excp(m=2, filenm=DEFAULTFILE)
 def _mode(mode: str):
-    global THEME_MODE, CPP_SELECT_MODE, HIDDEN_OPT
+    global THEME_MODE, SELECT_MODE, HIDDEN_OPT
 
     match mode := mode:
         case mode if mode.lower() == "dark":
@@ -3599,11 +3667,12 @@ def _mode(mode: str):
             if THEME_MODE is False:
                 THEME_MODE = "light"
         case mode if mode.lower() == "multiple":
-            CPP_SELECT_MODE = mode
+            SELECT_MODE = mode
         case mode if mode.lower() == "unreverse":
             HIDDEN_OPT = mode
         case _:
             pass
+    del mode
 
 
 @excp(m=2, filenm=DEFAULTFILE)
@@ -3629,19 +3698,6 @@ def titlemode(sent: str):
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
 
-    match ment := len(sys.argv):
-        case ment if ment == 2:
-            _mode(sys.argv[1])
-        case ment if ment == 3:
-            _mode(sys.argv[1])
-            _mode(sys.argv[2])
-        case ment if ment == 4:
-            _mode(sys.argv[1])
-            _mode(sys.argv[2])
-            _mode(sys.argv[3])
-        case _:
-            pass
-
     global _addon
     if _addon and _addon.name == "addon_tvg":
         _addon = True
@@ -3649,6 +3705,9 @@ def main():
         _addon = False
 
     findpath()
+    configuring(sys.argv)
+    _load_config()
+
     root = Tk()
     root.withdraw()
     # case fontchooser dialog still reacted toward the application sudden exit and cause it to show
