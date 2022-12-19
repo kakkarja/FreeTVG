@@ -54,6 +54,8 @@ HIDDEN_OPT = False
 
 WRAPPING = "none"
 
+CHECKED_BOX = "off"
+
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class TreeViewGui:
@@ -73,6 +75,7 @@ class TreeViewGui:
         self.cpp_select = SELECT_MODE
         self.hidopt = HIDDEN_OPT
         self.wrapping = WRAPPING
+        self.checked_box = CHECKED_BOX
         self.filename = filename
         self.root = root
         self.plat = platform
@@ -1594,14 +1597,31 @@ class TreeViewGui:
         if self.unlock:
             if self.listb.curselection():
                 rw = int(self.listb.curselection()[0])
-                with tv(self.filename) as tvg:
-                    tvg.checked(rw)
-                del tvg
+                if self.checked_box.lower() == "on":
+                    gtt = self.text.get(f"{rw + 1}.0", f"{rw + 1}.0 lineend")
+                    if gtt:
+                        if gtt[0].isspace() and not gtt.strip().startswith("-[x] "):
+                            gtt = gtt.partition("-")
+                            rwd = "[x] " + gtt[2]
+                            with tv(self.filename) as tvg:
+                                tvg.edittree(rwd, rw, f"child{len(gtt[0])//4}")
+                            del rwd, tvg
+                        elif gtt.strip().startswith("-[x] "):
+                            gtt = gtt.partition("-[x] ")
+                            rwd = gtt[2]
+                            with tv(self.filename) as tvg:
+                                tvg.edittree(rwd, rw, f"child{len(gtt[0])//4}")
+                            del rwd, tvg
+                    del gtt
+                else:
+                    with tv(self.filename) as tvg:
+                        tvg.checked(rw)
+                    del tvg
                 self.view()
                 self.listb.select_set(rw)
                 self.listb.activate(rw)
                 self.listb.see(rw)
-                self.text.see(f"{rw}.0")
+                self.text.see(f"{rw + 1}.0")
                 del rw
                 self.infobar()
 
@@ -3623,6 +3643,7 @@ def _create_config():
                     "SELECT_MODE": SELECT_MODE,
                     "HIDDEN_OPT": HIDDEN_OPT,
                     "WRAPPING": WRAPPING,
+                    "CHECKED_BOX": CHECKED_BOX,
                 }
             },
             fp,
@@ -3635,7 +3656,7 @@ def _load_config():
     """Load configuration"""
 
     if os.path.exists("TVG_config.toml"):
-        global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING
+        global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
         with open("TVG_config.toml") as rf:
             cfg = tomlkit.load(rf)
         THEME_MODE = (
@@ -3646,6 +3667,7 @@ def _load_config():
         SELECT_MODE = cfg["Configure"]["SELECT_MODE"]
         HIDDEN_OPT = cfg["Configure"]["HIDDEN_OPT"]
         WRAPPING = cfg["Configure"]["WRAPPING"]
+        CHECKED_BOX = cfg["Configure"]["CHECKED_BOX"]
         del cfg
 
 
@@ -3653,7 +3675,7 @@ def _load_config():
 def configuring(args: list):
     """configuring TVG"""
 
-    vals = THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING
+    vals = THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
     match ment := len(args):
         case ment if ment == 2:
             _mode(args[1])
@@ -3669,16 +3691,22 @@ def configuring(args: list):
             _mode(args[2])
             _mode(args[3])
             _mode(args[4])
+        case ment if ment == 6:
+            _mode(args[1])
+            _mode(args[2])
+            _mode(args[3])
+            _mode(args[4])
+            _mode(args[5])
         case _:
             pass
-    if vals != (THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING):
+    if vals != (THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX):
         _create_config()
     del args, vals
 
 
 @excp(m=2, filenm=DEFAULTFILE)
 def _mode(mode: str):
-    global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING
+    global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
 
     match mode := mode:
         case mode if mode.lower() == "dark":
@@ -3693,6 +3721,8 @@ def _mode(mode: str):
             HIDDEN_OPT = mode
         case mode if mode.lower() == "word":
             WRAPPING = mode
+        case mode if mode.lower() == "on":
+            CHECKED_BOX = mode
         case _:
             pass
     del mode

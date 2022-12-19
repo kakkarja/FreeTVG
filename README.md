@@ -26,6 +26,7 @@
 * **[Latest Notice](#latest-notice)**
 * **[Algorithm Explanation](#-algorithm-explanation-)**
 * **[Technical issues](#technical-issues-on-shortcut-buttons)**
+* **[Configuration](#configuration)**
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
@@ -404,12 +405,17 @@ main()
   * **When starting the app in cmd prompt / terminal type**
 
     ```Terminal
+    # Config for Hidden mode
     >TVG unreverse
     ```
 
   * **Will change the reverse option in Hidden mode**
     * **The selections will be hidden instead**
-* **Configuration**
+
+[⬆️](#freetvg-tree-view-gui)
+
+* ### **Configuration**
+
   * **Now when user change the configuration of elements in TVG, it will be saved**
     * **User do not need to reconfigure again when starting the app**
   * **If want to set back to default setting:**
@@ -422,6 +428,23 @@ main()
       ```Terminal
       # Config wrapping
       > TVG word
+      ```
+
+  * **Add configuration for cheked-box**
+    * **Cheked function by default will add "✔️" or ">>[DONE]<<" depend on the OS default system encoding**
+    * **Now can be configured to add "[x]"**
+
+      ```Terminal
+      # Config Checked-Box
+      > TVG on
+      ```
+
+  * **Configuration values**
+    * **Can be mixed as long as values are identified by TVG**
+
+      ```Terminal
+      # Config values mixed
+      > TVG on light unreverse word multiple
       ```
 
 [⬆️](#freetvg-tree-view-gui)
