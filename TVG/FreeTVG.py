@@ -689,7 +689,7 @@ class TreeViewGui:
         chbg = "grey30"
         orifg = "black"
         chfg = "white"
-        if self.tmode == "dark" or not self.tmode:
+        if self.tmode == "dark" or self.tmode is False:
             self.stl.configure(
                 ".",
                 background=chbg,
