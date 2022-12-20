@@ -7,9 +7,8 @@ import importlib
 import json
 import os
 import re
-import sys
 import string
-import tomlkit
+import sys
 from datetime import datetime as dt
 from functools import partial
 from itertools import islice
@@ -18,6 +17,7 @@ from sys import platform
 from tkinter import *
 from tkinter import colorchooser, font, messagebox, simpledialog, ttk
 
+import tomlkit
 from treeview import TreeView as tv
 from treeview.dbase import Datab as db
 
@@ -1720,7 +1720,7 @@ class TreeViewGui:
                     else:
                         messagebox.showinfo(
                             "TreeViewGui",
-                            "Cannot create new file because is already exist!!!",
+                            "Cannot create new file because is already exist!",
                             parent=self.root,
                         )
                 else:
@@ -1729,18 +1729,45 @@ class TreeViewGui:
                     )
                 del askname
             else:
-                if os.path.exists(
-                    self.glop.parent.joinpath(
-                        flname, f'{flname.rpartition("_")[0]}.txt'
-                    )
-                ):
-                    if not os.path.exists(
+                # To catch error for unknown escape sequence!
+                if os.path.exists(self.glop.parent.joinpath(flname)):
+                    if os.path.exists(
                         self.glop.parent.joinpath(
-                            flname,
-                            f'{flname.rpartition("_")[0]}_hid.json',
+                            flname, f'{flname.rpartition("_")[0]}.txt'
                         )
                     ):
-                        tak = self.fildat(self.text.get("1.0", END)[:-1], False)
+                        if not os.path.exists(
+                            self.glop.parent.joinpath(
+                                flname,
+                                f'{flname.rpartition("_")[0]}_hid.json',
+                            )
+                        ):
+                            tak = self.fildat(self.text.get("1.0", END)[:-1], False)
+                            os.remove(f"{self.filename}_hid.json")
+                            self.addonchk()
+                            self.filename = flname.rpartition("_")[0]
+                            self.glop = self.glop.parent.joinpath(flname)
+                            os.chdir(self.glop)
+                            self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
+                            with tv(self.filename) as tvg:
+                                tak = tvg.insighthidden(tak, False)
+                                for p, d in tak:
+                                    if p == "parent":
+                                        tvg.addparent(d[:-1])
+                                    else:
+                                        tvg.quickchild(d[1:], p)
+                            self.addonchk(False)
+                            del tvg, tak
+                            self.spaces()
+                            self.infobar()
+                        else:
+                            messagebox.showinfo(
+                                "TreeViewGui",
+                                "You cannot copied to hidden mode file!",
+                                parent=self.root,
+                            )
+                    else:
+                        tak = self.fildat(self.text.get("1.0", END)[:-1])
                         os.remove(f"{self.filename}_hid.json")
                         self.addonchk()
                         self.filename = flname.rpartition("_")[0]
@@ -1748,36 +1775,17 @@ class TreeViewGui:
                         os.chdir(self.glop)
                         self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                         with tv(self.filename) as tvg:
-                            tak = tvg.insighthidden(tak, False)
-                            for p, d in tak:
-                                if p == "parent":
-                                    tvg.addparent(d[:-1])
-                                else:
-                                    tvg.quickchild(d[1:], p)
+                            tvg.fileread(tvg.insighthidden(tak, False))
+                        del tak, tvg
                         self.addonchk(False)
-                        del tvg, tak
                         self.spaces()
                         self.infobar()
-                    else:
-                        messagebox.showinfo(
-                            "TreeViewGui",
-                            "You cannot copied to hidden mode file!",
-                            parent=self.root,
-                        )
                 else:
-                    tak = self.fildat(self.text.get("1.0", END)[:-1])
-                    os.remove(f"{self.filename}_hid.json")
-                    self.addonchk()
-                    self.filename = flname.rpartition("_")[0]
-                    self.glop = self.glop.parent.joinpath(flname)
-                    os.chdir(self.glop)
-                    self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
-                    with tv(self.filename) as tvg:
-                        tvg.fileread(tvg.insighthidden(tak, False))
-                    del tak, tvg
-                    self.addonchk(False)
-                    self.spaces()
-                    self.infobar()
+                    messagebox.showerror(
+                        "TreeViewGui",
+                        f"{flname}_tvg is not exist please re-choose 'NEW'!",
+                        parent=self.root,
+                    )
             del flname
 
         TreeViewGui.FREEZE = True
