@@ -449,8 +449,8 @@ main()
 
 * **Combobox algorithm enhance for selecting file or creating new file**
   * **For CPP, Change File, Template and create new file from first starting TVG**
-  * **Improve checking files**
-    * **To avoid processing errors**
+* **Bugs fixed for checking files**
+  * **To avoid processing errors**
 
 [⬆️](#freetvg-tree-view-gui)
 
