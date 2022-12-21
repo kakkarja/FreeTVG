@@ -1297,7 +1297,15 @@ class TreeViewGui:
             self.root.update()
             self.lock = False
             if d.result:
-                chosen(d.result)
+                if d.result in files:
+                    chosen(d.result)
+                else:
+                    messagebox.showerror(
+                        "TreeViewGui",
+                        f"Unable to process for {d.result}!",
+                        parent=self.root,
+                    )
+                    TreeViewGui.FREEZE = False
             else:
                 TreeViewGui.FREEZE = False
             del d
@@ -1729,45 +1737,18 @@ class TreeViewGui:
                     )
                 del askname
             else:
-                # To catch error for unknown escape sequence!
-                if os.path.exists(self.glop.parent.joinpath(flname)):
-                    if os.path.exists(
+                if os.path.exists(
+                    self.glop.parent.joinpath(
+                        flname, f'{flname.rpartition("_")[0]}.txt'
+                    )
+                ):
+                    if not os.path.exists(
                         self.glop.parent.joinpath(
-                            flname, f'{flname.rpartition("_")[0]}.txt'
+                            flname,
+                            f'{flname.rpartition("_")[0]}_hid.json',
                         )
                     ):
-                        if not os.path.exists(
-                            self.glop.parent.joinpath(
-                                flname,
-                                f'{flname.rpartition("_")[0]}_hid.json',
-                            )
-                        ):
-                            tak = self.fildat(self.text.get("1.0", END)[:-1], False)
-                            os.remove(f"{self.filename}_hid.json")
-                            self.addonchk()
-                            self.filename = flname.rpartition("_")[0]
-                            self.glop = self.glop.parent.joinpath(flname)
-                            os.chdir(self.glop)
-                            self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
-                            with tv(self.filename) as tvg:
-                                tak = tvg.insighthidden(tak, False)
-                                for p, d in tak:
-                                    if p == "parent":
-                                        tvg.addparent(d[:-1])
-                                    else:
-                                        tvg.quickchild(d[1:], p)
-                            self.addonchk(False)
-                            del tvg, tak
-                            self.spaces()
-                            self.infobar()
-                        else:
-                            messagebox.showinfo(
-                                "TreeViewGui",
-                                "You cannot copied to hidden mode file!",
-                                parent=self.root,
-                            )
-                    else:
-                        tak = self.fildat(self.text.get("1.0", END)[:-1])
+                        tak = self.fildat(self.text.get("1.0", END)[:-1], False)
                         os.remove(f"{self.filename}_hid.json")
                         self.addonchk()
                         self.filename = flname.rpartition("_")[0]
@@ -1775,17 +1756,36 @@ class TreeViewGui:
                         os.chdir(self.glop)
                         self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
                         with tv(self.filename) as tvg:
-                            tvg.fileread(tvg.insighthidden(tak, False))
-                        del tak, tvg
+                            tak = tvg.insighthidden(tak, False)
+                            for p, d in tak:
+                                if p == "parent":
+                                    tvg.addparent(d[:-1])
+                                else:
+                                    tvg.quickchild(d[1:], p)
                         self.addonchk(False)
+                        del tvg, tak
                         self.spaces()
                         self.infobar()
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui",
+                            "You cannot copied to hidden mode file!",
+                            parent=self.root,
+                        )
                 else:
-                    messagebox.showerror(
-                        "TreeViewGui",
-                        f"{flname}_tvg is not exist please re-choose 'NEW'!",
-                        parent=self.root,
-                    )
+                    tak = self.fildat(self.text.get("1.0", END)[:-1])
+                    os.remove(f"{self.filename}_hid.json")
+                    self.addonchk()
+                    self.filename = flname.rpartition("_")[0]
+                    self.glop = self.glop.parent.joinpath(flname)
+                    os.chdir(self.glop)
+                    self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
+                    with tv(self.filename) as tvg:
+                        tvg.fileread(tvg.insighthidden(tak, False))
+                    del tak, tvg
+                    self.addonchk(False)
+                    self.spaces()
+                    self.infobar()
             del flname
 
         TreeViewGui.FREEZE = True
@@ -1812,7 +1812,15 @@ class TreeViewGui:
         self.root.update()
         self.lock = False
         if d.result:
-            chosen(d.result)
+            if d.result in files:
+                chosen(d.result)
+            else:
+                messagebox.showerror(
+                    "TreeViewGui",
+                    f"Unable to process for {d.result}!",
+                    parent=self.root,
+                )
+                TreeViewGui.FREEZE = False
         else:
             TreeViewGui.FREEZE = False
         del files, d.result
@@ -2502,7 +2510,7 @@ class TreeViewGui:
 
     @excp(2, DEFAULTFILE)
     @staticmethod
-    def tynam(event, files: list | tuple):
+    def tynam(event, files: list | tuple, ca: bool = True):
         if event.widget.get():
             idx = event.widget.index(INSERT)
             gt = event.widget.get()
@@ -2516,8 +2524,18 @@ class TreeViewGui:
                         == em[: len(event.widget.get())]
                     ):
                         event.widget.current(files.index(em))
+                        event.widget.icursor(index=idx)
                         break
-            event.widget.icursor(index=idx)
+                else:
+                    if ca:
+                        for em in files:
+                            if gt[: idx - 1] in em:
+                                event.widget.current(files.index(em))
+                                break
+                        else:
+                            event.widget.delete(0, END)
+                            event.widget.insert(0, gt[: idx - 1])
+                        event.widget.icursor(index=idx - 1)
             del idx, gt
 
     def temp(self, event=None):
@@ -2593,12 +2611,21 @@ class TreeViewGui:
                         self.root.update()
                         self.lock = False
                         if d.result:
-                            path = os.path.join(self.glop.parent, "Templates", d.result)
-                            with open(path) as rdf:
-                                gf = ast.literal_eval(rdf.read())
-                            for pr in gf:
-                                self.text.insert(f"{INSERT} linestart", f"{pr}\n")
-                            del path, gf, pr
+                            if d.result in files:
+                                path = os.path.join(
+                                    self.glop.parent, "Templates", d.result
+                                )
+                                with open(path) as rdf:
+                                    gf = ast.literal_eval(rdf.read())
+                                for pr in gf:
+                                    self.text.insert(f"{INSERT} linestart", f"{pr}\n")
+                                del path, gf, pr
+                            else:
+                                messagebox.showerror(
+                                    "TreeViewGui",
+                                    f"Unable to process for {d.result}!",
+                                    parent=self.root,
+                                )
                         else:
                             if ask := messagebox.askyesno(
                                 "TreeViewGui",
@@ -3603,7 +3630,9 @@ def askfile(root):
             self.e1 = ttk.Combobox(master)
             self.e1["values"] = files
             self.e1.grid(row=0, column=1)
-            self.e1.bind("<KeyRelease>", partial(TreeViewGui.tynam, files=files))
+            self.e1.bind(
+                "<KeyRelease>", partial(TreeViewGui.tynam, files=files, ca=False)
+            )
             return self.e1
 
         def apply(self):
