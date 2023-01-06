@@ -451,6 +451,10 @@ main()
   * **For CPP, Change File, Template and create new file from first starting TVG**
 * **Bugs fixed for checking files**
   * **To avoid processing errors**
+* **In Printing**
+  * **When print button clicked**
+    * **The background color will turned white and the foreground color will be black**
+    * **Need to click-checked for printing background, so that the marking highlight will be visible**
 
 [⬆️](#freetvg-tree-view-gui)
 

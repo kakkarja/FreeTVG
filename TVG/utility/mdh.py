@@ -114,7 +114,13 @@ list-style-type: none !important;
 {tasklist}
 """
         printed = """@media print {
-.button { display: none }
+.button { display: none; }
+body { 
+    background-color: white !important;
+    color: black !important;
+    }
+
+kbd { color: black !important; }
 }
 </style>
 <body>

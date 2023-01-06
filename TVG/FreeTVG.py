@@ -63,7 +63,6 @@ class TreeViewGui:
     This is the Gui for TreeView engine. This gui is to make the Writing and editing is viewable.
     """
 
-    DB = None
     FREEZE = False
     MARK = False
     MODE = False
@@ -88,14 +87,14 @@ class TreeViewGui:
         self.pwidth = int(self.root.winfo_screenwidth() / 2 - self.wwidth / 2)
         self.pheight = int(self.root.winfo_screenheight() / 3 - self.wheight / 3)
         self.root.geometry(f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}")
-        TreeViewGui.GEO = f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}"
+        self.GEO = f"{self.wwidth}x{self.wheight}+{self.pwidth}+{self.pheight}"
         gpath = self.glop.joinpath(self.glop.parent, "geo.tvg")
         gem = None
         if os.path.exists(gpath):
             with open(gpath, "rb") as geo:
                 gem = ast.literal_eval(geo.read().decode("utf-8"))
                 self.root.geometry(gem["geo"])
-                TreeViewGui.GEO = gem["geo"]
+                self.GEO = gem["geo"]
         del gpath
         del gem
         self.root.bind_all("<Control-f>", self.fcsent)
@@ -891,9 +890,9 @@ class TreeViewGui:
 
         if os.path.exists(f"{self.filename}_hid.json"):
             self.info.set("Hidden Mode")
-        elif TreeViewGui.FREEZE and str(self.bt["button17"]["state"]) == "normal":
+        elif self.FREEZE and str(self.bt["button17"]["state"]) == "normal":
             self.info.set("CPP Mode")
-        elif TreeViewGui.FREEZE and str(self.bt["button24"]["state"]) == "normal":
+        elif self.FREEZE and str(self.bt["button24"]["state"]) == "normal":
             self.info.set("Editor Mode")
         elif self.listb.curselection():
             st = int(self.listb.curselection()[0])
@@ -954,7 +953,7 @@ class TreeViewGui:
         """Key Bindings to keyboards"""
 
         fcom = str(self.root.focus_get())
-        if TreeViewGui.FREEZE is False:
+        if self.FREEZE is False:
             if event.keysym == "f":
                 self.entry.focus()
             elif event.keysym == "r":
@@ -1054,26 +1053,27 @@ class TreeViewGui:
             elif event.keysym == "S":
                 self.fold_selected()
         else:
-            if str(self.bt["button17"].cget("state")) == "normal":
-                if event.keysym == "n":
-                    self.cmrows()
-                elif event.keysym == "s":
-                    self.insight()
-            elif str(self.bt["button14"].cget("state")) == "normal":
-                if event.keysym == "h":
-                    self.hiddenchl()
-                elif event.keysym == "s":
-                    self.insight()
-            elif (
-                str(self.bt["button24"].cget("state")) == "normal"
-                and event.keysym == "7"
-            ):
-                self.editor()
-            elif str(self.bt["button34"].cget("state")) == "normal":
-                if event.keysym == "S":
-                    self.fold_selected()
-                elif event.keysym == "s":
-                    self.insight()
+            if self.lock is False:
+                if str(self.bt["button17"].cget("state")) == "normal":
+                    if event.keysym == "n":
+                        self.cmrows()
+                    elif event.keysym == "s":
+                        self.insight()
+                elif str(self.bt["button14"].cget("state")) == "normal":
+                    if event.keysym == "h":
+                        self.hiddenchl()
+                    elif event.keysym == "s":
+                        self.insight()
+                elif (
+                    str(self.bt["button24"].cget("state")) == "normal"
+                    and event.keysym == "7"
+                ):
+                    self.editor()
+                elif str(self.bt["button34"].cget("state")) == "normal":
+                    if event.keysym == "S":
+                        self.fold_selected()
+                    elif event.keysym == "s":
+                        self.insight()
 
         del fcom
 
@@ -1217,7 +1217,7 @@ class TreeViewGui:
 
         def chosen(file):
             fi = file
-            TreeViewGui.FREEZE = False
+            self.FREEZE = False
             ask = messagebox.askyesno(
                 "TreeViewGui",
                 '"Yes" to change file, "No" to delete directory',
@@ -1274,7 +1274,7 @@ class TreeViewGui:
         files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
         files.sort()
         if self.lock is False and files:
-            TreeViewGui.FREEZE = True
+            self.FREEZE = True
             self.lock = True
 
             @excpcls(2, DEFAULTFILE)
@@ -1305,9 +1305,9 @@ class TreeViewGui:
                         f"Unable to process for {d.result}!",
                         parent=self.root,
                     )
-                    TreeViewGui.FREEZE = False
+                    self.FREEZE = False
             else:
-                TreeViewGui.FREEZE = False
+                self.FREEZE = False
             del d
         del files
 
@@ -1344,7 +1344,7 @@ class TreeViewGui:
                 rw = None
                 if self.entry3.get():
                     if self.entry.get() and self.entry.get() not in cek:
-                        if TreeViewGui.MARK:
+                        if self.MARK:
                             rw = self.listb.curselection()[0]
                             appr = messagebox.askyesno(
                                 "Edit", f"Edit cell {rw}?", parent=self.root
@@ -1374,7 +1374,7 @@ class TreeViewGui:
                         self.spaces()
                 else:
                     if self.entry.get() and self.entry.get() not in cek:
-                        if TreeViewGui.MARK:
+                        if self.MARK:
                             rw = self.listb.curselection()[0]
                             appr = messagebox.askyesno(
                                 "Edit", f"Edit cell {rw}?", parent=self.root
@@ -1407,7 +1407,7 @@ class TreeViewGui:
     def flb(self, event=None):
         """Set Mark for cheking row for edit"""
 
-        TreeViewGui.MARK = True
+        self.MARK = True
 
     def deleterow(self):
         """Deletion on recorded row and updated"""
@@ -1416,7 +1416,7 @@ class TreeViewGui:
         if self.unlock:
             if self.nonetype():
                 if self.listb.curselection():
-                    TreeViewGui.MODE = True
+                    self.MODE = True
                     rw = int(self.listb.curselection()[0])
                     with tv(self.filename) as tvg:
                         if rw != 0:
@@ -1462,7 +1462,7 @@ class TreeViewGui:
         if self.unlock:
             if self.listb.curselection():
                 if self.entry3.get():
-                    TreeViewGui.MODE = True
+                    self.MODE = True
                     try:
                         rw = int(self.listb.curselection()[0])
                         self.text.config(state="normal")
@@ -1508,7 +1508,7 @@ class TreeViewGui:
                     insight = self.listb.get(rw).split(":")[1].strip()
                     if insight != "space" and "child" in insight:
                         if rw != 0 and rw - 1 != 0:
-                            TreeViewGui.MODE = True
+                            self.MODE = True
                             with tv(self.filename) as tvg:
                                 tvg.movetree(rw, rw - 1)
                             del tvg
@@ -1543,7 +1543,7 @@ class TreeViewGui:
                                 == "space"
                                 else False
                             )
-                            TreeViewGui.MODE = True
+                            self.MODE = True
                             with tv(self.filename) as tvg:
                                 if sp:
                                     tvg.movetree(rw, rw + 2)
@@ -1571,7 +1571,7 @@ class TreeViewGui:
             if self.nonetype():
                 cek = ["parent", "child"]
                 if self.entry.get() and self.entry.get() not in cek:
-                    if TreeViewGui.MARK:
+                    if self.MARK:
                         appr = messagebox.askyesno(
                             "Edit",
                             f"Edit cell {self.listb.curselection()[0]}?",
@@ -1709,7 +1709,7 @@ class TreeViewGui:
         """Copy parents and childs in hidden modes to another existing file or new file."""
 
         def chosen(flname):
-            TreeViewGui.FREEZE = False
+            self.FREEZE = False
             if flname == "New":
                 askname = simpledialog.askstring(
                     "TreeViewGui", "New file name:", parent=self.root
@@ -1788,7 +1788,7 @@ class TreeViewGui:
                     self.infobar()
             del flname
 
-        TreeViewGui.FREEZE = True
+        self.FREEZE = True
         self.lock = True
         files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
         files.insert(0, "New")
@@ -1820,9 +1820,9 @@ class TreeViewGui:
                     f"Unable to process for {d.result}!",
                     parent=self.root,
                 )
-                TreeViewGui.FREEZE = False
+                self.FREEZE = False
         else:
-            TreeViewGui.FREEZE = False
+            self.FREEZE = False
         del files, d.result
 
     def cmrows(self):
@@ -2022,10 +2022,10 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.nonetype():
-                if TreeViewGui.MARK and TreeViewGui.MODE is False:
-                    TreeViewGui.MARK = False
+                if self.MARK and self.MODE is False:
+                    self.MARK = False
                 else:
-                    TreeViewGui.MODE = False
+                    self.MODE = False
                 with tv(self.filename) as tvg:
                     data = (i[:-1] for _, i in tvg.getdata() if i != "\n")
                     writer = tvg.satofi()
@@ -2267,6 +2267,7 @@ class TreeViewGui:
 
                     if self.lock is False:
                         self.lock = True
+                        self.FREEZE = True
                         self.root.update()
 
                         @excpcls(2, DEFAULTFILE)
@@ -2288,6 +2289,7 @@ class TreeViewGui:
                         self.lock = False
                         if d.result:
                             searchw(d.result)
+                        self.FREEZE = False
                         del d.result
             else:
                 if self.nonetype():
@@ -2553,6 +2555,7 @@ class TreeViewGui:
                 self.tempsave()
             else:
                 if self.lock is False:
+                    self.FREEZE = True
                     self.lock = True
                     files = [
                         i
@@ -2640,6 +2643,7 @@ class TreeViewGui:
                             "TreeViewGui", "No templates yet!", parent=self.root
                         )
                         self.tempsave()
+                    self.FREEZE = False
                     del files
             self.text.focus()
 
@@ -2651,7 +2655,7 @@ class TreeViewGui:
                 if "label" not in i and "scrollbar" not in i:
                     if i not in args:
                         self.bt[i].config(state="disable")
-            TreeViewGui.FREEZE = True
+            self.FREEZE = True
         else:
             for i in self.bt:
                 if "label" not in i and "scrollbar" not in i:
@@ -2665,7 +2669,7 @@ class TreeViewGui:
                     else:
                         if i != "text":
                             self.bt[i].config(state="normal")
-            TreeViewGui.FREEZE = False
+            self.FREEZE = False
 
     def _mdbuttons(self):
 
@@ -2815,6 +2819,8 @@ class TreeViewGui:
                 self.text.edit_reset()
                 self.text.focus()
                 self._mdbuttons()
+                if not self.plat.startswith("win"):
+                    self.root.clipboard_clear()
                 del ckb
             else:
                 try:
@@ -2974,13 +2980,13 @@ class TreeViewGui:
     def tvgexit(self, event=None):
         """Exit mode for TVG and setting everything back to default"""
 
-        if TreeViewGui.FREEZE is False:
+        if self.FREEZE is False:
             if self.checkfile():
                 with open(os.path.join(self.glop.parent, "lastopen.tvg"), "wb") as lop:
                     lop.write(str({"lop": self.filename}).encode())
-                if str(self.root.winfo_geometry()) == TreeViewGui.GEO:
+                if str(self.root.winfo_geometry()) == self.GEO:
                     with open(os.path.join(self.glop.parent, "geo.tvg"), "wb") as geo:
-                        geo.write(str({"geo": TreeViewGui.GEO}).encode())
+                        geo.write(str({"geo": self.GEO}).encode())
                 else:
                     ask = messagebox.askyesno(
                         "TreeViewGui",
@@ -2998,7 +3004,7 @@ class TreeViewGui:
                         with open(
                             os.path.join(self.glop.parent, "geo.tvg"), "wb"
                         ) as geo:
-                            geo.write(str({"geo": TreeViewGui.GEO}).encode())
+                            geo.write(str({"geo": self.GEO}).encode())
                     del ask
                 self.addonchk()
             self.root.quit()
@@ -3326,8 +3332,9 @@ class TreeViewGui:
     def exprsum(self, event=None):
         """Expression Calculation for Editor mode"""
 
-        if self.unlock and self.text.cget("state") == NORMAL:
-            self.unlock = False
+        if self.lock is False and self.text.cget("state") == NORMAL:
+            self.lock = True
+            self.FREEZE = True
 
             err = None
 
@@ -3479,15 +3486,17 @@ class TreeViewGui:
             self.__setattr__("toptempo", mas)
             self.__setattr__("labcop", None)
             d = MyDialog(mas)
+            self.lock = False
             self.root.update()
             self.unlock = True
+            self.FREEZE = True
             if hasattr(self, "toptempo"):
                 mas.destroy()
                 self.__delattr__("toptempo")
             self.__delattr__("labcop")
             del wid, lab, d, mas, err
         else:
-            if not hasattr(self, "toptempo"):
+            if self.lock is False and not hasattr(self, "toptempo"):
                 messagebox.showinfo(
                     "TreeViewGui", "Only work for Editor mode", parent=self.root
                 )
@@ -3604,7 +3613,9 @@ class TreeViewGui:
     def configd(self, event=None):
         """Deleting configuration file to default"""
 
-        if os.path.exists(self.glop.parent.joinpath("TVG_config.toml")):
+        if self.lock is False and os.path.exists(
+            self.glop.parent.joinpath("TVG_config.toml")
+        ):
             os.remove(self.glop.parent.joinpath("TVG_config.toml"))
             messagebox.showinfo(
                 "TreeViewGui",
@@ -3666,8 +3677,6 @@ def findpath():
 def _create_config():
     """Configuration set according to the user's preference"""
 
-    global THEME_MODE
-
     deval = [ctlight()]
 
     with open("TVG_config.toml", "w") as fp:
@@ -3675,7 +3684,7 @@ def _create_config():
             {
                 "Configure": {
                     "THEME_MODE": (
-                        THEME_MODE := THEME_MODE if THEME_MODE != deval[0] else 0
+                        THEME_MODE_ := THEME_MODE if THEME_MODE != deval[0] else 0
                     ),
                     "SELECT_MODE": SELECT_MODE,
                     "HIDDEN_OPT": HIDDEN_OPT,
@@ -3685,7 +3694,8 @@ def _create_config():
             },
             fp,
         )
-    del deval
+
+    del deval, THEME_MODE_
 
 
 @excp(m=2, filenm=DEFAULTFILE)
