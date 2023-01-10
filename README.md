@@ -455,6 +455,12 @@ main()
   * **When print button clicked**
     * **The background color will turned white and the foreground color will be black**
     * **Need to click-checked for printing background, so that the marking highlight will be visible**
+  * **Open browser for viewing html file**
+    * **Defaulted to Safari for MacOs X, as the hyperlink can be click when save as pdf file**
+    * **Defaulted to Edge in Windows, as the hyperlink can be click when save as pdf file**
+    * **TAKE NOTE:**
+      * **If the system has other default browser, it may open both browsers**
+      * **In Chrome the hyperlink deactivated**
 
 [⬆️](#freetvg-tree-view-gui)
 

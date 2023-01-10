@@ -4,6 +4,8 @@
 
 import os
 import re
+from pathlib import Path
+from subprocess import run
 from sys import platform
 
 import markdown
@@ -174,10 +176,18 @@ kbd { color: black !important; }
         del fcs
         with open(f"{filename}.html", "w") as whtm:
             whtm.write(cssstyle)
+        pro = None
         if platform.startswith("win"):
-            os.startfile(f"{filename}.html")
+            pro = [
+                "powershell.exe",
+                "start",
+                "msedge",
+                f"'\"{Path(f'{filename}.html').absolute()}\"'",
+            ]
+            run(pro)
         else:
-            os.system(f'open "{filename}.html"')
+            pro = ["open", "-a", "Safari", f"{Path(f'{filename}.html').absolute()}"]
+            run(pro)
         del (
             text,
             filename,
@@ -194,6 +204,7 @@ kbd { color: black !important; }
             cssstyle,
             printed,
             nxt,
+            pro,
         )
     except Exception as e:
         raise e
