@@ -3193,12 +3193,12 @@ class TreeViewGui:
 
         if self.nonetype():
             sa = SumAll(self.filename, sig="+")
-            self.listb.config(selectmode=MULTIPLE)
             match len(sa) > 0:
                 case False if hasattr(self, "sumtot"):
                     match os.path.exists(f"{self.filename}_hid.json"):
                         case False:
                             if not hasattr(self, "fold"):
+                                self.listb.config(selectmode=MULTIPLE)
                                 idx = sa.getidx(False)
                                 tot = sa.lumpsum()
                                 for i in idx:
@@ -3213,6 +3213,7 @@ class TreeViewGui:
                                     self.text.insert(END, f"\nTOTAL SUMS = {tot}")
                                 else:
                                     self.text.insert(END, f"TOTAL SUMS = {tot}")
+                                self.listb.config(selectmode=BROWSE)
                                 self.text.config(state=DISABLED)
                                 del idx, tot
                             else:
@@ -3242,7 +3243,6 @@ class TreeViewGui:
                     messagebox.showinfo(
                         "TreeViewGui", "No data to sums!", parent=self.root
                     )
-            self.listb.config(selectmode=BROWSE)
             del sa
 
     def chktp(self):
@@ -3613,15 +3613,97 @@ class TreeViewGui:
     def configd(self, event=None):
         """Deleting configuration file to default"""
 
-        if self.lock is False and os.path.exists(
-            self.glop.parent.joinpath("TVG_config.toml")
-        ):
-            os.remove(self.glop.parent.joinpath("TVG_config.toml"))
-            messagebox.showinfo(
-                "TreeViewGui",
-                "Configuration has been set to default!",
-                parent=self.root,
-            )
+        if self.lock is False:
+            TreeViewGui.FREEZE = True
+            self.lock = True
+
+            if self.glop.parent.joinpath("TVG_config.toml").exists():
+                with open(self.glop.parent.joinpath("TVG_config.toml")) as rf:
+                    cfg = tomlkit.load(rf)
+
+                @excpcls(2, DEFAULTFILE)
+                class MyDialog(simpledialog.Dialog):
+                    def body(self, master):
+                        self.title("Configure TVG")
+
+                        self.fr2 = Frame(master)
+                        self.fr2.pack(fill=X, expand=1, pady=(0, 1))
+                        Label(self.fr2, text="Select Mode: ").pack(side=LEFT)
+                        self.e2 = ttk.Combobox(self.fr2)
+                        self.e2["values"] = "extended", "multiple"
+                        self.e2.pack(side=RIGHT)
+                        self.e2.current(
+                            self.e2["values"].index(cfg["Configure"]["SELECT_MODE"])
+                        )
+                        self.e2.config(state="readonly")
+
+                        self.fr3 = Frame(master)
+                        self.fr3.pack(fill=X, expand=1, pady=(0, 1))
+                        Label(self.fr3, text="Hidden Opt: ").pack(side=LEFT)
+                        self.e3 = ttk.Combobox(self.fr3)
+                        self.e3["values"] = "False", "unreverse"
+                        self.e3.pack(side=RIGHT)
+                        self.e3.current(
+                            self.e3["values"].index(str(cfg["Configure"]["HIDDEN_OPT"]))
+                        )
+                        self.e3.config(state="readonly")
+
+                        self.fr4 = Frame(master)
+                        self.fr4.pack(fill=X, expand=1, pady=(0, 1))
+                        Label(self.fr4, text="Wrapping: ").pack(side=LEFT)
+                        self.e4 = ttk.Combobox(self.fr4)
+                        self.e4["values"] = "none", "word"
+                        self.e4.pack(side=RIGHT)
+                        self.e4.current(
+                            self.e4["values"].index(cfg["Configure"]["WRAPPING"])
+                        )
+                        self.e4.config(state="readonly")
+
+                        self.fr5 = Frame(master)
+                        self.fr5.pack(fill=X, expand=1, pady=(0, 1))
+                        Label(self.fr5, text="Checked Box: ").pack(side=LEFT)
+                        self.e5 = ttk.Combobox(self.fr5)
+                        self.e5["values"] = "off", "on"
+                        self.e5.pack(side=RIGHT)
+                        self.e5.current(
+                            self.e5["values"].index(cfg["Configure"]["CHECKED_BOX"])
+                        )
+                        self.e5.config(state="readonly")
+                        return self.e2
+
+                    def apply(self):
+                        hid = (
+                            ast.literal_eval(self.e3.get())
+                            if self.e3.get() == "False"
+                            else self.e3.get()
+                        )
+                        self.result = (
+                            self.e2.get(),
+                            hid,
+                            self.e4.get(),
+                            self.e5.get(),
+                        )
+
+            d = MyDialog(self.root)
+            self.root.update()
+            self.lock = False
+
+            if d.result:
+                if tuple(cfg["Configure"].values())[1:] != d.result:
+                    global SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
+                    self.cpp_select = SELECT_MODE = d.result[0]
+                    self.hidopt = HIDDEN_OPT = d.result[1]
+                    if WRAPPING != d.result[2]:
+                        self.wrapping = WRAPPING = d.result[2]
+                        self.wrapped()
+                    self.checked_box = CHECKED_BOX = d.result[3]
+                    _create_config(self.glop.parent.joinpath("TVG_config.toml"))
+                else:
+                    messagebox.showinfo(
+                        "TreeViewGui", "Configuring aborted!", parent=self.root
+                    )
+
+            TreeViewGui.FREEZE = False
 
 
 @excp(m=2, filenm=DEFAULTFILE)
@@ -3674,12 +3756,12 @@ def findpath():
 
 
 @excp(m=2, filenm=DEFAULTFILE)
-def _create_config():
+def _create_config(pth: str = None):
     """Configuration set according to the user's preference"""
 
     deval = [ctlight()]
 
-    with open("TVG_config.toml", "w") as fp:
+    with open(pth := "TVG_config.toml" if pth is None else pth, "w") as fp:
         tomlkit.dump(
             {
                 "Configure": {

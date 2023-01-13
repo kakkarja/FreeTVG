@@ -420,7 +420,7 @@ main()
     * **User do not need to reconfigure again when starting the app**
   * **If want to set back to default setting:**
     * **While app still running Press Win [Ctrl + F5] || Mac [fn + F5]**
-    * **Exit the app and run again, everyrhing back to default!**
+    * **~~Exit the app and run again, everyrhing back to default!~~**
   * **Dependency added tomlkit [@sdispater](https://pypi.org/project/tomlkit/)**
   * **Add Configuration for wrapping**
     * **By default words in TVG is unwrapped**
@@ -461,6 +461,10 @@ main()
     * **TAKE NOTE:**
       * **If the system has other default browser, it may open both browsers**
       * **In Chrome the hyperlink deactivated**
+* **Configuration enhance**
+  * **Press Win [Ctrl + F5] || Mac [fn + F5]**
+    * **Can modified Configuration directly**
+    * **For theming is not available because it cannot implemented directly**
 
 [⬆️](#freetvg-tree-view-gui)
 

@@ -117,6 +117,7 @@ list-style-type: none !important;
 """
         printed = """@media print {
 .button { display: none; }
+
 body { 
     background-color: white !important;
     color: black !important;
