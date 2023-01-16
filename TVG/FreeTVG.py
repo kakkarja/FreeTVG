@@ -681,6 +681,9 @@ class TreeViewGui:
             self.root,
         )
 
+        if not self.glop.parent.joinpath("TVG_config.toml").exists():
+            _create_config(self.glop.parent.joinpath("TVG_config.toml"))
+
     def ldmode(self):
         """Dark mode for easing the eye"""
 
@@ -3684,24 +3687,24 @@ class TreeViewGui:
                             self.e5.get(),
                         )
 
-            d = MyDialog(self.root)
-            self.root.update()
-            self.lock = False
+                d = MyDialog(self.root)
+                self.root.update()
+                self.lock = False
 
-            if d.result:
-                if tuple(cfg["Configure"].values())[1:] != d.result:
-                    global SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
-                    self.cpp_select = SELECT_MODE = d.result[0]
-                    self.hidopt = HIDDEN_OPT = d.result[1]
-                    if WRAPPING != d.result[2]:
-                        self.wrapping = WRAPPING = d.result[2]
-                        self.wrapped()
-                    self.checked_box = CHECKED_BOX = d.result[3]
-                    _create_config(self.glop.parent.joinpath("TVG_config.toml"))
-                else:
-                    messagebox.showinfo(
-                        "TreeViewGui", "Configuring aborted!", parent=self.root
-                    )
+                if d.result:
+                    if tuple(cfg["Configure"].values()) != d.result:
+                        global SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
+                        self.cpp_select = SELECT_MODE = d.result[0]
+                        self.hidopt = HIDDEN_OPT = d.result[1]
+                        if WRAPPING != d.result[2]:
+                            self.wrapping = WRAPPING = d.result[2]
+                            self.wrapped()
+                        self.checked_box = CHECKED_BOX = d.result[3]
+                        _create_config(self.glop.parent.joinpath("TVG_config.toml"))
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui", "Configuring aborted!", parent=self.root
+                        )
 
             TreeViewGui.FREEZE = False
 
@@ -3759,15 +3762,10 @@ def findpath():
 def _create_config(pth: str = None):
     """Configuration set according to the user's preference"""
 
-    deval = [ctlight()]
-
     with open(pth := "TVG_config.toml" if pth is None else pth, "w") as fp:
         tomlkit.dump(
             {
                 "Configure": {
-                    "THEME_MODE": (
-                        THEME_MODE_ := THEME_MODE if THEME_MODE != deval[0] else 0
-                    ),
                     "SELECT_MODE": SELECT_MODE,
                     "HIDDEN_OPT": HIDDEN_OPT,
                     "WRAPPING": WRAPPING,
@@ -3776,8 +3774,6 @@ def _create_config(pth: str = None):
             },
             fp,
         )
-
-    del deval, THEME_MODE_
 
 
 @excp(m=2, filenm=DEFAULTFILE)
@@ -3788,11 +3784,6 @@ def _load_config():
         global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
         with open("TVG_config.toml") as rf:
             cfg = tomlkit.load(rf)
-        THEME_MODE = (
-            cfg["Configure"]["THEME_MODE"]
-            if cfg["Configure"]["THEME_MODE"] != 0
-            else THEME_MODE
-        )
         SELECT_MODE = cfg["Configure"]["SELECT_MODE"]
         HIDDEN_OPT = cfg["Configure"]["HIDDEN_OPT"]
         WRAPPING = cfg["Configure"]["WRAPPING"]
@@ -3804,38 +3795,17 @@ def _load_config():
 def configuring(args: list):
     """configuring TVG"""
 
-    vals = THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
     match ment := len(args):
         case ment if ment == 2:
             _mode(args[1])
-        case ment if ment == 3:
-            _mode(args[1])
-            _mode(args[2])
-        case ment if ment == 4:
-            _mode(args[1])
-            _mode(args[2])
-            _mode(args[3])
-        case ment if ment == 5:
-            _mode(args[1])
-            _mode(args[2])
-            _mode(args[3])
-            _mode(args[4])
-        case ment if ment == 6:
-            _mode(args[1])
-            _mode(args[2])
-            _mode(args[3])
-            _mode(args[4])
-            _mode(args[5])
         case _:
             pass
-    if vals != (THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX):
-        _create_config()
-    del args, vals
+    del args, ment
 
 
 @excp(m=2, filenm=DEFAULTFILE)
 def _mode(mode: str):
-    global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
+    global THEME_MODE
 
     match mode := mode:
         case mode if mode.lower() == "dark":
@@ -3844,14 +3814,6 @@ def _mode(mode: str):
         case mode if mode.lower() == "light":
             if THEME_MODE is False:
                 THEME_MODE = "light"
-        case mode if mode.lower() == "multiple":
-            SELECT_MODE = mode
-        case mode if mode.lower() == "unreverse":
-            HIDDEN_OPT = mode
-        case mode if mode.lower() == "word":
-            WRAPPING = mode
-        case mode if mode.lower() == "on":
-            CHECKED_BOX = mode
         case _:
             pass
     del mode

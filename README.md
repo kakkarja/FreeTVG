@@ -320,17 +320,6 @@ main()
     * **However, if you find it confusing when you wanted choose the cells for manipulation, you can hacked the configuration to multiple mode**
       * **Multiple mode will choose the cells one by one selectively**
 
-        ```Terminal
-        # Will change to multiple selection for CPP function
-        > tvg multiple
-        
-        # Combination for theme mode and selection mode
-        >tvg dark multiple
-        
-        # or
-        >tvg multiple light
-        ```
-
 * **The algorithm of CPP has been improved**
   * **Now selections that is not in order can be copied and moved to chosen selected line number**
 
@@ -402,50 +391,10 @@ main()
       * **In fold hiding selections are making more sense**
 * **On 2nd thought**
   * **Is not easy to just hid 1 parent, so there is the configuration for it**
-  * **When starting the app in cmd prompt / terminal type**
-
-    ```Terminal
-    # Config for Hidden mode
-    >TVG unreverse
-    ```
-
   * **Will change the reverse option in Hidden mode**
     * **The selections will be hidden instead**
 
 [⬆️](#freetvg-tree-view-gui)
-
-* ### **Configuration**
-
-  * **Now when user change the configuration of elements in TVG, it will be saved**
-    * **User do not need to reconfigure again when starting the app**
-  * **If want to set back to default setting:**
-    * **While app still running Press Win [Ctrl + F5] || Mac [fn + F5]**
-    * **~~Exit the app and run again, everyrhing back to default!~~**
-  * **Dependency added tomlkit [@sdispater](https://pypi.org/project/tomlkit/)**
-  * **Add Configuration for wrapping**
-    * **By default words in TVG is unwrapped**
-
-      ```Terminal
-      # Config wrapping
-      > TVG word
-      ```
-
-  * **Add configuration for cheked-box**
-    * **Cheked function by default will add "✔️" or ">>[DONE]<<" depend on the OS default system encoding**
-    * **Now can be configured to add "[x]"**
-
-      ```Terminal
-      # Config Checked-Box
-      > TVG on
-      ```
-
-  * **Configuration values**
-    * **Can be mixed as long as values are identified by TVG**
-
-      ```Terminal
-      # Config values mixed
-      > TVG on light unreverse word multiple
-      ```
 
 * **Combobox algorithm enhance for selecting file or creating new file**
   * **For CPP, Change File, Template and create new file from first starting TVG**
@@ -461,10 +410,11 @@ main()
     * **TAKE NOTE:**
       * **If the system has other default browser, it may open both browsers**
       * **In Chrome the hyperlink deactivated**
-* **Configuration enhance**
+
+* ### **Configuration**
+
   * **Press Win [Ctrl + F5] || Mac [fn + F5]**
-    * **Can modified Configuration directly**
-    * **For theming is not available because it cannot implemented directly**
+    * **Can modified Configuration directly; please refer to Tutorial by pressing MacOs X [fn + F1] and Windows [Ctrl + F1]**
 
 [⬆️](#freetvg-tree-view-gui)
 
