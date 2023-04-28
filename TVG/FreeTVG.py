@@ -1955,7 +1955,6 @@ class TreeViewGui:
                     self.infobar()
 
     def _utilspdf(self):
-
         try:
             gttx = []
             line = None
@@ -2675,7 +2674,6 @@ class TreeViewGui:
             self.FREEZE = False
 
     def _mdbuttons(self):
-
         if not hasattr(self, "mdframe"):
             self.__setattr__("mdb", None)
             self.mdb = {
@@ -3313,11 +3311,9 @@ class TreeViewGui:
                         "Please unfolding first!",
                         parent=self.root,
                     )
-                del sal
                 self.spaces()
 
     def _ckwrds(self, wrd: str):
-
         if self._addon:
             nums = len(wrd)
             if nums >= 101:
