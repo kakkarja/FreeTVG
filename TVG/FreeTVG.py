@@ -2739,12 +2739,14 @@ class TreeViewGui:
         for font in listbox to be appear correctly
         """
 
+        tlframe = self.tframe.tlframe
         self.listb.destroy()
         self.listb = Listbox(
-            self.tlframe,
+            tlframe,
             background=self.text["background"],
             foreground=self.text["foreground"],
             font=fon,
+            exportselection=False,
         )
         self.listb.pack(side=LEFT, fill="both", expand=1)
         self.listb.pack_propagate(0)
@@ -2757,7 +2759,7 @@ class TreeViewGui:
         self.listb.bind("<Down>", self.mscrl)
         self.listb.bind("<FocusIn>", self.flb)
         self.listb.update()
-        del fon
+        del fon, tlframe
 
     def ft(self, event=None, path=None):
         """Initial starting fonts chooser"""

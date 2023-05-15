@@ -17,7 +17,7 @@ from tkinter import (
     Listbox,
     CENTER,
 )
-from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
+from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excpcls
 
 DEFAULTDIR = os.path.join(DIRPATH, "FreeTVG_TRACE")
 if not os.path.exists(DEFAULTDIR):
@@ -280,6 +280,7 @@ class Lay7(ttk.Frame):
         self.scrollbar2.config(command=self.listb.yview)
         self.scrollbar2.pack(side="left", fill="y")
         self.listb.config(yscrollcommand=self.scrollbar2.set)
+        del frw, lbw, scw
 
 
 @excpcls(m=2, filenm=DEFAULTFILE)
@@ -310,6 +311,7 @@ class Lay8(ttk.Frame):
         )
         self.labcor.pack(side=LEFT, fill="x", expand=1)
         self.labcor.propagate(0)
+        del frw, lbw, scw
 
 
 @excpcls(m=2, filenm=DEFAULTFILE)
