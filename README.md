@@ -159,6 +159,14 @@ main()
 
 [⬆️](#freetvg-tree-view-gui)
 
+* ### **Dynamic Theme Changes**
+
+  * **Theme will change dynamically when user chage the os system's theme \[**Dark / Light**\]**
+    * **Using dependency of <em><u>Dark-Detect</u></em>**
+      * **[@albertosottile](https://github.com/albertosottile/darkdetect)**
+
+[⬆️](#freetvg-tree-view-gui)
+
 ## Changes
 
 * **Tutorial TVG.pdf press: <Ctrl+F1> or <fn+F1> in MacOS**
@@ -224,29 +232,7 @@ main()
 
 ## Latest Notice
 
-* **Found very little bug in Template**
-  * **Has been fixed in 2.8.18**
-* **When send to email**
-  * **For MacOs X**
-    * **Markdown escape "\\" will <ins>not</ins> be ~~deleted~~ when send with default email ([F4/Ctrl+F4] send mail function)**
-  * **Email will be copied to default email app**
-* **Theme set globally according to system default theme**
-  * **No longer active through function button (previously F3/Ctrl+F3 button)**
-* **Send to email assign to F3/Ctrl+F3 button**
 * **Express Calc assign to F4/Ctrl+F4 button and no longer F5/Ctrl+F5**
-* **Some bugs fixed**
-  * **Editor on raise error, no longer shut the markdown buttons**
-  * **After pressing markdown button, the focus back to text editor**
-* **You can force dark mode in daylight global setting and vice-versa**
-
-  ```Terminal
-  # Will change the light theme to dark
-  > tvg dark
-
-  # Will change the dark theme to light
-  > tvg light
-  ```
-
 * **In Markdown**
   * **When dragging curssor with mouse/trackpad on text**
     * **Markdown will wrapped the text when insert**
@@ -274,24 +260,11 @@ main()
       ```
 
     * **For add-on TVG has another format please click -> [NEW](#new)**  
-* **Printing will fill the background and foreground according to the text editor background and foreground**
-* **Fix little in light mode theme**
-* **Enhancing Fold**
-  * **Making fold running faster in huge records**
-* **Fold is already release just**
-
-  ```Terminal
-  pip3 install -U FreeTVG-karjkak
-  ```
-
 * **Send email (fn+F3 / Ctrl+F3)**
   * **For MacOs X**
     * **Enhance the text by converting emojies to text description**
     * **Using dependency: demoji**
       * **[@bsolomon1124](https://pypi.org/project/demoji/)**
-* **Printing**
-  * **Printing have no more option for ~~check-box~~**
-    * **Since markdown has involved for checked-box, ~~check-box~~ option become obsolete**
 * **Markdown has short-cut**
   * **Check it out in tutorial press `Ctrl+F1 / fn+F1`**
 * **Filename enhancement**
@@ -305,8 +278,7 @@ main()
     * **If you press "Fold Childs" the retain ones will be folded again**
   * **Fold selected will delete the retain selected if selections is none**
   * **Fold Childs will fold all childs, if there is no retain selected**
-* **[New unresolve issues](#unresolve-issues)**
-  * **Refactoring, and bugs fixed or resolved**
+
 * **EXPLANATION:**
   * **If user want to keep the selected fold and using hidden mode**
     * **Just unfold and use hidden mode**

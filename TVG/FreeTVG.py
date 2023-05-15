@@ -8,7 +8,6 @@ import json
 import os
 import re
 import string
-import sys
 from datetime import datetime as dt
 from functools import partial
 from itertools import islice
@@ -46,6 +45,7 @@ from tkinter import (
     ttk,
 )
 
+import darkdetect
 import tomlkit
 from treeview import TreeView as tv
 from treeview.dbase import Datab as db
@@ -55,7 +55,6 @@ from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
 from .structure import Lay1, Lay2, Lay3, Lay4, Lay5, Lay6, Lay7, Lay8, Scribe
 from .utility.mdh import convhtml
 from .utility.RegMail import composemail, wrwords
-from .utility.term import ctlight
 
 __all__ = ["main"]
 
@@ -76,7 +75,7 @@ match _addon := importlib.util.find_spec("addon_tvg"):
     case _:
         print("Add-On for TVG is missing!")
 
-THEME_MODE = ctlight()
+THEME_MODE = darkdetect.theme().lower()
 
 SELECT_MODE = "extended"
 
@@ -137,6 +136,7 @@ class TreeViewGui:
         self.tpl = None
         self.ai = None
         self.ew = None
+        self.cycle = None
 
         # Creating style "clam" style for TVG
         self.stl = ttk.Style(self.root)
@@ -400,6 +400,15 @@ class TreeViewGui:
 
         # Checking theme mode!
         self.ldmode()
+        self.cycle_theme()
+
+    def cycle_theme(self):
+        """Detecting system theme cycle and apply it to TVG"""
+
+        if darkdetect.theme().lower() != self.tmode:
+            self.tmode = darkdetect.theme().lower()
+            self.ldmode()
+        self.cycle = self.root.after(1000, self.cycle_theme)
 
     def ldmode(self):
         """Dark mode for easing the eye"""
@@ -448,9 +457,40 @@ class TreeViewGui:
                 self.txtcol(
                     path=self.glop.joinpath(self.glop.parent, "theme.tvg"), wr=False
                 )
-            del oribg, chbg, orifg, chfg
         elif self.tmode == "light":
-            self.stl.theme_use("clam")
+            self.stl.configure(
+                ".",
+                background=oribg,
+                foreground=orifg,
+                fieldbackground=oribg,
+                insertcolor=orifg,
+                troughcolor="#bab5ab",
+                arrowcolor=orifg,
+                bordercolor="#9e9a91",
+            )
+            self.stl.map(
+                ".",
+                background=[("background", oribg)],
+            )
+            self.stl.map(
+                "TCombobox",
+                fieldbackground=[("readonly", oribg)],
+                background=[("active", "#eeebe7")],
+                arrowcolor=[("active", "black")],
+            )
+            self.stl.map(
+                "Horizontal.TScrollbar",
+                background=[("active", "#eeebe7")],
+                arrowcolor=[("active", "black")],
+            )
+            self.stl.map(
+                "Vertical.TScrollbar",
+                background=[("active", "#eeebe7")],
+                arrowcolor=[("active", "black")],
+            )
+            self.stl.configure("TEntry", fieldbackground=chfg)
+        del oribg, chbg, orifg, chfg
+        self.root.update()
 
     def ttip(self, event=None):
         """Tooltip for TVG buttons"""
@@ -638,8 +678,10 @@ class TreeViewGui:
 
     def fcsent(self, event=None):
         """Key Bindings to keyboards"""
-
-        fcom = str(self.root.focus_get())
+        try:
+            fcom = str(self.root.focus_get())
+        except:
+            fcom = ""
         if self.FREEZE is False:
             if event.keysym == "f":
                 self.bt["entry"].focus()
@@ -2650,6 +2692,11 @@ class TreeViewGui:
                             geo.write(str({"geo": self.GEO}).encode())
                     del ask
                 self.addonchk()
+            if self.cycle:
+                self.root.after_cancel(self.cycle)
+            self.__delattr__("bt")
+            self.__delattr__("scribe")
+            self.__delattr__("addonb")
             self.root.quit()
         else:
             messagebox.showerror(
@@ -3432,34 +3479,6 @@ def _load_config():
 
 
 @excp(m=2, filenm=DEFAULTFILE)
-def configuring(args: list):
-    """configuring TVG"""
-
-    match ment := len(args):
-        case ment if ment == 2:
-            _mode(args[1])
-        case _:
-            pass
-    del args, ment
-
-
-@excp(m=2, filenm=DEFAULTFILE)
-def _mode(mode: str):
-    global THEME_MODE
-
-    match mode := mode:
-        case mode if mode.lower() == "dark":
-            if THEME_MODE is True:
-                THEME_MODE = "dark"
-        case mode if mode.lower() == "light":
-            if THEME_MODE is False:
-                THEME_MODE = "light"
-        case _:
-            pass
-    del mode
-
-
-@excp(m=2, filenm=DEFAULTFILE)
 def titlemode(sent: str):
     try:
         cks = string.printable.partition("!")[0] + "_ "
@@ -3489,7 +3508,6 @@ def main():
         _addon = False
 
     findpath()
-    configuring(sys.argv)
     _load_config()
 
     root = Tk()

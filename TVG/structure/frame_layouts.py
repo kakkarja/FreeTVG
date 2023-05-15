@@ -82,34 +82,55 @@ class Lay1(ttk.Frame):
     def radiobut(self, event=None):
         """These are the switches on radio buttons, to apply certain rule on child"""
 
-        case = {"": self.rb.get(), "child": "child", "parent": "parent"}
-        self.entry.config(state="normal")
-        if self.entry.get() in case:
-            if case[self.rb.get()] == "child":
+        match (self.rb.get(), str(self.entry.cget("state")), self.entry.get()):
+            case ("parent", "disable", _):
+                self.entry.config(state="normal")
+                self.entry.insert(0, "parent")
+            case ("child", "disable", _):
+                self.entry.config(state="normal")
+                self.entry.insert(0, "child")
+                self.entry3.config(state="normal")
                 self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
                 self.entry3.current(0)
-            elif case[self.rb.get()] != "child":
-                self.entry3.config(values="")
+                self.entry3.config(state="readonly")
+            case ("parent", _, "child"):
+                self.entry.delete(0, END)
+                self.entry.insert(0, "parent")
                 self.entry3.config(state="normal")
+                self.entry3.config(values="")
                 self.entry3.delete(0, END)
                 self.entry3.config(state="readonly")
-            self.entry.delete(0, END)
-            if len(str(self.entry.focus_get())) > 5:
-                if str(self.entry.focus_get())[-5:] != "entry":
-                    self.entry.insert(0, case[""])
-            else:
-                self.entry.insert(0, case[""])
-        else:
-            if case[self.rb.get()] == "child":
+            case ("child", _, "parent"):
+                self.entry.delete(0, END)
+                self.entry.insert(0, "child")
+                self.entry3.config(state="normal")
                 self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
                 self.entry3.current(0)
-            elif case[self.rb.get()] != "child":
-                self.entry3.config(values="")
+                self.entry3.config(state="readonly")
+            case ("parent", _, ""):
+                self.entry.insert(0, "parent")
                 self.entry3.config(state="normal")
+                self.entry3.config(values="")
                 self.entry3.delete(0, END)
                 self.entry3.config(state="readonly")
-            self.entry.selection_clear()
-        del case
+            case ("child", _, ""):
+                self.entry.insert(0, "child")
+                self.entry3.config(state="normal")
+                self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
+                self.entry3.current(0)
+                self.entry3.config(state="readonly")
+            case ("parent", _, _):
+                self.entry3.config(state="normal")
+                self.entry3.config(values="")
+                self.entry3.delete(0, END)
+                self.entry3.config(state="readonly")
+            case ("child", _, _):
+                self.entry3.config(state="normal")
+                self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
+                self.entry3.current(0)
+                self.entry3.config(state="readonly")
+
+        self.entry.configure(validate="focusin")
 
 
 @excpcls(m=2, filenm=DEFAULTFILE)
