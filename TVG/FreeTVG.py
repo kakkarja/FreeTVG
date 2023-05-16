@@ -56,6 +56,11 @@ from .structure import Lay1, Lay2, Lay3, Lay4, Lay5, Lay6, Lay7, Lay8, Scribe
 from .utility.mdh import convhtml
 from .utility.RegMail import composemail, wrwords
 
+try:
+    from ctypes import windll, byref, sizeof, c_int
+except:
+    pass
+
 __all__ = ["main"]
 
 
@@ -410,6 +415,29 @@ class TreeViewGui:
             self.ldmode()
         self.cycle = self.root.after(1000, self.cycle_theme)
 
+    def _windows_only(self):
+        # Ref:
+        # https://stackoverflow.com/questions/23836000/can-i-change-the-title-bar-in-tkinter
+        # These attributes are for windows 11
+        bar = None
+        title = None
+        if self.tmode == "dark":
+            bar = 0x001A1A1A
+            title = 0xEEEEEE
+        else:
+            bar = 0xEEEEEE
+            title = 0x001A1A1A
+        HWND = windll.user32.GetParent(self.root.winfo_id())
+        DWMWA_CAPTION_COLOR = 35
+        DWMWA_TITLE_COLOR = 36
+        windll.dwmapi.DwmSetWindowAttribute(
+            HWND, DWMWA_CAPTION_COLOR, byref(c_int(bar)), sizeof(c_int)
+        )
+        windll.dwmapi.DwmSetWindowAttribute(
+            HWND, DWMWA_TITLE_COLOR, byref(c_int(title)), sizeof(c_int)
+        )
+        del bar, title, HWND, DWMWA_CAPTION_COLOR, DWMWA_TITLE_COLOR
+
     def ldmode(self):
         """Dark mode for easing the eye"""
 
@@ -457,6 +485,8 @@ class TreeViewGui:
                 self.txtcol(
                     path=self.glop.joinpath(self.glop.parent, "theme.tvg"), wr=False
                 )
+            if self.plat.startswith("win"):
+                self._windows_only()
         elif self.tmode == "light":
             self.stl.configure(
                 ".",
@@ -489,6 +519,8 @@ class TreeViewGui:
                 arrowcolor=[("active", "black")],
             )
             self.stl.configure("TEntry", fieldbackground=chfg)
+            if self.plat.startswith("win"):
+                self._windows_only()
         del oribg, chbg, orifg, chfg
         self.root.update()
 

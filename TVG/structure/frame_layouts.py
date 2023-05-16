@@ -34,7 +34,7 @@ class Lay1(ttk.Frame):
         self.label.pack(side=LEFT, pady=3, fill="x")
         self.entry = ttk.Entry(
             self,
-            validate="focusin",
+            validate="none",
             validatecommand=self.focus,
             font="consolas 12",
         )
@@ -79,58 +79,43 @@ class Lay1(ttk.Frame):
             else:
                 return False
 
+    def _make_entry(self, ch: bool = True):
+        if str(self.entry["state"]) == "disable":
+            self.entry.configure(state="normal")
+        if ch:
+            self.entry3.config(state="normal")
+            self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
+            self.entry3.current(0)
+            self.entry3.config(state="readonly")
+        else:
+            self.entry3.config(state="normal")
+            self.entry3.config(values="")
+            self.entry3.delete(0, END)
+            self.entry3.config(state="readonly")
+        self.entry.configure(validate="focusin")
+
     def radiobut(self, event=None):
         """These are the switches on radio buttons, to apply certain rule on child"""
 
-        match (self.rb.get(), str(self.entry.cget("state")), self.entry.get()):
-            case ("parent", "disable", _):
-                self.entry.config(state="normal")
-                self.entry.insert(0, "parent")
-            case ("child", "disable", _):
-                self.entry.config(state="normal")
-                self.entry.insert(0, "child")
-                self.entry3.config(state="normal")
-                self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
-                self.entry3.current(0)
-                self.entry3.config(state="readonly")
-            case ("parent", _, "child"):
-                self.entry.delete(0, END)
-                self.entry.insert(0, "parent")
-                self.entry3.config(state="normal")
-                self.entry3.config(values="")
-                self.entry3.delete(0, END)
-                self.entry3.config(state="readonly")
-            case ("child", _, "parent"):
-                self.entry.delete(0, END)
-                self.entry.insert(0, "child")
-                self.entry3.config(state="normal")
-                self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
-                self.entry3.current(0)
-                self.entry3.config(state="readonly")
-            case ("parent", _, ""):
-                self.entry.insert(0, "parent")
-                self.entry3.config(state="normal")
-                self.entry3.config(values="")
-                self.entry3.delete(0, END)
-                self.entry3.config(state="readonly")
-            case ("child", _, ""):
-                self.entry.insert(0, "child")
-                self.entry3.config(state="normal")
-                self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
-                self.entry3.current(0)
-                self.entry3.config(state="readonly")
-            case ("parent", _, _):
-                self.entry3.config(state="normal")
-                self.entry3.config(values="")
-                self.entry3.delete(0, END)
-                self.entry3.config(state="readonly")
-            case ("child", _, _):
-                self.entry3.config(state="normal")
-                self.entry3.config(values=tuple([f"child{c}" for c in range(1, 51)]))
-                self.entry3.current(0)
-                self.entry3.config(state="readonly")
-
-        self.entry.configure(validate="focusin")
+        match self.rb.get():
+            case "parent":
+                match w := self.entry.get():
+                    case "child" | "":
+                        self._make_entry(False)
+                        if w:
+                            self.entry.delete(0, END)
+                        self.entry.insert(0, "parent")
+                    case w if w != "parent":
+                        self._make_entry(False)
+            case "child":
+                match w := self.entry.get():
+                    case "parent" | "":
+                        self._make_entry()
+                        if w:
+                            self.entry.delete(0, END)
+                        self.entry.insert(0, "child")
+                    case w if w != "child":
+                        self._make_entry()
 
 
 @excpcls(m=2, filenm=DEFAULTFILE)

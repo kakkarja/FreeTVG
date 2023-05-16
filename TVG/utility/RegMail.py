@@ -19,10 +19,7 @@ def composemail(sub: str, body: str):
         webbrowser.open(f"mailto:?subject={subject}&body={parse.quote(body)}", new=1)
     else:
         # For default MacOsX default "Mail" app
-        if body.encode("unicode_escape").decode().partition("\\U")[1]:
-            body = f"{demoji.replace_with_desc(body)!r}".strip().replace('"', "'")[1:-1]
-        else:
-            body = f"{body!r}".strip().replace('"', "'")[1:-1]
+        body = demoji.replace_with_desc(body).strip().replace('"', "'")
         webbrowser.open(f"mailto:?subject={subject}&body={body}", new=1)
 
 

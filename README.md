@@ -20,6 +20,7 @@
   * **[Add-On for TVG](#add-on-for-tvg)**
   * **[Markdown](#markdown)**
   * **[Folding](#folding)**
+  * **[Dynamic Theme Changes](#dynamic-theme-changes)**
 * **[Changes](#changes)**
 * **[Unresolved Issues](#unresolve-issues)**
 * **[Development Purpose](#development-purpose)**
@@ -30,6 +31,7 @@
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
+* **[Dynamic Theme](#dynamic-theme)**
 
 </details>
 
@@ -387,6 +389,14 @@ main()
 
   * **Press Win [Ctrl + F5] || Mac [fn + F5]**
     * **Can modified Configuration directly; please refer to Tutorial by pressing MacOs X [fn + F1] and Windows [Ctrl + F1]**
+
+* ### **Dynamic Theme**
+  
+  * **Title-Bar in windows can be change to dark or light**
+    * **Not for dialogs and messages yet!**
+
+* **Mail \[fn+F3 / ctrl+F3\]**
+  * **For macos bug fixed**
 
 [⬆️](#freetvg-tree-view-gui)
 
