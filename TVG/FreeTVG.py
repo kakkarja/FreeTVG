@@ -754,9 +754,11 @@ class TreeViewGui:
                 if self.fframe.rb.get() == "parent":
                     self.fframe.rb.set("child")
                     self.fframe.radiobut()
+                    self.fframe.focus()
                 else:
                     self.fframe.rb.set("parent")
                     self.fframe.radiobut()
+                    self.fframe.focus()
             elif event.keysym == "e":
                 self.copas()
             elif event.keysym == "y":

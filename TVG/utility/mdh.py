@@ -2,10 +2,9 @@
 # Copyright (c) 2020, KarjaKAK
 # All rights reserved.
 
-import os
 import re
+import subprocess
 from pathlib import Path
-from subprocess import run
 from sys import platform
 
 import markdown
@@ -185,10 +184,12 @@ kbd { color: black !important; }
                 "msedge",
                 f"'\"{Path(f'{filename}.html').absolute()}\"'",
             ]
-            run(pro)
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            subprocess.run(pro, startupinfo=startupinfo)
         else:
             pro = ["open", "-a", "Safari", f"{Path(f'{filename}.html').absolute()}"]
-            run(pro)
+            subprocess.run(pro)
         del (
             text,
             filename,
@@ -206,6 +207,7 @@ kbd { color: black !important; }
             printed,
             nxt,
             pro,
+            startupinfo,
         )
     except Exception as e:
         raise e
