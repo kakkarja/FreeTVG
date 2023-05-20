@@ -56,10 +56,9 @@ from .structure import Lay1, Lay2, Lay3, Lay4, Lay5, Lay6, Lay7, Lay8, Scribe
 from .utility.mdh import convhtml
 from .utility.RegMail import composemail, wrwords
 
-try:
+if platform.startswith("win"):
     from ctypes import windll, byref, sizeof, c_int
-except:
-    pass
+
 
 __all__ = ["main"]
 
@@ -1727,13 +1726,26 @@ class TreeViewGui:
                 fon = self.text["font"].partition(" ")[0]
                 fon = f"{add}{fon}"
 
-            convhtml(
-                self._utilspdf(),
-                self.filename,
-                fon,
-                self.text.cget("background")[1:],
-                self.text.cget("foreground"),
+            ans = messagebox.askyesno(
+                "Preview", "Do you want to preview? ('no' will go to web for printing)"
             )
+            if ans:
+                style = convhtml(
+                    self._utilspdf(),
+                    self.filename,
+                    fon,
+                    self.text.cget("background")[1:],
+                    self.text.cget("foreground"),
+                )
+            else:
+                style = convhtml(
+                    self._utilspdf(),
+                    self.filename,
+                    fon,
+                    self.text.cget("background")[1:],
+                    self.text.cget("foreground"),
+                    preview=False,
+                )
             del px, ck, sty, add, fon
 
     def spaces(self):
@@ -2683,18 +2695,10 @@ class TreeViewGui:
                 except Exception as a:
                     messagebox.showerror("TreeViewGui", f"{a}", parent=self.root)
                 if self.text.cget("state") == DISABLED:
-                    self.chktempo()
                     self._mdbuttons()
             self.store = None
             self.text.edit_reset()
             self.infobar()
-
-    def chktempo(self):
-        """Checking Add-On expression attribute"""
-
-        if self._addon and hasattr(self, "toptempo"):
-            self.toptempo.destroy()
-            self.__delattr__("toptempo")
 
     def tvgexit(self, event=None):
         """Exit mode for TVG and setting everything back to default"""
@@ -3038,21 +3042,6 @@ class TreeViewGui:
                     )
                 self.spaces()
 
-    def _ckwrds(self, wrd: str):
-        if self._addon:
-            nums = len(wrd)
-            if nums >= 101:
-                raise Exception(f"{nums} charcters, is exceeding than 100 chars!")
-
-            for i in wrd:
-                if i not in tuple("0123456789*/-+()%."):
-                    raise ValueError(f"{i!r} is not acceptable expression!")
-
-            ck = re.compile(r"[\W+]{2}")
-            if ck := ck.search(wrd):
-                raise ValueError(f"These {ck.group()!r} are not allowed!")
-            del ck, nums
-
     def exprsum(self, event=None):
         """Expression Calculation for Editor mode"""
 
@@ -3061,24 +3050,29 @@ class TreeViewGui:
             self.FREEZE = True
 
             err = None
+            stor_tuple = tuple()
 
             @excp(2, DEFAULTFILE)
             def calc(event=None):
-                nonlocal err
+                nonlocal err, stor_tuple
                 try:
                     if gw := wid.get():
-                        self._ckwrds(gw)
-                        ms = EvalExp(gw, None)
-                        lab["text"] = ms.evlex()
-                        if err:
-                            err = None
-                        del ms, gw
+                        if not stor_tuple or gw != stor_tuple[0]:
+                            lab["text"] = _ckwrds(gw)
+                            if err:
+                                err = None
+                            stor_tuple = gw, lab["text"]
+                        else:
+                            lab["text"] = stor_tuple[1]
+                        del gw
                     else:
                         raise ValueError("Expression is empty!")
                 except Exception as e:
                     if err is None:
                         err = 1
                     messagebox.showerror("Error Message", e)
+                    lab.focus()
+                    wid.focus()
 
             @excp(2, DEFAULTFILE)
             def utilins(lab: str):
@@ -3125,33 +3119,10 @@ class TreeViewGui:
                             )
 
             @excp(2, DEFAULTFILE)
-            def updatelab():
-                try:
-                    ms = None
-                    if gw := wid.get():
-                        self._ckwrds(gw)
-                        ms = EvalExp(gw, None)
-                    if lab["text"] != (ms := ms.evlex()):
-                        lab["text"] = ms
-                except:
-                    calc()
-                finally:
-                    del ms, gw
-
-            @excp(2, DEFAULTFILE)
             def insert():
                 if isinstance(lab["text"], int | float):
-                    updatelab()
-                    match self.labcop:
-                        case lc if lc is None:
-                            self.labcop = f"{lab['text']:,.2f}"
-                        case lc if self.text.get(
-                            f"{INSERT} - {len(lc)}c", INSERT
-                        ) == lc:
-                            self.text.delete(f"{INSERT} - {len(lc)}c", INSERT)
-                            self.labcop = f"{lab['text']:,.2f}"
-                        case _:
-                            self.labcop = f"{lab['text']:,.2f}"
+                    calc()
+                    self.labcop = f"{lab['text']:,.2f}"
                     utilins(self.labcop)
                     lab["text"] = "click for result"
 
@@ -3205,25 +3176,18 @@ class TreeViewGui:
                     else:
                         self.after(1000, self.fcs)
 
-            mas = Toplevel(self.root)
-            mas.withdraw()
-            self.__setattr__("toptempo", mas)
             self.__setattr__("labcop", None)
-            d = MyDialog(mas)
+            d = MyDialog(self.root)
             self.lock = False
             self.root.update()
             self.unlock = True
             self.FREEZE = True
-            if hasattr(self, "toptempo"):
-                mas.destroy()
-                self.__delattr__("toptempo")
             self.__delattr__("labcop")
-            del wid, lab, d, mas, err
+            del wid, lab, d, err, stor_entry
         else:
-            if self.lock is False and not hasattr(self, "toptempo"):
-                messagebox.showinfo(
-                    "TreeViewGui", "Only work for Editor mode", parent=self.root
-                )
+            messagebox.showinfo(
+                "TreeViewGui", "Only work for Editor mode", parent=self.root
+            )
 
     def _indconv(self, n: int):
         return f"{float(n)}", f"{float(n + 1)}"
@@ -3428,6 +3392,31 @@ class TreeViewGui:
                         )
 
             TreeViewGui.FREEZE = False
+
+
+def _ckwrds(wrd: str):
+    if _addon:
+        try:
+            nums = len(wrd)
+            values = tuple("0123456789*/-+()%.")
+            ck = None
+
+            if nums >= 101:
+                raise ValueError(f"{nums} charcters, is exceeding than 100 chars!")
+
+            for i in wrd:
+                if i not in values:
+                    raise ValueError(f"{i!r} is not acceptable expression!")
+
+            ck = EvalExp(wrd, None)
+            ck = ck.evlex()
+            return ck
+        except ValueError:
+            raise
+        except:
+            raise ValueError(f"These expression {wrd!r} are not allowed!")
+        finally:
+            del wrd, ck, nums, values
 
 
 @excp(m=2, filenm=DEFAULTFILE)

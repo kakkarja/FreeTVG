@@ -8,6 +8,7 @@ from pathlib import Path
 from sys import platform
 
 import markdown
+import webview
 
 __all__ = [""]
 
@@ -31,7 +32,14 @@ extension_configs = {
 }
 
 
-def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None):
+def convhtml(
+    text: str,
+    filename: str,
+    font: str,
+    bg: str = None,
+    fg: str = None,
+    preview: bool = True,
+):
     # Converting your TVG to html and printable directly from browser.
 
     try:
@@ -40,6 +48,9 @@ def convhtml(text: str, filename: str, font: str, bg: str = None, fg: str = None
         background = bg if bg else "gold"
         foreground = fg if fg else "black"
         kbfg = "333" if foreground == "black" else "eee"
+        startupinfo = None
+        window = None
+        pointer_event = None
 
         for i in gettext:
             if i != "\n":
@@ -97,10 +108,12 @@ list-style-type: none !important;
     text-decoration: line-through;
 }
 """
+        if preview:
+            pointer_event = """body { pointer-events: none; }"""
 
         cssstyle = f"""<!DOCTYPE html>
 <html>
-<button class="button"  onclick="javascript:window.print();">Print</button>
+<button class="button" onclick="javascript:window.print();">Print</button>
 <header>
 <meta charset="UTF-8">
 <h1>
@@ -113,6 +126,8 @@ list-style-type: none !important;
 {setfont}
 {kbd}
 {tasklist}
+{pointer_event if preview else ""}
+
 """
         printed = """@media print {
 .button { display: none; }
@@ -188,8 +203,15 @@ kbd { color: black !important; }
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             subprocess.run(pro, startupinfo=startupinfo)
         else:
-            pro = ["open", "-a", "Safari", f"{Path(f'{filename}.html').absolute()}"]
-            subprocess.run(pro)
+            if preview:
+                window = webview.create_window("TVG", html=cssstyle)
+                webview.start()
+            else:
+                pro = ["open", "-a", "Safari", f"{Path(f'{filename}.html').absolute()}"]
+                subprocess.run(pro)
+    except Exception as e:
+        raise e
+    finally:
         del (
             text,
             filename,
@@ -208,6 +230,8 @@ kbd { color: black !important; }
             nxt,
             pro,
             startupinfo,
+            pointer_event,
+            window,
+            preview,
+            pointer_event,
         )
-    except Exception as e:
-        raise e

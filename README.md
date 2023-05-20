@@ -21,6 +21,7 @@
   * **[Markdown](#markdown)**
   * **[Folding](#folding)**
   * **[Dynamic Theme Changes](#dynamic-theme-changes)**
+  * **[Preview](#preview)**
 * **[Changes](#changes)**
 * **[Unresolved Issues](#unresolve-issues)**
 * **[Development Purpose](#development-purpose)**
@@ -166,6 +167,14 @@ main()
   * **Theme will change dynamically when user chage the os system's theme \[**Dark / Light**\]**
     * **Using dependency of <em><u>Dark-Detect</u></em>**
       * **[@albertosottile](https://github.com/albertosottile/darkdetect)**
+
+* ### **Preview**
+
+  * **Preview the html view**
+    * **Only for Mac**
+    * **Not for printing**
+    * **Using dependency of <em><u>PyWebView</u></em>**
+      * **[@r0x0r](https://github.com/r0x0r/pywebview)**
 
 [⬆️](#freetvg-tree-view-gui)
 
