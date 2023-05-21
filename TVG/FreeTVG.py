@@ -1727,7 +1727,9 @@ class TreeViewGui:
                 fon = f"{add}{fon}"
 
             ans = messagebox.askyesno(
-                "Preview", "Do you want to preview? ('no' will go to web for printing)"
+                "Preview",
+                "Do you want to preview? ('no' will go to web for printing)",
+                parent=self.root,
             )
             if ans:
                 style = convhtml(
@@ -1736,6 +1738,8 @@ class TreeViewGui:
                     fon,
                     self.text.cget("background")[1:],
                     self.text.cget("foreground"),
+                    width=self.root.winfo_width(),
+                    height=self.root.winfo_height(),
                 )
             else:
                 style = convhtml(

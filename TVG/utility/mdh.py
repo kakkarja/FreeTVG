@@ -39,6 +39,8 @@ def convhtml(
     bg: str = None,
     fg: str = None,
     preview: bool = True,
+    width: int = 0,
+    height: int = 0,
 ):
     # Converting your TVG to html and printable directly from browser.
 
@@ -204,7 +206,14 @@ kbd { color: black !important; }
             subprocess.run(pro, startupinfo=startupinfo)
         else:
             if preview:
-                window = webview.create_window("TVG", html=cssstyle)
+                window = webview.create_window(
+                    "TVG",
+                    html=cssstyle,
+                    resizable=False,
+                    width=width if width else 800,
+                    height=height if height else 600,
+                    on_top=True,
+                )
                 webview.start()
             else:
                 pro = ["open", "-a", "Safari", f"{Path(f'{filename}.html').absolute()}"]
@@ -234,4 +243,6 @@ kbd { color: black !important; }
             window,
             preview,
             pointer_event,
+            width,
+            height,
         )
