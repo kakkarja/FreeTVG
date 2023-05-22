@@ -1731,6 +1731,7 @@ class TreeViewGui:
                 "Do you want to preview? ('no' will go to web for printing)",
                 parent=self.root,
             )
+            style = None
             if ans:
                 style = convhtml(
                     self._utilspdf(),
@@ -1750,7 +1751,7 @@ class TreeViewGui:
                     self.text.cget("foreground"),
                     preview=False,
                 )
-            del px, ck, sty, add, fon
+            del px, ck, sty, add, fon, style
 
     def spaces(self):
         """Mostly used by other functions to clear an obselete spaces.
@@ -3187,7 +3188,7 @@ class TreeViewGui:
             self.unlock = True
             self.FREEZE = True
             self.__delattr__("labcop")
-            del wid, lab, d, err, stor_entry
+            del wid, lab, d, err, stor_tuple
         else:
             messagebox.showinfo(
                 "TreeViewGui", "Only work for Editor mode", parent=self.root

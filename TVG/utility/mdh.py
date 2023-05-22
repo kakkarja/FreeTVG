@@ -242,7 +242,6 @@ kbd { color: black !important; }
             pointer_event,
             window,
             preview,
-            pointer_event,
             width,
             height,
         )
