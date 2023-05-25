@@ -32,6 +32,36 @@ extension_configs = {
 }
 
 
+def _pattern(wrd: str, pat: str):
+    try:
+        last = g = fx = pt = None
+        if "<p>" not in wrd:
+            last = -5
+        else:
+            last = -4
+        g = wrd.partition(pat)
+        g = g[0] + g[1]
+        pt = (
+            '<input type="checkbox" class="strikethrough" name="ck"/><span for="ck">'
+            if not "checked" in pat
+            else '<input type="checkbox" class="strikethrough" name="ck" checked/><span for="ck">'
+        )
+        fx = (
+            wrd[: len(g)]
+            + "<span>"
+            + wrd[len(g) : last]
+            + "</span>"
+            + wrd[last:]
+            + "\n"
+        ).replace(
+            f"{pat}<span>",
+            pt,
+        )
+        return fx
+    finally:
+        del last, g, fx, pt, wrd, pat
+
+
 def convhtml(
     text: str,
     filename: str,
@@ -153,38 +183,10 @@ kbd { color: black !important; }
         fcs = []
         if 'input type="checkbox"' in cssstyle:
             for i in cssstyle.split("\n"):
-                if '<p><input type="checkbox"/>' in i:
-                    g = '<p><input type="checkbox"/>'
-                    fx = (
-                        i[: len(g)]
-                        + "<span>"
-                        + i[len(g) : -4]
-                        + "</span>"
-                        + i[-4:]
-                        + "\n"
-                    )
-                    fx = fx.replace(
-                        g + "<span>",
-                        '<p><input type="checkbox" class="strikethrough" name="ck"/><span for="ck">',
-                    )
-                    fcs.append(fx)
-                    del g, fx
-                elif '<p><input type="checkbox" checked/>' in i:
-                    g = '<p><input type="checkbox" checked/>'
-                    fx = (
-                        i[: len(g)]
-                        + "<span>"
-                        + i[len(g) : -4]
-                        + "</span>"
-                        + i[-4:]
-                        + "\n"
-                    )
-                    fx = fx.replace(
-                        g + "<span>",
-                        '<p><input type="checkbox" class="strikethrough" name="ck" checked/><span for="ck">',
-                    )
-                    fcs.append(fx)
-                    del g, fx
+                if '<input type="checkbox" checked/>' in i:
+                    fcs.append(_pattern(i, '<input type="checkbox" checked/>'))
+                elif '<input type="checkbox"/>' in i:
+                    fcs.append(_pattern(i, '<input type="checkbox"/>'))
                 else:
                     fcs.append(f"{i}\n")
 
@@ -195,6 +197,8 @@ kbd { color: black !important; }
             whtm.write(cssstyle)
         pro = None
         if platform.startswith("win"):
+            # ToDo: Preview for arm64 architecture
+            # In preview no interactive printing even it open on browser
             pro = [
                 "powershell.exe",
                 "start",

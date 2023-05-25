@@ -33,6 +33,7 @@
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
 * **[Dynamic Theme](#dynamic-theme)**
+* **[Editor Enhancement](#editor-new-enhancement)**
 
 </details>
 
@@ -406,6 +407,11 @@ main()
 
 * **Mail \[fn+F3 / ctrl+F3\]**
   * **For macos bug fixed**
+
+* ### **Editor new enhancement**
+  
+  * **Editor can write to any row in working document**
+    * **Click any row in the list-box before goto Editor mode**
 
 [⬆️](#freetvg-tree-view-gui)
 
