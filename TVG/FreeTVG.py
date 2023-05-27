@@ -1750,6 +1750,9 @@ class TreeViewGui:
                     self.text.cget("background")[1:],
                     self.text.cget("foreground"),
                     preview=False,
+                    pdfpath=self.glop.joinpath(f"{self.filename}.pdf")
+                    if not self.plat.startswith("win")
+                    else None,
                 )
             del px, ck, sty, add, fon, style
 

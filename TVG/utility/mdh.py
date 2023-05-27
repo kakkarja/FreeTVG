@@ -8,6 +8,7 @@ from pathlib import Path
 from sys import platform
 
 import markdown
+import pdfkit
 import webview
 
 __all__ = [""]
@@ -62,6 +63,28 @@ def _pattern(wrd: str, pat: str):
         del last, g, fx, pt, wrd, pat
 
 
+def _checking_wkhtmltopdf():
+    result = subprocess.run(
+        ["which", "wkhtmltopdf"],
+        stderr=subprocess.PIPE,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    if "wkhtmltopdf" in result.stdout:
+        return True
+    else:
+        return False
+
+
+def _save_pdf(scr: str, pdfpath: str):
+    options = {
+        "print-media-type": True,
+    }
+    pdfkit.from_file(scr, pdfpath, options=options)
+    del options
+
+
 def convhtml(
     text: str,
     filename: str,
@@ -71,6 +94,7 @@ def convhtml(
     preview: bool = True,
     width: int = 0,
     height: int = 0,
+    pdfpath: str = None,
 ):
     # Converting your TVG to html and printable directly from browser.
 
@@ -220,8 +244,17 @@ kbd { color: black !important; }
                 )
                 webview.start()
             else:
-                pro = ["open", "-a", "Safari", f"{Path(f'{filename}.html').absolute()}"]
-                subprocess.run(pro)
+                if not _checking_wkhtmltopdf():
+                    pro = [
+                        "open",
+                        "-a",
+                        "Safari",
+                        f"{Path(f'{filename}.html').absolute()}",
+                    ]
+                    subprocess.run(pro)
+                else:
+                    _save_pdf(f"{filename}.html", pdfpath=pdfpath)
+                    subprocess.run(["open", f"{Path(pdfpath).name}"])
     except Exception as e:
         raise e
     finally:

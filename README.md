@@ -22,6 +22,7 @@
   * **[Folding](#folding)**
   * **[Dynamic Theme Changes](#dynamic-theme-changes)**
   * **[Preview](#preview)**
+  * **[Direct Print PDF](#direct-print-pdf)**
 * **[Changes](#changes)**
 * **[Unresolved Issues](#unresolve-issues)**
 * **[Development Purpose](#development-purpose)**
@@ -176,6 +177,20 @@ main()
     * **Not for printing**
     * **Using dependency of <em><u>PyWebView</u></em>**
       * **[@r0x0r](https://github.com/r0x0r/pywebview)**
+
+* ### **Direct Print PDF**
+
+  * **Only for MacOS X**
+    * **Dependency using <em><u>PdfKit</u></em>**
+      * **[JazzCore](https://github.com/JazzCore/python-pdfkit)**
+    * **IMPORTANT!**
+      * **Need to install wkhtmltopdf using homebrew**
+
+        ```Terminal
+        brew install homebrew/cask/wkhtmltopdf
+        ```
+
+      * **If wkhtmltopdf not installed, Printing will directed to browser instead**
 
 [⬆️](#freetvg-tree-view-gui)
 

@@ -24,6 +24,8 @@ if not os.path.exists(DEFAULTDIR):
     os.mkdir(DEFAULTDIR)
 DEFAULTFILE = os.path.join(DEFAULTDIR, Path(DEFAULTFILE).name)
 
+__all__ = [""]
+
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class Lay1(ttk.Frame):
