@@ -7,6 +7,7 @@ import webbrowser
 from sys import platform
 from textwrap import fill
 from urllib import parse
+
 import demoji
 
 __all__ = [""]

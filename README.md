@@ -35,6 +35,7 @@
 * **[Picture Markdown](#markdown-1)**
 * **[Dynamic Theme](#dynamic-theme)**
 * **[Editor Enhancement](#editor-new-enhancement)**
+* **[Preview On Hold!](#preview-has-been-on-hold-for-latest-version-onword)**
 
 </details>
 
@@ -177,6 +178,9 @@ main()
     * **Not for printing**
     * **Using dependency of <em><u>PyWebView</u></em>**
       * **[@r0x0r](https://github.com/r0x0r/pywebview)**
+    * **WARNING: => [Unresolve Issue](#preview-has-been-on-hold-for-latest-version-onword)**
+      * **For version 3.2.10 preview is still available!**
+      * **To prevent crash, do not click on the header-top bar area, while preview is not close yet**
 
 * ### **Direct Print PDF**
 
@@ -246,6 +250,12 @@ main()
     * **When application is quit and restarted again, it will persistently reappear at start**
     * **Resolution walk-around:**
       * **Will check the dialog visibility at beginning of starting application, and if is true, will hide it at once**
+
+* ### **Preview has been on hold! (for latest version onword)**
+  
+  * **Unable to resolve the crash on Tkinter because of creating another thread from another source**
+  * **However there is a way to prevent from crash...**
+    * **[How to prevent](#preview)...**
 
 [⬆️](#freetvg-tree-view-gui)
 
