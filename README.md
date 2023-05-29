@@ -174,13 +174,12 @@ main()
 * ### **Preview**
 
   * **Preview the html view**
-    * **Only for Mac**
-    * **Not for printing**
-    * **Using dependency of <em><u>PyWebView</u></em>**
-      * **[@r0x0r](https://github.com/r0x0r/pywebview)**
+    * **~~Only for Mac~~**
+    * **Clicking print button and links are disabled!**
+    * **~~Using dependency of <em><u>PyWebView</u></em>~~**
     * **WARNING: => [Unresolve Issue](#preview-has-been-on-hold-for-latest-version-onword)**
-      * **For version 3.2.10 preview is still available!**
-      * **To prevent crash, do not click on the header-top bar area, while preview is not close yet**
+      * **For version 3.2.10 preview stand-alone is still available!**
+      * **Do not click on the header-top bar area, while preview is not close yet**
 
 * ### **Direct Print PDF**
 
@@ -195,6 +194,8 @@ main()
         ```
 
       * **If wkhtmltopdf not installed, Printing will directed to browser instead**
+
+![DirectPrintInMac](/Pics/printedPDF.png)
 
 [⬆️](#freetvg-tree-view-gui)
 
@@ -254,8 +255,6 @@ main()
 * ### **Preview has been on hold! (for latest version onword)**
   
   * **Unable to resolve the crash on Tkinter because of creating another thread from another source**
-  * **However there is a way to prevent from crash...**
-    * **[How to prevent](#preview)...**
 
 [⬆️](#freetvg-tree-view-gui)
 

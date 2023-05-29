@@ -4,21 +4,13 @@
 
 import re
 import subprocess
-import time
 from pathlib import Path
 from sys import platform
 
 import markdown
 import pdfkit
 
-# ToDo: To prevent crash on tkinter
-#
-# import webview
-
-# from .pid_process import PROCS
-
 __all__ = [""]
-
 
 extensions = [
     "pymdownx.extra",
@@ -89,24 +81,6 @@ def _save_pdf(scr: str, pdfpath: str):
     }
     pdfkit.from_file(scr, pdfpath, options=options)
     del options
-
-
-# def _on_showed():
-#     if webview.threading.active_count():
-#         x = webview.threading.Event()
-#         x.set()
-#         x.wait(0.5)
-#     time.sleep(1.0)
-#     PROCS.collect()
-
-
-# def _on_close():
-#     global PROCS
-#     if PROCS.avail():
-#         time.sleep(2.0)
-#         PROCS.terminate()
-#     PROCS.l1 = set()
-#     PROCS.l2 = set()
 
 
 def convhtml(
@@ -258,26 +232,9 @@ kbd { color: black !important; }
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             subprocess.run(pro, startupinfo=startupinfo)
         else:
-            # ToDo: To prevent crash on tkinter
-            #
-            # if preview:
-            #     window = webview.create_window(
-            #         "TVG",
-            #         html=cssstyle,
-            #         resizable=False,
-            #         width=width if width else 800,
-            #         height=height if height else 600,
-            #         on_top=True,
-            #     )
-            #     # window.events.shown += _on_showed
-            #     # window.events.closed += _on_close
-            #     webview.start()
-            # else:
             if preview or not _checking_wkhtmltopdf():
                 pro = [
                     "open",
-                    "-a",
-                    "Safari",
                     f"{Path(f'{filename}.html').absolute()}",
                 ]
                 subprocess.run(pro)
