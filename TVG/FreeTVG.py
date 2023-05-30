@@ -1143,6 +1143,7 @@ class TreeViewGui:
                             tvg.delrow(rw)
 
                     del tvg
+                    self._fold_restruct((rw, 1), False)
                     self.spaces()
                     if rw > self.listb.size() - 1:
                         if self.listb.get(rw - 1):
@@ -1311,6 +1312,7 @@ class TreeViewGui:
                                         tvg.insertrow(self.bt["entry"].get(), rw)
                                 del tvg
                                 self.bt["entry"].delete(0, END)
+                                self._fold_restruct((rw, 1))
                                 self.spaces()
                                 self.listb.see(rw)
                                 self.text.see(f"{rw}.0")
@@ -1377,7 +1379,10 @@ class TreeViewGui:
                 dbs = db(self.filename)
                 row = simpledialog.askinteger(
                     "Load Backup",
-                    f"There are {dbs.totalrecs()} rows, please choose a row:",
+                    (
+                        f"There are {dbs.totalrecs()} rows, please choose a row:\n"
+                        f"(Fold selections data will be erased!)"
+                    ),
                     parent=self.root,
                 )
                 if row and row <= dbs.totalrecs():
@@ -1389,6 +1394,8 @@ class TreeViewGui:
                         "Load backup is done, chek again!",
                         parent=self.root,
                     )
+                    self._deldatt(False)
+                    self._chkfoldatt()
                     self.spaces()
 
                 del row, dbs
@@ -1577,7 +1584,10 @@ class TreeViewGui:
                             if ask is not None and ask < self.listb.size():
                                 deci = messagebox.askyesno(
                                     "TreeViewGui",
-                                    '"Yes" to MOVE to, "No" to COPY to',
+                                    (
+                                        '"Yes" to MOVE to, "No" to COPY to\n'
+                                        "(Fold selection will be clear in 'MOVE'!)"
+                                    ),
                                     parent=self.root,
                                 )
                                 if deci:
@@ -1618,6 +1628,8 @@ class TreeViewGui:
                                                 writer.send(i)
                                         writer.close()
                                     del tvg, data, writer
+                                    self._deldatt(False)
+                                    self._chkfoldatt()
                                     self.spaces()
                                 else:
                                     with tv(self.filename) as tvg:
@@ -1651,6 +1663,7 @@ class TreeViewGui:
                                             for i in data:
                                                 writer.send(i)
                                         writer.close()
+                                    self._fold_restruct((ask, len(data)))
                                     del tvg, data, writer
                                     self.spaces()
                                 self.disab(dis=False)
@@ -2597,6 +2610,8 @@ class TreeViewGui:
                 del ckb
             else:
                 try:
+                    fts = None
+                    current_size = self.listb.size()
                     if self.text.count("1.0", END, "chars")[0] > 1:
                         stor = None
                         if self.editorsel or (stor := self.listb.curselection()):
@@ -2621,6 +2636,7 @@ class TreeViewGui:
                                 else:
                                     combi = iter((dict(p1) | p2[0]).values())
                                 tvg.fileread(combi)
+                            fts = [stor[0]]
                             del tvg, p1, p2, combi, p3
                         else:
                             p2 = self._compile_editor(self.listb.size())
@@ -2651,8 +2667,33 @@ class TreeViewGui:
                     messagebox.showerror("TreeViewGui", f"{a}", parent=self.root)
                 if self.text.cget("state") == DISABLED:
                     self._mdbuttons()
+                if fts:
+                    if current_size < self.listb.size():
+                        fts.append(self.listb.size() - current_size)
+                        self._fold_restruct(fts)
+                        self.view()
+                    elif current_size > self.listb.size():
+                        fts.append(current_size - self.listb.size())
+                        self._fold_restruct(fts, False)
+                        self.view()
+                del fts, current_size
             self.text.edit_reset()
             self.infobar()
+
+    def _fold_restruct(self, pos: tuple | list, op: bool = True):
+        self.listb.selection_clear(0, END)
+        if selections := self._ckfoldtvg():
+            for select in selections:
+                if select < pos[0]:
+                    self.listb.select_set(select)
+                else:
+                    if op:
+                        self.listb.select_set(select + pos[1])
+                    else:
+                        self.listb.select_set(select - pos[1])
+            with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
+                cur.write(str(self.listb.curselection()).encode())
+        del selections
 
     def tvgexit(self, event=None):
         """Exit mode for TVG and setting everything back to default"""
@@ -3208,11 +3249,12 @@ class TreeViewGui:
             for sel in sels:
                 self.listb.select_set(sel)
 
-    def _deldatt(self):
+    def _deldatt(self, v: bool = True):
         if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
             os.remove(self.glop.absolute().joinpath("fold.tvg"))
-            self.view()
-            self.infobar()
+            if v:
+                self.view()
+                self.infobar()
 
     def fold_selected(self):
         """Folding selected"""

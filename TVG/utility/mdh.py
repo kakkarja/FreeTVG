@@ -105,7 +105,8 @@ def convhtml(
         startupinfo = None
         window = None
         pointer_event = None
-        # PROCS.collect()
+        printed = ""
+        button_class = None
 
         for i in gettext:
             if i != "\n":
@@ -165,10 +166,12 @@ list-style-type: none !important;
 """
         if preview:
             pointer_event = """body { pointer-events: none; }"""
+        else:
+            button_class = '<button class="button" onclick="javascript:window.print();">Print</button>'
 
         cssstyle = f"""<!DOCTYPE html>
 <html>
-<button class="button" onclick="javascript:window.print();">Print</button>
+{button_class if not preview else ""}
 <header>
 <meta charset="UTF-8">
 <h1>
@@ -184,7 +187,8 @@ list-style-type: none !important;
 {pointer_event if preview else ""}
 
 """
-        printed = """@media print {
+        if not preview:
+            printed = """@media print {
 .button { display: none; }
 
 body { 
@@ -194,10 +198,11 @@ body {
 
 kbd { color: black !important; }
 }
+"""
+        nxt = f"""
 </style>
 <body>
-"""
-        nxt = f"""{a}
+{a}
 </body>
 </html>
 """

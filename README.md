@@ -36,6 +36,7 @@
 * **[Dynamic Theme](#dynamic-theme)**
 * **[Editor Enhancement](#editor-new-enhancement)**
 * **[Preview On Hold!](#preview-has-been-on-hold-for-latest-version-onword)**
+* **[Control fold flow](#control-fold-selected-flow)**
 
 </details>
 
@@ -436,6 +437,15 @@ main()
   
   * **Editor can write to any row in working document**
     * **Click any row in the list-box before goto Editor mode**
+
+* ### **Control Fold-Selected flow**
+
+  * **Fold-selected will be viewed folded even after**
+    * **Editing or writing in Editor**
+    * **After deletion a row in Delete**
+    * **After inserting a row in Insert**
+    * **After copying in CPP**
+      * **Not for moving in CPP**
 
 [⬆️](#freetvg-tree-view-gui)
 
