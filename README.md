@@ -36,7 +36,7 @@
 * **[Dynamic Theme](#dynamic-theme)**
 * **[Editor Enhancement](#editor-new-enhancement)**
 * **[Preview On Hold!](#preview-has-been-on-hold-for-latest-version-onword)**
-* **[Control fold flow](#control-fold-selected-flow)**
+* **[Control fold flow (WIP)](#control-fold-selected-flow---wip-work-in-progress)**
 
 </details>
 
@@ -438,14 +438,18 @@ main()
   * **Editor can write to any row in working document**
     * **Click any row in the list-box before goto Editor mode**
 
-* ### **Control Fold-Selected flow**
+* ### **Control Fold-Selected flow - WIP (Work-In-Progress)**
 
   * **Fold-selected will be viewed folded even after**
     * **Editing or writing in Editor**
     * **After deletion a row in Delete**
     * **After inserting a row in Insert**
     * **After copying in CPP**
-      * **Not for moving in CPP**
+    * **After editing a parent and its child in Ex**
+  * **NOT WORKING YET IN:**
+    * **Sum-Up addon for TVG**
+    * **Del Total addon for TVG**
+    * **Ex - editing whole note in editor**
 
 [⬆️](#freetvg-tree-view-gui)
 
