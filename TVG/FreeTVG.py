@@ -1663,9 +1663,10 @@ class TreeViewGui:
                                             for i in data:
                                                 writer.send(i)
                                         writer.close()
-                                    self._fold_restruct((ask, len(data)))
-                                    del tvg, data, writer
                                     self.spaces()
+                                    self._fold_restruct((ask, len(data)))
+                                    self.view()
+                                    del tvg, data, writer
                                 self.disab(dis=False)
                                 self.listb.config(selectmode=BROWSE)
                                 self.text.see(f"{ask}.0")
@@ -2175,53 +2176,30 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.nonetype():
-                ask = messagebox.askyesno(
-                    "TreeViewGui",
-                    '"Yes" Edit whole file, or "No" Edit selected parent only?',
-                    parent=self.root,
-                )
-                if ask:
+                if (stor := self.listb.curselection()) and "parent" in self.listb.get(
+                    stor := stor[0]
+                ):
                     self.editor()
                     with tv(self.filename) as tvg:
-                        for p, d in tvg.compdatch(True):
+                        num = stor
+                        for p, d in islice(tvg.compdatch(True), stor, tvg.getdatanum()):
                             if p == "parent":
                                 self.text.insert(END, f"p:{d[:-2]}\n")
-                            elif p == "space":
-                                self.text.insert(END, "s:\n")
-                            else:
+                            elif p.partition("child")[1]:
                                 self.text.insert(END, f"c{p[5:]}:{d[1:]}")
-                    del tvg, p, d
+                            else:
+                                if p == "space":
+                                    break
+                            num += 1
+                    self.editorsel = (stor, num)
+                    del tvg, p, d, stor, num
                     self.text.see(self.text.index(INSERT))
-                    os.remove(f"{self.filename}.txt")
                 else:
-                    if (
-                        stor := self.listb.curselection()
-                    ) and "parent" in self.listb.get(stor := stor[0]):
-                        self.editor()
-                        with tv(self.filename) as tvg:
-                            num = stor
-                            for p, d in islice(
-                                tvg.compdatch(True), stor, tvg.getdatanum()
-                            ):
-                                if p == "parent":
-                                    self.text.insert(END, f"p:{d[:-2]}\n")
-                                elif p.partition("child")[1]:
-                                    self.text.insert(END, f"c{p[5:]}:{d[1:]}")
-                                else:
-                                    if p == "space":
-                                        break
-                                num += 1
-                        self.editorsel = (stor, num)
-                        del tvg, p, d, stor, num
-                        self.text.see(self.text.index(INSERT))
-                    else:
-                        messagebox.showinfo(
-                            "TreeViewGui",
-                            "Please select a parent row first!",
-                            parent=self.root,
-                        )
-                del ask
-                self.text.focus()
+                    messagebox.showinfo(
+                        "TreeViewGui",
+                        "Please select a parent row first!",
+                        parent=self.root,
+                    )
 
     def tempsave(self):
         """Saving template"""
@@ -2681,19 +2659,19 @@ class TreeViewGui:
             self.infobar()
 
     def _fold_restruct(self, pos: tuple | list, op: bool = True):
-        self.listb.selection_clear(0, END)
+        colsel = []
         if selections := self._ckfoldtvg():
             for select in selections:
                 if select < pos[0]:
-                    self.listb.select_set(select)
+                    colsel.append(select)
                 else:
                     if op:
-                        self.listb.select_set(select + pos[1])
+                        colsel.append(select + pos[1])
                     else:
-                        self.listb.select_set(select - pos[1])
+                        colsel.append(select - pos[1])
             with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
-                cur.write(str(self.listb.curselection()).encode())
-        del selections
+                cur.write(str(tuple(colsel)).encode())
+        del selections, colsel
 
     def tvgexit(self, event=None):
         """Exit mode for TVG and setting everything back to default"""
@@ -2913,6 +2891,25 @@ class TreeViewGui:
                     "TreeViewGui", "Cannot send empty text!", parent=self.root
                 )
 
+    def _sumtot_restruct(self, _add: bool = True):
+        if ck := bool(self._ckfoldtvg()):
+            idx = None
+            placement = self.listb.get(0, END)
+            size = self.listb.size()
+            for n, w in enumerate(placement):
+                ckr = self.text.get(f"{n+1}.0", f"{n+1}.1")
+                if "parent" in w and ckr == "+":
+                    idx = n
+                elif "space" in w or n == (size - 1):
+                    if idx:
+                        if _add:
+                            self._fold_restruct((idx, 1))
+                        else:
+                            self._fold_restruct((idx, 1), _add)
+                        idx = None
+            del idx, placement, size
+        del ck
+
     def gettotsum(self):
         """Get all sums on all parents that have "+" sign in front"""
 
@@ -2954,16 +2951,11 @@ class TreeViewGui:
                                 parent=self.root,
                             )
                 case True:
-                    if not hasattr(self, "fold"):
-                        self.__setattr__("sumtot", True)
-                        sa.sumway()
-                        self.spaces()
-                    else:
-                        messagebox.showwarning(
-                            "TreeViewGui",
-                            "Please unfolding first!",
-                            parent=self.root,
-                        )
+                    self.__setattr__("sumtot", True)
+                    sa.sumway()
+                    self.spaces()
+                    self._sumtot_restruct()
+                    self.view()
                 case False:
                     messagebox.showinfo(
                         "TreeViewGui", "No data to sums!", parent=self.root
@@ -3020,22 +3012,17 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.nonetype():
-                if not hasattr(self, "fold"):
-                    with SumAll(self.filename, sig="+") as sal:
-                        if hasattr(self, "sumtot") and self.sumtot:
-                            self.__delattr__("sumtot")
-                            sal.del_total()
-                        else:
-                            messagebox.showinfo(
-                                "TreeViewGui", "Nothing to delete!", parent=self.root
-                            )
-                else:
-                    messagebox.showwarning(
-                        "TreeViewGui",
-                        "Please unfolding first!",
-                        parent=self.root,
-                    )
-                self.spaces()
+                with SumAll(self.filename, sig="+") as sal:
+                    if hasattr(self, "sumtot") and self.sumtot:
+                        self.__delattr__("sumtot")
+                        sal.del_total()
+                        self.spaces()
+                        self._sumtot_restruct(False)
+                        self.view()
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui", "Nothing to delete!", parent=self.root
+                        )
 
     def exprsum(self, event=None):
         """Expression Calculation for Editor mode"""
@@ -3277,8 +3264,14 @@ class TreeViewGui:
                         self.view()
                         self.infobar()
                     else:
-                        self.__delattr__("fold")
-                        self._deldatt()
+                        if self.glop.absolute().joinpath("fold.tvg").exists():
+                            if ask := messagebox.askyesno(
+                                "TreeViewGui",
+                                "Sure to delete selections?",
+                                parent=self.root,
+                            ):
+                                self.__delattr__("fold")
+                                self._deldatt()
                     self.disab(dis=False)
                     self.listb.selection_clear(0, END)
                     self.listb.config(selectmode=BROWSE)

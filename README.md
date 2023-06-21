@@ -33,10 +33,11 @@
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
+* **[Preview On Hold!](#preview-enhancement-as-stand-alone-has-been-on-hold)**
 * **[Dynamic Theme](#dynamic-theme)**
 * **[Editor Enhancement](#editor-new-enhancement)**
-* **[Preview On Hold!](#preview-has-been-on-hold-for-latest-version-onword)**
-* **[Control fold flow (WIP)](#control-fold-selected-flow---wip-work-in-progress)**
+* **[Control fold flow (BETA)](#control-fold-selected-flow---beta)**
+* **[Ex Func Changes](#ex-function-changes)**
 
 </details>
 
@@ -178,7 +179,7 @@ main()
     * **~~Only for Mac~~**
     * **Clicking print button and links are disabled!**
     * **~~Using dependency of <em><u>PyWebView</u></em>~~**
-    * **WARNING: => [Unresolve Issue](#preview-has-been-on-hold-for-latest-version-onword)**
+    * **WARNING: => [Unresolve Issue](#preview-enhancement-as-stand-alone-has-been-on-hold)**
       * **For version 3.2.10 preview stand-alone is still available!**
       * **Do not click on the header-top bar area, while preview is not close yet**
 
@@ -253,7 +254,7 @@ main()
     * **Resolution walk-around:**
       * **Will check the dialog visibility at beginning of starting application, and if is true, will hide it at once**
 
-* ### **Preview has been on hold! (for latest version onword)**
+* ### **Preview enhancement as stand-alone has been on hold!**
   
   * **Unable to resolve the crash on Tkinter because of creating another thread from another source**
 
@@ -438,7 +439,7 @@ main()
   * **Editor can write to any row in working document**
     * **Click any row in the list-box before goto Editor mode**
 
-* ### **Control Fold-Selected flow - WIP (Work-In-Progress)**
+* ### **Control Fold-Selected flow - (BETA)**
 
   * **Fold-selected will be viewed folded even after**
     * **Editing or writing in Editor**
@@ -446,10 +447,13 @@ main()
     * **After inserting a row in Insert**
     * **After copying in CPP**
     * **After editing a parent and its child in Ex**
-  * **NOT WORKING YET IN:**
     * **Sum-Up addon for TVG**
     * **Del Total addon for TVG**
-    * **Ex - editing whole note in editor**
+
+* ### **Ex Function changes**
+
+  * **Edit only for a Parent and its childs**
+  * **Option for Edit whole document has been no more!**
 
 [⬆️](#freetvg-tree-view-gui)
 
