@@ -1329,6 +1329,7 @@ class TreeViewGui:
         if self.unlock:
             if self.listb.curselection():
                 rw = int(self.listb.curselection()[0])
+                self._ckinsight()
                 if self.checked_box.lower() == "on":
                     gtt = self.text.get(f"{rw + 1}.0", f"{rw + 1}.0 lineend")
                     if gtt:
@@ -1687,8 +1688,13 @@ class TreeViewGui:
                     self.listb.selection_clear(0, END)
                     self.infobar()
 
+    def _ckinsight(self):
+        if "row 0:" in self.text.get("1.0", "1.0 lineend"):
+            self.view()
+
     def _utilspdf(self):
         try:
+            self._ckinsight()
             gttx = []
             line = None
             cg = None
@@ -1753,8 +1759,6 @@ class TreeViewGui:
                     fon,
                     self.text.cget("background")[1:],
                     self.text.cget("foreground"),
-                    width=self.root.winfo_width(),
-                    height=self.root.winfo_height(),
                 )
             else:
                 style = convhtml(

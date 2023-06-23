@@ -90,8 +90,6 @@ def convhtml(
     bg: str = None,
     fg: str = None,
     preview: bool = True,
-    width: int = 0,
-    height: int = 0,
     pdfpath: str = None,
 ):
     # Converting your TVG to html and printable directly from browser.
@@ -225,8 +223,6 @@ kbd { color: black !important; }
             whtm.write(cssstyle)
         pro = None
         if platform.startswith("win"):
-            # ToDo: Preview for arm64 architecture
-            # In preview no interactive printing even it open on browser
             pro = [
                 "powershell.exe",
                 "start",
@@ -270,6 +266,4 @@ kbd { color: black !important; }
             pointer_event,
             window,
             preview,
-            width,
-            height,
         )
