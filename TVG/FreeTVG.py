@@ -50,14 +50,14 @@ import tomlkit
 from treeview import TreeView as tv
 from treeview.dbase import Datab as db
 
+from addon_tvg import Charts, EvalExp, SumAll
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
 
 from .structure import Lay1, Lay2, Lay3, Lay4, Lay5, Lay6, Lay7, Lay8, Scribe
-from .utility.mdh import convhtml
-from .utility.RegMail import composemail, wrwords
+from .utility import ParseData, composemail, convhtml, wrwords
 
 if platform.startswith("win"):
-    from ctypes import windll, byref, sizeof, c_int
+    from ctypes import byref, c_int, sizeof, windll
 
 
 __all__ = ["main"]
@@ -68,16 +68,6 @@ if not os.path.exists(DEFAULTDIR):
     os.mkdir(DEFAULTDIR)
 DEFAULTFILE = os.path.join(DEFAULTDIR, Path(DEFAULTFILE).name)
 
-
-match _addon := importlib.util.find_spec("addon_tvg"):
-    case _addon if _addon is not None and _addon.name == "addon_tvg":
-        if _addon.loader is not None:
-            print("Add-On for TVG is ready!")
-            from addon_tvg import Charts, EvalExp, SumAll
-        else:
-            print("Add-On for TVG is missing!")
-    case _:
-        print("Add-On for TVG is missing!")
 
 THEME_MODE = darkdetect.theme().lower()
 
@@ -102,7 +92,6 @@ class TreeViewGui:
     GEO = None
 
     def __init__(self, root, filename):
-        self._addon = _addon
         self.tmode = THEME_MODE
         self.cpp_select = SELECT_MODE
         self.hidopt = HIDDEN_OPT
@@ -114,7 +103,7 @@ class TreeViewGui:
         self.glop = Path(os.getcwd())
         self.root.title(f"{self.glop.joinpath(self.filename)}.txt")
         self.root.protocol("WM_DELETE_WINDOW", self.tvgexit)
-        self.wwidth = 850 if self._addon and self.plat.startswith("win") else 835
+        self.wwidth = 850 if self.plat.startswith("win") else 835
         self.wheight = 610
         self.root.minsize(self.wwidth, self.wheight)
         self.pwidth = int(self.root.winfo_screenwidth() / 2 - self.wwidth / 2)
@@ -195,8 +184,7 @@ class TreeViewGui:
             self.root.bind_all("<Control-Key-F2>", self.fcsent)
             self.root.bind_all("<Control-Key-F3>", self.fcsent)
             self.root.bind_all("<Control-Key-F5>", self.configd)
-            if self._addon:
-                self.root.bind_all("<Control-Key-F4>", self.exprsum)
+            self.root.bind_all("<Control-Key-F4>", self.exprsum)
         else:
             self.root.bind_all("<Control-Shift-Up>", self.fcsent)
             self.root.bind_all("<Control-Shift-Down>", self.fcsent)
@@ -207,13 +195,11 @@ class TreeViewGui:
             self.root.bind_all("<Key-F2>", self.fcsent)
             self.root.bind_all("<Key-F3>", self.fcsent)
             self.root.bind_all("<Key-F5>", self.configd)
-            if self._addon:
-                self.root.bind_all("<Key-F4>", self.exprsum)
+            self.root.bind_all("<Key-F4>", self.exprsum)
 
-        if self._addon:
-            self.root.bind_all("<Control-Key-1>", self.fcsent)
-            self.root.bind_all("<Control-Key-4>", self.fcsent)
-            self.root.bind_all("<Control-Key-5>", self.fcsent)
+        self.root.bind_all("<Control-Key-1>", self.fcsent)
+        self.root.bind_all("<Control-Key-4>", self.fcsent)
+        self.root.bind_all("<Control-Key-5>", self.fcsent)
 
         self.root.bind_class("TButton", "<Enter>", self.ttip)
         self.root.bind_class("TButton", "<Leave>", self.leave)
@@ -302,14 +288,13 @@ class TreeViewGui:
 
         # 6th Frame
         # For addon buttons
-        if self._addon:
-            self.addonb = Lay6(self.bframe, self.frb1, self.frb2)
-            self.bt["Sum-Up"] = self.addonb.button30
-            self.bt["Sum-Up"].configure(command=self.gettotsum)
-            self.bt["Pie-Chart"] = self.addonb.button31
-            self.bt["Pie-Chart"].configure(command=self.createpg)
-            self.bt["Del Total"] = self.addonb.button32
-            self.bt["Del Total"].configure(command=self.deltots)
+        self.addonb = Lay6(self.bframe, self.frb1, self.frb2)
+        self.bt["Sum-Up"] = self.addonb.button30
+        self.bt["Sum-Up"].configure(command=self.gettotsum)
+        self.bt["Pie-Chart"] = self.addonb.button31
+        self.bt["Pie-Chart"].configure(command=self.createpg)
+        self.bt["Del Total"] = self.addonb.button32
+        self.bt["Del Total"].configure(command=self.deltots)
 
         # 7th frame.
         # Frame for text, listbox and scrollbars.
@@ -353,19 +338,16 @@ class TreeViewGui:
 
         # Creating tool-tip for all buttons and radio-buttons
         self.scribe = Scribe().scribe()
-        if self._addon:
-            on = {
-                "Sum-Up": "Summing all add-on",
-                "Pie-Chart": "Graph base on all sums",
-                "Del Total": "Delete all totals",
-            }
-            self.scribe = self.scribe | on
-            self.ew = list(on) + ["child", "R"]
-            if os.path.exists(self.glop.absolute().joinpath("sumtot.tvg")):
-                self.sumtot = True
-                os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
-        else:
-            self.ew = ["CPP", "Clear hide", "Printing", "child", "R"]
+        on = {
+            "Sum-Up": "Summing all add-on",
+            "Pie-Chart": "Graph base on all sums",
+            "Del Total": "Delete all totals",
+        }
+        self.scribe = self.scribe | on
+        self.ew = list(on) + ["child", "R"]
+        if os.path.exists(self.glop.absolute().joinpath("sumtot.tvg")):
+            self.sumtot = True
+            os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
 
         # cheking existing paths for early configuration on TVG
         if os.path.exists(self.glop.joinpath(self.glop.parent, "ft.tvg")):
@@ -788,11 +770,11 @@ class TreeViewGui:
                 self.editor()
             elif event.keysym == "9":
                 self.wrapped()
-            elif self._addon and event.keysym == "1":
+            elif event.keysym == "1":
                 self.gettotsum()
-            elif self._addon and event.keysym == "4":
+            elif event.keysym == "4":
                 self.createpg()
-            elif self._addon and event.keysym == "5":
+            elif event.keysym == "5":
                 self.deltots()
             elif event.keysym == "bracketleft":
                 self.editex()
@@ -912,23 +894,17 @@ class TreeViewGui:
     def addonchk(self, sta: bool = True):
         """Checking on addon for sumtot attribute purpose"""
 
-        if self._addon:
-            if self.nonetype():
-                if sta:
-                    if hasattr(self, "sumtot"):
-                        with open(
-                            self.glop.absolute().joinpath("sumtot.tvg"), "wb"
-                        ) as st:
-                            st.write("True".encode())
-                else:
-                    if not self.glop.absolute().joinpath("sumtot.tvg").exists():
-                        self._sumchk()
-                    else:
-                        self._sumchk()
-                        os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
-            else:
+        if self.nonetype():
+            if sta:
                 if hasattr(self, "sumtot"):
-                    self.__delattr__("sumtot")
+                    with open(self.glop.absolute().joinpath("sumtot.tvg"), "wb") as st:
+                        st.write("True".encode())
+            else:
+                if not self.glop.absolute().joinpath("sumtot.tvg").exists():
+                    self._sumchk()
+                else:
+                    self._sumchk()
+                    os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
 
     def chgfile(self):
         """Changing file on active app environment"""
@@ -1129,22 +1105,39 @@ class TreeViewGui:
 
         self.MARK = True
 
+    def _chk_total_spc(self, row: int):
+        """Checking total and space"""
+
+        try:
+            with tv(self.filename) as tvg:
+                for n, d in tvg.getdata():
+                    if n == row:
+                        if d.strip().startswith("-TOTAL") or d.startswith("\n"):
+                            return False
+                return True
+        finally:
+            del tvg
+
     def deleterow(self):
         """Deletion on recorded row and updated"""
 
         self.hidcheck()
         if self.unlock:
             if self.nonetype():
-                if self.listb.curselection():
+                if self.listb.curselection() and self._chk_total_spc(
+                    int(self.listb.curselection()[0])
+                ):
                     self.MODE = True
+                    current_size = self.listb.size()
                     rw = int(self.listb.curselection()[0])
                     with tv(self.filename) as tvg:
                         if rw != 0:
                             tvg.delrow(rw)
 
                     del tvg
-                    self._fold_restruct((rw, 1), False)
                     self.spaces()
+                    self._fold_restruct(self.listb.size() - current_size, rw)
+                    self.view()
                     if rw > self.listb.size() - 1:
                         if self.listb.get(rw - 1):
                             rw = rw - 1
@@ -1173,7 +1166,7 @@ class TreeViewGui:
                             self.listb.select_set(len(ck) - 1)
                             self.listb.see(len(ck) - 1)
                             self.text.see(f"{(len(ck)-1)}.0")
-                    del rw, ck
+                    del rw, ck, current_size
                     self.infobar()
 
     def move_lr(self, event=None):
@@ -1300,6 +1293,7 @@ class TreeViewGui:
                         )
                         if appr:
                             if self.listb.curselection():
+                                current_size = self.listb.size()
                                 rw = int(self.listb.curselection()[0])
                                 with tv(self.filename) as tvg:
                                     if self.bt["entry3"].get():
@@ -1312,11 +1306,14 @@ class TreeViewGui:
                                         tvg.insertrow(self.bt["entry"].get(), rw)
                                 del tvg
                                 self.bt["entry"].delete(0, END)
-                                self._fold_restruct((rw, 1))
                                 self.spaces()
+                                self._fold_restruct(
+                                    self.listb.size() - current_size, rw
+                                )
+                                self.view()
                                 self.listb.see(rw)
                                 self.text.see(f"{rw}.0")
-                                del rw
+                                del rw, current_size
                         del appr
                 del cek
 
@@ -1396,6 +1393,7 @@ class TreeViewGui:
                         parent=self.root,
                     )
                     self._deldatt(False)
+                    self._sumchk()
                     self._chkfoldatt()
                     self.spaces()
 
@@ -1579,16 +1577,16 @@ class TreeViewGui:
                             gcs = [int(i) for i in gcs]
                             ask = simpledialog.askinteger(
                                 "TreeViewGui",
-                                f"Move to which row? choose between 0 to {self.listb.size()-1} rows",
+                                (
+                                    f"Move to which row? choose between 0 to {self.listb.size()-1} rows\n"
+                                    "WARNING: Fold selection will be clear!"
+                                ),
                                 parent=self.root,
                             )
                             if ask is not None and ask < self.listb.size():
                                 deci = messagebox.askyesno(
                                     "TreeViewGui",
-                                    (
-                                        '"Yes" to MOVE to, "No" to COPY to\n'
-                                        "(Fold selection will be clear in 'MOVE'!)"
-                                    ),
+                                    '"Yes" to MOVE to, "No" to COPY to\n',
                                     parent=self.root,
                                 )
                                 if deci:
@@ -1664,10 +1662,10 @@ class TreeViewGui:
                                             for i in data:
                                                 writer.send(i)
                                         writer.close()
-                                    self.spaces()
-                                    self._fold_restruct((ask, len(data)))
-                                    self.view()
                                     del tvg, data, writer
+                                    self._deldatt(False)
+                                    self._chkfoldatt()
+                                    self.spaces()
                                 self.disab(dis=False)
                                 self.listb.config(selectmode=BROWSE)
                                 self.text.see(f"{ask}.0")
@@ -2563,6 +2561,20 @@ class TreeViewGui:
         del ckc
         return compiled, et
 
+    def _check_Totals(self):
+        try:
+            sumtot = None
+            if hasattr(self, "sumtot"):
+                sumtot = SumAll(self.filename, sig="+")
+                if sumtot.chktot():
+                    return False
+                else:
+                    return True
+            return True
+        finally:
+            if sumtot:
+                del sumtot
+
     def editor(self):
         """This is direct editor on text window.
         FORMAT:
@@ -2574,22 +2586,29 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if str(self.text.cget("state")) == "disabled":
-                self.text.config(state="normal")
-                self.text.delete("1.0", END)
-                ckb = [
-                    "Editor",
-                    "Template",
-                    "Date-Time",
-                    "Look Up",
-                    "text",
-                ]
-                self.disab(*ckb)
-                self.text.edit_reset()
-                self.text.focus()
-                self._mdbuttons()
-                if not self.plat.startswith("win"):
-                    self.root.clipboard_clear()
-                del ckb
+                if self._check_Totals():
+                    self.text.config(state="normal")
+                    self.text.delete("1.0", END)
+                    ckb = [
+                        "Editor",
+                        "Template",
+                        "Date-Time",
+                        "Look Up",
+                        "text",
+                    ]
+                    self.disab(*ckb)
+                    self.text.edit_reset()
+                    self.text.focus()
+                    self._mdbuttons()
+                    if not self.plat.startswith("win"):
+                        self.root.clipboard_clear()
+                    del ckb
+                else:
+                    messagebox.showwarning(
+                        "TreeViewGui",
+                        "Please delete all 'TOTAl's first",
+                        parent=self.root,
+                    )
             else:
                 try:
                     fts = None
@@ -2618,7 +2637,7 @@ class TreeViewGui:
                                 else:
                                     combi = iter((dict(p1) | p2[0]).values())
                                 tvg.fileread(combi)
-                            fts = [stor[0]]
+                            fts = stor[0]
                             del tvg, p1, p2, combi, p3
                         else:
                             p2 = self._compile_editor(self.listb.size())
@@ -2632,10 +2651,13 @@ class TreeViewGui:
                                     tvg.fileread(combi)
                                     del combi
                             del tvg, p2
-                        del stor
                         self.text.config(state=DISABLED)
                         self.disab(dis=False)
                         self.spaces()
+                        if fts:
+                            self._fold_restruct(self.listb.size() - current_size, fts)
+                            self.view()
+                        del stor, current_size, fts
                         if self.editorsel:
                             self.text.see(f"{self.editorsel[0]}.0")
                             self.editorsel = None
@@ -2649,33 +2671,18 @@ class TreeViewGui:
                     messagebox.showerror("TreeViewGui", f"{a}", parent=self.root)
                 if self.text.cget("state") == DISABLED:
                     self._mdbuttons()
-                if fts:
-                    if current_size < self.listb.size():
-                        fts.append(self.listb.size() - current_size)
-                        self._fold_restruct(fts)
-                        self.view()
-                    elif current_size > self.listb.size():
-                        fts.append(current_size - self.listb.size())
-                        self._fold_restruct(fts, False)
-                        self.view()
-                del fts, current_size
             self.text.edit_reset()
             self.infobar()
 
-    def _fold_restruct(self, pos: tuple | list, op: bool = True):
-        colsel = []
-        if selections := self._ckfoldtvg():
-            for select in selections:
-                if select < pos[0]:
-                    colsel.append(select)
-                else:
-                    if op:
-                        colsel.append(select + pos[1])
-                    else:
-                        colsel.append(select - pos[1])
+    def _fold_restruct(self, size: int, pos: int):
+        pd = ParseData(self.filename, pos, size, data=None)
+        update = pd.update_data()
+
+        if update:
             with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
-                cur.write(str(tuple(colsel)).encode())
-        del selections, colsel
+                cur.write(str(update).encode())
+
+        del pd, update
 
     def tvgexit(self, event=None):
         """Exit mode for TVG and setting everything back to default"""
@@ -2895,24 +2902,12 @@ class TreeViewGui:
                     "TreeViewGui", "Cannot send empty text!", parent=self.root
                 )
 
-    def _sumtot_restruct(self, _add: bool = True):
-        if ck := bool(self._ckfoldtvg()):
-            idx = None
-            placement = self.listb.get(0, END)
-            size = self.listb.size()
-            for n, w in enumerate(placement):
-                ckr = self.text.get(f"{n+1}.0", f"{n+1}.1")
-                if "parent" in w and ckr == "+":
-                    idx = n
-                elif "space" in w or n == (size - 1):
-                    if idx:
-                        if _add:
-                            self._fold_restruct((idx, 1))
-                        else:
-                            self._fold_restruct((idx, 1), _add)
-                        idx = None
-            del idx, placement, size
-        del ck
+    def _sumtot_restruct(self, plus: bool = True):
+        st = ParseData(self.filename, data=None)
+        if update := st.update_data_sum(plus):
+            with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
+                cur.write(str(update).encode())
+        del st, update
 
     def gettotsum(self):
         """Get all sums on all parents that have "+" sign in front"""
@@ -2955,11 +2950,11 @@ class TreeViewGui:
                                 parent=self.root,
                             )
                 case True:
-                    self.__setattr__("sumtot", True)
-                    sa.sumway()
-                    self.spaces()
-                    self._sumtot_restruct()
-                    self.view()
+                    if not hasattr(self, "sumtot"):
+                        self.__setattr__("sumtot", True)
+                        sa.sumway()
+                        self._sumtot_restruct()
+                        self.spaces()
                 case False:
                     messagebox.showinfo(
                         "TreeViewGui", "No data to sums!", parent=self.root
@@ -3020,9 +3015,8 @@ class TreeViewGui:
                     if hasattr(self, "sumtot") and self.sumtot:
                         self.__delattr__("sumtot")
                         sal.del_total()
-                        self.spaces()
                         self._sumtot_restruct(False)
-                        self.view()
+                        self.spaces()
                     else:
                         messagebox.showinfo(
                             "TreeViewGui", "Nothing to delete!", parent=self.root
@@ -3240,12 +3234,25 @@ class TreeViewGui:
             for sel in sels:
                 self.listb.select_set(sel)
 
+    def _deldatfile(self):
+        ParseData(self.filename, data=None).del_data()
+
     def _deldatt(self, v: bool = True):
         if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
             os.remove(self.glop.absolute().joinpath("fold.tvg"))
+            self._deldatfile()
             if v:
                 self.view()
                 self.infobar()
+
+    def _noparsp(self, selects: tuple | list):
+        accept = []
+        if selects:
+            for n in selects:
+                if self.listb.get(n).partition(" ")[2] not in ["parent", "space"]:
+                    accept.append(n)
+            del selects
+        return tuple(accept)
 
     def fold_selected(self):
         """Folding selected"""
@@ -3260,11 +3267,14 @@ class TreeViewGui:
                     if not hasattr(self, "fold"):
                         self.__setattr__("fold", True)
                 else:
-                    if self.listb.curselection():
+                    data = self._noparsp(self.listb.curselection())
+                    pd = ParseData(self.filename, data=data if data else None)
+                    if data:
                         with open(
                             self.glop.absolute().joinpath("fold.tvg"), "wb"
                         ) as cur:
-                            cur.write(str(self.listb.curselection()).encode())
+                            cur.write(str(data).encode())
+                        pd.create_data()
                         self.view()
                         self.infobar()
                     else:
@@ -3276,6 +3286,7 @@ class TreeViewGui:
                             ):
                                 self.__delattr__("fold")
                                 self._deldatt()
+                    del data, pd
                     self.disab(dis=False)
                     self.listb.selection_clear(0, END)
                     self.listb.config(selectmode=BROWSE)
@@ -3388,28 +3399,27 @@ class TreeViewGui:
 
 
 def _ckwrds(wrd: str):
-    if _addon:
-        try:
-            nums = len(wrd)
-            values = tuple("0123456789*/-+()%.")
-            ck = None
+    try:
+        nums = len(wrd)
+        values = tuple("0123456789*/-+()%.")
+        ck = None
 
-            if nums >= 101:
-                raise ValueError(f"{nums} charcters, is exceeding than 100 chars!")
+        if nums >= 101:
+            raise ValueError(f"{nums} charcters, is exceeding than 100 chars!")
 
-            for i in wrd:
-                if i not in values:
-                    raise ValueError(f"{i!r} is not acceptable expression!")
+        for i in wrd:
+            if i not in values:
+                raise ValueError(f"{i!r} is not acceptable expression!")
 
-            ck = EvalExp(wrd, None)
-            ck = ck.evlex()
-            return ck
-        except ValueError:
-            raise
-        except:
-            raise ValueError(f"These expression {wrd!r} are not allowed!")
-        finally:
-            del wrd, ck, nums, values
+        ck = EvalExp(wrd, None)
+        ck = ck.evlex()
+        return ck
+    except ValueError:
+        raise
+    except:
+        raise ValueError(f"These expression {wrd!r} are not allowed!")
+    finally:
+        del wrd, ck, nums, values
 
 
 @excp(m=2, filenm=DEFAULTFILE)
@@ -3516,12 +3526,6 @@ def titlemode(sent: str):
 @excp(m=2, filenm=DEFAULTFILE)
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
-
-    global _addon
-    if _addon and _addon.name == "addon_tvg":
-        _addon = True
-    else:
-        _addon = False
 
     findpath()
     _load_config()

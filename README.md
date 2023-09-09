@@ -21,23 +21,17 @@
   * **[Markdown](#markdown)**
   * **[Folding](#folding)**
   * **[Dynamic Theme Changes](#dynamic-theme-changes)**
-  * **[Preview](#preview)**
   * **[Direct Print PDF](#direct-print-pdf)**
-* **[Changes](#changes)**
-* **[Unresolved Issues](#unresolve-issues)**
 * **[Development Purpose](#development-purpose)**
 * **[Latest Notice](#latest-notice)**
 * **[Algorithm Explanation](#-algorithm-explanation-)**
-* **[Technical issues](#technical-issues-on-shortcut-buttons)**
 * **[Configuration](#configuration)**
+* **[Editor Enhancement](#editor-new-enhancement)**
+* **[Ex Func Changes](#ex-function-changes)**
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
-* **[Preview On Hold!](#preview-enhancement-as-stand-alone-has-been-on-hold)**
 * **[Dynamic Theme](#dynamic-theme)**
-* **[Editor Enhancement](#editor-new-enhancement)**
-* **[Control fold flow (BETA)](#control-fold-selected-flow---beta)**
-* **[Ex Func Changes](#ex-function-changes)**
 
 </details>
 
@@ -81,11 +75,8 @@ main()
 ## NEW
 
 * ### **Add-On for TVG**
-
-  ```Terminal
-  pip3 install -U addon-tvg-karjakak
-  ```
-
+  
+  * **Become required dependency in FreeTVG**
   * **Add extra 3 Functions:**
     * **Sum-Up**
       * **format editor:**
@@ -155,7 +146,7 @@ main()
       * **Will fold all childs**
     * **Fold selected**
       * **Will fold selected childs**
-      * **Use "Shift" button to select massively, and ~~"Option"~~ "Control" button to select differently or unselect**
+      * **Use "Shift" button to select massively, and "Control" button to select differently or unselect**
     * **Unfold**
       * **To unhide all**
   * **TAKE NOTICE:**
@@ -163,7 +154,10 @@ main()
     * **~~Once Unfold, the retain selection will be erased~~**
   * **The difference between Fold and Hidden mode**
     * **Fold only hide childs and Hidden mode, hide parents and their childs**
-    * **In fold all other functions working properly and in Hidden mode, all other functions are freeze**
+    * **In fold almost all other functions working properly and in Hidden mode, all other functions are freeze**
+  * **Latest Update**
+    * **Version 3.3.7**
+      * **Have new parsing utility to help folding selections remain intact**
 
 [⬆️](#freetvg-tree-view-gui)
 
@@ -172,16 +166,6 @@ main()
   * **Theme will change dynamically when user chage the os system's theme \[**Dark / Light**\]**
     * **Using dependency of <em><u>Dark-Detect</u></em>**
       * **[@albertosottile](https://github.com/albertosottile/darkdetect)**
-
-* ### **Preview**
-
-  * **Preview the html view**
-    * **~~Only for Mac~~**
-    * **Clicking print button and links are disabled!**
-    * **~~Using dependency of <em><u>PyWebView</u></em>~~**
-    * **WARNING: => [Unresolve Issue](#preview-enhancement-as-stand-alone-has-been-on-hold)**
-      * **For version 3.2.10 preview stand-alone is still available!**
-      * **Do not click on the header-top bar area, while preview is not close yet**
 
 * ### **Direct Print PDF**
 
@@ -201,62 +185,11 @@ main()
 
 [⬆️](#freetvg-tree-view-gui)
 
-## Changes
-
-* **Tutorial TVG.pdf press: <Ctrl+F1> or <fn+F1> in MacOS**
-* **Send note from default email: <Ctrl+F4> or <fn+F4> in MacOs**
-  * **Can choose copy to clipboard. (set indentation shorter)**
-    * **Can be use to send message in [TeleTVG](https://github.com/kakkarja/TeleTVG)**
-* **Clean-up some comment line.**
-* **Can run TVG directly without creating a script.**
-* **6 buttons deleted [Calculator, Send Note, Save, Open, Emoji, and ViewHTML].**
-  * **Free from annoying message pop-up.**
-  * **View HTML deleted as well, because the purpose is not much and basically the same as printing.**
-* **Bugs fixed on overflowing memory usage.**
-* **Tooltip now available in MacOS X.**
-* **For Add-On TVG**
-  * **For function Sum-Up**
-    * **Much faster calculation for thousands lines.**
-    * **Just delete "TOTAL..." lines manually that need to be change, will be much faster instead.**
-  * **For Expression Calculation (F5/Ctrl+F5)**
-    * **Works for simple calculation.**
-    * **All double operator like eg. "\*\*", disabled.**
-      * **To avoid overlflow result.**
-    * **Able to paste directly without clicking result first.**
-    * **Will paste exactly where the position of numbers suppose to be**
-* **Template has been overhauled for improvement**
-  * **Can delete a saved template**
-* **Look-Up now more informative (not in editor mode)**
-* **Add Markdown buttons in Editor mode for convinience**
-
 * ### [treeview](https://github.com/kakkarja/TV)
 
   * **Part of TVG engine has been seperated and has its own repo.**
   * **TVG has been partly overhaul for adapting the new engine.**
   * **More robust and faster.**
-
-[⬆️](#freetvg-tree-view-gui)
-
-## Unresolve Issues
-
-* **For Add-On TVG**
-  * **For PieChart-Graph**
-    * **Some issue in matplotlib**
-      * **Will raise exception after closing the graph, if configure window (within the tool bar) is already closed beforhand.**
-    * **Nonetheless**
-      * **Will not raise exception if configure window is not close yet.**
-* **Short-Cut Issues**
-  * **Virtual OS Windows in Mac**
-    * **Some short-cuts works only with "Control" + "Option" or "Shift" + ...**
-* **Tk fontchooser**
-  * **When dialog in focus too long**
-    * **When application is quit and restarted again, it will persistently reappear at start**
-    * **Resolution walk-around:**
-      * **Will check the dialog visibility at beginning of starting application, and if is true, will hide it at once**
-
-* ### **Preview enhancement as stand-alone has been on hold!**
-  
-  * **Unable to resolve the crash on Tkinter because of creating another thread from another source**
 
 [⬆️](#freetvg-tree-view-gui)
 
@@ -314,7 +247,7 @@ main()
 * **Fold enhancement**
   * **Unfolding no longer delete retain selected childs**
     * **If you press "Fold Childs" the retain ones will be folded again**
-  * **Fold selected will delete the retain selected if selections is none**
+  * **Fold selected have a choice to delete or not when none selected**
   * **Fold Childs will fold all childs, if there is no retain selected**
 
 * **EXPLANATION:**
@@ -324,12 +257,6 @@ main()
     * **If hidden mode is cleared, just press fold childs again and the retain ones will folded back again**
   * **For CPP function \[very powerful function for manipulating text content\]**
     * **In Hidden mode, you can select CPP to copied the text content and copied to new file or existing file**
-* **In CPP function**
-  * **CPP selection has been hacked for it's selection mode**
-    * **By default is extended mode selection that works like charm, same as selection mode for Fold selected**
-    * **However, if you find it confusing when you wanted choose the cells for manipulation, you can hacked the configuration to multiple mode**
-      * **Multiple mode will choose the cells one by one selectively**
-
 * **The algorithm of CPP has been improved**
   * **Now selections that is not in order can be copied and moved to chosen selected line number**
 
@@ -367,60 +294,6 @@ main()
 
 [⬆️](#freetvg-tree-view-gui)
 
----
-
-* ## **Technical issues on shortcut buttons**
-  
-  * **Due to some similarity of shortcut buttons in TVG with the global one in a OS, therefore the functions may result weirdly**
-  * **Found issues:**
-    * **TVG**
-      * **<ins>Ctrl+n</ins> for <ins>CPP function</ins> in <ins>MacOS X</ins>**
-      * **resulting selections being canceled and only one selected below selections**
-      * **For reference research [Shortcuts in MacOS X](https://support.apple.com/en-us/HT201236)**
-    * **Resolution**
-      * **Now change to <ins>Cmd+n</ins> for <ins>CPP function</ins> in <ins>MacOS X</ins>**
-
-[⬆️](#freetvg-tree-view-gui)
-
----
-
-* **Selection preference**
-  * **Configuring selection to "multiple" will also applied to Fold selected function**
-  * **Only for Hidden mode will not change, as it is "multiple" by default**
-    * **No point to change to other selection mode, because the function's selection only choosing parents**
-* **Insight function**
-  * **Now functioning in Hidden mode, and CPP as well**
-* **In Hidden Mode**
-  * **No longer 2 options**
-  * **The hidden mode is using reverse option only**
-    * **That mean the selection parents are not hid, and the rest will be hidden.**
-  * **TAKE NOTICE:**
-    * **If this changes bother any user, please stay with the current installed one**
-    * **However any future update changes will no more 2 options as well for Hidden Mode**
-    * **This decision deliberately done because of new functions Fold**
-      * **In fold hiding selections are making more sense**
-* **On 2nd thought**
-  * **Is not easy to just hid 1 parent, so there is the configuration for it**
-  * **Will change the reverse option in Hidden mode**
-    * **The selections will be hidden instead**
-
-[⬆️](#freetvg-tree-view-gui)
-
-* **Combobox algorithm enhance for selecting file or creating new file**
-  * **For CPP, Change File, Template and create new file from first starting TVG**
-* **Bugs fixed for checking files**
-  * **To avoid processing errors**
-* **In Printing**
-  * **When print button clicked**
-    * **The background color will turned white and the foreground color will be black**
-    * **Need to click-checked for printing background, so that the marking highlight will be visible**
-  * **Open browser for viewing html file**
-    * **Defaulted to Safari for MacOs X, as the hyperlink can be click when save as pdf file**
-    * **Defaulted to Edge in Windows, as the hyperlink can be click when save as pdf file**
-    * **TAKE NOTE:**
-      * **If the system has other default browser, it may open both browsers**
-      * **In Chrome the hyperlink deactivated**
-
 * ### **Configuration**
 
   * **Press Win [Ctrl + F5] || Mac [fn + F5]**
@@ -439,13 +312,12 @@ main()
   * **Editor can write to any row in working document**
     * **Click any row in the list-box before goto Editor mode**
 
-* ### **Control Fold-Selected flow - (BETA)**
+* ### **Control Fold-Selected flow**
 
   * **Fold-selected will be viewed folded even after**
     * **Editing or writing in Editor**
     * **After deletion a row in Delete**
     * **After inserting a row in Insert**
-    * **After copying in CPP**
     * **After editing a parent and its child in Ex**
     * **Sum-Up addon for TVG**
     * **Del Total addon for TVG**
