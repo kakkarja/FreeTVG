@@ -57,26 +57,37 @@ class ParseData(TreeView):
 
         return Path(f"{self.filename}.dat").exists()
 
+    def _restStr(self, sentence: str) -> str:
+        """To create identifier from a data."""
+
+        return sentence.strip().replace(" ", "")[:81]
+
     def create_data(self) -> None:
         """Create parsed data."""
 
         storeDat = []
         if self.data:
-            getdat = self.getdatanum()
             with open(f"{self.filename}.dat", "wb") as dwr:
-                for n in range(getdat):
+                for n, d in self.getdata():
                     if n in self.data:
-                        storeDat.append(n)
+                        storeDat.append((n, self._restStr(d)))
                 for dt in storeDat:
                     dwr.write(f"{dt}\n".encode())
         del storeDat
+
+    def getkv(self) -> Generator | None:
+        """Get existing keys and values"""
+
+        if self.check_exist():
+            with open(f"{self.filename}.dat", "rb") as dr:
+                yield from (leval(i.decode().strip("\n")) for i in dr)
 
     def getkey(self) -> Generator | None:
         """Get existing keys"""
 
         if self.check_exist():
             with open(f"{self.filename}.dat", "rb") as dr:
-                yield from (leval(i.decode().strip("\n")) for i in dr)
+                yield from (leval(i.decode().strip("\n"))[0] for i in dr)
 
     def update_data(self) -> tuple[int] | None:
         """To update parsed data with existing TVG doc."""
@@ -85,17 +96,17 @@ class ParseData(TreeView):
             try:
                 update = []
                 s = 0
-                getdat = self.getdatanum()
-                for k in self.getkey():
+                for k, v in self.getkv():
                     if k < self.pos:
                         update.append(k)
                     else:
                         k += self.size
-                        for n in islice(range(getdat), s, None):
+                        for n, d in islice(self.getdata(), s, None):
                             if k == n:
-                                update.append(n)
-                                s = n + 1
-                                break
+                                if self._restStr(d) == v:
+                                    update.append(n)
+                                    s = n + 1
+                                    break
                         else:
                             s = k
                 match update := tuple(update):
@@ -106,7 +117,7 @@ class ParseData(TreeView):
                     case _:
                         return
             finally:
-                del update, s, getdat
+                del update, s
 
     def update_single_data(self, row: int) -> tuple[int] | None:
         """Update a single data to preserve"""
