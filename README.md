@@ -158,6 +158,8 @@ main()
   * **Latest Update**
     * **Version 3.3.7**
       * **Have new parsing utility to help folding selections remain intact**
+    * **Version 3.3.8**
+      * **Now Folding control flows work in COPY but not MOVE**
 
 [⬆️](#freetvg-tree-view-gui)
 
