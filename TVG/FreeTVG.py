@@ -1579,93 +1579,113 @@ class TreeViewGui:
                                 "TreeViewGui",
                                 (
                                     f"Move to which row? choose between 0 to {self.listb.size()-1} rows\n"
-                                    "WARNING: Fold selection will be clear!"
+                                    "WARNING: Fold selection not working in 'MOVE'!"
                                 ),
                                 parent=self.root,
                             )
                             if ask is not None and ask < self.listb.size():
-                                deci = messagebox.askyesno(
-                                    "TreeViewGui",
-                                    '"Yes" to MOVE to, "No" to COPY to\n',
-                                    parent=self.root,
+                                foldsel = (
+                                    True if self._ckfoldtvg() is not None else False
                                 )
-                                if deci:
-                                    with tv(self.filename) as tvg:
-                                        data = []
-                                        for i in range(len(gcs)):
-                                            for _, d in islice(
-                                                tvg.getdata(), gcs[i], gcs[i] + 1
-                                            ):
-                                                data.append(d)
-                                        writer = tvg.satofi()
-                                        if ask < tvg.getdatanum() - 1:
-                                            for n, d in tvg.getdata():
-                                                if n == ask == 0:
-                                                    if not data[0][0].isspace():
+                                while True:
+                                    deci = messagebox.askyesnocancel(
+                                        "TreeViewGui",
+                                        '"Yes" to MOVE to, "No" to COPY to\n',
+                                        parent=self.root,
+                                    )
+                                    if deci:
+                                        if foldsel:
+                                            messagebox.showwarning(
+                                                "TreeViewGui",
+                                                "Cannot move in folded data, please choose 'COPY' instead!",
+                                                parent=self.root,
+                                            )
+                                            continue
+                                        else:
+                                            break
+                                    else:
+                                        break
+                                del foldsel
+                                if deci is not None:
+                                    if deci:
+                                        with tv(self.filename) as tvg:
+                                            data = []
+                                            for i in range(len(gcs)):
+                                                for _, d in islice(
+                                                    tvg.getdata(), gcs[i], gcs[i] + 1
+                                                ):
+                                                    data.append(d)
+                                            writer = tvg.satofi()
+                                            if ask < tvg.getdatanum() - 1:
+                                                for n, d in tvg.getdata():
+                                                    if n == ask == 0:
+                                                        if not data[0][0].isspace():
+                                                            for i in data:
+                                                                writer.send(i)
+                                                            writer.send(d)
+                                                        else:
+                                                            writer.send(d)
+                                                            for i in data:
+                                                                writer.send(i)
+                                                    elif n == ask:
+                                                        for i in data:
+                                                            writer.send(i)
+                                                        writer.send(d)
+                                                    elif n in gcs:
+                                                        continue
+                                                    else:
+                                                        writer.send(d)
+                                            else:
+                                                for n, d in tvg.getdata():
+                                                    if n in gcs:
+                                                        continue
+                                                    else:
+                                                        writer.send(d)
+                                                for i in data:
+                                                    writer.send(i)
+                                            writer.close()
+                                        del tvg, data, writer
+                                        self.spaces()
+                                    else:
+                                        current_size = self.listb.size()
+                                        with tv(self.filename) as tvg:
+                                            data = []
+                                            for i in range(len(gcs)):
+                                                for _, d in islice(
+                                                    tvg.getdata(), gcs[i], gcs[i] + 1
+                                                ):
+                                                    data.append(d)
+                                            writer = tvg.satofi()
+                                            if ask < tvg.getdatanum() - 1:
+                                                for n, d in tvg.getdata():
+                                                    if n == ask == 0:
+                                                        if not data[0][0].isspace():
+                                                            for i in data:
+                                                                writer.send(i)
+                                                            writer.send(d)
+                                                        else:
+                                                            writer.send(d)
+                                                            for i in data:
+                                                                writer.send(i)
+                                                    elif n == ask:
                                                         for i in data:
                                                             writer.send(i)
                                                         writer.send(d)
                                                     else:
                                                         writer.send(d)
-                                                        for i in data:
-                                                            writer.send(i)
-                                                elif n == ask:
-                                                    for i in data:
-                                                        writer.send(i)
+                                            else:
+                                                for n, d in tvg.getdata():
                                                     writer.send(d)
-                                                elif n in gcs:
-                                                    continue
-                                                else:
-                                                    writer.send(d)
-                                        else:
-                                            for n, d in tvg.getdata():
-                                                if n in gcs:
-                                                    continue
-                                                else:
-                                                    writer.send(d)
-                                            for i in data:
-                                                writer.send(i)
-                                        writer.close()
-                                    del tvg, data, writer
-                                    self._deldatt(False)
-                                    self._chkfoldatt()
-                                    self.spaces()
-                                else:
-                                    with tv(self.filename) as tvg:
-                                        data = []
-                                        for i in range(len(gcs)):
-                                            for _, d in islice(
-                                                tvg.getdata(), gcs[i], gcs[i] + 1
-                                            ):
-                                                data.append(d)
-                                        writer = tvg.satofi()
-                                        if ask < tvg.getdatanum() - 1:
-                                            for n, d in tvg.getdata():
-                                                if n == ask == 0:
-                                                    if not data[0][0].isspace():
-                                                        for i in data:
-                                                            writer.send(i)
-                                                        writer.send(d)
-                                                    else:
-                                                        writer.send(d)
-                                                        for i in data:
-                                                            writer.send(i)
-                                                elif n == ask:
-                                                    for i in data:
-                                                        writer.send(i)
-                                                    writer.send(d)
-                                                else:
-                                                    writer.send(d)
-                                        else:
-                                            for n, d in tvg.getdata():
-                                                writer.send(d)
-                                            for i in data:
-                                                writer.send(i)
-                                        writer.close()
-                                    del tvg, data, writer
-                                    self._deldatt(False)
-                                    self._chkfoldatt()
-                                    self.spaces()
+                                                for i in data:
+                                                    writer.send(i)
+                                            writer.close()
+                                        del tvg, data, writer
+                                        self.spaces()
+                                        self._fold_restruct(
+                                            self.listb.size() - current_size, ask
+                                        )
+                                        del current_size
+                                        self.view()
                                 self.disab(dis=False)
                                 self.listb.config(selectmode=BROWSE)
                                 self.text.see(f"{ask}.0")
@@ -2606,7 +2626,7 @@ class TreeViewGui:
                 else:
                     messagebox.showwarning(
                         "TreeViewGui",
-                        "Please delete all 'TOTAl's first",
+                        "Please delete all 'TOTAL's first",
                         parent=self.root,
                     )
             else:

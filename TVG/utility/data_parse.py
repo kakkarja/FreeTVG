@@ -4,7 +4,7 @@
 
 import os
 from ast import literal_eval as leval
-from dataclasses import dataclass, field, KW_ONLY
+from dataclasses import dataclass, field
 from itertools import islice
 from pathlib import Path
 from typing import Generator
@@ -57,18 +57,14 @@ class ParseData(TreeView):
 
         return Path(f"{self.filename}.dat").exists()
 
-    def _restStr(self, sentence: str) -> str:
-        """To create identifer from a data."""
-
-        return sentence.strip().replace(" ", "")[:81]
-
     def create_data(self) -> None:
         """Create parsed data."""
 
         storeDat = []
         if self.data:
+            getdat = self.getdatanum()
             with open(f"{self.filename}.dat", "wb") as dwr:
-                for n, d in self.getdata():
+                for n in range(getdat):
                     if n in self.data:
                         storeDat.append(n)
                 for dt in storeDat:
@@ -89,12 +85,13 @@ class ParseData(TreeView):
             try:
                 update = []
                 s = 0
+                getdat = self.getdatanum()
                 for k in self.getkey():
                     if k < self.pos:
                         update.append(k)
                     else:
                         k += self.size
-                        for n, d in islice(self.getdata(), s, None):
+                        for n in islice(range(getdat), s, None):
                             if k == n:
                                 update.append(n)
                                 s = n + 1
@@ -109,7 +106,7 @@ class ParseData(TreeView):
                     case _:
                         return
             finally:
-                del update, s
+                del update, s, getdat
 
     def update_single_data(self, row: int) -> tuple[int] | None:
         """Update a single data to preserve"""
@@ -126,7 +123,7 @@ class ParseData(TreeView):
             finally:
                 del dt, row
 
-    def add_stacks(self) -> Generator | tuple | None:
+    def add_stacks(self) -> Generator | None:
         """Collect '+' sequence from start to end"""
 
         if self.check_exist():
@@ -145,8 +142,6 @@ class ParseData(TreeView):
                             sequence.append(n)
                 if sequence:
                     return (i for i in sequence)
-                else:
-                    return tuple()
             finally:
                 del sequence, pos
 
