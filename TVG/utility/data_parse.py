@@ -134,6 +134,50 @@ class ParseData(TreeView):
             finally:
                 del dt, row
 
+    def update_move(self, row: int, down: bool = False) -> tuple[int] | None:
+        """Updating Data in moving a row up or down"""
+
+        try:
+            update = []
+            s = 0
+            getdatnum = self.getdatanum()
+            for k in self.getkey():
+                if k < row:
+                    if down:
+                        if self.check_child(k):
+                            update.append(k)
+                    else:
+                        update.append(k)
+                else:
+                    if k == row:
+                        if down:
+                            update.append(k - 1)
+                        else:
+                            update.append(k + 1)
+                    else:
+                        update.append(k)
+
+            match update := tuple(update):
+                case update if update != tuple(self.getkey()):
+                    super(ParseData, self).__setattr__("data", update)
+                    self.create_data()
+                    return self.data
+                case _:
+                    return
+        finally:
+            del update, s
+
+    def check_child(self, row: int) -> bool:
+        """Checking for specific row as a child in data"""
+
+        for _, p in islice(self.getdata(), row, row + 1):
+            if p[0] == "\n":
+                return False
+            elif p[0] == " ":
+                return True
+            else:
+                return False
+
     def add_stacks(self) -> Generator | None:
         """Collect '+' sequence from start to end"""
 

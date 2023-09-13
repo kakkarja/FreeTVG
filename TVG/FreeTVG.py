@@ -1035,69 +1035,51 @@ class TreeViewGui:
                         parent=self.root,
                     )
             else:
-                rw = None
-                if self.bt["entry3"].get():
-                    if self.bt["entry"].get() and self.bt["entry"].get() not in cek:
-                        if self.MARK:
-                            rw = self.listb.curselection()[0]
+                rw = self.listb.curselection()[0] if self.listb.curselection() else None
+                total = True
+                current_size = None
+                child = self.bt["entry3"].get()
+                if (
+                    self.bt["entry"].get()
+                    and self.bt["entry"].get() not in cek
+                    and (total := self._check_Totals())
+                ):
+                    current_size = self.listb.size()
+                    if self.MARK:
+                        if self._chk_total_spc(rw):
                             appr = messagebox.askyesno(
                                 "Edit", f"Edit cell {rw}?", parent=self.root
                             )
                             if appr:
                                 with tv(self.filename) as tvg:
-                                    insight = tuple(
-                                        islice(
-                                            tvg.compdatch(True),
-                                            int(rw),
-                                            int(rw) + 1,
-                                        )
+                                    tvg.edittree(
+                                        self.bt["entry"].get(),
+                                        rw,
+                                        child=child if child else None,
                                     )
-                                    if insight[0][0] != "space":
-                                        tvg.edittree(
-                                            self.bt["entry"].get(),
-                                            int(rw),
-                                            self.bt["entry3"].get(),
-                                        )
-                                del tvg, insight
+                                del tvg
                                 self.bt["entry"].delete(0, END)
-                        else:
-                            with tv(self.filename) as tvg:
-                                tvg.quickchild(
-                                    self.bt["entry"].get(), self.bt["entry3"].get()
-                                )
-                            self.bt["entry"].delete(0, END)
-                            del tvg
-                        self.spaces()
-                else:
-                    if self.bt["entry"].get() and self.bt["entry"].get() not in cek:
-                        if self.MARK:
-                            rw = self.listb.curselection()[0]
-                            appr = messagebox.askyesno(
-                                "Edit", f"Edit cell {rw}?", parent=self.root
-                            )
-                            if appr:
-                                with tv(self.filename) as tvg:
-                                    insight = tuple(
-                                        islice(
-                                            tvg.compdatch(True),
-                                            int(rw),
-                                            int(rw) + 1,
-                                        )
-                                    )
-                                    if insight[0][0] != "space":
-                                        tvg.edittree(self.bt["entry"].get(), int(rw))
-                                del tvg, insight
-                                self.bt["entry"].delete(0, END)
-                        else:
-                            with tv(self.filename) as tvg:
+                    else:
+                        total = False
+                        with tv(self.filename) as tvg:
+                            if child:
+                                tvg.quickchild(self.bt["entry"].get(), child)
+                            else:
                                 tvg.addparent(self.bt["entry"].get())
-                            del tvg
-                            self.bt["entry"].delete(0, END)
-                        self.spaces()
-                if rw and rw < len(self.listb.get(0, END)) - 1:
-                    self.text.see(f"{int(rw)}.0")
+                        self.bt["entry"].delete(0, END)
+                        del tvg
+                    self.spaces()
+                    if total:
+                        if size := self.listb.size() - current_size:
+                            self._fold_restruct(size, rw)
+                            self.view()
+                        else:
+                            self._fold_restruct(0, 0, row=rw)
+                        del size
+                if rw and rw < self.listb.size() - 1:
+                    self.text.see(f"{rw + 1}.0")
                     self.listb.see(rw)
-                del rw
+                del rw, total, current_size
         del cek
 
     def flb(self, event=None):
@@ -1183,6 +1165,7 @@ class TreeViewGui:
                         with tv(self.filename) as tvg:
                             tvg.movechild(rw, self.bt["entry3"].get())
                         del tvg
+                        self._fold_restruct(0, 0, row=rw)
                         self.spaces()
                         self.text.config(state="disable")
                         self.listb.select_set(rw)
@@ -1216,7 +1199,7 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if self.nonetype():
+            if self.nonetype() and self._check_Totals():
                 if self.listb.curselection():
                     rw = int(self.listb.curselection()[0])
                     insight = self.listb.get(rw).split(":")[1].strip()
@@ -1227,6 +1210,8 @@ class TreeViewGui:
                                 tvg.movetree(rw, rw - 1)
                             del tvg
                             self.spaces()
+                            self._fold_restruct(0, 0, row=rw - 1, move=True)
+                            self.view()
                             ck = self.listb.get(rw - 1).split(":")[1].strip()
                             if ck != "space":
                                 self.listb.select_set(rw - 1)
@@ -1246,7 +1231,7 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.nonetype():
-                if self.listb.curselection():
+                if self.listb.curselection() and self._check_Totals():
                     rw = int(self.listb.curselection()[0])
                     ck = self.listb.get(rw).split(":")[1].strip()
                     if "child" in ck:
@@ -1258,13 +1243,17 @@ class TreeViewGui:
                                 else False
                             )
                             self.MODE = True
+                            mv = None
                             with tv(self.filename) as tvg:
                                 if sp:
-                                    tvg.movetree(rw, rw + 2)
+                                    tvg.movetree(rw, mv := rw + 2)
                                 else:
-                                    tvg.movetree(rw, rw + 1)
+                                    tvg.movetree(rw, mv := rw + 1)
                             del tvg, sp
                             self.spaces()
+                            self._fold_restruct(0, 0, row=mv, move=True, down=True)
+                            self.view()
+                            del mv
                             ck = self.listb.get(rw + 1).split(":")[1].strip()
                             if ck != "parent":
                                 self.listb.select_set(rw + 1)
@@ -1284,7 +1273,9 @@ class TreeViewGui:
         if self.unlock:
             if self.nonetype():
                 cek = ["parent", "child"]
-                if self.bt["entry"].get() and self.bt["entry"].get() not in cek:
+                if self.bt["entry"].get() and (
+                    self.bt["entry"].get() not in cek and self._check_Totals()
+                ):
                     if self.MARK:
                         appr = messagebox.askyesno(
                             "Edit",
@@ -1347,6 +1338,7 @@ class TreeViewGui:
                     with tv(self.filename) as tvg:
                         tvg.checked(rw)
                     del tvg
+                self._fold_restruct(0, 0, row=rw)
                 self.view()
                 self.listb.select_set(rw)
                 self.listb.activate(rw)
@@ -2198,8 +2190,11 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.nonetype():
-                if (stor := self.listb.curselection()) and "parent" in self.listb.get(
-                    stor := stor[0]
+                total = None
+                if (
+                    (stor := self.listb.curselection())
+                    and "parent" in self.listb.get(stor := stor[0])
+                    and (total := self._check_Totals())
                 ):
                     self.editor()
                     with tv(self.filename) as tvg:
@@ -2217,11 +2212,13 @@ class TreeViewGui:
                     del tvg, p, d, stor, num
                     self.text.see(self.text.index(INSERT))
                 else:
-                    messagebox.showinfo(
-                        "TreeViewGui",
-                        "Please select a parent row first!",
-                        parent=self.root,
-                    )
+                    if "child" in self.listb.get(stor):
+                        messagebox.showinfo(
+                            "TreeViewGui",
+                            "Please select a parent row first!",
+                            parent=self.root,
+                        )
+                del total, stor
 
     def tempsave(self):
         """Saving template"""
@@ -2587,6 +2584,11 @@ class TreeViewGui:
             if hasattr(self, "sumtot"):
                 sumtot = SumAll(self.filename, sig="+")
                 if sumtot.chktot():
+                    messagebox.showwarning(
+                        "TreeViewGui",
+                        "Please delete all 'TOTAL's first",
+                        parent=self.root,
+                    )
                     return False
                 else:
                     return True
@@ -2623,12 +2625,6 @@ class TreeViewGui:
                     if not self.plat.startswith("win"):
                         self.root.clipboard_clear()
                     del ckb
-                else:
-                    messagebox.showwarning(
-                        "TreeViewGui",
-                        "Please delete all 'TOTAL's first",
-                        parent=self.root,
-                    )
             else:
                 try:
                     fts = None
@@ -2694,9 +2690,26 @@ class TreeViewGui:
             self.text.edit_reset()
             self.infobar()
 
-    def _fold_restruct(self, size: int, pos: int):
+    def _fold_restruct(
+        self,
+        size: int,
+        pos: int,
+        *,
+        row: int = None,
+        move: bool = False,
+        down: bool = False,
+    ):
         pd = ParseData(self.filename, pos, size, data=None)
-        update = pd.update_data()
+        if row is None:
+            update = pd.update_data()
+        else:
+            if not move:
+                update = pd.update_single_data(row)
+            else:
+                if down:
+                    update = pd.update_move(row, down=down)
+                else:
+                    update = pd.update_move(row)
 
         if update:
             with open(self.glop.absolute().joinpath("fold.tvg"), "wb") as cur:
