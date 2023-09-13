@@ -28,6 +28,7 @@
 * **[Configuration](#configuration)**
 * **[Editor Enhancement](#editor-new-enhancement)**
 * **[Ex Func Changes](#ex-function-changes)**
+* **[Versions Highlights](#versions-highlights)**
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
@@ -155,11 +156,6 @@ main()
   * **The difference between Fold and Hidden mode**
     * **Fold only hide childs and Hidden mode, hide parents and their childs**
     * **In fold almost all other functions working properly and in Hidden mode, all other functions are freeze**
-  * **Latest Update**
-    * **Version 3.3.7**
-      * **Have new parsing utility to help folding selections remain intact**
-    * **Version 3.3.8**
-      * **Now Folding control flows work in COPY but not MOVE**
 
 [⬆️](#freetvg-tree-view-gui)
 
@@ -316,18 +312,33 @@ main()
 
 * ### **Control Fold-Selected flow**
 
-  * **Fold-selected will be viewed folded even after**
+  * **Fold-selected will be viewed folded even after (intact)**
     * **Editing or writing in Editor**
     * **After deletion a row in Delete**
     * **After inserting a row in Insert**
     * **After editing a parent and its child in Ex**
     * **Sum-Up addon for TVG**
     * **Del Total addon for TVG**
+    * **When COPY function copying data to other row (not for MOVE)**
+    * **When moving a child Up or Down**
+    * **When changing child's state to left or right**
 
 * ### **Ex Function changes**
 
   * **Edit only for a Parent and its childs**
   * **Option for Edit whole document has been no more!**
+
+* ### **Versions Highlights**
+
+  * **Version 3.3.7**
+    * **Have new parsing utility to help folding selections remain intact**
+  * **Version 3.3.8**
+    * **Now Folding control flows work in COPY but not MOVE**
+  * **Version 3.3.10**
+    * **Folding control flows also working in:**
+      * **Edit**
+      * **Move Child up, down, left and right**
+      * **Checked**
 
 [⬆️](#freetvg-tree-view-gui)
 
