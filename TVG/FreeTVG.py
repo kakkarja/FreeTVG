@@ -1974,6 +1974,24 @@ class TreeViewGui:
                 parent=self.root,
             )
 
+    def _data_appear(self, dat: str, src: int, max: int = 100):
+        match len(dat):
+            case num if num < max:
+                return dat
+            case _:
+                hl = len(dat[:src])
+                hr = len(dat[src:])
+                if hr < hl:
+                    return dat[src - (hl - hr) : max]
+                else:
+                    if hr < max:
+                        match max - hr:
+                            case cmp if cmp >= src:
+                                return dat[src:]
+                            case _:
+                                return dat[src - cmp :]
+                    return dat[src:max]
+
     def lookup(self, event=None):
         """To lookup word on row and also on editor mode"""
 
@@ -2079,12 +2097,12 @@ class TreeViewGui:
                                 self.listb.selection_set(sw)
                         else:
                             while sn <= num:
-                                dat = self.text.get(f"{sn}.0", f"{sn+1}.0")
+                                dat = self.text.get(
+                                    f"{sn}.0", f"{sn}.0 lineend"
+                                ).strip()
                                 if sw in dat:
-                                    dat = self.text.get(
-                                        self.text.search(sw, f"{sn}.0", f"{sn+1}.0"),
-                                        f"{sn+1}.0",
-                                    )
+                                    src = dat.find(sw)
+                                    dat = self._data_appear(dat, src, 81)
                                     self.text.see(f"{sn}.0")
                                     self.listb.see(sn)
                                     self.listb.selection_clear(0, END)
@@ -2093,7 +2111,7 @@ class TreeViewGui:
                                     self.listb.activate(sn - 1)
                                     ask = messagebox.askyesno(
                                         "TreeViewGui",
-                                        f"Find in row {sn-1}\nText: '{dat.strip()[:100]}...'\nContinue lookup?",
+                                        f"Find in row {sn-1}\nText: '...{dat}...'\nContinue lookup?",
                                         parent=self.root,
                                     )
                                     if ask:
@@ -2159,7 +2177,7 @@ class TreeViewGui:
                 mkd.mkdir()
                 os.chdir(mkd)
                 self.glop = mkd
-                self._ckfoldtvg()
+                self._chkfoldatt()
                 self.filename = self.glop.name.rpartition("_")[0]
                 self.root.title(f"{self.glop.absolute().joinpath(self.filename)}.txt")
                 self.text.config(state=NORMAL)
@@ -2191,33 +2209,35 @@ class TreeViewGui:
         if self.unlock:
             if self.nonetype():
                 total = None
-                if (
-                    (stor := self.listb.curselection())
-                    and "parent" in self.listb.get(stor := stor[0])
-                    and (total := self._check_Totals())
-                ):
-                    self.editor()
-                    with tv(self.filename) as tvg:
-                        num = stor
-                        for p, d in islice(tvg.compdatch(True), stor, tvg.getdatanum()):
-                            if p == "parent":
-                                self.text.insert(END, f"p:{d[:-2]}\n")
-                            elif p.partition("child")[1]:
-                                self.text.insert(END, f"c{p[5:]}:{d[1:]}")
-                            else:
-                                if p == "space":
-                                    break
-                            num += 1
-                    self.editorsel = (stor, num)
-                    del tvg, p, d, stor, num
-                    self.text.see(self.text.index(INSERT))
-                else:
-                    if "child" in self.listb.get(stor):
-                        messagebox.showinfo(
-                            "TreeViewGui",
-                            "Please select a parent row first!",
-                            parent=self.root,
-                        )
+                stor = self.listb.curselection()
+                if stor:
+                    if "parent" in self.listb.get(stor := stor[0]) and (
+                        total := self._check_Totals()
+                    ):
+                        self.editor()
+                        with tv(self.filename) as tvg:
+                            num = stor
+                            for p, d in islice(
+                                tvg.compdatch(True), stor, tvg.getdatanum()
+                            ):
+                                if p == "parent":
+                                    self.text.insert(END, f"p:{d[:-2]}\n")
+                                elif p.partition("child")[1]:
+                                    self.text.insert(END, f"c{p[5:]}:{d[1:]}")
+                                else:
+                                    if p == "space":
+                                        break
+                                num += 1
+                        self.editorsel = (stor, num)
+                        del tvg, num
+                        self.text.see(self.text.index(INSERT))
+                    else:
+                        if "child" in self.listb.get(stor):
+                            messagebox.showinfo(
+                                "TreeViewGui",
+                                "Please select a parent row first!",
+                                parent=self.root,
+                            )
                 del total, stor
 
     def tempsave(self):
