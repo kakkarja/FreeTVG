@@ -339,6 +339,11 @@ main()
       * **Edit**
       * **Move Child up, down, left and right**
       * **Checked**
+  * **Version 3.3.11**
+    * **Bugs Fixed**
+      * **in function Ex**
+      * **in function Create file**
+    * **Enhancement for function LookUp**
 
 [⬆️](#freetvg-tree-view-gui)
 
