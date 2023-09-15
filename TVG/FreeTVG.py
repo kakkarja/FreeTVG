@@ -206,16 +206,6 @@ class TreeViewGui:
         self.root.bind_class("TRadiobutton", "<Enter>", self.ttip)
         self.root.bind_class("TRadiobutton", "<Leave>", self.leave)
 
-        # 1st frame.
-        # Frame for labels, Entry, radio-buttons and combobox.
-        self.fframe = Lay1(self.root)
-        self.bt["label"] = self.fframe.label
-        self.bt["entry"] = self.fframe.entry
-        self.bt["radio1"] = self.fframe.radio1
-        self.bt["radio2"] = self.fframe.radio2
-        self.bt["label3"] = self.fframe.label3
-        self.bt["entry3"] = self.fframe.entry3
-
         # 2nd frame.
         # Frame for first row Buttons.
         self.bframe = Lay2(self.root)
@@ -335,6 +325,15 @@ class TreeViewGui:
 
         self.info = self.fscr.info
         self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
+
+        # 1st frame.
+        # Frame for labels, Entry, radio-buttons and combobox.
+        self.fframe = Lay1(self.root)
+        self.bt["entry"] = self.fframe.entry
+        self.bt["radio1"] = self.fframe.radio1
+        self.bt["radio2"] = self.fframe.radio2
+        self.bt["label3"] = self.fframe.label3
+        self.bt["entry3"] = self.fframe.entry3
 
         # Creating tool-tip for all buttons and radio-buttons
         self.scribe = Scribe().scribe()
@@ -567,6 +566,7 @@ class TreeViewGui:
         pth = self.glop.joinpath(self.glop.parent, "hbts.tvg")
         self.tframe.pack_forget()
         self.fscr.pack_forget()
+        self.fframe.pack_forget()
         if bool(frm[0].winfo_ismapped()):
             for fr in frm:
                 fr.pack_forget()
@@ -581,6 +581,8 @@ class TreeViewGui:
         self.tframe.update()
         self.fscr.pack(fill="x")
         self.fscr.update()
+        self.fframe.pack(fill="x")
+        self.fframe.update()
         del frm, pth
 
     def inenter(self, event):
@@ -839,6 +841,20 @@ class TreeViewGui:
         self.listb.yview_moveto(str(a))
         del a
 
+    def _spot_on(self, row: int):
+        """View the latest spot of a row"""
+
+        self.text.see(f"{row + 1}.0")
+        self.listb.see(row)
+
+    def _move_to(self, top: bool = True):
+        if top:
+            self.text.yview_moveto(0.0)
+            self.listb.yview_moveto(0.0)
+        else:
+            self.text.yview_moveto(1.0)
+            self.listb.yview_moveto(1.0)
+
     def _prettyv(self, tx):
         """Wrapping mode view purpose"""
 
@@ -876,8 +892,7 @@ class TreeViewGui:
                     self.listb.insert(END, f"{k}: {v[0]}")
             self.text.edit_reset()
             self.text.config(state="disable")
-            self.text.yview_moveto(1.0)
-            self.listb.yview_moveto(1.0)
+            self._move_to(False)
             del tvg
             self.foldfun()
 
@@ -939,6 +954,7 @@ class TreeViewGui:
                     self.text.config(state="disable")
                     self.listb.delete(0, END)
                 self.addonchk(False)
+                self._move_to(False)
             else:
                 import shutil
 
@@ -1076,9 +1092,8 @@ class TreeViewGui:
                         else:
                             self._fold_restruct(0, 0, row=rw)
                         del size
-                if rw and rw < self.listb.size() - 1:
-                    self.text.see(f"{rw + 1}.0")
-                    self.listb.see(rw)
+                if rw:
+                    self._spot_on(rw)
                 del rw, total, current_size
         del cek
 
@@ -1115,7 +1130,6 @@ class TreeViewGui:
                     with tv(self.filename) as tvg:
                         if rw != 0:
                             tvg.delrow(rw)
-
                     del tvg
                     self.spaces()
                     self._fold_restruct(self.listb.size() - current_size, rw)
@@ -1135,19 +1149,16 @@ class TreeViewGui:
                     if rw < ck[0]:
                         if ck[1] != "space" and rw != 0:
                             self.listb.select_set(rw)
-                            self.listb.see(rw)
-                            self.text.see(f"{(rw)}.0")
+                            self._spot_on(rw)
                         else:
                             self.listb.select_set(rw - 1)
-                            self.listb.see(rw - 1)
-                            self.text.see(f"{(rw-1)}.0")
+                            self._spot_on(rw - 1)
                     else:
                         if ck[0] == 1:
                             self.listb.select_set(0)
                         else:
                             self.listb.select_set(len(ck) - 1)
-                            self.listb.see(len(ck) - 1)
-                            self.text.see(f"{(len(ck)-1)}.0")
+                            self._spot_on(len(ck) - 1)
                     del rw, ck, current_size
                     self.infobar()
 
@@ -1169,8 +1180,7 @@ class TreeViewGui:
                         self.spaces()
                         self.text.config(state="disable")
                         self.listb.select_set(rw)
-                        self.listb.see(rw)
-                        self.text.see(f"{rw}.0")
+                        self._spot_on(rw)
                     except:
                         self.text.insert(
                             END, "Parent row is unable to be move to a child"
@@ -1193,6 +1203,7 @@ class TreeViewGui:
                 del tvg
                 self.text.edit_reset()
                 self.text.config(state="disable")
+                self._move_to()
 
     def moveup(self, event=None):
         """Step up a row to upper row"""
@@ -1215,12 +1226,10 @@ class TreeViewGui:
                             ck = self.listb.get(rw - 1).split(":")[1].strip()
                             if ck != "space":
                                 self.listb.select_set(rw - 1)
-                                self.listb.see(rw - 1)
-                                self.text.see(f"{rw - 1}.0")
+                                self._spot_on(rw - 1)
                             else:
                                 self.listb.select_set(rw - 2)
-                                self.listb.see(rw - 2)
-                                self.text.see(f"{rw - 2}.0")
+                                self._spot_on(rw - 2)
                             self.infobar()
                             del ck
                     del rw, insight
@@ -1257,12 +1266,10 @@ class TreeViewGui:
                             ck = self.listb.get(rw + 1).split(":")[1].strip()
                             if ck != "parent":
                                 self.listb.select_set(rw + 1)
-                                self.listb.see(rw + 1)
-                                self.text.see(f"{(rw+1)}.0")
+                                self._spot_on(rw + 1)
                             else:
                                 self.listb.select_set(rw + 2)
-                                self.listb.see(rw + 2)
-                                self.text.see(f"{(rw+2)}.0")
+                                self._spot_on(rw + 2)
                             self.infobar()
                     del rw, ck
 
@@ -1302,8 +1309,7 @@ class TreeViewGui:
                                     self.listb.size() - current_size, rw
                                 )
                                 self.view()
-                                self.listb.see(rw)
-                                self.text.see(f"{rw}.0")
+                                self._spot_on(rw)
                                 del rw, current_size
                         del appr
                 del cek
@@ -1342,8 +1348,7 @@ class TreeViewGui:
                 self.view()
                 self.listb.select_set(rw)
                 self.listb.activate(rw)
-                self.listb.see(rw)
-                self.text.see(f"{rw + 1}.0")
+                self._spot_on(rw)
                 del rw
                 self.infobar()
 
@@ -1680,8 +1685,7 @@ class TreeViewGui:
                                         self.view()
                                 self.disab(dis=False)
                                 self.listb.config(selectmode=BROWSE)
-                                self.text.see(f"{ask}.0")
-                                self.listb.see(ask)
+                                self._spot_on(ask)
                             else:
                                 self.disab(dis=False)
                                 self.listb.config(selectmode=BROWSE)
@@ -1894,6 +1898,7 @@ class TreeViewGui:
                     self.listb.insert(END, f"{n}: {p}")
                 del ih, tvg, vals
             del rd, rolrd, showt
+            self._move_to()
 
     def hiddenchl(self, event=None):
         """Create Hidden position of parent and its childs in json file"""
@@ -2089,8 +2094,7 @@ class TreeViewGui:
                         if sw.isdigit():
                             sw = int(sw)
                             if sw <= num - 1:
-                                self.listb.see(sw)
-                                self.text.see(f"{sw}.0")
+                                self._spot_on(sw)
                                 self.listb.focus()
                                 self.listb.selection_clear(0, END)
                                 self.listb.activate(sw)
@@ -2103,8 +2107,7 @@ class TreeViewGui:
                                 if sw in dat:
                                     src = dat.find(sw)
                                     dat = self._data_appear(dat, src, 81)
-                                    self.text.see(f"{sn}.0")
-                                    self.listb.see(sn)
+                                    self._spot_on(sn - 1)
                                     self.listb.selection_clear(0, END)
                                     self.listb.selection_set(sn - 1)
                                     self.listb.focus()
@@ -2532,6 +2535,7 @@ class TreeViewGui:
             lmdb = list(self.mdb)
             self.tframe.pack_forget()
             self.fscr.pack_forget()
+            self.fframe.pack_forget()
 
             self.__setattr__("mdframe", None)
             self.frb3.pack(fill=X)
@@ -2552,6 +2556,8 @@ class TreeViewGui:
             self.tframe.update()
             self.fscr.pack(fill="x")
             self.fscr.update()
+            self.fframe.pack(fill="x")
+            self.fframe.update()
             del lmdb
         else:
             for i in self.mdframe.winfo_children():
@@ -2695,7 +2701,7 @@ class TreeViewGui:
                             self.view()
                         del stor, current_size, fts
                         if self.editorsel:
-                            self.text.see(f"{self.editorsel[0]}.0")
+                            self._spot_on(self.editorsel[0])
                             self.editorsel = None
                     else:
                         self.text.config(state=DISABLED)

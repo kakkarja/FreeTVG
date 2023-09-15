@@ -31,21 +31,21 @@ __all__ = [""]
 class Lay1(ttk.Frame):
     def __init__(self, root):
         super().__init__()
-        self.pack(side=TOP, fill="x")
-        self.label = ttk.Label(self, text="Words")
-        self.label.pack(side=LEFT, pady=3, fill="x")
+        self.pack(fill="x")
         self.entry = ttk.Entry(
             self,
             validate="none",
             validatecommand=self.focus,
-            font="consolas 12",
+            font="verdana 12",
         )
-        self.entry.pack(side=LEFT, ipady=5, pady=(3, 1), fill="both", expand=1)
+        self.entry.pack(
+            side=LEFT, ipady=5, pady=(2, 2), padx=(2, 2), fill="both", expand=1
+        )
         self.entry.config(state="disable")
 
         self.rb = StringVar()
         self.frbt = ttk.Frame(self)
-        self.frbt.pack()
+        self.frbt.pack(padx=(12, 12), pady=2)
         self.frrb = ttk.Frame(self.frbt)
         self.frrb.pack(side=BOTTOM)
         self.radio1 = ttk.Radiobutton(
@@ -60,7 +60,7 @@ class Lay1(ttk.Frame):
         self.frcc = ttk.Frame(self.frrb)
         self.frcc.pack(side=TOP)
         self.label3 = ttk.Label(self.frcc, text="Child")
-        self.label3.pack(side=LEFT, padx=1, pady=(0, 1), fill="x")
+        self.label3.pack(side=LEFT, fill="x")
         self.entry3 = ttk.Combobox(
             self.frcc,
             width=8,
@@ -124,7 +124,7 @@ class Lay1(ttk.Frame):
 class Lay2(ttk.Frame):
     def __init__(self, root):
         super().__init__()
-        self.pack(side=TOP, fill="x")
+        self.pack(side=TOP, fill="x", pady=(2, 0))
 
         self.button5 = ttk.Button(self, text="Insert", width=1)
         self.button5.pack(side=LEFT, pady=(2, 3), padx=(1, 1), fill="x", expand=1)
