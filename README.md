@@ -344,6 +344,9 @@ main()
       * **in function Ex**
       * **in function Create file**
     * **Enhancement for function LookUp**
+  * **Version 3.3.12**
+    * **Layout change**
+      * **The entry for writing and inserting are now at the bottom, for easy viewing when writing and editting**
 
 [⬆️](#freetvg-tree-view-gui)
 
