@@ -3,20 +3,25 @@
 
 
 import os
+import re
 from pathlib import Path
 from tkinter import (
     BOTTOM,
+    CENTER,
+    DISABLED,
     END,
     LEFT,
+    NORMAL,
     RIGHT,
     TOP,
-    StringVar,
-    X,
-    ttk,
-    Text,
     Listbox,
-    CENTER,
+    StringVar,
+    Text,
+    X,
+    font,
+    ttk,
 )
+
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excpcls
 
 DEFAULTDIR = os.path.join(DIRPATH, "FreeTVG_TRACE")
@@ -289,6 +294,245 @@ class Lay7(ttk.Frame):
         self.scrollbar2.pack(side="left", fill="y")
         self.listb.config(yscrollcommand=self.scrollbar2.set)
         del frw, lbw, scw
+
+        self.mdw = ("~~", "^^", "==", "*", "^", "~")
+
+    def find_sentence(self, sent: str, pos: tuple[int, int]) -> tuple[int, int] | None:
+        regex = re.compile(r"[^\*{2}\*{1}\^{2}\^{1}\~{2}\~{1}\={2}\+{2}]+[\S\s]+?")
+        if wordies := regex.search(sent):
+            wordies = wordies.span()
+            return pos[0] + wordies[0], pos[1] - wordies[0]
+        del regex, wordies
+
+    def finditer_sentences(
+        self, sents: str, _iter: bool = False
+    ) -> list[tuple[int, int]] | list:
+        new = []
+        regex = re.compile(r"[\*\^\~]+[\S\s]+?[\*\^\~]+|==+?[\S\s]+?==+?")
+        for i in regex.finditer(sents):
+            if i and "\\" not in i.group():
+                match _iter:
+                    case False:
+                        new.append(self.find_sentence(i.group(), i.span()))
+                        if new[-1] is None:
+                            new.pop()
+                    case True:
+                        new.append(i.span())
+        return new
+
+    def combine_pos(self, sents: str) -> zip | None:
+        p1 = self.finditer_sentences(sents, True)
+        p2 = self.finditer_sentences(sents)
+
+        if p1 and len(p1) == len(p2):
+            p1 = tuple(p1)
+            p2 = tuple(p2)
+            return zip(p1, p2)
+        del p1, p2
+
+    def stat_changer(self):
+        if self.text.cget("state") == DISABLED:
+            self.text.configure(state=NORMAL)
+        else:
+            self.text.configure(state=DISABLED)
+
+    def check(self):
+        for i in self.text.tag_names():
+            print(f"{i}: {self.text.tag_ranges(i)}")
+
+    def text_view(self):
+        container = enumerate(
+            tuple(w for w in self.text.get("1.0", END)[:-1].splitlines(keepends=True))
+        )
+        posses = None
+        toch = None
+        touch = 0
+        length = 0
+        part = None
+        mdset = []
+        mdlen = None
+        p1 = p2 = None
+        count = 0
+        got = False
+        ft = str(self.text.cget("font"))
+        edit_md = []
+        g = None
+        gr = None
+        em = None
+        bullet_width = None
+        text_font = None
+        try:
+            text_font = font.Font(self, font=ft, name=ft, exists=True)
+        except:
+            text_font = font.Font(self, font=ft, name=ft, exists=False)
+        for n, contain in container:
+            if contain != "\n" and contain != "":
+                if posses := self.finditer_sentences(contain, True):
+                    g = re.compile(r"\s+")
+                    em = text_font.measure(" ")
+                    gr = g.match(contain)
+                    if gr and gr.span()[1] > 1:
+                        gr = gr.span()[1]
+                        bullet_width = text_font.measure(f'{gr*" "}-')
+                        self.text.tag_configure(
+                            f"{gr}", lmargin1=em, lmargin2=em + bullet_width
+                        )
+                        got = True
+                    for pos1 in posses:
+                        toch = len(self.mdw)
+                        part = contain[pos1[0] : pos1[1]]
+                        ft = str(self.text.cget("font"))
+                        while touch < toch:
+                            match self.mdw[touch]:
+                                case md if md in part and md == "*":
+                                    count = part.count(md)
+                                    if count > 1 and count % 2 == 0:
+                                        if count == 6:
+                                            if "bold" in ft and "italic" not in ft:
+                                                self.text.tag_configure(
+                                                    f"{md}{n+1}{pos1[0]}",
+                                                    font=ft + " italic",
+                                                )
+                                            elif "italic" in ft and "bold" not in ft:
+                                                self.text.tag_configure(
+                                                    f"{md}{n+1}{pos1[0]}",
+                                                    font=ft + " bold",
+                                                )
+                                            else:
+                                                self.text.tag_configure(
+                                                    f"{md}{n+1}{pos1[0]}",
+                                                    font=ft + " bold italic",
+                                                )
+                                        elif count == 4:
+                                            if "bold" not in ft:
+                                                self.text.tag_configure(
+                                                    f"{md}{n+1}{pos1[0]}",
+                                                    font=ft + " bold",
+                                                )
+                                        elif count == 2:
+                                            if "italic" not in ft:
+                                                self.text.tag_configure(
+                                                    f"{md}{n+1}{pos1[0]}",
+                                                    font=ft + " italic",
+                                                )
+                                        part = part.replace(md, "")
+                                        mdset.append(f"{md}{n+1}{pos1[0]}")
+                                case md if md in part and md == "^^":
+                                    count = part.count(md)
+                                    if count > 1 and count % 2 == 0:
+                                        self.text.tag_configure(
+                                            f"{md}{n+1}{pos1[0]}", underline=True
+                                        )
+                                        part = part.replace(md, "")
+                                        mdset.append(f"{md}{n+1}{pos1[0]}")
+                                case md if md in part and md == "~~":
+                                    count = part.count(md)
+                                    if count > 1 and count % 2 == 0:
+                                        self.text.tag_configure(
+                                            f"{md}{n+1}{pos1[0]}", overstrike=True
+                                        )
+                                        part = part.replace(md, "")
+                                        mdset.append(f"{md}{n+1}{pos1[0]}")
+                                case md if md in part and md == "==":
+                                    count = part.count(md)
+                                    if count > 1 and count % 2 == 0:
+                                        color = (
+                                            "yellow"
+                                            if str(self.text.cget("foreground"))
+                                            != "white"
+                                            else "grey"
+                                        )
+                                        self.text.tag_configure(
+                                            f"{md}{n+1}{pos1[0]}", background=color
+                                        )
+                                        part = part.replace(md, "")
+                                        mdset.append(f"{md}{n+1}{pos1[0]}")
+                                        del color
+                                case md if md in part and md == "^":
+                                    count = part.count(md)
+                                    if count > 1 and count % 2 == 0:
+                                        fts = list(
+                                            self.text.cget("font").rpartition("} ")
+                                        )
+                                        if fts[1]:
+                                            fts[2] = "9" + fts[2][fts[2].find(" ") :]
+                                        else:
+                                            fts = fts[2].split(" ")
+                                            fts[1] = "9"
+                                        fts = " ".join(fts)
+                                        self.text.tag_configure(
+                                            f"{md}{n+1}{pos1[0]}", offset=6, font=fts
+                                        )
+                                        part = part.replace(md, "")
+                                        mdset.append(f"{md}{n+1}{pos1[0]}")
+                                        del fts
+                                case md if md in part and md == "~":
+                                    count = part.count(md)
+                                    if count > 1 and count % 2 == 0:
+                                        fts = list(
+                                            self.text.cget("font").rpartition("} ")
+                                        )
+                                        if fts[1]:
+                                            fts[2] = "9" + fts[2][fts[2].find(" ") :]
+                                        else:
+                                            fts = fts[2].split(" ")
+                                            fts[1] = "9"
+                                        fts = " ".join(fts)
+                                        self.text.tag_configure(
+                                            f"{md}{n+1}{pos1[0]}", offset=-4, font=fts
+                                        )
+                                        part = part.replace(md, "")
+                                        mdset.append(f"{md}{n+1}{pos1[0]}")
+                                        del fts
+                            touch += 1
+                        touch = 0
+
+                        mdlen = contain[pos1[0] : pos1[1]]
+                        p1 = self.text.search(mdlen, f"{n+1}.0", f"{n+2}.0")
+                        p2 = f"{n+1}.{int(p1.partition('.')[2]) + len(mdlen)}"
+                        self.text.delete(p1, p2)
+                        self.text.insert(p1, part)
+                        edit_md.append(
+                            (
+                                (
+                                    p1,
+                                    f"{n+1}.{int(p1.partition('.')[2]) + len(part)}",
+                                    mdset.copy(),
+                                )
+                            )
+                        )
+                        mdset.clear()
+                    contain = self.text.get(f"{n+1}.0", f"{n+1}.0 lineend + 1c")
+                    self.text.delete(f"{n+1}.0", f"{n+1}.0 lineend + 1c")
+                    if got:
+                        got = False
+                        self.text.insert(f"{n+1}.0", contain, gr)
+                    else:
+                        self.text.insert(f"{n+1}.0", contain)
+                    for e in edit_md:
+                        for m in e[2]:
+                            self.text.tag_add(m, e[0], e[1])
+                    edit_md.clear()
+        del (
+            container,
+            posses,
+            toch,
+            touch,
+            length,
+            part,
+            mdset,
+            mdlen,
+            p1,
+            p2,
+            ft,
+            count,
+            edit_md,
+            g,
+            gr,
+            em,
+            bullet_width,
+            text_font,
+        )
 
 
 @excpcls(m=2, filenm=DEFAULTFILE)

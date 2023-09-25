@@ -43,6 +43,7 @@ from tkinter import (
     messagebox,
     simpledialog,
     ttk,
+    SEL,
 )
 
 import darkdetect
@@ -890,6 +891,7 @@ class TreeViewGui:
                 self._prettyv(tvg.getdata())
                 for k, v in tvg.insighttree():
                     self.listb.insert(END, f"{k}: {v[0]}")
+            self.tframe.text_view()
             self.text.edit_reset()
             self.text.config(state="disable")
             self._move_to(False)
@@ -1713,28 +1715,16 @@ class TreeViewGui:
             line = None
             cg = None
             eldat = self._ckfoldtvg()
-            if hasattr(self, "fold"):
-                for i in range(1, self.listb.size() + 1):
-                    line = self.text.get(f"{float(i)}", f"{float(i)} lineend + 1c")
-                    if line:
-                        match eldat:
-                            case eldat if eldat:
-                                if not line[0].isspace():
-                                    gttx.append(line)
-                                elif i - 1 not in eldat:
-                                    gttx.append(line)
-                                elif line == "\n":
-                                    gttx.append(line)
-                            case _:
-                                if not line[0].isspace():
-                                    gttx.append(line)
-                                elif line == "\n":
-                                    gttx.append(line)
-                return "".join(gttx)
-            else:
-                return self.text.get("1.0", END)[:-1]
+            with tv(self.filename) as tvg:
+                if hasattr(self, "fold") and eldat:
+                    for n, d in tvg.getdata():
+                        if n not in eldat:
+                            gttx.append(d)
+                    return "".join(gttx)
+                else:
+                    return "".join([d for _, d in tvg.getdata()])
         finally:
-            del gttx, line, cg, eldat
+            del gttx, line, cg, eldat, tvg
 
     def saveaspdf(self):
         """Show to browser and directly print as pdf or direct printing"""
@@ -2450,15 +2440,15 @@ class TreeViewGui:
         if not hasattr(self, "mdframe"):
             self.__setattr__("mdb", None)
             self.mdb = {
-                "B": ("<Control-Shift-!>", "****"),
-                "I": ("<Control-Shift-@>", "**"),
-                "U": ("<Control-Shift-#>", "^^^^"),
-                "S": ("<Control-Shift-$>", "~~~~"),
-                "M": ("<Control-Shift-%>", "===="),
-                "SA": ("<Control-Shift-^>", "++++"),
+                "B": ("<Control-Shift-!>", "**"),
+                "I": ("<Control-Shift-@>", "*"),
+                "U": ("<Control-Shift-#>", "^^"),
+                "S": ("<Control-Shift-$>", "~~"),
+                "M": ("<Control-Shift-%>", "=="),
+                "SA": ("<Control-Shift-^>", "++"),
                 "L": ("<Control-Shift-&>", "[]()"),
-                "SP": ("<Control-Shift-*>", "^^"),
-                "SB": ("<Control-Shift-(>", "~~"),
+                "SP": ("<Control-Shift-*>", "^"),
+                "SB": ("<Control-Shift-(>", "~"),
                 "C": ("<Control-Shift-)>", "[x]"),
                 "AR": ("<Control-Shift-Q>", "-->"),
                 "AL": ("<Control-Shift-W>", "<--"),
@@ -2477,36 +2467,53 @@ class TreeViewGui:
                 stb = event.widget.cget("text")
 
             @excp(2, DEFAULTFILE)
+            def check_mdatt():
+                sentence = self.text.get(SEL_FIRST, SEL_LAST)
+
+                if all(i not in sentence for i in ["*", "~", "^", "\\"]):
+                    return True
+                messagebox.showwarning(
+                    "TreeViewGui",
+                    f"The sentence '{sentence}' has char like | * | ~ | ^ | \ |"
+                    " which is represent a Markdown's char or escape char!\n"
+                    "Please delete it first!",
+                    parent=self.root,
+                )
+
+            @excp(2, DEFAULTFILE)
             def insmd():
                 if stb and stb in self.mdb:
                     mk = None
+                    markd = ("B", "I", "U", "S", "M", "SA", "L", "SP", "SB")
                     match self.text.tag_ranges("sel"):
-                        case tsel if tsel:
-                            if stb in ("B", "I", "U", "S", "M", "SA", "L", "SP", "SB"):
+                        case tsel if tsel and check_mdatt():
+                            if stb in markd:
                                 match len(mk := self.mdb[stb][1]):
+                                    case 1:
+                                        self.text.insert(SEL_FIRST, mk[0])
+                                        self.text.insert(SEL_LAST, mk[0])
                                     case 2:
-                                        self.text.insert(SEL_FIRST, mk[:1])
-                                        self.text.insert(SEL_LAST, mk[:1])
+                                        self.text.insert(SEL_FIRST, mk[0:])
+                                        self.text.insert(SEL_LAST, mk[0:])
                                     case 4:
                                         if "[" in mk:
                                             self.text.insert(SEL_FIRST, mk[:1])
                                             self.text.insert(SEL_LAST, mk[1:])
-                                        else:
-                                            self.text.insert(SEL_FIRST, mk[:2])
-                                            self.text.insert(SEL_LAST, mk[:2])
                                 if idx := self.text.search(" ", SEL_LAST, END):
                                     self.text.mark_set("insert", idx)
                                 else:
                                     self.text.mark_set("insert", f"{SEL_LAST} lineend")
                                 self.text.tag_remove("sel", SEL_FIRST, SEL_LAST)
                                 del idx
-                    if mk is None:
-                        if self.text.get(f"{INSERT} - 1c", INSERT).isspace():
-                            self.text.insert(INSERT, self.mdb[stb][1])
-                        else:
-                            self.text.insert(INSERT, f" {self.mdb[stb][1]}")
+                        case _:
+                            if stb not in markd:
+                                if self.text.get(f"{INSERT} - 1c", INSERT).isspace():
+                                    self.text.insert(INSERT, self.mdb[stb][1])
+                                else:
+                                    self.text.insert(INSERT, f" {self.mdb[stb][1]}")
+
                     self.text.focus()
-                    del mk
+                    del mk, markd
 
             @excp(2, DEFAULTFILE)
             def shortcut(event):
