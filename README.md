@@ -333,6 +333,8 @@ main()
   
   * **Text View convert Markdown attribute**
     * **To bold, italic, underline, strikethrough, highlight, superscript, and subscript**
+  
+  ![Text View](/pics/text_view.png)
 
 * ### **Versions Highlights**
 
