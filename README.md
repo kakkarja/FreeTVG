@@ -28,11 +28,12 @@
 * **[Configuration](#configuration)**
 * **[Editor Enhancement](#editor-new-enhancement)**
 * **[Ex Func Changes](#ex-function-changes)**
+* **[Dynamic Theme](#dynamic-theme)**
 * **[Versions Highlights](#versions-highlights)**
+* **[Text Viewer Enhencement](#text-view)**
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
-* **[Dynamic Theme](#dynamic-theme)**
 
 </details>
 
@@ -328,6 +329,11 @@ main()
   * **Edit only for a Parent and its childs**
   * **Option for Edit whole document has been no more!**
 
+* ### **Text View**
+  
+  * **Text View convert Markdown attribute**
+    * **To bold, italic, underline, strikethrough, highlight, superscript, and subscript**
+
 * ### **Versions Highlights**
 
   * **Version 3.3.7**
@@ -347,6 +353,9 @@ main()
   * **Version 3.3.12**
     * **Layout change**
       * **The entry for writing and inserting are now at the bottom, for easy viewing when writing and editting**
+  * **Version 3.3.14**
+    * **Add functionality to Text Viewer**
+      * **Text View, which convert markdown attributes to look like rich text ([for common attributes only](#text-view))**
 
 [⬆️](#freetvg-tree-view-gui)
 
