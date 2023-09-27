@@ -308,7 +308,18 @@ class Lay7(ttk.Frame):
         self, sents: str, _iter: bool = False
     ) -> list[tuple[int, int]] | list:
         new = []
-        regex = re.compile(r"[\*\^\~]+[\S\s]+?[\*\^\~]+|==+?[\S\s]+?==+?")
+        regex = re.compile(
+            r"\*\*\*[\S\s]+?\*\*\*"
+            r"|\*\*[\S\s]+?\*\*"
+            r"|\*[\S\s]+?\*"
+            r"|\^\^\^[\S\s]+?\^\^\^"
+            r"|\^\^[\S\s]+?\^\^"
+            r"|\^[\S\s]+?\^"
+            r"|~~~[\S\s]+?~~~"
+            r"|~~[\S\s]+?~~"
+            r"|~[\S\s]+?~"
+            r"|==[\S\s]+?=="
+        )
         for i in regex.finditer(sents):
             if i and "\\" not in i.group():
                 match _iter:
@@ -479,7 +490,7 @@ class Lay7(ttk.Frame):
                                             fts[1] = "9"
                                         fts = " ".join(fts)
                                         self.text.tag_configure(
-                                            f"{md}{n+1}{pos1[0]}", offset=-4, font=fts
+                                            f"{md}{n+1}{pos1[0]}", offset=-2, font=fts
                                         )
                                         part = part.replace(md, "")
                                         mdset.append(f"{md}{n+1}{pos1[0]}")

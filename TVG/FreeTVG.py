@@ -362,7 +362,8 @@ class TreeViewGui:
                 fr.pack_forget()
             del frm
         if os.path.exists(self.glop.absolute().joinpath("fold.tvg")):
-            self.fold = True
+            if not Path(f"{self.filename}_hid.json").exists():
+                self.fold = True
         if not self.glop.parent.joinpath("TVG_config.toml").exists():
             _create_config(self.glop.parent.joinpath("TVG_config.toml"))
 
@@ -880,7 +881,7 @@ class TreeViewGui:
             del gr
         del tx, nf, text_font, g, em
 
-    def view(self, event=None):
+    def view(self, event=None, hid: bool = False):
         """Viewing engine for most module fuction"""
 
         if self.nonetype():
@@ -891,7 +892,8 @@ class TreeViewGui:
                 self._prettyv(tvg.getdata())
                 for k, v in tvg.insighttree():
                     self.listb.insert(END, f"{k}: {v[0]}")
-            self.tframe.text_view()
+            if not hid:
+                self.tframe.text_view()
             self.text.edit_reset()
             self.text.config(state="disable")
             self._move_to(False)
@@ -1326,23 +1328,22 @@ class TreeViewGui:
             if self.listb.curselection():
                 rw = int(self.listb.curselection()[0])
                 self._ckinsight()
+                gtt = self.text.get(f"{rw + 1}.0", f"{rw + 1}.0 lineend")
                 if self.checked_box.lower() == "on":
-                    gtt = self.text.get(f"{rw + 1}.0", f"{rw + 1}.0 lineend")
-                    if gtt:
-                        if gtt[0].isspace() and not gtt.strip().startswith("-[x] "):
-                            gtt = gtt.partition("-")
-                            rwd = "[x] " + gtt[2]
-                            with tv(self.filename) as tvg:
-                                tvg.edittree(rwd, rw, f"child{len(gtt[0])//4}")
-                            del rwd, tvg
-                        elif gtt.strip().startswith("-[x] "):
-                            gtt = gtt.partition("-[x] ")
-                            rwd = gtt[2]
-                            with tv(self.filename) as tvg:
-                                tvg.edittree(rwd, rw, f"child{len(gtt[0])//4}")
-                            del rwd, tvg
-                    del gtt
-                else:
+                    rwd = None
+                    with tv(self.filename) as tvg:
+                        for _, v in islice(tvg.getdata(), rw, rw + 1):
+                            gtt = v
+                        if gtt.strip().startswith("-"):
+                            if not gtt.strip().startswith("-[x] "):
+                                gtt = v.partition("-")
+                                rwd = "[x] " + gtt[2].strip()
+                            else:
+                                gtt = v.partition("-[x] ")
+                                rwd = gtt[2].strip()
+                            tvg.edittree(rwd, rw, f"child{len(gtt[0])//4}")
+                    del rwd, tvg
+                elif gtt.strip().startswith("-"):
                     with tv(self.filename) as tvg:
                         tvg.checked(rw)
                     del tvg
@@ -1351,7 +1352,7 @@ class TreeViewGui:
                 self.listb.select_set(rw)
                 self.listb.activate(rw)
                 self._spot_on(rw)
-                del rw
+                del rw, gtt
                 self.infobar()
 
     def backup(self, event=None):
@@ -1714,6 +1715,7 @@ class TreeViewGui:
             gttx = []
             line = None
             cg = None
+            rd = None
             eldat = self._ckfoldtvg()
             with tv(self.filename) as tvg:
                 if hasattr(self, "fold") and eldat:
@@ -1722,9 +1724,17 @@ class TreeViewGui:
                             gttx.append(d)
                     return "".join(gttx)
                 else:
-                    return "".join([d for _, d in tvg.getdata()])
+                    if Path(f"{self.filename}_hid.json").exists():
+                        with open(f"{self.filename}_hid.json") as jfile:
+                            rd = dict(json.load(jfile))
+                        for r1, r2 in rd.values():
+                            for _, v in islice(tvg.getdata(), r1, r2 + 1):
+                                gttx.append(v)
+                        return "".join(gttx[:-1])
+                    else:
+                        return "".join([d for _, d in tvg.getdata()])
         finally:
-            del gttx, line, cg, eldat, tvg
+            del gttx, line, cg, eldat, tvg, rd
 
     def saveaspdf(self):
         """Show to browser and directly print as pdf or direct printing"""
@@ -1849,7 +1859,7 @@ class TreeViewGui:
             with open(f"{self.filename}_hid.json") as jfile:
                 rd = dict(json.load(jfile))
             rolrd = tuple(tuple(i) for i in tuple(rd.values()) if isinstance(i, list))
-            self.view()
+            self.view(hid=True)
             showt = self.text.get("1.0", END).split("\n")[:-2]
             if self.hidopt == "unreverse":
                 for wow, wrow in rolrd:
@@ -1859,7 +1869,6 @@ class TreeViewGui:
                 self.text.delete("1.0", END)
                 showt = tuple(f"{i}\n" for i in showt if i != 0)
                 self._prettyv(enumerate(showt))
-                self.text.config(state="disable")
                 self.listb.delete(0, END)
                 if showt:
                     with tv(self.filename) as tvg:
@@ -1874,11 +1883,10 @@ class TreeViewGui:
                 for wow, wrow in rolrd:
                     for i in range(wow, wrow + 1):
                         ih.append(f"{showt[i]}\n")
-                ih = tuple(ih)
+                ih = tuple(ih[:-1])
                 self.text.config(state="normal")
                 self.text.delete("1.0", END)
                 self._prettyv(enumerate(ih))
-                self.text.config(state="disable")
                 with tv(self.filename) as tvg:
                     vals = enumerate(
                         [d[0] for d in tvg.insighthidden(enumerate(ih), False)]
@@ -1888,6 +1896,8 @@ class TreeViewGui:
                     self.listb.insert(END, f"{n}: {p}")
                 del ih, tvg, vals
             del rd, rolrd, showt
+            self.tframe.text_view()
+            self.text.config(state="disable")
             self._move_to()
 
     def hiddenchl(self, event=None):

@@ -358,6 +358,11 @@ main()
   * **Version 3.3.14**
     * **Add functionality to Text Viewer**
       * **Text View, which convert markdown attributes to look like rich text ([for common attributes only](#text-view))**
+  * **Version 3.3.17**
+    * **Bugs fixed**
+      * **Printing work accordingly in hidden mode**
+      * **Checked work nice with Text View functionality**
+      * **Hidden mode also work with Text View**
 
 [⬆️](#freetvg-tree-view-gui)
 
