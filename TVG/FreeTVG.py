@@ -49,13 +49,18 @@ from tkinter import (
 import darkdetect
 import tomlkit
 from treeview import TreeView as tv
-from treeview.dbase import Datab as db
 
 from addon_tvg import Charts, EvalExp, SumAll
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
 
 from .structure import Lay1, Lay2, Lay3, Lay4, Lay5, Lay6, Lay7, Lay8, Scribe
-from .utility import ParseData, composemail, convhtml, wrwords
+from .utility import (
+    ParseData,
+    composemail,
+    convhtml,
+    wrwords,
+    DatabaseTVG,
+)
 
 if platform.startswith("win"):
     from ctypes import byref, c_int, sizeof, windll
@@ -640,13 +645,11 @@ class TreeViewGui:
             self.info.set("Editor Mode")
         elif self.listb.curselection():
             st = int(self.listb.curselection()[0])
-            insight = None
-            with tv(f"{self.filename}") as tvg:
-                insight = tuple(islice(tvg.compdatch(True), st, st + 1))
-                ck = insight[0][1][:12]
-            self.info.set(f"{st}: {ck[:-1]}...")
-            self.text.see(f"{st}.0")
-            del ck, tvg, st, insight
+            insight = self.text.get(f"{st + 1}.0", f"{st + 1}.0 lineend")
+            ck = insight.strip()[:12]
+            self.info.set(f"{st}: {ck}...")
+            self.text.see(f"{st + 1}.0")
+            del ck, st, insight
         else:
             self.info.set(f'{dt.strftime(dt.today(),"%a %d %b %Y")}')
 
@@ -1327,7 +1330,6 @@ class TreeViewGui:
         if self.unlock:
             if self.listb.curselection():
                 rw = int(self.listb.curselection()[0])
-                self._ckinsight()
                 gtt = self.text.get(f"{rw + 1}.0", f"{rw + 1}.0 lineend")
                 if self.checked_box.lower() == "on":
                     rwd = None
@@ -1363,9 +1365,14 @@ class TreeViewGui:
         self.hidcheck()
         if self.unlock:
             if self.nonetype():
-                with tv(self.filename) as tvg:
-                    tvg.backuptv()
-                del tvg
+                db = DatabaseTVG(self.filename)
+                db.create_db_tables()
+                if db.total_records() < 10:
+                    db.insert_data(self._ckfoldtvg())
+                else:
+                    db.delete_data(db.get_firstid())
+                    db.insert_data(self._ckfoldtvg())
+                del db
                 messagebox.showinfo("Backup", "Backup done!", parent=self.root)
 
     def loadbkp(self, event=None):
@@ -1373,31 +1380,43 @@ class TreeViewGui:
 
         self.hidcheck()
         if self.unlock:
-            if os.path.exists(f"{self.filename}.json"):
-                dbs = db(self.filename)
+            db = DatabaseTVG(self.filename)
+            if db.check_dbfile():
+                from ast import literal_eval as leval
+
                 row = simpledialog.askinteger(
                     "Load Backup",
                     (
-                        f"There are {dbs.totalrecs()} rows, please choose a row:\n"
-                        f"(Fold selections data will be erased!)"
+                        f"There are {db.total_records()} rows, please choose a row:\n"
+                        "(Fold selections data will be loaded as well if any!)"
                     ),
                     parent=self.root,
                 )
-                if row and row <= dbs.totalrecs():
-                    with tv(self.filename) as tvg:
-                        tvg.loadbackup(self.filename, row=row - 1, stat=True)
-                    del tvg
+                pd = None
+                result = None
+                if row and row <= db.total_records():
+                    result = db.get_data(row)
+                    db.fileread(iter(leval(result.data)))
+                    if result.fold:
+                        with open(
+                            self.glop.absolute().joinpath("fold.tvg"), "wb"
+                        ) as cur:
+                            cur.write(result.fold.encode())
+                        pd = ParseData(self.filename, data=leval(result.fold))
+                        pd.create_data()
+                    else:
+                        self._deldatt(False)
                     messagebox.showinfo(
                         "Load Backup",
-                        "Load backup is done, chek again!",
+                        "Load backup is done, check again!",
                         parent=self.root,
                     )
-                    self._deldatt(False)
                     self._sumchk()
                     self._chkfoldatt()
                     self.spaces()
 
-                del row, dbs
+                del row, pd, result
+            del db
 
     def copas(self, event=None):
         """Paste a row value to Entry for fixing value"""
@@ -1425,13 +1444,9 @@ class TreeViewGui:
         """Returning data pattern to cmrows"""
 
         if b:
-            return enumerate(
-                [f"{i}\n" for i in dat.split("\n") if not i.startswith("TOTAL SUMS =")]
-            )
+            return enumerate([f"{i}\n" for i in dat.split("\n")])
         else:
-            return enumerate(
-                [i for i in dat.split("\n") if i and not i.startswith("TOTAL SUMS =")]
-            )
+            return enumerate([i for i in dat.split("\n") if i])
 
     def _copytofile(self):
         """Copy parents and childs in hidden modes to another existing file or new file."""
@@ -1444,7 +1459,7 @@ class TreeViewGui:
                 )
                 if askname:
                     if not os.path.exists(self.glop.parent.joinpath(f"{askname}_tvg")):
-                        tak = self.fildat(self.text.get("1.0", END)[:-1])
+                        tak = self.fildat(self._utilspdf())
                         os.remove(f"{self.filename}_hid.json")
                         self.createf(askname)
                         with tv(self.filename) as tvg:
@@ -1476,7 +1491,7 @@ class TreeViewGui:
                             f'{flname.rpartition("_")[0]}_hid.json',
                         )
                     ):
-                        tak = self.fildat(self.text.get("1.0", END)[:-1], False)
+                        tak = self.fildat(self._utilspdf(), False)
                         os.remove(f"{self.filename}_hid.json")
                         self.addonchk()
                         self.filename = flname.rpartition("_")[0]
@@ -1501,7 +1516,7 @@ class TreeViewGui:
                             parent=self.root,
                         )
                 else:
-                    tak = self.fildat(self.text.get("1.0", END)[:-1])
+                    tak = self.fildat(self._utilspdf())
                     os.remove(f"{self.filename}_hid.json")
                     self.addonchk()
                     self.filename = flname.rpartition("_")[0]
@@ -1518,7 +1533,9 @@ class TreeViewGui:
 
         self.FREEZE = True
         self.lock = True
-        files = [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
+        files = sorted(
+            [file for file in os.listdir(self.glop.parent) if "_tvg" in file]
+        )
         files.insert(0, "New")
 
         @excpcls(2, DEFAULTFILE)
@@ -1705,13 +1722,8 @@ class TreeViewGui:
                     self.listb.selection_clear(0, END)
                     self.infobar()
 
-    def _ckinsight(self):
-        if "row 0:" in self.text.get("1.0", "1.0 lineend"):
-            self.view()
-
     def _utilspdf(self):
         try:
-            self._ckinsight()
             gttx = []
             line = None
             cg = None

@@ -29,8 +29,9 @@
 * **[Editor Enhancement](#editor-new-enhancement)**
 * **[Ex Func Changes](#ex-function-changes)**
 * **[Dynamic Theme](#dynamic-theme)**
-* **[Versions Highlights](#versions-highlights)**
 * **[Text Viewer Enhencement](#text-view)**
+* **[New Backup](#new-backup)**
+* **[Versions Highlights](#versions-highlights)**
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
 * **[Picture Markdown](#markdown-1)**
@@ -336,6 +337,13 @@ main()
   
   ![Text View](/Pics/text_view.png)
 
+* ### **NEW Backup**
+
+  * **Backup was using json, now change to SQLite database**
+  * **Database dependency using SQLModel**
+    * **[@tiangolo](https://sqlmodel.tiangolo.com/)**
+  * **Now Backup function also backup fold selection data, if any!**
+
 * ### **Versions Highlights**
 
   * **Version 3.3.7**
@@ -363,6 +371,12 @@ main()
       * **Printing work accordingly in hidden mode**
       * **Checked work nice with Text View functionality**
       * **Hidden mode also work with Text View**
+  * **Version 3.4.0**
+    * **Backup now using SQLite with dependency package SQLModel**
+    * **Bugs fixed**
+      * **On copying data from hidden mode to a new or existing file (part of CPP function)**
+        * **Works well with text view functionality**
+      * **Infobar display text of selected row from text view (used to be from original text)**
 
 [⬆️](#freetvg-tree-view-gui)
 
