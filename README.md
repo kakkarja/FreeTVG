@@ -377,6 +377,8 @@ main()
       * **On copying data from hidden mode to a new or existing file (part of CPP function)**
         * **Works well with text view functionality**
       * **Infobar display text of selected row from text view (used to be from original text)**
+  * **Version 3.4.1**
+    * **Bug fixed in database**
 
 [⬆️](#freetvg-tree-view-gui)
 
