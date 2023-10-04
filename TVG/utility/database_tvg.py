@@ -51,7 +51,7 @@ class DatabaseTVG(TreeView):
     def insert_data(self, fold: tuple[int] = None) -> None:
         """Saving data to DataBase including fold if any"""
 
-        data = f"{tuple(self.compdatch())}"
+        data = f"{tuple(self.compdatch(True))}"
         fold = f"{fold}" if fold else fold
         with Session(self.engine) as session:
             session.add(TreeViewGuiDataBase(data=data, fold=fold))

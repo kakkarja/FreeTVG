@@ -1382,8 +1382,6 @@ class TreeViewGui:
         if self.unlock:
             db = DatabaseTVG(self.filename)
             if db.check_dbfile():
-                from ast import literal_eval as leval
-
                 row = simpledialog.askinteger(
                     "Load Backup",
                     (
@@ -1396,13 +1394,15 @@ class TreeViewGui:
                 result = None
                 if row and row <= db.total_records():
                     result = db.get_data(row)
-                    db.fileread(iter(leval(result.data)))
+                    db.fileread(iter(ast.literal_eval(result.data)))
                     if result.fold:
                         with open(
                             self.glop.absolute().joinpath("fold.tvg"), "wb"
                         ) as cur:
                             cur.write(result.fold.encode())
-                        pd = ParseData(self.filename, data=leval(result.fold))
+                        pd = ParseData(
+                            self.filename, data=ast.literal_eval(result.fold)
+                        )
                         pd.create_data()
                     else:
                         self._deldatt(False)
