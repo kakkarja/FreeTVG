@@ -340,13 +340,13 @@ main()
 
   * ### **Known Limitation**
 
-    * **Markup language and how Text View works**
+    * **Markdown language and how Text View works**
       * **Text View cannot interprate eg. "\*\*\*Testing this \^\^text\^\^\*\*\*"**
       * **The position of text that marked inside another marked will cause entirely bolded and italic also underline**
       * **To avoid such cases, it should be "\*\*\*Testing This\*\*\* \*\*\*\^\^text\^\^\*\*\*"**
       * **In some rare case like eg. "\^\^\*\*\*Good 20M\*\*\*\^\^\^\*\*\*2\*\*\*\^ area"**
       * **Will work perfectly fine in text view**
-      * **However in MarkUp language will interprate them bewilderedly**
+      * **However in Markdown language will interprate them bewilderedly**
 
 * ### **NEW Backup**
 
