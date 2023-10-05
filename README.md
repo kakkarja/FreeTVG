@@ -30,6 +30,7 @@
 * **[Ex Func Changes](#ex-function-changes)**
 * **[Dynamic Theme](#dynamic-theme)**
 * **[Text Viewer Enhencement](#text-view)**
+  * **[Known Limitation](#known-limitation)**
 * **[New Backup](#new-backup)**
 * **[Versions Highlights](#versions-highlights)**
 * **[Picture TVG](#tvg)**
@@ -336,6 +337,16 @@ main()
     * **To bold, italic, underline, strikethrough, highlight, superscript, and subscript**
   
   ![Text View](/Pics/text_view.png)
+
+  * ### **Known Limitation**
+
+    * **Markup language and how Text View works**
+      * **Text View cannot interprate eg. "\*\*\*Testing this \^\^text\^\^\*\*\*"**
+      * **The position of text that marked inside another marked will cause entirely bolded and italic also underline**
+      * **To avoid such cases, it should be "\*\*\*Testing This\*\*\* \*\*\*\^\^text\^\^\*\*\*"**
+      * **In some rare case like eg. "\^\^\*\*\*Good 20M\*\*\*\^\^\^\*\*\*2\*\*\*\^ area"**
+      * **Will work perfectly fine in text view**
+      * **However in MarkUp language will interprate them bewilderedly**
 
 * ### **NEW Backup**
 
