@@ -61,6 +61,7 @@ from .utility import (
     wrwords,
     DatabaseTVG,
 )
+from .bible_reader import BibleReader, DEFAULT_PATH
 
 if platform.startswith("win"):
     from ctypes import byref, c_int, sizeof, windll
@@ -74,6 +75,7 @@ if not os.path.exists(DEFAULTDIR):
     os.mkdir(DEFAULTDIR)
 DEFAULTFILE = os.path.join(DEFAULTDIR, Path(DEFAULTFILE).name)
 
+BIBLE_PATH = str(DEFAULT_PATH)
 
 THEME_MODE = darkdetect.theme().lower()
 
@@ -191,6 +193,7 @@ class TreeViewGui:
             self.root.bind_all("<Control-Key-F3>", self.fcsent)
             self.root.bind_all("<Control-Key-F5>", self.configd)
             self.root.bind_all("<Control-Key-F4>", self.exprsum)
+            self.root.bind_all("<Control-Key-F7>", self.bible_reading)
         else:
             self.root.bind_all("<Control-Shift-Up>", self.fcsent)
             self.root.bind_all("<Control-Shift-Down>", self.fcsent)
@@ -202,6 +205,7 @@ class TreeViewGui:
             self.root.bind_all("<Key-F3>", self.fcsent)
             self.root.bind_all("<Key-F5>", self.configd)
             self.root.bind_all("<Key-F4>", self.exprsum)
+            self.root.bind_all("<Key-F7>", self.bible_reading)
 
         self.root.bind_all("<Control-Key-1>", self.fcsent)
         self.root.bind_all("<Control-Key-4>", self.fcsent)
@@ -1774,7 +1778,11 @@ class TreeViewGui:
 
             ans = messagebox.askyesno(
                 "Preview",
-                "Do you want to preview? ('no' will go to web for printing)",
+                (
+                    "Do you want to preview? "
+                    "('no' will go to web for printing "
+                    "or directly create pdf)"
+                ),
                 parent=self.root,
             )
             style = None
@@ -2496,7 +2504,7 @@ class TreeViewGui:
                     return True
                 messagebox.showwarning(
                     "TreeViewGui",
-                    f"The sentence '{sentence}' has char like | * | ~ | ^ | \ |"
+                    f"The sentence '{sentence}' has char like | * | ~ | ^ | \\ |"
                     " which is represent a Markdown's char or escape char!\n"
                     "Please delete it first!",
                     parent=self.root,
@@ -3390,6 +3398,26 @@ class TreeViewGui:
                     self.view()
                     self.infobar()
 
+    def bible_reading(self, event=None):
+        """Bible Reading and journal"""
+
+        if self.lock is False:
+            TreeViewGui.FREEZE = True
+            self.lock = True
+            d = BibleReader(self.root, bpath=BIBLE_PATH)
+            self.lock = False
+            if d.result:
+                if self.info.get() != "Editor Mode":
+                    TreeViewGui.FREEZE = False
+                    self.editor()
+                j = d.result.partition("\n")
+                journal = f"p:^^{j[0]}^^\nc1:Ayat:\nc2:***{j[2]}***\nc1:Journal:\nc2:"
+                self.text.insert(END, journal)
+                del j, d.result
+            else:
+                TreeViewGui.FREEZE = False
+            del d
+
     def configd(self, event=None):
         """Deleting configuration file to default"""
 
@@ -3400,6 +3428,13 @@ class TreeViewGui:
             if self.glop.parent.joinpath("TVG_config.toml").exists():
                 with open(self.glop.parent.joinpath("TVG_config.toml")) as rf:
                     cfg = tomlkit.load(rf)
+                bibles = os.listdir(self.glop.parent.joinpath("Bibles"))
+                if bibles:
+                    bibles = [Path(DEFAULT_PATH).name] + bibles
+                else:
+                    bibles = [Path(DEFAULT_PATH).name]
+
+                pth = self.glop.parent
 
                 @excpcls(2, DEFAULTFILE)
                 class MyDialog(simpledialog.Dialog):
@@ -3449,19 +3484,37 @@ class TreeViewGui:
                             self.e5["values"].index(cfg["Configure"]["CHECKED_BOX"])
                         )
                         self.e5.config(state="readonly")
+
+                        self.fr6 = Frame(master)
+                        self.fr6.pack(fill=X, expand=1, pady=(0, 1))
+                        Label(self.fr6, text="Bible path: ").pack(side=LEFT)
+                        self.e6 = ttk.Combobox(self.fr6)
+                        self.e6["values"] = bibles
+                        self.e6.pack(side=RIGHT)
+                        idx = Path(cfg["Configure"]["BIBLE_PATH"]).name
+                        self.e6.current(self.e6["values"].index(idx))
+                        self.e6.config(state="readonly")
+
                         return self.e2
 
                     def apply(self):
+                        nonlocal pth
                         hid = (
                             ast.literal_eval(self.e3.get())
                             if self.e3.get() == "False"
                             else self.e3.get()
                         )
+
+                        if not self.e6.get() in str(DEFAULT_PATH):
+                            pth = str(pth.joinpath("Bibles", self.e6.get()))
+                        else:
+                            pth = str(DEFAULT_PATH)
                         self.result = (
                             self.e2.get(),
                             hid,
                             self.e4.get(),
                             self.e5.get(),
+                            pth,
                         )
 
                 d = MyDialog(self.root)
@@ -3470,13 +3523,15 @@ class TreeViewGui:
 
                 if d.result:
                     if tuple(cfg["Configure"].values()) != d.result:
-                        global SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
+                        global SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX, BIBLE_PATH
                         self.cpp_select = SELECT_MODE = d.result[0]
                         self.hidopt = HIDDEN_OPT = d.result[1]
                         if WRAPPING != d.result[2]:
                             self.wrapping = WRAPPING = d.result[2]
                             self.wrapped()
                         self.checked_box = CHECKED_BOX = d.result[3]
+                        BIBLE_PATH = d.result[4]
+
                         _create_config(self.glop.parent.joinpath("TVG_config.toml"))
                     else:
                         messagebox.showinfo(
@@ -3486,6 +3541,7 @@ class TreeViewGui:
             TreeViewGui.FREEZE = False
 
 
+@excp(m=2, filenm=DEFAULTFILE)
 def _ckwrds(wrd: str):
     try:
         nums = len(wrd)
@@ -3548,15 +3604,16 @@ def findpath():
     """Select default path for TVG"""
 
     pth = (
-        os.path.join(os.path.expanduser("~"), "Documents", "TVG")
-        if os.path.isdir(os.path.join(os.path.expanduser("~"), "Documents"))
-        else os.path.join(os.path.expanduser("~"), "TVG")
+        Path().home().joinpath("Documents")
+        if Path().home().joinpath("Documents").exists()
+        else Path().home()
     )
-    if os.path.isdir(pth):
-        os.chdir(pth)
+
+    if pth.joinpath("TVG").exists():
+        os.chdir(pth.joinpath("TVG"))
     else:
-        os.mkdir(pth)
-        os.chdir(pth)
+        pth.joinpath("TVG").mkdir()
+        os.chdir(pth.joinpath("TVG"))
 
 
 @excp(m=2, filenm=DEFAULTFILE)
@@ -3571,6 +3628,7 @@ def _create_config(pth: str = None):
                     "HIDDEN_OPT": HIDDEN_OPT,
                     "WRAPPING": WRAPPING,
                     "CHECKED_BOX": CHECKED_BOX,
+                    "BIBLE_PATH": BIBLE_PATH,
                 }
             },
             fp,
@@ -3582,13 +3640,14 @@ def _load_config():
     """Load configuration"""
 
     if os.path.exists("TVG_config.toml"):
-        global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX
+        global THEME_MODE, SELECT_MODE, HIDDEN_OPT, WRAPPING, CHECKED_BOX, BIBLE_PATH
         with open("TVG_config.toml") as rf:
             cfg = tomlkit.load(rf)
         SELECT_MODE = cfg["Configure"]["SELECT_MODE"]
         HIDDEN_OPT = cfg["Configure"]["HIDDEN_OPT"]
         WRAPPING = cfg["Configure"]["WRAPPING"]
         CHECKED_BOX = cfg["Configure"]["CHECKED_BOX"]
+        BIBLE_PATH = cfg["Configure"]["BIBLE_PATH"]
         del cfg
 
 
@@ -3612,10 +3671,24 @@ def titlemode(sent: str):
 
 
 @excp(m=2, filenm=DEFAULTFILE)
+def bible_coll():
+    pth = (
+        Path().home().joinpath("Documents")
+        if Path().home().joinpath("Documents").exists()
+        else Path().home()
+    )
+
+    if pth.joinpath("TVG").exists():
+        if not pth.joinpath("TVG", "Bibles").exists():
+            pth.joinpath("TVG", "Bibles").mkdir()
+
+
+@excp(m=2, filenm=DEFAULTFILE)
 def main():
     """Starting point of running TVG and making directory for non-existing file"""
 
     findpath()
+    bible_coll()
     _load_config()
 
     root = Tk()

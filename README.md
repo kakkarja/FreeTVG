@@ -32,6 +32,7 @@
 * **[Text Viewer Enhencement](#text-view)**
   * **[Known Limitation](#known-limitation)**
 * **[New Backup](#new-backup)**
+* **[New Function Bible Reader](#bible-reader-and-journal)**
 * **[Versions Highlights](#versions-highlights)**
 * **[Picture TVG](#tvg)**
 * **[Picture with Add-On TVG](#with-add-on-freetvg)**
@@ -182,7 +183,7 @@ main()
 
       * **If wkhtmltopdf not installed, Printing will directed to browser instead**
 
-![DirectPrintInMac](/Pics/printedPDF.png)
+![DirectPrintInMac](Pics/printedPDF.png)
 
 [⬆️](#freetvg-tree-view-gui)
 
@@ -336,7 +337,7 @@ main()
   * **Text View convert Markdown attribute**
     * **To bold, italic, underline, strikethrough, highlight, superscript, and subscript**
   
-  ![Text View](/Pics/text_view.png)
+  ![Text View](Pics/text_view.png)
 
   * ### **Known Limitation**
 
@@ -354,6 +355,43 @@ main()
   * **Database dependency using SQLModel**
     * **[@tiangolo](https://sqlmodel.tiangolo.com/)**
   * **Now Backup function also backup fold selection data, if any!**
+
+* ### **Bible Reader and Journal**
+
+  * **New function for Reading Bible and take journal**
+    * **Short-Cut [fn/control + F7]**
+  * **Bible provided KJV**
+  * **Can have more bibles**
+    * **Download bibles in [BIBLE4U](https://www.google.com/search?q=bible4u)**
+    * **Download XML zipfile**
+    * **Unarchive it to:**
+
+    ```Terminal
+    /user_name/Documents/TVG/Bibles
+
+    #if no documents folder than
+
+    /user_name/TVG/Bibles
+    ```
+
+    * **In TVG open configuration by pressing [fn/control + F5]**
+    * **Select the Bible you have downloaded**
+    ![Configure](Pics/Config.png)
+    * **WARNING!**
+      * **Not all characters will appear properly**
+      * **Try change the font styles of TVG (refer to help > fn/control + F1)**
+
+  ![Bible Reader](Pics/Bible_Reader.png)
+
+  * **When press journal, the displayed verses copied to Editor for for journal purpose 🙏**
+
+>---
+>
+> # Revelation
+>
+> ### I testify to everyone who hears the prophetic words of this book: If anyone adds to them, God will add to him the plagues described in this book. And if anyone subtracts from the prophetic words of this book, God will remove his portion from the Tree of Life and in the holy city, which are described in this book
+>
+>---
 
 * ### **Versions Highlights**
 
@@ -390,29 +428,32 @@ main()
       * **Infobar display text of selected row from text view (used to be from original text)**
   * **Version 3.4.1**
     * **Bug fixed in database**
+  * **Version 3.5.0**
+    * **Add new fuction**
+      * **Bible Reading [⇪](#bible-reader-and-journal)**
 
 [⬆️](#freetvg-tree-view-gui)
 
 ## TVG
 
-![TVG](/Pics/TVG.png)
+![TVG](Pics/TVG.png)
 
 [⬆️](#freetvg-tree-view-gui)
 
 ## With Add-On FreeTVG
 
-![SumAll](/Pics/sumup.png)
+![SumAll](Pics/sumup.png)
 
-![PieChart](/Pics/piechart.png)
+![PieChart](Pics/piechart.png)
 
-![ExpressionCalc](/Pics/expressioncalc.png)
+![ExpressionCalc](Pics/expressioncalc.png)
 
 [⬆️](#freetvg-tree-view-gui)
 
 ## Markdown
 
-![Markdown](/Pics/markdown.png)
+![Markdown](Pics/markdown.png)
 
-![Printing](/Pics/printing.png)
+![Printing](Pics/printing.png)
 
 [⬆️](#freetvg-tree-view-gui)

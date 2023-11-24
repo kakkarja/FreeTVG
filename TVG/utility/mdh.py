@@ -185,8 +185,7 @@ list-style-type: none !important;
 {pointer_event if preview else ""}
 
 """
-        if not preview:
-            printed = """@media print {
+        printed = """@media print {
 .button { display: none; }
 
 body { 
