@@ -383,7 +383,7 @@ main()
 
   ![Bible Reader](Pics/Bible_Reader.png)
 
-  * **When press journal, the displayed verses copied to Editor for for journal purpose 🙏**
+  * **When press journal, the displayed verses copied to Editor for journal purpose 🙏**
 
 >---
 >
