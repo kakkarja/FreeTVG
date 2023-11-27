@@ -9,13 +9,26 @@ from .bible_creator import BibleProduceData, DEFAULT_PATH
 class BibleReader(simpledialog.Dialog):
     """Bible Reader"""
 
-    def __init__(self, parent, title=None, bpath=DEFAULT_PATH) -> None:
+    def __init__(
+        self,
+        parent,
+        title=None,
+        book=None,
+        chapter=None,
+        _from=None,
+        _to=None,
+        bpath=DEFAULT_PATH,
+    ) -> None:
+        self.book = book
+        self.chapter = chapter
+        self._from = _from
+        self._to = _to
         self.br = BibleProduceData(bpath)
+        self.record = None
         super().__init__(parent=parent, title=title)
 
     def body(self, master):
         self.title("Bible Reader")
-        self.geometry("700x470")
         self.frame_main = Frame(master)
         self.frame_main.pack(fill="both", expand=True)
 
@@ -75,7 +88,7 @@ class BibleReader(simpledialog.Dialog):
         self.combobox4.bind("<<ComboboxSelected>>", self.display_verses)
 
         self.frame_text = Frame(self.frame_main)
-        self.frame_text.pack(pady=3, side="left", fill="both", expand=True)
+        self.frame_text.pack(pady=(3, 0), side="left", fill="both", expand=True)
         self.scroll = ttk.Scrollbar(self.frame_text, orient="vertical")
         self.text = Text(
             self.frame_text,
@@ -89,7 +102,32 @@ class BibleReader(simpledialog.Dialog):
         self.text.configure(state="disabled")
 
         self._read_only()
-        self.book_selected()
+        if self._checker():
+            self.start_record()
+        else:
+            self.book_selected()
+
+    def _checker(self):
+        r = self.book, self.chapter, self._from, self._to
+        if all(r):
+            return True
+        return False
+
+    def start_record(self):
+        """Saved record  will be display at start"""
+        self.combobox1.current(self.combobox1["value"].index(self.book))
+        chp = self.br.chapters(self.combobox1.get())
+        self.combobox2["value"] = [i + 1 for i in range(chp)]
+        self.combobox2.current(self.combobox2["value"].index(self.chapter))
+        _, verses = self.br.verses(self.combobox1.get(), int(self.combobox2.get()))
+        self.combobox3["value"] = [i + 1 for i in range(verses)]
+        self.combobox3.current(self.combobox3["value"].index(self._from))
+        self.combobox4["value"] = [
+            i + 1 for i in range(int(self.combobox3.get()) - 1, verses)
+        ]
+        self.combobox4.current(self.combobox4["value"].index(self._to))
+        del chp, verses
+        self.display_verses()
 
     def book_selected(self, event=None):
         """Event for bible Book selected"""
@@ -166,6 +204,16 @@ class BibleReader(simpledialog.Dialog):
         self._text_state()
         del txt
 
+    def _record(self) -> dict[str, str]:
+        """Record state of display"""
+
+        return {
+            "book": self.combobox1.get(),
+            "chapter": self.combobox2.get(),
+            "from": self.combobox3.get(),
+            "to": self.combobox4.get(),
+        }
+
     def apply(self) -> None:
         header = (
             f"{self.combobox1.get()} "
@@ -177,7 +225,7 @@ class BibleReader(simpledialog.Dialog):
             + "".join(
                 [tx[tx.find(" ") :] for tx in self.text.get("1.0", "end").split("\n\n")]
             )[1:-1]
-        )
+        ), self._record()
         del header
 
     def buttonbox(self):
@@ -203,6 +251,7 @@ class BibleReader(simpledialog.Dialog):
             self.cancel()
 
     def cancel(self, event=None):
+        self.record = self._record()
         if self.parent is not None:
             self.parent.focus_set()
         self.destroy()

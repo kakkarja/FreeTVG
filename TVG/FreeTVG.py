@@ -3398,28 +3398,64 @@ class TreeViewGui:
                     self.view()
                     self.infobar()
 
+    def _save_bible_record(self, record: dict = None, wr: bool = True):
+        f = self._bible_path_json()
+        if wr:
+            if record:
+                with open(f, "w") as wr:
+                    json.dump(record, wr)
+        else:
+            with open(f) as rd:
+                return dict(json.load(rd))
+
+    def _bible_path_json(self):
+        bpj= f"bible_{Path(BIBLE_PATH).name.partition(".")[0]}"
+        return f"{self.glop.parent.joinpath(bpj)}.json"
+
     def bible_reading(self, event=None):
         """Bible Reading and journal"""
 
-        if self.lock is False:
-            TreeViewGui.FREEZE = True
-            self.lock = True
-            d = BibleReader(self.root, bpath=BIBLE_PATH)
-            self.lock = False
-            if d.result:
-                if self.info.get() != "Editor Mode":
+        try:
+            if self.lock is False:
+                TreeViewGui.FREEZE = True
+                self.lock = True
+                rec = None
+                if Path(self._bible_path_json()).exists():
+                    rec = self._save_bible_record(wr=False)
+                d = BibleReader(
+                    self.root,
+                    book=rec["book"] if rec else None,
+                    chapter=rec["chapter"] if rec else None,
+                    _from=rec["from"] if rec else None,
+                    _to=rec["to"] if rec else None,
+                    bpath=BIBLE_PATH,
+                )
+                self.lock = False
+                del rec
+                if d.result:
+                    if self.info.get() != "Editor Mode":
+                        TreeViewGui.FREEZE = False
+                        self.editor()
+                    j = d.result[0].partition("\n")
+                    journal = (
+                        f"p:^^{j[0]}^^\nc1:Ayat:\nc2:***{j[2]}***\nc1:Journal:\nc2:"
+                    )
+                    self.text.insert(END, journal)
+                    self._save_bible_record(record=d.result[1])
+
+                    del j, d.result
+                else:
+                    self._save_bible_record(record=d.record)
                     TreeViewGui.FREEZE = False
-                    self.editor()
-                j = d.result.partition("\n")
-                journal = f"p:^^{j[0]}^^\nc1:Ayat:\nc2:***{j[2]}***\nc1:Journal:\nc2:"
-                self.text.insert(END, journal)
-                del j, d.result
-            else:
-                TreeViewGui.FREEZE = False
-            del d
+                    del d.record
+                del d
+        except Exception as e:
+            self.lock = False
+            TreeViewGui.FREEZE = False
+            messagebox.showinfo("Bible Reader", f"Error: {e}")
 
     def configd(self, event=None):
-        """Deleting configuration file to default"""
+        """Configuration setting"""
 
         if self.lock is False:
             TreeViewGui.FREEZE = True

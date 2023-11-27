@@ -378,8 +378,12 @@ main()
     * **Select the Bible you have downloaded**
     ![Configure](Pics/Config.png)
     * **WARNING!**
-      * **Not all characters will appear properly**
-      * **Try change the font styles of TVG (refer to help > fn/control + F1)**
+      * **Not all bibles will result properly**
+        * **Try choosing right fonts before opening a bible so that it will work well**
+        * **Change the font styles of TVG (refer to help > fn/control + F1)**
+      * **In case of error, please raise an issue 🙏**
+        * **Will alert what kind of error**
+        * **Can check at folder "FreeTVG_TRACE" for error log ([for development purpose](#development-purpose))**
 
   ![Bible Reader](Pics/Bible_Reader.png)
 
@@ -431,6 +435,15 @@ main()
   * **Version 3.5.0**
     * **Add new fuction**
       * **Bible Reading [⇪](#bible-reader-and-journal)**
+  * **Version 3.5.1**
+    * **Bible Reading**
+      * **When open again will open to last open book 🙏**
+  * **Version 3.5.2**
+    * **Catch error in Bible Reading for issuing purpose**
+      * **TVG will work fine now**
+  * **Version 3.5.3**
+    * **Now every bible has it's own last open saved file**
+      * **No conflict of opening a bible that have different language transaltion**
 
 [⬆️](#freetvg-tree-view-gui)
 
