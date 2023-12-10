@@ -380,6 +380,7 @@ main()
     * **WARNING!**
       * **Not all bibles will result properly**
         * **Try choosing right fonts before opening a bible so that it will work well**
+        * **For windows 10 and 11 users, you can set the global setting of unicode to [utf-8 (edited3)](https://superuser.com/questions/1715715/can-i-enable-unicode-utf-8-worldwide-support-in-windows-11-but-set-another-enco)**
         * **Change the font styles of TVG (refer to help > fn/control + F1)**
       * **In case of error, please raise an issue 🙏**
         * **Will alert what kind of error**
