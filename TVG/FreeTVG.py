@@ -2608,38 +2608,45 @@ class TreeViewGui:
             self.frb3.pack_forget()
 
     def _compile_editor(self, rows: int):
-        self.store = tuple(i for i in self.text.get("0.0", END)[:-1].split("\n") if i)
-        ckc = {f"c{i}": f"child{i}" for i in range(1, 51)}
-        compiled = {}
-        et = rows
-        for i in self.store:
-            et += 1
-            if "s:" == i.lower()[:2]:
-                compiled[et] = ("space", "\n")
-            elif "p:" == i.lower()[:2]:
-                if i.partition(":")[2].isspace() or not bool(i.partition(":")[2]):
-                    raise Exception("Parent cannot be empty!")
-                else:
-                    compiled[et] = (
-                        "parent",
-                        i[2:].removeprefix(" "),
-                    )
-            elif i.lower().partition(":")[0] in list(ckc):
-                if i.partition(":")[2].isspace():
-                    compiled[et] = (
-                        ckc[i.partition(":")[0].lower()],
-                        i.partition(":")[2],
-                    )
-                elif bool(i.partition(":")[2]):
-                    compiled[et] = (
-                        ckc[i.partition(":")[0].lower()],
-                        i.partition(":")[2].removeprefix(" "),
-                    )
-        if len(self.store) != len(compiled):
-            raise Exception("Not Editable!")
-        self.store = None
-        del ckc
-        return compiled, et
+        try:
+            self.store = tuple(i for i in self.text.get("0.0", END)[:-1].split("\n") if i)
+            ckc = {f"c{i}": f"child{i}" for i in range(1, 51)}
+            compiled = {}
+            et = rows
+            for i in self.store:
+                et += 1
+                if "s:" == i.lower()[:2]:
+                    compiled[et] = ("space", "\n")
+                elif "p:" == i.lower()[:2]:
+                    if i.partition(":")[2].isspace() or not bool(i.partition(":")[2]):
+                        raise Exception("Parent cannot be empty!")
+                    else:
+                        compiled[et] = (
+                            "parent",
+                            i[2:].strip(),
+                        )
+                elif i.lower().partition(":")[0] in list(ckc):
+                    if i.partition(":")[2] == " ":
+                        compiled[et] = (
+                            ckc[i.partition(":")[0].lower()],
+                            i.partition(":")[2],
+                        )
+                    elif bool(i.partition(":")[2]):
+                        compiled[et] = (
+                            ckc[i.partition(":")[0].lower()],
+                            i.partition(":")[2].strip(),
+                        )
+            if len(self.store) != len(compiled):
+                raise Exception("Not Editable!")
+            self.store = None
+            return compiled, et
+        except Exception as e:
+            del e
+            return
+        finally:
+            if self.store:
+                self.store = None
+            del ckc, compiled, et
 
     def _check_Totals(self):
         try:
@@ -2701,35 +2708,43 @@ class TreeViewGui:
                             p2 = self._compile_editor(stor[0])
                             p1 = None
                             p3 = None
-                            with tv(self.filename) as tvg:
-                                p1 = islice(tvg.insighttree(), 0, stor[0])
-                                if stor[1] <= tvg.getdatanum() - 1:
-                                    p3 = islice(
-                                        tvg.insighttree(),
-                                        stor[1],
-                                        tvg.getdatanum(),
-                                    )
-                                if p3:
-                                    p3 = tuple(v for v in dict(p3).values())
-                                    p3 = {p2[1] + j + 1: p3[j] for j in range(len(p3))}
-                                    combi = iter((dict(p1) | p2[0] | p3).values())
-                                else:
-                                    combi = iter((dict(p1) | p2[0]).values())
-                                tvg.fileread(combi)
-                            fts = stor[0]
-                            del tvg, p1, p2, combi, p3
+                            if p2:
+                                with tv(self.filename) as tvg:
+                                    p1 = islice(tvg.insighttree(), 0, stor[0])
+                                    if stor[1] <= tvg.getdatanum() - 1:
+                                        p3 = islice(
+                                            tvg.insighttree(),
+                                            stor[1],
+                                            tvg.getdatanum(),
+                                        )
+                                    if p3:
+                                        p3 = tuple(v for v in dict(p3).values())
+                                        p3 = {p2[1] + j + 1: p3[j] for j in range(len(p3))}
+                                        combi = iter((dict(p1) | p2[0] | p3).values())
+                                    else:
+                                        combi = iter((dict(p1) | p2[0]).values())
+                                    tvg.fileread(combi)
+                                fts = stor[0]
+                                del tvg, p1, p2, combi, p3
+                            else:
+                                del p1, p2, p3, stor, fts
+                                raise Exception("Not Editable!")
                         else:
                             p2 = self._compile_editor(self.listb.size())
-                            with tv(self.filename) as tvg:
-                                if not self.nonetype():
-                                    tvg.fileread(iter(p2[0].values()))
-                                else:
-                                    combi = iter(
-                                        (dict(tvg.insighttree()) | p2[0]).values()
-                                    )
-                                    tvg.fileread(combi)
-                                    del combi
-                            del tvg, p2
+                            if p2:
+                                with tv(self.filename) as tvg:
+                                    if not self.nonetype():
+                                        tvg.fileread(iter(p2[0].values()))
+                                    else:
+                                        combi = iter(
+                                            (dict(tvg.insighttree()) | p2[0]).values()
+                                        )
+                                        tvg.fileread(combi)
+                                        del combi
+                                del tvg, p2
+                            else:
+                                del p2, stor, fts
+                                raise Exception("Not Editable!")
                         self.text.config(state=DISABLED)
                         self.disab(dis=False)
                         self.spaces()
