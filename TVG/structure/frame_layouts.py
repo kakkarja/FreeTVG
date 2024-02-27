@@ -34,40 +34,44 @@ __all__ = [""]
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class Lay1(ttk.Frame):
-    def __init__(self, root, w):
-        self.w = w
+    def __init__(self, root):
         super().__init__()
+        frw = int(round(root.winfo_screenwidth() * 0.9224011713030746))
+        lbw = int(round(frw * 0.09285714285714286))
+        scw = int(round(frw * 0.011904761904761904))
+        self.config(height=40)
         self.pack(fill="x")
+        self.pack_propagate(0)
         self.entry = ttk.Entry(
             self,
             validate="none",
             validatecommand=self.focus,
             font="verdana 12",
-            width=self.w
         )
         self.entry.pack(
-            side=LEFT, ipady=5, pady=(2, 2), padx=(2, 2), fill="both"
+            side=LEFT, ipady=5, pady=(0, 2), padx=(2, 2), fill="x", expand=1
         )
         self.entry.config(state="disable")
 
         self.rb = StringVar()
-        self.frbt = ttk.Frame(self)
-        self.frbt.pack(padx=12, pady=2)
+        self.frbt = ttk.Frame(self, width=(scw-1) + lbw + scw)
+        self.frbt.pack(fill="both", expand=1)
+        self.frbt.pack_propagate(0)
         self.frrb = ttk.Frame(self.frbt)
-        self.frrb.pack(side=BOTTOM)
+        self.frrb.pack(side=BOTTOM, fill="both", expand=1)
+        self.frrb.pack_propagate(0)
         self.radio1 = ttk.Radiobutton(
             self.frbt, text="parent", value="parent", var=self.rb, command=self.radiobut
         )
-        self.radio1.pack(side=LEFT, anchor="w")
+        self.radio1.pack(padx=(20,0),side=LEFT, anchor="w")
         self.radio2 = ttk.Radiobutton(
             self.frbt, text="child", value="child", var=self.rb, command=self.radiobut
         )
-        self.radio2.pack(side=RIGHT, anchor="w")
-
+        self.radio2.pack(padx=(0,22), side=RIGHT, anchor="w")
         self.frcc = ttk.Frame(self.frrb)
-        self.frcc.pack(side=TOP)
+        self.frcc.pack(side=TOP, padx=22, fill="both", expand=1)
         self.label3 = ttk.Label(self.frcc, text="Child")
-        self.label3.pack(side=LEFT, fill="x")
+        self.label3.pack(side=LEFT)
         self.entry3 = ttk.Combobox(
             self.frcc,
             width=8,
@@ -75,8 +79,8 @@ class Lay1(ttk.Frame):
             state="readonly",
             justify="center",
         )
-        self.entry3.pack(side=LEFT, padx=1, pady=(0, 1), fill="x")
-
+        self.entry3.pack(side=LEFT, padx=2, pady=2)
+        
     def focus(self, event=None):
         """Validation for Entry"""
 
