@@ -338,7 +338,7 @@ class TreeViewGui:
 
         # 1st frame.
         # Frame for labels, Entry, radio-buttons and combobox.
-        self.fframe = Lay1(self.root)
+        self.fframe = Lay1(self.root, w=int(self.text.winfo_screendepth()*2.15625))
         self.bt["entry"] = self.fframe.entry
         self.bt["radio1"] = self.fframe.radio1
         self.bt["radio2"] = self.fframe.radio2

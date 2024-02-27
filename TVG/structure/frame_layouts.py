@@ -34,7 +34,8 @@ __all__ = [""]
 
 @excpcls(m=2, filenm=DEFAULTFILE)
 class Lay1(ttk.Frame):
-    def __init__(self, root):
+    def __init__(self, root, w):
+        self.w = w
         super().__init__()
         self.pack(fill="x")
         self.entry = ttk.Entry(
@@ -42,15 +43,16 @@ class Lay1(ttk.Frame):
             validate="none",
             validatecommand=self.focus,
             font="verdana 12",
+            width=self.w
         )
         self.entry.pack(
-            side=LEFT, ipady=5, pady=(2, 2), padx=(2, 2), fill="both", expand=1
+            side=LEFT, ipady=5, pady=(2, 2), padx=(2, 2), fill="both"
         )
         self.entry.config(state="disable")
 
         self.rb = StringVar()
         self.frbt = ttk.Frame(self)
-        self.frbt.pack(padx=(12, 12), pady=2)
+        self.frbt.pack(padx=12, pady=2)
         self.frrb = ttk.Frame(self.frbt)
         self.frrb.pack(side=BOTTOM)
         self.radio1 = ttk.Radiobutton(
