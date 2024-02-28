@@ -23,6 +23,7 @@ from tkinter import (
 )
 
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excpcls
+from sys import platform
 
 DEFAULTDIR = os.path.join(DIRPATH, "FreeTVG_TRACE")
 if not os.path.exists(DEFAULTDIR):
@@ -39,7 +40,7 @@ class Lay1(ttk.Frame):
         frw = int(round(root.winfo_screenwidth() * 0.9224011713030746))
         lbw = int(round(frw * 0.09285714285714286))
         scw = int(round(frw * 0.011904761904761904))
-        self.config(height=40)
+        self.config(height=41 if platform.startswith("win") else 46)
         self.pack(fill="x")
         self.pack_propagate(0)
         self.entry = ttk.Entry(
@@ -49,7 +50,7 @@ class Lay1(ttk.Frame):
             font="verdana 12",
         )
         self.entry.pack(
-            side=LEFT, ipady=5, pady=(0, 2), padx=(2, 2), fill="x", expand=1
+            side=LEFT, ipady=5, pady=(0, 2), padx=(2, 2), fill="both", expand=1
         )
         self.entry.config(state="disable")
 
