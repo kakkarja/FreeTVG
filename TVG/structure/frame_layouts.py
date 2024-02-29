@@ -400,7 +400,7 @@ class Lay7(ttk.Frame):
                         toch = len(self.mdw)
                         part = contain[pos1[0] : pos1[1]]
                         ft = str(self.text.cget("font"))
-                        font_size = "7" if platform.startswith("win") else "9"
+                        font_size = "9"
                         while touch < toch:
                             match self.mdw[touch]:
                                 case md if md in part and md == "*":
@@ -455,14 +455,9 @@ class Lay7(ttk.Frame):
                                 case md if md in part and md == "==":
                                     count = part.count(md)
                                     if count > 1 and count % 2 == 0:
-                                        color = (
-                                            "yellow"
-                                            if str(self.text.cget("foreground"))
-                                            != "white"
-                                            else "grey"
-                                        )
+                                        color = "yellow"
                                         self.text.tag_configure(
-                                            f"{md}{n+1}{pos1[0]}", background=color
+                                            f"{md}{n+1}{pos1[0]}", background=color, foreground="black"
                                         )
                                         part = part.replace(md, "")
                                         mdset.append(f"{md}{n+1}{pos1[0]}")
@@ -578,7 +573,7 @@ class Lay8(ttk.Frame):
             self.frlab,
             anchor=CENTER,
             textvariable=self.info,
-            font="consolas 10 bold",
+            font="consolas 9 bold" if platform.startswith("win") else "consolas 10 bold",
             justify=CENTER,
         )
         self.labcor.pack(side=LEFT, fill="x", expand=1)
