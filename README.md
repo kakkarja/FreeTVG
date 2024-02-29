@@ -171,14 +171,23 @@ main()
 
 * ### **Direct Print PDF**
 
-  * **Only for MacOS X**
+  * **For MacOS X and Windows**
     * **Dependency using <em><u>PdfKit</u></em>**
       * **[JazzCore](https://github.com/JazzCore/python-pdfkit)**
     * **IMPORTANT!**
-      * **Need to install wkhtmltopdf using homebrew**
+      * **Need to install wkhtmltopdf using homebrew for MacOS Users**
 
         ```Terminal
         brew install homebrew/cask/wkhtmltopdf
+        ```
+
+      * **For Windows users**
+        * **Need to download the installer on [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html)**
+        * **When installing, choose default path:**
+
+        ```Terminal
+        # Program Files folder in Windows
+        C:\Program Files\wkhtmltopdf
         ```
 
       * **If wkhtmltopdf not installed, Printing will directed to browser instead**
@@ -445,12 +454,20 @@ main()
   * **Version 3.5.3**
     * **Now every bible has it's own last open saved file**
       * **No conflict of opening a bible that have different language transaltion**
+  * **Version 3.5.4**
+    * **Little bugs fixed in Editor**
+    * **The layout for writing entry appearance has been fixed for Windows and MacOS as well**
+  * **Version 3.5.5**
+    * **Direct PDF creation for Windows**
+      * **[Direct Print PDF](#direct-print-pdf)**
 
 [⬆️](#freetvg-tree-view-gui)
 
 ## TVG
 
 ![TVG](Pics/TVG.png)
+
+![TVG](Pics/TVG2.png)
 
 [⬆️](#freetvg-tree-view-gui)
 

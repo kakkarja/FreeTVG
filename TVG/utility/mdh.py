@@ -62,14 +62,16 @@ def _pattern(wrd: str, pat: str):
 
 
 def _checking_wkhtmltopdf():
+    cmd = "Test-Path -Path 'c:\\program files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'"
+    test_check = ["powershell", "-command", cmd] if platform.startswith("win") else ["which", "wkhtmltopdf"]
     result = subprocess.run(
-        ["which", "wkhtmltopdf"],
+        test_check,
         stderr=subprocess.PIPE,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True,
     )
-    if "wkhtmltopdf" in result.stdout:
+    if "wkhtmltopdf" in result.stdout or result.stdout.strip("\n") == "True":
         return True
     else:
         return False
@@ -79,8 +81,16 @@ def _save_pdf(scr: str, pdfpath: str):
     options = {
         "print-media-type": True,
     }
-    pdfkit.from_file(scr, pdfpath, options=options)
-    del options
+    config = (
+        pdfkit.configuration(wkhtmltopdf='c:\\program files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+        if platform.startswith("win") 
+        else None
+    )
+    if config:
+        pdfkit.from_file(scr, pdfpath, options=options, configuration=config)
+    else:
+        pdfkit.from_file(scr, pdfpath, options=options)
+    del options, config
 
 
 def convhtml(
@@ -222,15 +232,19 @@ kbd { color: black !important; }
             whtm.write(cssstyle)
         pro = None
         if platform.startswith("win"):
-            pro = [
-                "powershell.exe",
-                "start",
-                "msedge",
-                f"'\"{Path(f'{filename}.html').absolute()}\"'",
-            ]
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            subprocess.run(pro, startupinfo=startupinfo)
+            if preview or not _checking_wkhtmltopdf():
+                pro = [
+                    "powershell.exe",
+                    "start",
+                    "msedge",
+                    f"'\"{Path(f'{filename}.html').absolute()}\"'",
+                ]
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.run(pro, startupinfo=startupinfo)
+            else:
+                _save_pdf(f"{filename}.html", pdfpath=pdfpath)
+                subprocess.run(["powershell.exe", "start", "msedge", f"'\"{Path(pdfpath).absolute()}\"'"])
         else:
             if preview or not _checking_wkhtmltopdf():
                 pro = [

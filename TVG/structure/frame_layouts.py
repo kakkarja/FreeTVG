@@ -40,7 +40,7 @@ class Lay1(ttk.Frame):
         frw = int(round(root.winfo_screenwidth() * 0.9224011713030746))
         lbw = int(round(frw * 0.09285714285714286))
         scw = int(round(frw * 0.011904761904761904))
-        self.config(height=41 if platform.startswith("win") else 46)
+        self.config(height=44 if platform.startswith("win") else 46)
         self.pack(fill="x")
         self.pack_propagate(0)
         self.entry = ttk.Entry(
@@ -400,6 +400,7 @@ class Lay7(ttk.Frame):
                         toch = len(self.mdw)
                         part = contain[pos1[0] : pos1[1]]
                         ft = str(self.text.cget("font"))
+                        font_size = "7" if platform.startswith("win") else "9"
                         while touch < toch:
                             match self.mdw[touch]:
                                 case md if md in part and md == "*":
@@ -473,10 +474,10 @@ class Lay7(ttk.Frame):
                                             self.text.cget("font").rpartition("} ")
                                         )
                                         if fts[1]:
-                                            fts[2] = "9" + fts[2][fts[2].find(" ") :]
+                                            fts[2] = font_size + fts[2][fts[2].find(" ") :]
                                         else:
                                             fts = fts[2].split(" ")
-                                            fts[1] = "9"
+                                            fts[1] = font_size
                                         fts = " ".join(fts)
                                         self.text.tag_configure(
                                             f"{md}{n+1}{pos1[0]}", offset=6, font=fts
@@ -491,10 +492,10 @@ class Lay7(ttk.Frame):
                                             self.text.cget("font").rpartition("} ")
                                         )
                                         if fts[1]:
-                                            fts[2] = "9" + fts[2][fts[2].find(" ") :]
+                                            fts[2] = font_size + fts[2][fts[2].find(" ") :]
                                         else:
                                             fts = fts[2].split(" ")
-                                            fts[1] = "9"
+                                            fts[1] = font_size
                                         fts = " ".join(fts)
                                         self.text.tag_configure(
                                             f"{md}{n+1}{pos1[0]}", offset=-2, font=fts
@@ -550,6 +551,7 @@ class Lay7(ttk.Frame):
             em,
             bullet_width,
             text_font,
+            font_size,
         )
 
 
