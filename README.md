@@ -460,6 +460,9 @@ main()
   * **Version 3.5.5**
     * **Direct PDF creation for Windows**
       * **[Direct Print PDF](#direct-print-pdf)**
+  * **Version 3.5.6**
+    * **Markdown marking highlight stay yellow and font color turn to black**
+    * **Infor-Bar font smaller in Windows**
 
 [⬆️](#freetvg-tree-view-gui)
 
