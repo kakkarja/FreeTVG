@@ -4,6 +4,7 @@
 
 from tkinter import ttk, simpledialog, Frame, Label, Text
 from .bible_creator import BibleProduceData, DEFAULT_PATH
+from sys import platform
 
 
 class BibleReader(simpledialog.Dialog):
@@ -92,7 +93,7 @@ class BibleReader(simpledialog.Dialog):
         self.scroll = ttk.Scrollbar(self.frame_text, orient="vertical")
         self.text = Text(
             self.frame_text,
-            font="verdana 12 bold",
+            font="verdana 10 bold" if platform.startswith("win") else "verdana 12 bold",
             wrap="word",
             yscrollcommand=self.scroll.set,
         )

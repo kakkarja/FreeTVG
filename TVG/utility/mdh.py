@@ -79,6 +79,7 @@ def _checking_wkhtmltopdf():
 
 def _save_pdf(scr: str, pdfpath: str):
     options = {
+        "page-size": "Letter",
         "print-media-type": True,
     }
     config = (
@@ -232,6 +233,8 @@ kbd { color: black !important; }
             whtm.write(cssstyle)
         pro = None
         if platform.startswith("win"):
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             if preview or not _checking_wkhtmltopdf():
                 pro = [
                     "powershell.exe",
@@ -239,12 +242,13 @@ kbd { color: black !important; }
                     "msedge",
                     f"'\"{Path(f'{filename}.html').absolute()}\"'",
                 ]
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 subprocess.run(pro, startupinfo=startupinfo)
             else:
                 _save_pdf(f"{filename}.html", pdfpath=pdfpath)
-                subprocess.run(["powershell.exe", "start", "msedge", f"'\"{Path(pdfpath).absolute()}\"'"])
+                subprocess.run(
+                    ["powershell.exe", "start", "msedge", f"'\"{Path(pdfpath).absolute()}\"'"],
+                    startupinfo=startupinfo
+                )
         else:
             if preview or not _checking_wkhtmltopdf():
                 pro = [

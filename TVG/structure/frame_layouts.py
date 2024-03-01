@@ -260,7 +260,7 @@ class Lay7(ttk.Frame):
         frw = int(round(root.winfo_screenwidth() * 0.9224011713030746))
         lbw = int(round(frw * 0.09285714285714286))
         scw = int(round(frw * 0.011904761904761904))
-        ftt = "verdana 11"
+        ftt = "verdana 9" if platform.startswith("win") else "verdana 11"
         self.pack(anchor="w", side=TOP, fill="both", expand=1)
         self.txframe = ttk.Frame(self)
         self.txframe.pack(anchor="w", side=LEFT, fill="both", expand=1)

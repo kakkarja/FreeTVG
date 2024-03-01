@@ -3430,7 +3430,7 @@ class TreeViewGui:
 
         try:
             if self.lock is False:
-                TreeViewGui.FREEZE = True
+                self.FREEZE = True
                 self.lock = True
                 rec = None
                 if Path(self._bible_path_json()).exists():
@@ -3447,7 +3447,7 @@ class TreeViewGui:
                 del rec
                 if d.result:
                     if self.info.get() != "Editor Mode":
-                        TreeViewGui.FREEZE = False
+                        self.FREEZE = False
                         self.editor()
                     j = d.result[0].partition("\n")
                     journal = (
@@ -3459,19 +3459,19 @@ class TreeViewGui:
                     del j, d.result
                 else:
                     self._save_bible_record(record=d.record)
-                    TreeViewGui.FREEZE = False
+                    self.FREEZE = False
                     del d.record
                 del d
         except Exception as e:
             self.lock = False
-            TreeViewGui.FREEZE = False
+            self.FREEZE = False
             messagebox.showinfo("Bible Reader", f"Error: {e}")
 
     def configd(self, event=None):
         """Configuration setting"""
 
         if self.lock is False:
-            TreeViewGui.FREEZE = True
+            self.FREEZE = True
             self.lock = True
 
             if self.glop.parent.joinpath("TVG_config.toml").exists():
@@ -3587,7 +3587,7 @@ class TreeViewGui:
                             "TreeViewGui", "Configuring aborted!", parent=self.root
                         )
 
-            TreeViewGui.FREEZE = False
+            self.FREEZE = False
 
 
 @excp(m=2, filenm=DEFAULTFILE)
