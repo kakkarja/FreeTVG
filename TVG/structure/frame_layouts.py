@@ -379,6 +379,7 @@ class Lay7(ttk.Frame):
         em = None
         bullet_width = None
         text_font = None
+        font_size = "9"
         try:
             text_font = font.Font(self, font=ft, name=ft, exists=True)
         except:
@@ -400,7 +401,6 @@ class Lay7(ttk.Frame):
                         toch = len(self.mdw)
                         part = contain[pos1[0] : pos1[1]]
                         ft = str(self.text.cget("font"))
-                        font_size = "9"
                         while touch < toch:
                             match self.mdw[touch]:
                                 case md if md in part and md == "*":

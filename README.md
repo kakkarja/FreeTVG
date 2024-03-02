@@ -463,6 +463,13 @@ main()
   * **Version 3.5.6**
     * **Markdown marking highlight stay yellow and font color turn to black**
     * **Infor-Bar font smaller in Windows**
+  * **Version 3.5.8**
+    * **Fix bugs for previous version**
+    * **Some tweak on appearance in Windows**
+      * **Font look smaller on Buttons**
+      * **Font look smaller on Bible**
+      * **Font look smaller on info-bar**
+      * **others..**
 
 [⬆️](#freetvg-tree-view-gui)
 
