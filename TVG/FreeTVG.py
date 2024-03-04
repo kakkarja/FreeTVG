@@ -586,7 +586,6 @@ class TreeViewGui:
         else:
             for fr in frm:
                 fr.pack(side=TOP, fill="x")
-            self.stl.configure("TButton", font="verdana 8 bold")
             os.remove(pth)
         self.tframe.pack(anchor="w", side=TOP, fill="both", expand=1)
         self.tframe.update()

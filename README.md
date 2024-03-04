@@ -470,6 +470,8 @@ main()
       * **Font look smaller on Bible**
       * **Font look smaller on info-bar**
       * **others..**
+  * **Version 3.5.9**
+    * **Bug fix - Font look smaller on Buttons**
 
 [⬆️](#freetvg-tree-view-gui)
 
