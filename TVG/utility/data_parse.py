@@ -96,8 +96,11 @@ class ParseData(TreeView):
             try:
                 update = []
                 s = 0
+                len_of_data = self.getdatanum() - 1
                 for k, v in self.getkv():
                     if k < self.pos:
+                        update.append(k)
+                    elif k == self.pos and (self.pos + self.size) == len_of_data:
                         update.append(k)
                     else:
                         k += self.size
@@ -117,7 +120,7 @@ class ParseData(TreeView):
                     case _:
                         return
             finally:
-                del update, s
+                del update, s, len_of_data
 
     def update_single_data(self, row: int) -> tuple[int] | None:
         """Update a single data to preserve"""

@@ -2993,7 +2993,12 @@ class TreeViewGui:
                     parent=self.root,
                 )
                 if ask:
-                    composemail(sub=f"{self.filename}", body=body)
+                    if not self.plat.startswith("win"):
+                        composemail(sub=f"{self.filename}", body=body)
+                    else:
+                        messagebox.showinfo(
+                            "TreeViewGui", "In development for Windows!", parent=self.root
+                        )
                 else:
                     self.root.clipboard_clear()
                     self.root.clipboard_append(
