@@ -472,6 +472,10 @@ main()
       * **others..**
   * **Version 3.5.9**
     * **Bug fix - Font look smaller on Buttons**
+  * **Version 3.5.10**
+    * **Bug fix for CPP function that copying to last row**
+    * **Sending TVG note with default mail is in development (for Windows only!)**
+      * **Edge browser no longer able to send email with mailto, due to max capacity set in url**
 
 [⬆️](#freetvg-tree-view-gui)
 
