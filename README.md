@@ -476,6 +476,11 @@ main()
     * **Bug fix for CPP function that copying to last row**
     * **Sending TVG note with default mail is in development (for Windows only!)**
       * **Edge browser no longer able to send email with mailto, due to max capacity set in url**
+  * **Version 3.5.11**
+    * **Nothing change on compose mail in Windows**
+      * **User need to manually change the App Default for Mail**
+        * **Choose => MAILTO open on Mail (instead of browser)**
+    * **Reference: [CHANGING DEFAULT EMAIL APP](https://helpdesk.telebroad.com/support/solutions/articles/4000185298-changing-the-default-email-app-windows-macos-chrome-firefox)**
 
 [⬆️](#freetvg-tree-view-gui)
 

@@ -3,7 +3,6 @@
 
 
 import ast
-import importlib
 import json
 import os
 import re
@@ -2993,12 +2992,7 @@ class TreeViewGui:
                     parent=self.root,
                 )
                 if ask:
-                    if not self.plat.startswith("win"):
-                        composemail(sub=f"{self.filename}", body=body)
-                    else:
-                        messagebox.showinfo(
-                            "TreeViewGui", "In development for Windows!", parent=self.root
-                        )
+                    composemail(sub=f"{self.filename}", body=body)
                 else:
                     self.root.clipboard_clear()
                     self.root.clipboard_append(
