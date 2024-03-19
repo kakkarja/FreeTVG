@@ -5,6 +5,7 @@
 import os
 import re
 from pathlib import Path
+from sys import platform
 from tkinter import (
     BOTTOM,
     CENTER,
@@ -23,7 +24,6 @@ from tkinter import (
 )
 
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excpcls
-from sys import platform
 
 DEFAULTDIR = os.path.join(DIRPATH, "FreeTVG_TRACE")
 if not os.path.exists(DEFAULTDIR):
@@ -55,7 +55,7 @@ class Lay1(ttk.Frame):
         self.entry.config(state="disable")
 
         self.rb = StringVar()
-        self.frbt = ttk.Frame(self, width=(scw-1) + lbw + scw)
+        self.frbt = ttk.Frame(self, width=(scw - 1) + lbw + scw)
         self.frbt.pack(fill="both", expand=1)
         self.frbt.pack_propagate(0)
         self.frrb = ttk.Frame(self.frbt)
@@ -64,11 +64,11 @@ class Lay1(ttk.Frame):
         self.radio1 = ttk.Radiobutton(
             self.frbt, text="parent", value="parent", var=self.rb, command=self.radiobut
         )
-        self.radio1.pack(padx=(20,0),side=LEFT, anchor="w")
+        self.radio1.pack(padx=(20, 0), side=LEFT, anchor="w")
         self.radio2 = ttk.Radiobutton(
             self.frbt, text="child", value="child", var=self.rb, command=self.radiobut
         )
-        self.radio2.pack(padx=(0,22), side=RIGHT, anchor="w")
+        self.radio2.pack(padx=(0, 22), side=RIGHT, anchor="w")
         self.frcc = ttk.Frame(self.frrb)
         self.frcc.pack(side=TOP, padx=22, fill="both", expand=1)
         self.label3 = ttk.Label(self.frcc, text="Child")
@@ -81,7 +81,7 @@ class Lay1(ttk.Frame):
             justify="center",
         )
         self.entry3.pack(side=LEFT, padx=2, pady=2)
-        
+
     def focus(self, event=None):
         """Validation for Entry"""
 
@@ -457,7 +457,9 @@ class Lay7(ttk.Frame):
                                     if count > 1 and count % 2 == 0:
                                         color = "yellow"
                                         self.text.tag_configure(
-                                            f"{md}{n+1}{pos1[0]}", background=color, foreground="black"
+                                            f"{md}{n+1}{pos1[0]}",
+                                            background=color,
+                                            foreground="black",
                                         )
                                         part = part.replace(md, "")
                                         mdset.append(f"{md}{n+1}{pos1[0]}")
@@ -469,7 +471,9 @@ class Lay7(ttk.Frame):
                                             self.text.cget("font").rpartition("} ")
                                         )
                                         if fts[1]:
-                                            fts[2] = font_size + fts[2][fts[2].find(" ") :]
+                                            fts[2] = (
+                                                font_size + fts[2][fts[2].find(" ") :]
+                                            )
                                         else:
                                             fts = fts[2].split(" ")
                                             fts[1] = font_size
@@ -487,7 +491,9 @@ class Lay7(ttk.Frame):
                                             self.text.cget("font").rpartition("} ")
                                         )
                                         if fts[1]:
-                                            fts[2] = font_size + fts[2][fts[2].find(" ") :]
+                                            fts[2] = (
+                                                font_size + fts[2][fts[2].find(" ") :]
+                                            )
                                         else:
                                             fts = fts[2].split(" ")
                                             fts[1] = font_size
@@ -573,7 +579,9 @@ class Lay8(ttk.Frame):
             self.frlab,
             anchor=CENTER,
             textvariable=self.info,
-            font="consolas 9 bold" if platform.startswith("win") else "consolas 10 bold",
+            font=(
+                "consolas 9 bold" if platform.startswith("win") else "consolas 10 bold"
+            ),
             justify=CENTER,
         )
         self.labcor.pack(side=LEFT, fill="x", expand=1)

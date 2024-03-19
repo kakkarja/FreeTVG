@@ -2,9 +2,10 @@
 # Copyright (c) 2023, KarjaKAK
 # All rights reserved.
 
-from tkinter import ttk, simpledialog, Frame, Label, Text
-from .bible_creator import BibleProduceData, DEFAULT_PATH
 from sys import platform
+from tkinter import Frame, Label, Text, simpledialog, ttk
+
+from .bible_creator import DEFAULT_PATH, BibleProduceData
 
 
 class BibleReader(simpledialog.Dialog):

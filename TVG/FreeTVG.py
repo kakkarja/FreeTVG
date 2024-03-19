@@ -23,6 +23,7 @@ from tkinter import (
     NONE,
     NORMAL,
     RIGHT,
+    SEL,
     SEL_FIRST,
     SEL_LAST,
     TOP,
@@ -42,25 +43,18 @@ from tkinter import (
     messagebox,
     simpledialog,
     ttk,
-    SEL,
 )
 
 import darkdetect
 import tomlkit
+from addon_tvg import Charts, EvalExp, SumAll
 from treeview import TreeView as tv
 
-from addon_tvg import Charts, EvalExp, SumAll
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
 
+from .bible_reader import DEFAULT_PATH, BibleReader
 from .structure import Lay1, Lay2, Lay3, Lay4, Lay5, Lay6, Lay7, Lay8, Scribe
-from .utility import (
-    ParseData,
-    composemail,
-    convhtml,
-    wrwords,
-    DatabaseTVG,
-)
-from .bible_reader import BibleReader, DEFAULT_PATH
+from .utility import DatabaseTVG, ParseData, composemail, convhtml, wrwords
 
 if platform.startswith("win"):
     from ctypes import byref, c_int, sizeof, windll
@@ -1744,7 +1738,7 @@ class TreeViewGui:
                         for r1, r2 in rd.values():
                             for _, v in islice(tvg.getdata(), r1, r2 + 1):
                                 gttx.append(v)
-                        return "".join(gttx[:-1])
+                        return "".join(gttx if gttx[-1] != "\n" else gttx[:-1])
                     else:
                         return "".join([d for _, d in tvg.getdata()])
         finally:
@@ -1884,6 +1878,7 @@ class TreeViewGui:
                 self.text.config(state="normal")
                 self.text.delete("1.0", END)
                 showt = tuple(f"{i}\n" for i in showt if i != 0)
+                showt = showt[:-1] if showt[-1] == "\n" else showt
                 self._prettyv(enumerate(showt))
                 self.listb.delete(0, END)
                 if showt:
@@ -1899,7 +1894,7 @@ class TreeViewGui:
                 for wow, wrow in rolrd:
                     for i in range(wow, wrow + 1):
                         ih.append(f"{showt[i]}\n")
-                ih = tuple(ih[:-1])
+                ih = tuple(ih if ih[-1] != "\n" else ih[:-1])
                 self.text.config(state="normal")
                 self.text.delete("1.0", END)
                 self._prettyv(enumerate(ih))

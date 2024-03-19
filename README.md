@@ -481,6 +481,11 @@ main()
       * **User need to manually change the App Default for Mail**
         * **Choose => MAILTO open on Mail (instead of browser)**
     * **Reference: [CHANGING DEFAULT EMAIL APP](https://helpdesk.telebroad.com/support/solutions/articles/4000185298-changing-the-default-email-app-windows-macos-chrome-firefox)**
+  * **Version 3.5.12**
+    * **Some bugs fixed on Hidden function**
+      * **Both hidden mode unreverse and reverse**
+        * **When try to hide a parent that the child is on last row, was not included -> FIXED**
+        * **When hide a parent, where the last child not the last row, the "space" was included -> FIXED**
 
 [⬆️](#freetvg-tree-view-gui)
 

@@ -2,7 +2,6 @@
 # Copyright (c) 2023, KarjaKAK
 # All rights reserved.
 
-from pathlib import Path
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Generator, LiteralString
