@@ -409,20 +409,6 @@ main()
 
 * ### **Versions Highlights**
 
-  * **Version 3.3.7**
-    * **Have new parsing utility to help folding selections remain intact**
-  * **Version 3.3.8**
-    * **Now Folding control flows work in COPY but not MOVE**
-  * **Version 3.3.10**
-    * **Folding control flows also working in:**
-      * **Edit**
-      * **Move Child up, down, left and right**
-      * **Checked**
-  * **Version 3.3.11**
-    * **Bugs Fixed**
-      * **in function Ex**
-      * **in function Create file**
-    * **Enhancement for function LookUp**
   * **Version 3.3.12**
     * **Layout change**
       * **The entry for writing and inserting are now at the bottom, for easy viewing when writing and editting**
@@ -486,6 +472,10 @@ main()
       * **Both hidden mode unreverse and reverse**
         * **When try to hide a parent that the child is on last row, was not included -> FIXED**
         * **When hide a parent, where the last child not the last row, the "space" was included -> FIXED**
+  * **Version 3.5.13**
+    * **Some Bugs fixed on Editor and Write functions**
+      * **With the short-cut button changing between listbox widget to entry widget create editing to "None" row -> FIXED**
+      * **Editor could not begin if the file is not exist yet -> FIXED**
 
 [⬆️](#freetvg-tree-view-gui)
 

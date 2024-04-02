@@ -923,6 +923,10 @@ class TreeViewGui:
                 else:
                     self._sumchk()
                     os.remove(self.glop.absolute().joinpath("sumtot.tvg"))
+        else:
+            if hasattr(self, "sumtot"):
+                self.__delattr__("sumtot")
+
 
     def chgfile(self):
         """Changing file on active app environment"""
@@ -1055,6 +1059,8 @@ class TreeViewGui:
                     )
             else:
                 rw = self.listb.curselection()[0] if self.listb.curselection() else None
+                if not rw and self.MARK:
+                    self.MARK = False
                 total = True
                 current_size = None
                 child = self.bt["entry3"].get()
@@ -1286,6 +1292,8 @@ class TreeViewGui:
                 if self.bt["entry"].get() and (
                     self.bt["entry"].get() not in cek and self._check_Totals()
                 ):
+                    if not self.listb.curselection() and self.MARK:
+                        self.MARK = False
                     if self.MARK:
                         appr = messagebox.askyesno(
                             "Edit",
@@ -2201,7 +2209,7 @@ class TreeViewGui:
                 self.fframe.rb.set("")
                 self.bt["entry"].config(state=DISABLED)
                 self.listb.delete(0, END)
-                self.addonchk(False)
+                self.addonchk()
             else:
                 messagebox.showinfo(
                     "TreeViewGui",
@@ -2642,17 +2650,18 @@ class TreeViewGui:
     def _check_Totals(self):
         try:
             sumtot = None
-            if hasattr(self, "sumtot"):
-                sumtot = SumAll(self.filename, sig="+")
-                if sumtot.chktot():
-                    messagebox.showwarning(
-                        "TreeViewGui",
-                        "Please delete all 'TOTAL's first",
-                        parent=self.root,
-                    )
-                    return False
-                else:
-                    return True
+            if self.nonetype():
+                if hasattr(self, "sumtot"):
+                    sumtot = SumAll(self.filename, sig="+")
+                    if sumtot.chktot():
+                        messagebox.showwarning(
+                            "TreeViewGui",
+                            "Please delete all 'TOTAL's first",
+                            parent=self.root,
+                        )
+                        return False
+                    else:
+                        return True
             return True
         finally:
             if sumtot:
@@ -2821,7 +2830,7 @@ class TreeViewGui:
             self.__delattr__("bt")
             self.__delattr__("scribe")
             self.__delattr__("addonb")
-            self.root.quit()
+            self.root.destroy()
         else:
             messagebox.showerror(
                 "TreeViewGui", "Do not exit before a function end!!!", parent=self.root

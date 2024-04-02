@@ -1,7 +1,53 @@
 [build-system]
-requires = [
-    "build>=1.0.3",
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "FreeTVG-karjakak"
+version = "3.5.13"
+dependencies = [
+    "markdown>=3.3.4",
+    "pymdown-extensions>=9.0",
+    "treeview-karjakak>=1.8.1",
+    "excptr-karjakak>=0.1.0",
+    "demoji>=1.1.0",
+    "tomlkit>=0.11.6",
+    "darkdetect>=0.8.0",
+    "pdfkit>=1.0.0",
+    "addon_tvg-karjakak>=0.2.3",
+    "sqlmodel>=0.0.8",
+    "xmltodict>=0.13.0",
+]
+requires-python = ">=3.10"
+authors = [{name = "karjakak", email = "kakkarja.github@gmail.com"}]
+description = "Tree View Gui for outline treeview note."
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "TreeViewGui", 
+    "TreeView Note",
+    "Note",
+    "MarkDown",
+    "Calculate Note",
+]
+classifiers = [
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: MacOS X",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Text Editors :: Text Processing",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.urls]
+Homepage = "https://github.com/kakkarja/FreeTVG#latest-notice"
+
+
+[project.gui-scripts]
+TVG = "TVG:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+"*" = ["*.pdf", ".Bible/*.xml"]
