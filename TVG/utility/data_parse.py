@@ -89,6 +89,25 @@ class ParseData(TreeView):
             with open(f"{self.filename}.dat", "rb") as dr:
                 yield from (leval(i.decode().strip("\n"))[0] for i in dr)
 
+    def parent_size(self) -> tuple[bool, int]:
+        """Getting size from parent"""
+
+        child = self.check_child(self.pos)
+        if not child:
+            size = 0
+            for n, d in islice(self.getdata(), self.pos + 1, None):
+                if d[0] == " ":
+                    size += 1
+                else:
+                    break
+            if size:
+                return (True, size)
+            else:
+                return (False, size)
+        else:
+            return (False, 0)
+
+
     def update_data(self) -> tuple[int] | None:
         """To update parsed data with existing TVG doc."""
 
@@ -97,6 +116,7 @@ class ParseData(TreeView):
                 update = []
                 s = 0
                 len_of_data = self.getdatanum() - 1
+                parsize = self.parent_size()
                 for k, v in self.getkv():
                     if k < self.pos:
                         update.append(k)
@@ -104,14 +124,32 @@ class ParseData(TreeView):
                         update.append(k)
                     else:
                         k += self.size
-                        for n, d in islice(self.getdata(), s, None):
-                            if k == n:
-                                if self._restStr(d) == v:
-                                    update.append(n)
-                                    s = n + 1
-                                    break
+                        if not all(parsize):
+                            for n, d in islice(self.getdata(), s, None):
+                                if k == n:
+                                    if self._restStr(d) == v:
+                                        update.append(n)
+                                        s = n + 1
+                                        break
+                            else:
+                                s = k
                         else:
-                            s = k
+                            chk = self.pos + parsize[1]
+                            for n, d in islice(self.getdata(), s, None):
+                                if k == n:
+                                    if self._restStr(d) == v:
+                                        update.append(n)
+                                        s = n + 1
+                                        break
+                                elif k - self.size == n and n <= chk:
+                                    if self._restStr(d) == v:
+                                        update.append(n)
+                                        s = n + 1
+                                        break
+
+                            else:
+                                s = k
+                            del chk
                 match update := tuple(update):
                     case update if update != tuple(self.getkey()):
                         super(ParseData, self).__setattr__("data", update)
@@ -120,7 +158,7 @@ class ParseData(TreeView):
                     case _:
                         return
             finally:
-                del update, s, len_of_data
+                del update, s, len_of_data, parsize
 
     def update_single_data(self, row: int) -> tuple[int] | None:
         """Update a single data to preserve"""

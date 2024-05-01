@@ -476,6 +476,10 @@ main()
     * **Some Bugs fixed on Editor and Write functions**
       * **With the short-cut button changing between listbox widget to entry widget create editing to "None" row -> FIXED**
       * **Editor could not begin if the file is not exist yet -> FIXED**
+  * **Version 3.5.14**
+    * **Fixed some bug in Folding Selection function**
+      * **When edit in Ex function, some folded child is not folded -> FIXED**
+        * **However if changes on both between a folded one, the folded will set to unfolded**
 
 [⬆️](#freetvg-tree-view-gui)
 
