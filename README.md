@@ -480,6 +480,9 @@ main()
     * **Fixed some bug in Folding Selection function**
       * **When edit in Ex function, some folded child is not folded -> FIXED**
         * **However if changes on both between a folded one, the folded will set to unfolded**
+  * **Version 3.5.15**
+    * **Bible verses selections appear better in journal**
+      * **Add Bible translation (abbreviation)**
 
 [⬆️](#freetvg-tree-view-gui)
 

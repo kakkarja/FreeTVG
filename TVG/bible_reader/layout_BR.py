@@ -7,6 +7,8 @@ from tkinter import Frame, Label, Text, simpledialog, ttk
 
 from .bible_creator import DEFAULT_PATH, BibleProduceData
 
+from pathlib import Path
+
 
 class BibleReader(simpledialog.Dialog):
     """Bible Reader"""
@@ -217,9 +219,10 @@ class BibleReader(simpledialog.Dialog):
         }
 
     def apply(self) -> None:
+        verse_to_verse = f"{self.combobox3.get()}-{self.combobox4.get()}" if int(self.combobox4.get()) > int(self.combobox3.get()) else f"{self.combobox3.get()}"
         header = (
             f"{self.combobox1.get()} "
-            f"{self.combobox2.get()}:{self.combobox3.get()}-{self.combobox4.get()}\n"
+            f"{self.combobox2.get()}:{verse_to_verse} ({Path(self.br.xml_path).name.rpartition(".")[0]})\n"
         )
         n = 0
         self.result = (
@@ -228,7 +231,7 @@ class BibleReader(simpledialog.Dialog):
                 [tx[tx.find(" ") :] for tx in self.text.get("1.0", "end").split("\n\n")]
             )[1:-1]
         ), self._record()
-        del header
+        del header, verse_to_verse
 
     def buttonbox(self):
         box = Frame(self)
