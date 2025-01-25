@@ -3443,6 +3443,7 @@ class TreeViewGui:
                     chapter=rec["chapter"] if rec else None,
                     _from=rec["from"] if rec else None,
                     _to=rec["to"] if rec else None,
+                    alt_path=str(self.glop),
                     bpath=BIBLE_PATH,
                 )
                 self.lock = False

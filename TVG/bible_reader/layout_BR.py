@@ -2,8 +2,10 @@
 # Copyright (c) 2023, KarjaKAK
 # All rights reserved.
 
+import json
+from pathlib import Path
 from sys import platform
-from tkinter import Frame, Label, Text, simpledialog, ttk
+from tkinter import Frame, Label, Text, simpledialog, ttk, messagebox
 
 from .bible_creator import DEFAULT_PATH, BibleProduceData
 
@@ -19,6 +21,7 @@ class BibleReader(simpledialog.Dialog):
         chapter=None,
         _from=None,
         _to=None,
+        alt_path=None, 
         bpath=DEFAULT_PATH,
     ) -> None:
         self.book = book
@@ -26,6 +29,11 @@ class BibleReader(simpledialog.Dialog):
         self._from = _from
         self._to = _to
         self.br = BibleProduceData(bpath)
+        self.altpath = None
+        if alt_path:
+            self.altpath = Path(alt_path).parent.joinpath(
+                f"history_{Path(bpath).name.partition(".")[0]}.json"
+            )
         self.record = None
         super().__init__(parent=parent, title=title)
 
@@ -87,7 +95,7 @@ class BibleReader(simpledialog.Dialog):
         self.frame_entry4.pack(side="left", fill="both", expand=True)
         self.combobox4 = ttk.Combobox(self.frame_entry4, width=by4, justify="center")
         self.combobox4.pack(padx=(2, 2), fill="both")
-        self.combobox4.bind("<<ComboboxSelected>>", self.display_verses)
+        self.combobox4.bind("<<ComboboxSelected>>", self.toverse_selected)
 
         self.frame_text = Frame(self.frame_main)
         self.frame_text.pack(pady=(3, 0), side="left", fill="both", expand=True)
@@ -103,11 +111,30 @@ class BibleReader(simpledialog.Dialog):
         self.text.pack(side="left", fill="both", expand=True)
         self.text.configure(state="disabled")
 
+        self.frame_entry5 = Frame(master)
+        self.frame_entry5.pack(side="bottom")
+        
+        button_add = ttk.Button(
+            self.frame_entry5, text="Add", width=10, command=self.create_history, default="active"
+        )
+        button_add.pack(side="left", padx=(2, 0), pady=(2,0), fill="x")
+
+        self.combobox5 = ttk.Combobox(self.frame_entry5, width=by4, justify="center", state="readonly",)
+        self.combobox5.pack(side="left", padx=(2, 2), pady=(2, 0), fill="x")
+        self.combobox5.bind("<<ComboboxSelected>>", self.history_choose) 
+
+        button_del = ttk.Button(
+            self.frame_entry5, text="Remove", width=10, command=self.history_delete, default="active"
+        )
+        button_del.pack(side="right", padx=(0, 2), pady=(2,0), fill="x")
+
+
         self._read_only()
         if self._checker():
             self.start_record()
         else:
             self.book_selected()
+        self._reload_history()
 
     def _checker(self):
         r = self.book, self.chapter, self._from, self._to
@@ -173,6 +200,12 @@ class BibleReader(simpledialog.Dialog):
             self.combobox4.current(len(self.combobox4["value"]) - 1)
             del verses
             self.display_verses()
+    
+    def toverse_selected(self, event=None):
+        """Event for range selected verses"""
+
+        if self.combobox4.get():
+            self.display_verses()
 
     def _read_only(self):
         if self.combobox1["state"] != "readonly":
@@ -206,15 +239,127 @@ class BibleReader(simpledialog.Dialog):
         self._text_state()
         del txt
 
-    def _record(self) -> dict[str, str]:
+    def _record(self, combo=True) -> dict[str, str]:
         """Record state of display"""
 
-        return {
-            "book": self.combobox1.get(),
-            "chapter": self.combobox2.get(),
-            "from": self.combobox3.get(),
-            "to": self.combobox4.get(),
-        }
+        if combo:
+            return {
+                "book": self.combobox1.get(),
+                "chapter": self.combobox2.get(),
+                "from": self.combobox3.get(),
+                "to": self.combobox4.get(),
+            }
+        else:
+            if self._checking_history():
+                select = {}
+                book = chapter = _from = _to = ""
+                selection = self.combobox5.get().partition(":")
+                book, _, chapter = selection[0].rpartition(" ")
+                if "-" in selection[2]:
+                    _from, _, _to = selection[2].partition("-")
+                else:
+                    _from = _to = selection[2]
+                select["book"] = book
+                select["chapter"] = chapter
+                select["from"] = _from
+                select["to"] = _to
+                del book, chapter, _from, _to, selection
+                return select
+    
+    def _bible_verses_format(self, dform: dict[str,str]) -> str:
+        if int(dform["from"]) < int(dform["to"]):
+            return f"{dform['book']} {dform['chapter']}:{dform['from']}-{dform['to']}"
+        else:
+            return f"{dform['book']} {dform['chapter']}:{dform['from']}"
+    
+    def _checking_history(self) -> bool:
+       if self.altpath:
+            return self.altpath.exists()
+    
+    def _compile_history_record(self) -> dict[str,list[dict]]:
+        return {"history":[self._record()]}
+    
+    def create_history(self, event=None):
+        if not self._checking_history():
+            with open(self.altpath, "w") as record:
+                json.dump(self._compile_history_record(), record)
+        else:
+            with open(self.altpath, "r") as record:
+                history_rec = json.load(record)
+                update = self._record()
+            if update not in history_rec["history"]:
+                with open(self.altpath, "w") as record:
+                    history_rec["history"].append(update)
+                    json.dump(history_rec, record)
+            del history_rec, update, record
+        self._reload_history()
+
+    def _reload_history(self):
+        if self._checking_history():
+            update = []
+            with open(self.altpath, "r") as record:
+                history_rec = json.load(record)
+                for rec in history_rec["history"]:
+                    update.append(self._bible_verses_format(dform=rec))
+                del history_rec
+            update.reverse()
+            self.combobox5["state"] = "normal"
+            self.combobox5["value"] = []
+            self.combobox5["value"] = update
+            self.combobox5.current(0)
+            self.combobox5["state"] = "readonly"
+            del update, record
+    
+    def history_choose(self, event=None):
+        selection = self.combobox5.get().partition(":")
+        selection_book_chap = selection[0].rpartition(" ")
+        self.combobox1.current(
+            self.combobox1["value"].index(selection_book_chap[0])
+        )
+        self.book_selected()
+        self.combobox2.current(
+            self.combobox2["value"].index(selection_book_chap[2])
+        )
+        self.chapter_selected()
+        selection_from_to = selection[2].partition("-") if "-" in selection[2] else selection[2]
+        if isinstance(selection_from_to, tuple):
+            self.combobox3.current(
+                self.combobox3["value"].index(selection_from_to[0])
+            )
+            self.fromverse_selected()
+            self.combobox4.current(
+                self.combobox4["value"].index(selection_from_to[2])
+            )
+        else:
+            self.combobox3.current(
+                self.combobox3["value"].index(selection_from_to)
+            )
+            self.fromverse_selected()
+            self.combobox4.current(
+                self.combobox4["value"].index(selection_from_to)
+            )
+        del selection, selection_book_chap, selection_from_to
+        self.toverse_selected()
+    
+    def history_delete(self, event=None):
+        if self._checking_history():
+            update = self._record(combo=False)
+            msg = "\n" + self._bible_verses_format(dform=update)
+            if ask := messagebox.askyesno(
+                "Bible Reader", 
+                f"Do you want to delete {msg} ?",
+                parent=self.master
+            ):
+                with open(self.altpath, "r") as record:
+                    history_rec = json.load(record)
+                    history_rec["history"].remove(update)
+                with open(self.altpath, "w") as record:
+                    json.dump(history_rec, record)
+                self._reload_history()
+                if update == self._record():
+                    self.history_choose()
+                del history_rec, record
+            del update, msg
 
     def apply(self) -> None:
         header = (
