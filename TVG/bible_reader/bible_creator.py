@@ -84,7 +84,12 @@ class BibleProduceData:
                             raise ValueError("Book's chapter is invalid!")
         except Exception as e:
             raise e
+        
+    def book_chap_verse_nums(self, book: str, chapter: int) -> dict[str, tuple[int, int]]:
+        """Getting book's chapters and verses in numbers"""
 
+        return {book: (self.chapters(book),) + (self.verses(book, chapter)[1],)}
+        
     def reader(self, book: str, chapter: int, vnumber: bool = True) -> LiteralString:
         """Bible Verses according to Chapter"""
 

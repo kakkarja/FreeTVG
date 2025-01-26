@@ -483,6 +483,8 @@ main()
   * **Version 3.7.0**
     * **Some additional function in bible reader**
       * **Can add bookmark and deleted it according to each translation.**
+  * **Version 3.7.1**
+    * **Enhancing the speed of getting the verses by clicking on bookmark verses**
 
 [⬆️](#freetvg-tree-view-gui)
 

@@ -97,7 +97,7 @@ class BibleReader(simpledialog.Dialog):
         self.frame_entry4.pack(side="left", fill="both", expand=True)
         self.combobox4 = ttk.Combobox(self.frame_entry4, width=by4, justify="center")
         self.combobox4.pack(padx=(2, 2), fill="both")
-        self.combobox4.bind("<<ComboboxSelected>>", self.toverse_selected)
+        self.combobox4.bind("<<ComboboxSelected>>", self.display_verses)
 
         self.frame_text = Frame(self.frame_main)
         self.frame_text.pack(pady=(3, 0), side="left", fill="both", expand=True)
@@ -201,12 +201,6 @@ class BibleReader(simpledialog.Dialog):
             ]
             self.combobox4.current(len(self.combobox4["value"]) - 1)
             del verses
-            self.display_verses()
-    
-    def toverse_selected(self, event=None):
-        """Event for range selected verses"""
-
-        if self.combobox4.get():
             self.display_verses()
 
     def _read_only(self):
@@ -312,36 +306,42 @@ class BibleReader(simpledialog.Dialog):
             self.combobox5["state"] = "readonly"
             del update, record
     
+    def _combobox_state_value(self):
+        cb = (self.combobox1, self.combobox2, self.combobox3, self.combobox4)
+        for c in range(len(cb)):
+            cb[c]["state"] = "normal"
+            if c != 0:
+                cb[c]["value"] = []
+        del cb
+
     def history_choose(self, event=None):
-        selection = self.combobox5.get().partition(":")
-        selection_book_chap = selection[0].rpartition(" ")
+        selection = self._record(False)
+        setting_book = self.br.book_chap_verse_nums(selection["book"], int(selection["chapter"]))
+        self._combobox_state_value()
         self.combobox1.current(
-            self.combobox1["value"].index(selection_book_chap[0])
+            self.combobox1["value"].index(selection["book"])
         )
-        self.book_selected()
+        self.combobox2["value"] = [
+            str(ch + 1) for ch in range(setting_book[selection["book"]][0])
+        ]
         self.combobox2.current(
-            self.combobox2["value"].index(selection_book_chap[2])
+            self.combobox2["value"].index(selection["chapter"])
         )
-        self.chapter_selected()
-        selection_from_to = selection[2].partition("-") if "-" in selection[2] else selection[2]
-        if isinstance(selection_from_to, tuple):
-            self.combobox3.current(
-                self.combobox3["value"].index(selection_from_to[0])
-            )
-            self.fromverse_selected()
-            self.combobox4.current(
-                self.combobox4["value"].index(selection_from_to[2])
-            )
-        else:
-            self.combobox3.current(
-                self.combobox3["value"].index(selection_from_to)
-            )
-            self.fromverse_selected()
-            self.combobox4.current(
-                self.combobox4["value"].index(selection_from_to)
-            )
-        del selection, selection_book_chap, selection_from_to
-        self.toverse_selected()
+        self.combobox3["value"] = [
+            str(ch + 1) for ch in range(setting_book[selection["book"]][1])
+        ]
+        self.combobox3.current(
+            self.combobox3["value"].index(selection["from"])
+        )
+        self.combobox4["value"] = [
+            ch for ch in self.combobox3["value"][int(selection["from"]) - 1:] 
+        ]
+        self.combobox4.current(
+            self.combobox4["value"].index(selection["to"])
+        )
+        self._read_only()
+        self.display_verses()
+        del selection, setting_book
     
     def history_delete(self, event=None):
         if self._checking_history():
