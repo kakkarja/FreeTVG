@@ -9,8 +9,6 @@ from tkinter import Frame, Label, Text, simpledialog, ttk, messagebox
 
 from .bible_creator import DEFAULT_PATH, BibleProduceData
 
-from pathlib import Path
-
 
 class BibleReader(simpledialog.Dialog):
     """Bible Reader"""

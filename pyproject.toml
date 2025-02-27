@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "FreeTVG-karjakak"
-version = "3.7.1"
+version = "3.7.2"
 dependencies = [
     "markdown>=3.3.4",
     "pymdown-extensions>=9.0",

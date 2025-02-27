@@ -485,6 +485,9 @@ main()
       * **Can add bookmark and deleted it according to each translation.**
   * **Version 3.7.1**
     * **Enhancing the speed of getting the verses by clicking on bookmark verses**
+  * **Version 3.7.2**
+    * **Enhancing the Bible verses selection.**
+      * **The "To" will be kept until user change it or the "From" is bigger then the "To".**
 
 [⬆️](#freetvg-tree-view-gui)
 
