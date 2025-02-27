@@ -3,6 +3,7 @@
 # All rights reserved.
 
 import json
+from functools import partial
 from pathlib import Path
 from sys import platform
 from tkinter import Frame, Label, Text, simpledialog, ttk, messagebox
@@ -146,34 +147,61 @@ class BibleReader(simpledialog.Dialog):
 
     def start_record(self):
         """Saved record  will be display at start"""
+
         self.combobox1.current(self.combobox1["value"].index(self.book))
         chp = self.br.chapters(self.combobox1.get())
-        self.combobox2["value"] = [i + 1 for i in range(chp)]
-        self.combobox2.current(self.combobox2["value"].index(self.chapter))
+        self.bible_selection_range(chp=chp)
         _, verses = self.br.verses(self.combobox1.get(), int(self.combobox2.get()))
-        self.combobox3["value"] = [i + 1 for i in range(verses)]
-        self.combobox3.current(self.combobox3["value"].index(self._from))
-        self.combobox4["value"] = [
-            i + 1 for i in range(int(self.combobox3.get()) - 1, verses)
-        ]
-        self.combobox4.current(self.combobox4["value"].index(self._to))
+        self.bible_selection_range(ver=verses)
         del chp, verses
         self.display_verses()
+
+    def _combo4(self, ver: int, skip: bool = False):
+        self.combobox4["value"] = [
+            i + 1 for i in range(int(self.combobox3.get()) - 1, ver)
+        ]
+        match skip:
+            case False if self._to:
+                self.combobox4.current(self.combobox4["value"].index(self._to))
+                self._to = None
+            case False:
+                self.combobox4.current(len(self.combobox4["value"]) - 1)
+            case True:
+                self.combobox4.current(self.combobox4["value"].index(self.combobox4.get()))
+
+
+
+    def bible_selection_range(self, /, chp: int = None, ver: int = None, skip: bool = False):
+        if chp:
+            self.combobox2["value"] = [i + 1 for i in range(chp)]
+            if self.chapter:
+                self.combobox2.current(self.combobox2["value"].index(self.chapter))
+                self.chapter = None
+            else:
+                self.combobox2.current(0)
+        elif ver:
+            if not skip:
+                self.combobox3["value"] = [i + 1 for i in range(ver)]
+                if self._from:
+                    self.combobox3.current(self.combobox3["value"].index(self._from))
+                    self._from = None
+                else:
+                    self.combobox3.current(0)
+                self._combo4(ver)
+            else:
+                if int(self.combobox3.get()) > int(self.combobox4.get()):
+                    self._combo4(ver)
+                else:
+                    self._combo4(ver, skip)                
 
     def book_selected(self, event=None):
         """Event for bible Book selected"""
 
         if self.combobox1.get():
             chp = self.br.chapters(self.combobox1.get())
-            self.combobox2["value"] = [i + 1 for i in range(chp)]
-            self.combobox2.current(0)
+            self.bible_selection_range(chp=chp)
             _, verses = self.br.verses(self.combobox1.get(), int(self.combobox2.get()))
-            self.combobox3["value"] = [i + 1 for i in range(verses)]
-            self.combobox3.current(0)
-            self.combobox4["value"] = [
-                i + 1 for i in range(int(self.combobox3.get()) - 1, verses)
-            ]
-            self.combobox4.current(len(self.combobox4["value"]) - 1)
+            self.bible_selection_range(ver=verses)
             del chp, verses
             self.display_verses()
 
@@ -182,12 +210,7 @@ class BibleReader(simpledialog.Dialog):
 
         if self.combobox2.get():
             _, verses = self.br.verses(self.combobox1.get(), int(self.combobox2.get()))
-            self.combobox3["value"] = [i + 1 for i in range(verses)]
-            self.combobox3.current(0)
-            self.combobox4["value"] = [
-                i + 1 for i in range(int(self.combobox3.get()) - 1, verses)
-            ]
-            self.combobox4.current(len(self.combobox4["value"]) - 1)
+            self.bible_selection_range(ver=verses)
             del verses
             self.display_verses()
 
@@ -196,22 +219,18 @@ class BibleReader(simpledialog.Dialog):
 
         if self.combobox3.get():
             _, verses = self.br.verses(self.combobox1.get(), int(self.combobox2.get()))
-            self.combobox4["value"] = [
-                i + 1 for i in range(int(self.combobox3.get()) - 1, verses)
-            ]
-            self.combobox4.current(len(self.combobox4["value"]) - 1)
+            self.bible_selection_range(ver=verses, skip=True)
             del verses
             self.display_verses()
 
     def _read_only(self):
-        if self.combobox1["state"] != "readonly":
-            self.combobox1.configure(state="readonly")
-        if self.combobox2["state"] != "readonly":
-            self.combobox2.configure(state="readonly")
-        if self.combobox3["state"] != "readonly":
-            self.combobox3.configure(state="readonly")
-        if self.combobox4["state"] != "readonly":
-            self.combobox4.configure(state="readonly")
+        list_combo = [
+            self.combobox1, self.combobox2, self.combobox3, self.combobox4
+        ]
+        for combo in list_combo:
+            if combo["state"] != "readonly":
+                combo.configure(state="readonly")
+        del list_combo
 
     def _text_state(self, _state: bool = True):
         if _state:
@@ -300,7 +319,6 @@ class BibleReader(simpledialog.Dialog):
                 del history_rec
             update.reverse()
             self.combobox5["state"] = "normal"
-            self.combobox5["value"] = []
             self.combobox5["value"] = update
             self.combobox5.current(0)
             self.combobox5["state"] = "readonly"
@@ -362,9 +380,14 @@ class BibleReader(simpledialog.Dialog):
                     self.history_choose()
                 del history_rec, record
             del update, msg
+            self.focus()
 
     def apply(self) -> None:
-        verse_to_verse = f"{self.combobox3.get()}-{self.combobox4.get()}" if int(self.combobox4.get()) > int(self.combobox3.get()) else f"{self.combobox3.get()}"
+        verse_to_verse = (
+            f"{self.combobox3.get()}-{self.combobox4.get()}" 
+            if int(self.combobox4.get()) > int(self.combobox3.get()) 
+            else f"{self.combobox3.get()}"
+        )
         header = (
             f"{self.combobox1.get()} "
             f"{self.combobox2.get()}:{verse_to_verse} ({Path(self.br.xml_path).name.rpartition(".")[0]})\n"
