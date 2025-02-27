@@ -3,7 +3,6 @@
 # All rights reserved.
 
 import json
-from functools import partial
 from pathlib import Path
 from sys import platform
 from tkinter import Frame, Label, Text, simpledialog, ttk, messagebox
