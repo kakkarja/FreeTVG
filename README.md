@@ -488,6 +488,14 @@ main()
   * **Version 3.7.2**
     * **Enhancing the Bible verses selection.**
       * **The "To" will be kept until user change it or the "From" is bigger then the "To".**
+  * **Version 3.7.5**
+    * **Bible bookmark enhancement**
+      * **Using SQLmodel as database to store bookmarks**
+      * **Can store alot more**
+      * **Database from .json file will be updated to the database automatically**
+    * **WARNING**
+      * **If you are not sure please make backup for the "history_\[translation\].json" file manually in TVG folder in documents or user directory**
+
 
 [⬆️](#freetvg-tree-view-gui)
 

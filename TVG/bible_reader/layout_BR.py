@@ -2,12 +2,12 @@
 # Copyright (c) 2023, KarjaKAK
 # All rights reserved.
 
-import json
 from pathlib import Path
 from sys import platform
 from tkinter import Frame, Label, Text, simpledialog, ttk, messagebox
 
 from .bible_creator import DEFAULT_PATH, BibleProduceData
+from .database_bible_tvg import BibleDataBase, DatabaseBibleTVG
 
 
 class BibleReader(simpledialog.Dialog):
@@ -32,7 +32,7 @@ class BibleReader(simpledialog.Dialog):
         self.altpath = None
         if alt_path:
             self.altpath = Path(alt_path).parent.joinpath(
-                f"history_{Path(bpath).name.partition(".")[0]}.json"
+                f"history_{Path(bpath).name.partition(".")[0]}"
             )
         self.record = None
         super().__init__(parent=parent, title=title)
@@ -127,7 +127,6 @@ class BibleReader(simpledialog.Dialog):
             self.frame_entry5, text="Remove", width=10, command=self.history_delete, default="active"
         )
         button_del.pack(side="right", padx=(0, 2), pady=(2,0), fill="x")
-
 
         self._read_only()
         if self._checker():
@@ -262,64 +261,67 @@ class BibleReader(simpledialog.Dialog):
                 "to": self.combobox4.get(),
             }
         else:
-            if self._checking_history():
-                select = {}
-                book = chapter = _from = _to = ""
-                selection = self.combobox5.get().partition(":")
-                book, _, chapter = selection[0].rpartition(" ")
-                if "-" in selection[2]:
-                    _from, _, _to = selection[2].partition("-")
-                else:
-                    _from = _to = selection[2]
-                select["book"] = book
-                select["chapter"] = chapter
-                select["from"] = _from
-                select["to"] = _to
-                del book, chapter, _from, _to, selection
-                return select
+            select = {}
+            book = chapter = _from = _to = ""
+            selection = self.combobox5.get().partition(":")
+            book, _, chapter = selection[0].rpartition(" ")
+            if "-" in selection[2]:
+                _from, _, _to = selection[2].partition("-")
+            else:
+                _from = _to = selection[2]
+            select["book"] = book
+            select["chapter"] = chapter
+            select["from_"] = _from
+            select["to_"] = _to
+            del book, chapter, _from, _to, selection
+            return select
     
     def _bible_verses_format(self, dform: dict[str,str]) -> str:
-        if int(dform["from"]) < int(dform["to"]):
-            return f"{dform['book']} {dform['chapter']}:{dform['from']}-{dform['to']}"
+        if int(dform["from_"]) < int(dform["to_"]):
+            return f"{dform['book']} {dform['chapter']}:{dform['from_']}-{dform['to_']}"
         else:
-            return f"{dform['book']} {dform['chapter']}:{dform['from']}"
+            return f"{dform['book']} {dform['chapter']}:{dform['from_']}"
     
     def _checking_history(self) -> bool:
-       if self.altpath:
-            return self.altpath.exists()
-    
-    def _compile_history_record(self) -> dict[str,list[dict]]:
-        return {"history":[self._record()]}
+       return bool(self.combobox5.get())
     
     def create_history(self, event=None):
-        if not self._checking_history():
-            with open(self.altpath, "w") as record:
-                json.dump(self._compile_history_record(), record)
-        else:
-            with open(self.altpath, "r") as record:
-                history_rec = json.load(record)
-                update = self._record()
-            if update not in history_rec["history"]:
-                with open(self.altpath, "w") as record:
-                    history_rec["history"].append(update)
-                    json.dump(history_rec, record)
-            del history_rec, update, record
+        db = DatabaseBibleTVG(self.altpath)
+        db.create_db_tables()
+        bible_dat = BibleDataBase(
+            book=self.combobox1.get(),
+            chapter=int(self.combobox2.get()),
+            from_=int(self.combobox3.get()),
+            to_=int(self.combobox4.get())
+        )
+        if not db.validity_data(bible_dat):
+            db.insert_data(bible_dat)
+        del db, bible_dat
         self._reload_history()
 
     def _reload_history(self):
-        if self._checking_history():
+        db = DatabaseBibleTVG(self.altpath)
+        db.create_db_tables()
+        tot = db.total_records()
+        if tot:
+            dat = db.select_datas()
             update = []
-            with open(self.altpath, "r") as record:
-                history_rec = json.load(record)
-                for rec in history_rec["history"]:
-                    update.append(self._bible_verses_format(dform=rec))
-                del history_rec
-            update.reverse()
+            for d in dat:
+                update.append(
+                    self._bible_verses_format(d)
+                )
             self.combobox5["state"] = "normal"
             self.combobox5["value"] = update
-            self.combobox5.current(0)
+            self.combobox5.current(len(update) - 1)
             self.combobox5["state"] = "readonly"
-            del update, record
+            del dat, update
+        elif len(self.combobox5["value"]) == 1:
+            self.combobox5["state"] = "normal"
+            self.combobox5["value"] = []
+            self.combobox5.delete(0, "end")
+            self.combobox5["state"] = "readonly"
+        
+        del db, tot
     
     def _combobox_state_value(self):
         cb = (self.combobox1, self.combobox2, self.combobox3, self.combobox4)
@@ -346,13 +348,13 @@ class BibleReader(simpledialog.Dialog):
             str(ch + 1) for ch in range(setting_book[selection["book"]][1])
         ]
         self.combobox3.current(
-            self.combobox3["value"].index(selection["from"])
+            self.combobox3["value"].index(selection["from_"])
         )
         self.combobox4["value"] = [
-            ch for ch in self.combobox3["value"][int(selection["from"]) - 1:] 
+            ch for ch in self.combobox3["value"][int(selection["from_"]) - 1:] 
         ]
         self.combobox4.current(
-            self.combobox4["value"].index(selection["to"])
+            self.combobox4["value"].index(selection["to_"])
         )
         self._read_only()
         self.display_verses()
@@ -367,15 +369,12 @@ class BibleReader(simpledialog.Dialog):
                 f"Do you want to delete {msg} ?",
                 parent=self.master
             ):
-                with open(self.altpath, "r") as record:
-                    history_rec = json.load(record)
-                    history_rec["history"].remove(update)
-                with open(self.altpath, "w") as record:
-                    json.dump(history_rec, record)
+                db = DatabaseBibleTVG(self.altpath)
+                db.create_db_tables()
+                row = self.combobox5["value"].index(self.combobox5.get())
+                db.delete_data(row + 1)
                 self._reload_history()
-                if update == self._record():
-                    self.history_choose()
-                del history_rec, record
+                del db, row
             del update, msg
             self.focus()
 

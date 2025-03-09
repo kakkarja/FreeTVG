@@ -52,7 +52,7 @@ from treeview import TreeView as tv
 
 from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excp, excpcls
 
-from .bible_reader import DEFAULT_PATH, BibleReader
+from .bible_reader import DEFAULT_PATH, BibleReader, update_database
 from .structure import Lay1, Lay2, Lay3, Lay4, Lay5, Lay6, Lay7, Lay8, Scribe
 from .utility import DatabaseTVG, ParseData, composemail, convhtml, wrwords
 
@@ -3427,10 +3427,24 @@ class TreeViewGui:
         bpj= f"bible_{Path(BIBLE_PATH).name.partition(".")[0]}"
         return f"{self.glop.parent.joinpath(bpj)}.json"
 
+    def _update_database(self):
+        path = Path(str(self.glop.parent.joinpath(
+                    f"history_{Path(BIBLE_PATH).name.partition(".")[0]}" + ".json")
+                    )
+                )
+        if path.exists():
+            update_database(str(path))
+            ask = messagebox.askyesno("Delete", f"Do you want to delete {path.name} file?", parent=self.root)
+            if ask:
+                import os
+                os.remove(path)
+        del path
+    
     def bible_reading(self, event=None):
         """Bible Reading and journal"""
 
         try:
+            self._update_database()
             if self.lock is False:
                 self.FREEZE = True
                 self.lock = True
