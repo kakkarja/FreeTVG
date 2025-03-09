@@ -489,6 +489,7 @@ main()
     * **Enhancing the Bible verses selection.**
       * **The "To" will be kept until user change it or the "From" is bigger then the "To".**
   * **Version 3.7.5**
+    ![TVG](Pics/bible_bookmark.png)
     * **Bible bookmark enhancement**
       * **Using SQLmodel as database to store bookmarks**
       * **Can store alot more**
